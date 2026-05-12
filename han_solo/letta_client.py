@@ -170,6 +170,48 @@ async def list_passages(limit: int = 50) -> list[dict[str, Any]]:
 
 
 # ---------------------------------------------------------------------------
+# Chat history — read conversation messages from Letta
+# ---------------------------------------------------------------------------
+
+async def list_chat_messages(limit: int = 200) -> list[dict[str, Any]]:
+    """
+    Fetch recent conversation messages from Letta and return them in the
+    same shape as chat_api._history: {role, name, text, ts}.
+
+    Filters to user_message and assistant_message types only — skips
+    reasoning, tool calls, and system messages.
+    """
+    agent_id = await ensure_ren_agent_id()
+    resp = await _letta(
+        "GET",
+        f"{LETTA_URL}/v1/agents/{agent_id}/messages",
+        params={"limit": limit},
+    )
+    raw = resp.json()
+    # Letta may return {"messages": [...]} or a bare list
+    messages = raw.get("messages", raw) if isinstance(raw, dict) else raw
+
+    result = []
+    for msg in messages:
+        mtype = msg.get("message_type", "")
+        if mtype == "user_message":
+            result.append({
+                "role": "user",
+                "name": msg.get("name") or "Scott",
+                "text": msg.get("content") or msg.get("text", ""),
+                "ts": msg.get("created_at", ""),
+            })
+        elif mtype == "assistant_message":
+            result.append({
+                "role": "assistant",
+                "name": "Ren",
+                "text": msg.get("content") or msg.get("assistant_message", ""),
+                "ts": msg.get("created_at", ""),
+            })
+    return result
+
+
+# ---------------------------------------------------------------------------
 # Chat — send a message and get Ren's response
 # ---------------------------------------------------------------------------
 

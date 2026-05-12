@@ -64,6 +64,52 @@ def register(server: FastMCP) -> None:
         return f"Portrait '{label}' updated."
 
     @server.tool()
+    async def add_portrait_signal(person: str, signal: str) -> str:
+        """
+        Append a single observation to a person's forming portrait.
+
+        Use this at the end of a session to record something specific and
+        non-obvious you noticed — how they think, what they care about,
+        a contradiction, a pattern. One clear sentence. Not a summary.
+
+        person: scott | ted | ren
+        signal: one specific observation in plain language
+
+        Ren receives a notification so she can incorporate it in her current
+        context without waiting for the next session.
+        """
+        get_current_user()
+        if person not in VALID_PEOPLE:
+            return f"Error: person must be one of {sorted(VALID_PEOPLE)}"
+
+        label = _label(person, "forming")
+        from datetime import date
+        dated_signal = f"\n[{date.today().isoformat()}] {signal}"
+
+        try:
+            block = await letta.read_core_block(label)
+            current = block.get("value", "")
+        except Exception:
+            current = ""
+
+        updated = current + dated_signal
+        try:
+            await letta.write_core_block(label, updated)
+        except Exception:
+            await letta.create_core_block(label, updated, limit=20000)
+
+        # Notify Ren so she sees the signal in her current context
+        try:
+            notice = (
+                f"[system] Claude just added a portrait signal for {person}: {signal}"
+            )
+            await letta.send_chat_message(notice, "system")
+        except Exception:
+            pass
+
+        return f"Signal added to {label}."
+
+    @server.tool()
     async def read_all_portraits() -> dict:
         """
         Read all portrait blocks for Scott, Ted, and Ren — both forming and trusted layers.
