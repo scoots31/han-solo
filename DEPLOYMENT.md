@@ -279,3 +279,20 @@ Letta v0.16.7 supports: `openai`, `anthropic`, `bedrock`, `google_ai`, `google_v
 `llamacpp`, `koboldcpp`, `vllm`, `hugging-face`, `mistral`, `together`, `pinecone`.
 Voyage AI is accessed through the `anthropic` endpoint type (Anthropic partners with Voyage),
 not as a standalone `voyageai` endpoint. Model: `voyage-3`, dim: `1024`.
+
+---
+
+### 16. Letta 307 redirects drop Authorization header (HTTPS → HTTP downgrade)
+
+**What happened:** All Letta endpoints redirect from the URL without a trailing slash to the same
+URL with a trailing slash — but the redirect `Location` header uses `http://` not `https://`.
+httpx strips the `Authorization` header when following a redirect that downgrades the scheme
+from HTTPS to HTTP (security rule). Every request to Letta that triggered the redirect arrived
+without auth and got a 401.
+
+`curl -L` worked in manual tests because curl preserves headers on same-host redirects regardless
+of scheme. httpx is stricter.
+
+**Fix:** Add trailing slashes to every Letta endpoint URL in `letta_client.py` so no redirect
+is needed. Every `/v1/agents`, `/v1/blocks`, `/v1/agents/{id}/messages`, etc. becomes
+`/v1/agents/`, `/v1/blocks/`, `/v1/agents/{id}/messages/`, etc.

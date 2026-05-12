@@ -59,7 +59,7 @@ async def get_or_create_ren_agent(name: str) -> str:
     """Return the agent_id for the named Ren agent, creating it if needed."""
     client = _client_or_raise()
 
-    resp = await client.get(f"{LETTA_URL}/v1/agents", headers=_headers())
+    resp = await client.get(f"{LETTA_URL}/v1/agents/", headers=_headers())
     resp.raise_for_status()
     agents = resp.json()
 
@@ -87,7 +87,7 @@ async def get_or_create_ren_agent(name: str) -> str:
             {"label": "project_state", "value": "{}", "limit": 10000},
         ],
     }
-    resp = await client.post(f"{LETTA_URL}/v1/agents", headers=_headers(), json=payload)
+    resp = await client.post(f"{LETTA_URL}/v1/agents/", headers=_headers(), json=payload)
     resp.raise_for_status()
     return resp.json()["id"]
 
@@ -100,7 +100,7 @@ async def read_core_block(label: str) -> dict[str, Any]:
     client = _client_or_raise()
     agent_id = await ensure_ren_agent_id()
     resp = await client.get(
-        f"{LETTA_URL}/v1/agents/{agent_id}/core-memory/blocks/{label}",
+        f"{LETTA_URL}/v1/agents/{agent_id}/core-memory/blocks/{label}/",
         headers=_headers(),
     )
     resp.raise_for_status()
@@ -111,7 +111,7 @@ async def write_core_block(label: str, value: str) -> dict[str, Any]:
     client = _client_or_raise()
     agent_id = await ensure_ren_agent_id()
     resp = await client.patch(
-        f"{LETTA_URL}/v1/agents/{agent_id}/core-memory/blocks/{label}",
+        f"{LETTA_URL}/v1/agents/{agent_id}/core-memory/blocks/{label}/",
         headers=_headers(),
         json={"value": value},
     )
@@ -123,7 +123,7 @@ async def list_core_blocks() -> list[dict[str, Any]]:
     client = _client_or_raise()
     agent_id = await ensure_ren_agent_id()
     resp = await client.get(
-        f"{LETTA_URL}/v1/agents/{agent_id}/core-memory/blocks",
+        f"{LETTA_URL}/v1/agents/{agent_id}/core-memory/blocks/",
         headers=_headers(),
     )
     resp.raise_for_status()
@@ -137,7 +137,7 @@ async def create_core_block(label: str, value: str = "", limit: int = 10000) -> 
 
     # Create block
     resp = await client.post(
-        f"{LETTA_URL}/v1/blocks",
+        f"{LETTA_URL}/v1/blocks/",
         headers=_headers(),
         json={"label": label, "value": value, "limit": limit},
     )
@@ -146,7 +146,7 @@ async def create_core_block(label: str, value: str = "", limit: int = 10000) -> 
 
     # Attach to agent
     await client.patch(
-        f"{LETTA_URL}/v1/agents/{agent_id}/core-memory/blocks/{label}",
+        f"{LETTA_URL}/v1/agents/{agent_id}/core-memory/blocks/{label}/",
         headers=_headers(),
         json={"value": value},
     )
@@ -161,7 +161,7 @@ async def insert_passage(content: str, tags: list[str]) -> dict[str, Any]:
     client = _client_or_raise()
     agent_id = await ensure_ren_agent_id()
     resp = await client.post(
-        f"{LETTA_URL}/v1/agents/{agent_id}/passages",
+        f"{LETTA_URL}/v1/agents/{agent_id}/passages/",
         headers=_headers(),
         json={"text": content, "metadata_": {"tags": tags}},
     )
@@ -173,7 +173,7 @@ async def search_passages(query: str, limit: int = 20) -> list[dict[str, Any]]:
     client = _client_or_raise()
     agent_id = await ensure_ren_agent_id()
     resp = await client.get(
-        f"{LETTA_URL}/v1/agents/{agent_id}/passages",
+        f"{LETTA_URL}/v1/agents/{agent_id}/passages/",
         headers=_headers(),
         params={"query_text": query, "limit": limit},
     )
@@ -185,7 +185,7 @@ async def list_passages(limit: int = 50) -> list[dict[str, Any]]:
     client = _client_or_raise()
     agent_id = await ensure_ren_agent_id()
     resp = await client.get(
-        f"{LETTA_URL}/v1/agents/{agent_id}/passages",
+        f"{LETTA_URL}/v1/agents/{agent_id}/passages/",
         headers=_headers(),
         params={"limit": limit},
     )
@@ -206,7 +206,7 @@ async def send_chat_message(content: str, user_name: str) -> str:
         "stream_tokens": False,
     }
     resp = await client.post(
-        f"{LETTA_URL}/v1/agents/{agent_id}/messages",
+        f"{LETTA_URL}/v1/agents/{agent_id}/messages/",
         headers=_headers(),
         json=payload,
         timeout=180.0,
