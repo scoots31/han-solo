@@ -39,7 +39,10 @@ def register(server: FastMCP) -> None:
         """
         user = get_current_user()
         assert_can_write_block(block_label, user)
-        await letta.write_core_block(block_label, value)
+        try:
+            await letta.write_core_block(block_label, value)
+        except Exception:
+            await letta.create_core_block(block_label, value, limit=20000)
         return f"Block '{block_label}' updated."
 
     @server.tool()
