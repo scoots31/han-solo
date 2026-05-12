@@ -1,6 +1,6 @@
 FROM lettaai/letta:latest
 
 USER root
-RUN pip install psycopg2-binary --quiet
+RUN /app/.venv/bin/pip install psycopg2-binary --quiet
 
 USER letta
