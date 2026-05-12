@@ -184,5 +184,5 @@ async def send_chat_message(content: str, user_name: str) -> str:
     data = resp.json()
     for msg in data.get("messages", []):
         if msg.get("message_type") == "assistant_message":
-            return msg.get("assistant_message", "")
+            return msg.get("content", "") or msg.get("assistant_message", "")
     return ""
