@@ -3,14 +3,17 @@ Async client for Letta's REST API.
 All Han Solo memory operations go through here — never call Letta directly from tools.
 """
 from typing import Any, Optional
+import logging
 import httpx
 
-from .config import LETTA_URL, LETTA_API_KEY
+from .config import LETTA_URL, LETTA_API_KEY, REN_AGENT_NAME
+
+logger = logging.getLogger(__name__)
 
 # Shared async client — initialised in server lifespan, closed on shutdown
 _client: Optional[httpx.AsyncClient] = None
 
-# Ren agent ID — resolved on startup by name, stored here for the process lifetime
+# Ren agent ID — resolved on first use; lazy so Letta sleeping at startup isn't fatal
 _ren_agent_id: Optional[str] = None
 
 
@@ -24,9 +27,14 @@ def set_ren_agent_id(agent_id: str) -> None:
     _ren_agent_id = agent_id
 
 
-def get_ren_agent_id() -> str:
-    if _ren_agent_id is None:
-        raise RuntimeError("Ren agent not initialised")
+async def ensure_ren_agent_id() -> str:
+    """Return the Ren agent ID, resolving it from Letta if not yet cached."""
+    global _ren_agent_id
+    if _ren_agent_id is not None:
+        return _ren_agent_id
+    logger.info("Ren agent ID not cached — resolving from Letta...")
+    _ren_agent_id = await get_or_create_ren_agent(REN_AGENT_NAME)
+    logger.info("Ren agent resolved: %s", _ren_agent_id)
     return _ren_agent_id
 
 
@@ -90,7 +98,7 @@ async def get_or_create_ren_agent(name: str) -> str:
 
 async def read_core_block(label: str) -> dict[str, Any]:
     client = _client_or_raise()
-    agent_id = get_ren_agent_id()
+    agent_id = await ensure_ren_agent_id()
     resp = await client.get(
         f"{LETTA_URL}/v1/agents/{agent_id}/core-memory/blocks/{label}",
         headers=_headers(),
@@ -101,7 +109,7 @@ async def read_core_block(label: str) -> dict[str, Any]:
 
 async def write_core_block(label: str, value: str) -> dict[str, Any]:
     client = _client_or_raise()
-    agent_id = get_ren_agent_id()
+    agent_id = await ensure_ren_agent_id()
     resp = await client.patch(
         f"{LETTA_URL}/v1/agents/{agent_id}/core-memory/blocks/{label}",
         headers=_headers(),
@@ -113,7 +121,7 @@ async def write_core_block(label: str, value: str) -> dict[str, Any]:
 
 async def list_core_blocks() -> list[dict[str, Any]]:
     client = _client_or_raise()
-    agent_id = get_ren_agent_id()
+    agent_id = await ensure_ren_agent_id()
     resp = await client.get(
         f"{LETTA_URL}/v1/agents/{agent_id}/core-memory/blocks",
         headers=_headers(),
@@ -125,7 +133,7 @@ async def list_core_blocks() -> list[dict[str, Any]]:
 async def create_core_block(label: str, value: str = "", limit: int = 10000) -> dict[str, Any]:
     """Create a new memory block and attach it to the Ren agent."""
     client = _client_or_raise()
-    agent_id = get_ren_agent_id()
+    agent_id = await ensure_ren_agent_id()
 
     # Create block
     resp = await client.post(
@@ -151,7 +159,7 @@ async def create_core_block(label: str, value: str = "", limit: int = 10000) -> 
 
 async def insert_passage(content: str, tags: list[str]) -> dict[str, Any]:
     client = _client_or_raise()
-    agent_id = get_ren_agent_id()
+    agent_id = await ensure_ren_agent_id()
     resp = await client.post(
         f"{LETTA_URL}/v1/agents/{agent_id}/passages",
         headers=_headers(),
@@ -163,7 +171,7 @@ async def insert_passage(content: str, tags: list[str]) -> dict[str, Any]:
 
 async def search_passages(query: str, limit: int = 20) -> list[dict[str, Any]]:
     client = _client_or_raise()
-    agent_id = get_ren_agent_id()
+    agent_id = await ensure_ren_agent_id()
     resp = await client.get(
         f"{LETTA_URL}/v1/agents/{agent_id}/passages",
         headers=_headers(),
@@ -175,7 +183,7 @@ async def search_passages(query: str, limit: int = 20) -> list[dict[str, Any]]:
 
 async def list_passages(limit: int = 50) -> list[dict[str, Any]]:
     client = _client_or_raise()
-    agent_id = get_ren_agent_id()
+    agent_id = await ensure_ren_agent_id()
     resp = await client.get(
         f"{LETTA_URL}/v1/agents/{agent_id}/passages",
         headers=_headers(),
