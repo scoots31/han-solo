@@ -230,6 +230,21 @@ protection is redundant when you have strong per-user auth.
 
 ---
 
+### 15. Archival memory fails — letta-free embedding requires Letta Cloud auth
+
+**What happened:** Archival memory insertion (`POST /v1/agents/{id}/archival-memory`) returns
+500 "An unknown error occurred" on a self-hosted Letta instance. The only embedding model
+accessible via the Letta handles system is `letta/letta-free` (dim 1536, openai endpoint type).
+`voyage-3` is not exposed as a model handle even with a valid Anthropic provider registered.
+The `letta-free` endpoint requires authentication with Letta's Cloud service (a separate
+credential from the self-hosted Letta server password), which is not available on BYOK installs.
+**Workaround:** Seed signals stored in a `seed_signals` core memory block (no embedding needed).
+**Permanent fix options:** (1) Configure an OpenAI API key as a second provider and use
+`text-embedding-3-small` (dim 1536, already matches the patched pgvector column); or (2) use
+Letta Cloud instead of self-hosted. Resolve before implementing archival signal search.
+
+---
+
 ## Architecture Notes
 
 ### Why the MCP endpoint is `/mcp` (not `/mcp/mcp`)
