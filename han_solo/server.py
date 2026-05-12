@@ -13,10 +13,9 @@ import logging
 
 import httpx
 from mcp.server.fastmcp import FastMCP
-from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import JSONResponse
-from starlette.routing import Mount, Route
+from starlette.routing import Route
 
 from .auth import BearerAuthMiddleware
 from .config import REN_AGENT_NAME
@@ -40,26 +39,6 @@ portraits.register(server)
 
 
 # ---------------------------------------------------------------------------
-# Lifespan — shared resources
-# ---------------------------------------------------------------------------
-
-@contextlib.asynccontextmanager
-async def lifespan(app):
-    async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
-        letta.set_client(client)
-        logger.info("Resolving Ren agent '%s'...", REN_AGENT_NAME)
-        try:
-            agent_id = await letta.get_or_create_ren_agent(REN_AGENT_NAME)
-            letta.set_ren_agent_id(agent_id)
-            logger.info("Ren agent ready: %s", agent_id)
-        except Exception as e:
-            # Log but don't crash — server stays up, tools will fail gracefully
-            # until Letta is reachable. Health check reports degraded state.
-            logger.error("Failed to initialise Ren agent (will retry on next request): %s", e)
-        yield
-
-
-# ---------------------------------------------------------------------------
 # Health endpoint — no auth, for Render health check
 # ---------------------------------------------------------------------------
 
@@ -73,18 +52,42 @@ async def health(request: Request) -> JSONResponse:
 
 # ---------------------------------------------------------------------------
 # ASGI app
+#
+# FastMCP's streamable_http_app() creates a Starlette app with its own lifespan
+# that initialises the SSE session manager's task group (required for streaming).
+# We need BOTH lifespans to run — FastMCP's and ours (httpx client + Letta agent).
+#
+# Strategy:
+#   1. Call streamable_http_app() to trigger lazy session manager creation.
+#   2. Add the /health route directly to that Starlette app's router.
+#   3. Replace the router's lifespan with a combined one that runs both.
+#   4. Wrap with our raw ASGI auth middleware (avoids BaseHTTPMiddleware SSE breakage).
 # ---------------------------------------------------------------------------
 
-_starlette = Starlette(
-    lifespan=lifespan,
-    routes=[
-        Route("/health", health),
-        # FastMCP's streamable_http_app routes to /mcp internally — mount at root
-        # so the external URL is /mcp (not /mcp/mcp from a double-prefix)
-        Mount("/", app=server.streamable_http_app()),
-    ],
-)
+# Step 1 — get FastMCP's Starlette app (creates session_manager lazily)
+_mcp_app = server.streamable_http_app()
 
-# Raw ASGI middleware wraps the Starlette app directly — avoids BaseHTTPMiddleware's
-# response buffering which breaks SSE streams used by MCP Streamable HTTP transport.
-app = BearerAuthMiddleware(_starlette)
+# Step 2 — inject /health before the /mcp route
+_mcp_app.router.routes.insert(0, Route("/health", health))
+
+
+# Step 3 — combined lifespan: our setup + FastMCP's session manager
+@contextlib.asynccontextmanager
+async def _lifespan(app):
+    async with httpx.AsyncClient(timeout=60.0, follow_redirects=True) as client:
+        letta.set_client(client)
+        logger.info("Resolving Ren agent '%s'...", REN_AGENT_NAME)
+        try:
+            agent_id = await letta.get_or_create_ren_agent(REN_AGENT_NAME)
+            letta.set_ren_agent_id(agent_id)
+            logger.info("Ren agent ready: %s", agent_id)
+        except Exception as e:
+            logger.error("Failed to initialise Ren agent (will retry on next request): %s", e)
+        async with server.session_manager.run():
+            yield
+
+
+_mcp_app.router.lifespan_context = _lifespan
+
+# Step 4 — raw ASGI auth middleware (preserves SSE streaming)
+app = BearerAuthMiddleware(_mcp_app)
