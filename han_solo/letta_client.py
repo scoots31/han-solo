@@ -71,6 +71,7 @@ async def get_or_create_ren_agent(name: str) -> str:
         "embedding_config": {
             "embedding_endpoint_type": "anthropic",
             "embedding_model": "voyage-3",
+            "embedding_dim": 1024,
         },
         "memory_blocks": [
             {"label": "always_loaded_core", "value": "", "limit": 10000},
