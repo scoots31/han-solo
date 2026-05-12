@@ -153,19 +153,19 @@ async def create_core_block(label: str, value: str = "", limit: int = 10000) -> 
 
 async def insert_passage(content: str, tags: list[str]) -> dict[str, Any]:
     agent_id = await ensure_ren_agent_id()
-    resp = await _letta("POST", f"{LETTA_URL}/v1/agents/{agent_id}/passages", json={"text": content, "metadata_": {"tags": tags}})
+    resp = await _letta("POST", f"{LETTA_URL}/v1/agents/{agent_id}/archival-memory", json={"text": content})
     return resp.json()
 
 
 async def search_passages(query: str, limit: int = 20) -> list[dict[str, Any]]:
     agent_id = await ensure_ren_agent_id()
-    resp = await _letta("GET", f"{LETTA_URL}/v1/agents/{agent_id}/passages", params={"query_text": query, "limit": limit})
+    resp = await _letta("GET", f"{LETTA_URL}/v1/agents/{agent_id}/archival-memory", params={"query_text": query, "limit": limit})
     return resp.json()
 
 
 async def list_passages(limit: int = 50) -> list[dict[str, Any]]:
     agent_id = await ensure_ren_agent_id()
-    resp = await _letta("GET", f"{LETTA_URL}/v1/agents/{agent_id}/passages", params={"limit": limit})
+    resp = await _letta("GET", f"{LETTA_URL}/v1/agents/{agent_id}/archival-memory", params={"limit": limit})
     return resp.json()
 
 
