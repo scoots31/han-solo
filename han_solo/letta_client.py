@@ -51,16 +51,39 @@ def _client_or_raise() -> httpx.AsyncClient:
     return _client
 
 
+async def _letta(method: str, url: str, timeout: float = 60.0, **kwargs) -> httpx.Response:
+    """
+    Make a request to Letta with auth, following redirects manually.
+
+    Render's reverse proxy emits http:// in Location headers even for https
+    services. httpx strips Authorization on https→http scheme downgrades.
+    We follow the redirect ourselves, converting http:// back to https://.
+    """
+    client = _client_or_raise()
+    resp = await client.request(
+        method, url, headers=_headers(), follow_redirects=False,
+        timeout=timeout, **kwargs
+    )
+    if resp.is_redirect:
+        location = resp.headers.get("location", "")
+        # Fix Render's http→https scheme artifact before retrying
+        location = location.replace("http://", "https://", 1)
+        logger.debug("Redirect %s → %s", url, location)
+        resp = await client.request(
+            method, location, headers=_headers(), follow_redirects=False,
+            timeout=timeout, **kwargs
+        )
+    resp.raise_for_status()
+    return resp
+
+
 # ---------------------------------------------------------------------------
 # Agent bootstrap
 # ---------------------------------------------------------------------------
 
 async def get_or_create_ren_agent(name: str) -> str:
     """Return the agent_id for the named Ren agent, creating it if needed."""
-    client = _client_or_raise()
-
-    resp = await client.get(f"{LETTA_URL}/v1/agents/", headers=_headers())
-    resp.raise_for_status()
+    resp = await _letta("GET", f"{LETTA_URL}/v1/agents")
     agents = resp.json()
 
     for agent in agents:
@@ -87,8 +110,7 @@ async def get_or_create_ren_agent(name: str) -> str:
             {"label": "project_state", "value": "{}", "limit": 10000},
         ],
     }
-    resp = await client.post(f"{LETTA_URL}/v1/agents/", headers=_headers(), json=payload)
-    resp.raise_for_status()
+    resp = await _letta("POST", f"{LETTA_URL}/v1/agents", json=payload)
     return resp.json()["id"]
 
 
@@ -97,59 +119,31 @@ async def get_or_create_ren_agent(name: str) -> str:
 # ---------------------------------------------------------------------------
 
 async def read_core_block(label: str) -> dict[str, Any]:
-    client = _client_or_raise()
     agent_id = await ensure_ren_agent_id()
-    resp = await client.get(
-        f"{LETTA_URL}/v1/agents/{agent_id}/core-memory/blocks/{label}/",
-        headers=_headers(),
-    )
-    resp.raise_for_status()
+    resp = await _letta("GET", f"{LETTA_URL}/v1/agents/{agent_id}/core-memory/blocks/{label}")
     return resp.json()
 
 
 async def write_core_block(label: str, value: str) -> dict[str, Any]:
-    client = _client_or_raise()
     agent_id = await ensure_ren_agent_id()
-    resp = await client.patch(
-        f"{LETTA_URL}/v1/agents/{agent_id}/core-memory/blocks/{label}/",
-        headers=_headers(),
-        json={"value": value},
-    )
-    resp.raise_for_status()
+    resp = await _letta("PATCH", f"{LETTA_URL}/v1/agents/{agent_id}/core-memory/blocks/{label}", json={"value": value})
     return resp.json()
 
 
 async def list_core_blocks() -> list[dict[str, Any]]:
-    client = _client_or_raise()
     agent_id = await ensure_ren_agent_id()
-    resp = await client.get(
-        f"{LETTA_URL}/v1/agents/{agent_id}/core-memory/blocks/",
-        headers=_headers(),
-    )
-    resp.raise_for_status()
+    resp = await _letta("GET", f"{LETTA_URL}/v1/agents/{agent_id}/core-memory/blocks")
     return resp.json()
 
 
 async def create_core_block(label: str, value: str = "", limit: int = 10000) -> dict[str, Any]:
     """Create a new memory block and attach it to the Ren agent."""
-    client = _client_or_raise()
     agent_id = await ensure_ren_agent_id()
 
-    # Create block
-    resp = await client.post(
-        f"{LETTA_URL}/v1/blocks/",
-        headers=_headers(),
-        json={"label": label, "value": value, "limit": limit},
-    )
-    resp.raise_for_status()
+    resp = await _letta("POST", f"{LETTA_URL}/v1/blocks", json={"label": label, "value": value, "limit": limit})
     block = resp.json()
 
-    # Attach to agent
-    await client.patch(
-        f"{LETTA_URL}/v1/agents/{agent_id}/core-memory/blocks/{label}/",
-        headers=_headers(),
-        json={"value": value},
-    )
+    await _letta("PATCH", f"{LETTA_URL}/v1/agents/{agent_id}/core-memory/blocks/{label}", json={"value": value})
     return block
 
 
@@ -158,38 +152,20 @@ async def create_core_block(label: str, value: str = "", limit: int = 10000) -> 
 # ---------------------------------------------------------------------------
 
 async def insert_passage(content: str, tags: list[str]) -> dict[str, Any]:
-    client = _client_or_raise()
     agent_id = await ensure_ren_agent_id()
-    resp = await client.post(
-        f"{LETTA_URL}/v1/agents/{agent_id}/passages/",
-        headers=_headers(),
-        json={"text": content, "metadata_": {"tags": tags}},
-    )
-    resp.raise_for_status()
+    resp = await _letta("POST", f"{LETTA_URL}/v1/agents/{agent_id}/passages", json={"text": content, "metadata_": {"tags": tags}})
     return resp.json()
 
 
 async def search_passages(query: str, limit: int = 20) -> list[dict[str, Any]]:
-    client = _client_or_raise()
     agent_id = await ensure_ren_agent_id()
-    resp = await client.get(
-        f"{LETTA_URL}/v1/agents/{agent_id}/passages/",
-        headers=_headers(),
-        params={"query_text": query, "limit": limit},
-    )
-    resp.raise_for_status()
+    resp = await _letta("GET", f"{LETTA_URL}/v1/agents/{agent_id}/passages", params={"query_text": query, "limit": limit})
     return resp.json()
 
 
 async def list_passages(limit: int = 50) -> list[dict[str, Any]]:
-    client = _client_or_raise()
     agent_id = await ensure_ren_agent_id()
-    resp = await client.get(
-        f"{LETTA_URL}/v1/agents/{agent_id}/passages/",
-        headers=_headers(),
-        params={"limit": limit},
-    )
-    resp.raise_for_status()
+    resp = await _letta("GET", f"{LETTA_URL}/v1/agents/{agent_id}/passages", params={"limit": limit})
     return resp.json()
 
 
@@ -199,19 +175,12 @@ async def list_passages(limit: int = 50) -> list[dict[str, Any]]:
 
 async def send_chat_message(content: str, user_name: str) -> str:
     """Send a message to the Ren agent, return the assistant's text response."""
-    client = _client_or_raise()
     agent_id = await ensure_ren_agent_id()
     payload = {
         "messages": [{"role": "user", "content": content, "name": user_name}],
         "stream_tokens": False,
     }
-    resp = await client.post(
-        f"{LETTA_URL}/v1/agents/{agent_id}/messages/",
-        headers=_headers(),
-        json=payload,
-        timeout=180.0,
-    )
-    resp.raise_for_status()
+    resp = await _letta("POST", f"{LETTA_URL}/v1/agents/{agent_id}/messages", json=payload, timeout=180.0)
     data = resp.json()
     for msg in data.get("messages", []):
         if msg.get("message_type") == "assistant_message":

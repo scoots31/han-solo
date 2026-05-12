@@ -91,7 +91,7 @@ for i, route in enumerate(_chat_routes):
 # Step 3 — combined lifespan: our setup + FastMCP's session manager
 @contextlib.asynccontextmanager
 async def _lifespan(app):
-    async with httpx.AsyncClient(timeout=60.0, follow_redirects=True) as client:
+    async with httpx.AsyncClient(timeout=60.0, follow_redirects=False) as client:
         letta.set_client(client)
         logger.info("Resolving Ren agent '%s'...", REN_AGENT_NAME)
         try:
