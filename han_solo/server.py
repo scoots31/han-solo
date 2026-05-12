@@ -11,8 +11,11 @@ Deploy:    Render web service
 import contextlib
 import logging
 
+import os
+
 import httpx
 from mcp.server.fastmcp import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.routing import Route
@@ -29,7 +32,11 @@ logger = logging.getLogger(__name__)
 # MCP server — register all tool groups
 # ---------------------------------------------------------------------------
 
-server = FastMCP("han-solo")
+# Disable built-in DNS rebinding protection — we enforce security via bearer token auth.
+# Without this, FastMCP rejects requests from the Render hostname with 421.
+_transport_security = TransportSecuritySettings(enable_dns_rebinding_protection=False)
+
+server = FastMCP("han-solo", transport_security=_transport_security)
 
 memory.register(server)
 signals.register(server)
