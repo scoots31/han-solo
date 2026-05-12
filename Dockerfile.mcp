@@ -2,11 +2,11 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY mcp/requirements.txt requirements.txt
+COPY han_solo/requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY mcp/ mcp/
+COPY han_solo/ han_solo/
 
 EXPOSE 8000
 
-CMD ["python", "-m", "uvicorn", "mcp.server:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "-m", "uvicorn", "han_solo.server:app", "--host", "0.0.0.0", "--port", "8000"]
