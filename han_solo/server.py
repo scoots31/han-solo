@@ -45,7 +45,7 @@ portraits.register(server)
 
 @contextlib.asynccontextmanager
 async def lifespan(app):
-    async with httpx.AsyncClient(timeout=30.0) as client:
+    async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
         letta.set_client(client)
         logger.info("Resolving Ren agent '%s'...", REN_AGENT_NAME)
         try:
