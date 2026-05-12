@@ -75,7 +75,7 @@ async def health(request: Request) -> JSONResponse:
 # ASGI app
 # ---------------------------------------------------------------------------
 
-app = Starlette(
+_starlette = Starlette(
     lifespan=lifespan,
     routes=[
         Route("/health", health),
@@ -83,4 +83,6 @@ app = Starlette(
     ],
 )
 
-app.add_middleware(BearerAuthMiddleware)
+# Raw ASGI middleware wraps the Starlette app directly — avoids BaseHTTPMiddleware's
+# response buffering which breaks SSE streams used by MCP Streamable HTTP transport.
+app = BearerAuthMiddleware(_starlette)
