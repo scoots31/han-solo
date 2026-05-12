@@ -191,3 +191,29 @@ async def list_passages(limit: int = 50) -> list[dict[str, Any]]:
     )
     resp.raise_for_status()
     return resp.json()
+
+
+# ---------------------------------------------------------------------------
+# Chat — send a message and get Ren's response
+# ---------------------------------------------------------------------------
+
+async def send_chat_message(content: str, user_name: str) -> str:
+    """Send a message to the Ren agent, return the assistant's text response."""
+    client = _client_or_raise()
+    agent_id = await ensure_ren_agent_id()
+    payload = {
+        "messages": [{"role": "user", "content": content, "name": user_name}],
+        "stream_tokens": False,
+    }
+    resp = await client.post(
+        f"{LETTA_URL}/v1/agents/{agent_id}/messages",
+        headers=_headers(),
+        json=payload,
+        timeout=180.0,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    for msg in data.get("messages", []):
+        if msg.get("message_type") == "assistant_message":
+            return msg.get("assistant_message", "")
+    return ""

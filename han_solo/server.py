@@ -24,6 +24,7 @@ from .auth import BearerAuthMiddleware
 from .config import REN_AGENT_NAME
 from . import letta_client as letta
 from .tools import memory, signals, phase, brief, portraits
+from . import chat_api
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -74,8 +75,17 @@ async def health(request: Request) -> JSONResponse:
 # Step 1 — get FastMCP's Starlette app (creates session_manager lazily)
 _mcp_app = server.streamable_http_app()
 
-# Step 2 — inject /health before the /mcp route
-_mcp_app.router.routes.insert(0, Route("/health", health))
+# Step 2 — inject custom routes before the /mcp route
+_chat_routes = [
+    Route("/", chat_api.chat_index),
+    Route("/health", health),
+    Route("/api/me", chat_api.api_me),
+    Route("/api/history", chat_api.api_history),
+    Route("/api/send", chat_api.api_send, methods=["POST"]),
+    Route("/api/memory-panel", chat_api.api_memory_panel),
+]
+for i, route in enumerate(_chat_routes):
+    _mcp_app.router.routes.insert(i, route)
 
 
 # Step 3 — combined lifespan: our setup + FastMCP's session manager
