@@ -230,18 +230,28 @@ protection is redundant when you have strong per-user auth.
 
 ---
 
-### 15. Archival memory fails — letta-free embedding requires Letta Cloud auth
+### 15. Archival memory fails — three layered root causes
 
-**What happened:** Archival memory insertion (`POST /v1/agents/{id}/archival-memory`) returns
-500 "An unknown error occurred" on a self-hosted Letta instance. The only embedding model
-accessible via the Letta handles system is `letta/letta-free` (dim 1536, openai endpoint type).
-`voyage-3` is not exposed as a model handle even with a valid Anthropic provider registered.
-The `letta-free` endpoint requires authentication with Letta's Cloud service (a separate
-credential from the self-hosted Letta server password), which is not available on BYOK installs.
-**Workaround:** Seed signals stored in a `seed_signals` core memory block (no embedding needed).
-**Permanent fix options:** (1) Configure an OpenAI API key as a second provider and use
-`text-embedding-3-small` (dim 1536, already matches the patched pgvector column); or (2) use
-Letta Cloud instead of self-hosted. Resolve before implementing archival signal search.
+**What happened:** `POST /v1/agents/{id}/archival-memory` returned 500 "An unknown error occurred"
+then "A database error occurred" through several debugging rounds. Three separate causes:
+
+**Cause A — Embedding provider not wired:** `letta-free` requires Letta Cloud auth unavailable
+on self-hosted. `voyageai` is not a valid `provider_type` in this Letta version. Fix: register
+Voyage AI as an `openai`-type provider (`base_url: https://api.voyageai.com/v1`), set
+`OPENAI_API_KEY=<voyage_key>` env var (Letta's OpenAI embedding client reads this), and configure
+the agent's `embedding_endpoint_type: "openai"`, `embedding_endpoint: "https://api.voyageai.com/v1"`.
+
+**Cause B — pgvector column wrong dimension:** Column was 4096 (original schema from the old
+lettaai image). We changed it to 1024 (voyage-3 dim) then 1536 (letta-free dim) chasing the
+problem, making it worse. The fix is to keep the column at **4096** — Letta's passage_manager
+always pads embeddings to `MAX_EMBEDDING_DIM = 4096` before inserting (hardcoded in constants.py,
+comment says "do NOT change or else DBs will need to be reset"). Do not alter this column.
+
+**Cause C — Rate limiting from Voyage API:** Rapid sequential embedding calls triggered transient
+failures. Fix: add 2-3 second pauses between bulk insertions.
+
+**Current state:** Fully resolved 2026-05-12. 8 archival signals seeded. Voyage API key stored
+as `OPENAI_API_KEY` on `han-solo-letta`. Archive and agent configs use openai type + Voyage endpoint.
 
 ---
 
