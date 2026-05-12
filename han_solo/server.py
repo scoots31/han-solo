@@ -79,7 +79,9 @@ _starlette = Starlette(
     lifespan=lifespan,
     routes=[
         Route("/health", health),
-        Mount("/mcp", app=server.streamable_http_app()),
+        # FastMCP's streamable_http_app routes to /mcp internally — mount at root
+        # so the external URL is /mcp (not /mcp/mcp from a double-prefix)
+        Mount("/", app=server.streamable_http_app()),
     ],
 )
 
