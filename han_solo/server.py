@@ -53,8 +53,9 @@ async def lifespan(app):
             letta.set_ren_agent_id(agent_id)
             logger.info("Ren agent ready: %s", agent_id)
         except Exception as e:
-            logger.error("Failed to initialise Ren agent: %s", e)
-            raise
+            # Log but don't crash — server stays up, tools will fail gracefully
+            # until Letta is reachable. Health check reports degraded state.
+            logger.error("Failed to initialise Ren agent (will retry on next request): %s", e)
         yield
 
 
@@ -63,9 +64,10 @@ async def lifespan(app):
 # ---------------------------------------------------------------------------
 
 async def health(request: Request) -> JSONResponse:
+    agent_id = letta._ren_agent_id
     return JSONResponse({
-        "status": "ok",
-        "ren_agent": letta._ren_agent_id or "not_initialised",
+        "status": "ok" if agent_id else "degraded",
+        "ren_agent": agent_id or "not_initialised",
     })
 
 
