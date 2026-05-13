@@ -136,19 +136,6 @@ async def api_send(request: Request) -> JSONResponse:
     return JSONResponse({"response": response_text, "session_reset": rolled_over})
 
 
-async def api_admin_set_model(request: Request) -> JSONResponse:
-    get_current_user()
-    body = await request.json()
-    model = body.get("model", "").strip()
-    if not model:
-        return JSONResponse({"error": "model required"}, status_code=400)
-    try:
-        result = await letta.patch_agent_model(model)
-        return JSONResponse({"ok": True, "agent_id": result.get("id"), "model": model})
-    except Exception as exc:
-        return JSONResponse({"error": str(exc)}, status_code=502)
-
-
 async def api_memory_panel(request: Request) -> JSONResponse:
     get_current_user()
     blocks = await letta.list_core_blocks()
