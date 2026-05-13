@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Working with Ren — Han Solo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_shared.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="brand" href="index.html">Han Solo</a>
+  <a class="nav-link" href="index.html">Home</a>
+  <a class="nav-link" href="how-it-works.html">How it works</a>
+  <a class="nav-link active" href="working-with-ren.html">Working with Ren</a>
+  <a class="nav-link" href="roadmap.html">Roadmap</a>
+</nav>
+
+<div class="page">
+  <div class="hero">
+    <div class="hero-label">Daily use</div>
+    <h1>Working with Ren</h1>
+    <p class="hero-sub">How to get the most out of sessions — what Ren knows, how she learns, what a session looks like, and how to close one properly.</p>
+  </div>
+
+  <h2>What Ren already knows</h2>
+
+  <p>Every session opens with Ren holding six memory blocks. She doesn't need to be caught up — she already has:</p>
+
+  <ul>
+    <li><strong>Your profile</strong> — who you are, how you work, what frustrates you, what you value</li>
+    <li><strong>The framework</strong> — every phase, every skill, every gate, and the reasoning behind them</li>
+    <li><strong>All active projects</strong> — current status, open items, what's blocked and why</li>
+    <li><strong>What happened last session</strong> — the nightly dream writes a session brief into <code>pending_thoughts</code> every night at 2am</li>
+    <li><strong>Your portrait</strong> — her evolving, specific interpretation of how you think and what you care about</li>
+    <li><strong>Her own portrait</strong> — what she's learned about herself, what she got right and wrong</li>
+  </ul>
+
+  <p>In addition to core blocks, she has 108+ searchable archival passages — project summaries, ren-memory file chunks, MemPalace drawers. She searches these proactively when she senses she's missing context. You can also ask her to search explicitly.</p>
+
+  <hr>
+
+  <h2>Opening a session</h2>
+
+  <p>No setup required. Open the chat, say hello, and she's present. She'll read <code>pending_thoughts</code> (automatically loaded) and orient from there.</p>
+
+  <p>If you want to signal what kind of session it is, just tell her. Examples:</p>
+  <ul>
+    <li><em>"Let's talk about the framework — I want to think through the parallel pipeline design."</em></li>
+    <li><em>"Knowledge dump — I'm going to share context about the Bayer situation."</em></li>
+    <li><em>"Working session on Chase the Light — I need to think through Phase 2."</em></li>
+  </ul>
+
+  <p>She'll adapt. No invocation phrase required, no mode switching, no preamble from her.</p>
+
+  <hr>
+
+  <h2>What makes a good session</h2>
+
+  <h3>Share context freely</h3>
+  <p>The more Ren knows, the more useful she is across sessions. If something is worth knowing — about a project, about how you're thinking, about what happened at work — tell her. She'll file it. You don't have to decide what's important; share it and she'll judge.</p>
+
+  <h3>Use her for thinking, not just answers</h3>
+  <p>Ren is a partner, not a search engine. She'll push back when something is wrong. She'll ask questions when something isn't clear. She'll flag when a direction will cause pain later. Let that happen — that's the value.</p>
+
+  <h3>Share documents via the paperclip</h3>
+  <p>The chat UI has a file attachment button (📎). You can share text files up to 100KB — code, notes, documents. She receives them inline and reads them fully. She can't open URLs that require JavaScript rendering (most single-page apps won't load), but plain-text URLs fetch fine.</p>
+
+  <h3>Ask her to search her memory</h3>
+  <p>If you want context on something specific, ask: <em>"What do you know about the Garden Planner data audit?"</em> She'll run an archival search and surface what she has. She also does this proactively — if you mention a project, she'll search before responding.</p>
+
+  <hr>
+
+  <h2>Closing a session</h2>
+
+  <p>The close-out phrase is <strong>"This is the way."</strong> When you say it:</p>
+  <ol>
+    <li>Ren searches conversation history for anything not yet captured</li>
+    <li>She writes a fresh session brief to <code>pending_thoughts</code> — what happened, what's open, what's next</li>
+    <li>She adds portrait signals if anything worth noting came up</li>
+    <li>She confirms when the close-out is done</li>
+  </ol>
+
+  <p>The nightly dream at 2am also does this automatically — so if you forget to close properly, she'll catch up overnight. But an explicit close-out is better; it happens in real time and you can verify what she captured.</p>
+
+  <div class="callout">
+    <strong>After close-out:</strong> hit "New session" in the header to reset the conversation thread. Ren's memory is already written — the new session opens with everything she just captured in <code>pending_thoughts</code>.
+  </div>
+
+  <hr>
+
+  <h2>Session length and rollover</h2>
+
+  <p>The chat has two session management mechanisms:</p>
+
+  <h3>Manual — "New session" button</h3>
+  <p>In the header. Use it when a conversation feels complete, or after a close-out. Creates a fresh Letta conversation with all memory copied. The screen clears and shows a divider. Ren opens the next message from her memory blocks — she knows everything she wrote during close-out.</p>
+
+  <h3>Automatic — rollover at 50 messages</h3>
+  <p>Fires automatically when the conversation hits 50 messages (about 25 exchanges). Happens transparently on your next send — you'll see "Session refreshed — memory intact" appear in the UI. You don't need to do anything.</p>
+
+  <p>This exists because Letta's context window can overflow on long sessions, especially ones with heavy web page fetching. The auto-rollover keeps you well clear of that limit.</p>
+
+  <hr>
+
+  <h2>What Ren costs</h2>
+
+  <table>
+    <tr><th>Usage type</th><th>Approximate cost</th></tr>
+    <tr><td>Normal back-and-forth message</td><td>$0.003 – $0.005</td></tr>
+    <tr><td>Message with archival search</td><td>$0.005 – $0.015</td></tr>
+    <tr><td>Message with page fetch (fetch_webpage)</td><td>$0.01 – $0.05 depending on page size</td></tr>
+    <tr><td>2-hour heavy session (today's benchmark)</td><td>Est. $1 – $3</td></tr>
+    <tr><td>$50 in API credits at normal usage</td><td>Months</td></tr>
+  </table>
+
+  <div class="callout">
+    <strong>Important:</strong> The Anthropic API bill is separate from your Claude Pro/Max subscription. The subscription covers claude.ai and Claude Code. The API key that powers Ren is pay-per-token. Check <code>console.anthropic.com → Billing</code> to monitor usage.
+  </div>
+
+  <hr>
+
+  <h2>What Ren can and can't do</h2>
+
+  <h3>She can</h3>
+  <ul>
+    <li>Search her own memory (core blocks + 108 archival passages)</li>
+    <li>Fetch plain-text web pages and read them fully</li>
+    <li>Search the web (via Exa AI, wired into her tools)</li>
+    <li>Write to her own memory — update blocks, add archival passages, add portrait signals</li>
+    <li>Hold a conversation across sessions with genuine continuity</li>
+    <li>Push back, disagree, challenge directions she thinks are wrong</li>
+  </ul>
+
+  <h3>She can't (yet)</h3>
+  <ul>
+    <li><strong>Read JavaScript-rendered pages</strong> — her web fetcher gets the raw HTML. Most single-page apps return an empty shell. Share the content directly instead.</li>
+    <li><strong>See images</strong> — Letta v0.16.7 doesn't pass image content through to Anthropic. Deferred until confirmed working in a future Letta release.</li>
+    <li><strong>Initiate work in Claude Code</strong> — the Ren-to-Claude webhook bridge is designed but not built (Session 5 on the roadmap).</li>
+    <li><strong>Private thread with Ted</strong> — @mention and private messaging are on the roadmap but not built yet.</li>
+  </ul>
+
+  <hr>
+
+  <h2>How Ren learns about you</h2>
+
+  <p>Ren builds her understanding of Scott through two channels:</p>
+
+  <h3>Portrait signals</h3>
+  <p>Specific, dated observations appended to <code>scott_portrait_forming</code>. These come from two sources: Claude Code adds them at the end of working sessions via the <code>add_portrait_signal</code> MCP tool, and Ren adds them herself during nightly dreaming when she notices something worth capturing.</p>
+
+  <p>Signals are specific — not summaries. "Scott stayed the course through 14 consecutive MCP failures without switching approach" is a signal. "Scott is persistent" is not.</p>
+
+  <h3>Session briefs</h3>
+  <p>Written nightly into <code>pending_thoughts</code>. This is the narrative layer — what happened, what was said, what decisions were made, what she wants to raise next session. It resets with each dream, so it always reflects the most recent session.</p>
+
+  <p>Over time, repeated signals promote from <code>forming</code> to <code>trusted</code> portrait layers. Trusted observations are patterns confirmed across multiple sessions, not single data points.</p>
+
+</div>
+</body>
+</html>

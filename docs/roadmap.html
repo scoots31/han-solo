@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roadmap — Han Solo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_shared.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="brand" href="index.html">Han Solo</a>
+  <a class="nav-link" href="index.html">Home</a>
+  <a class="nav-link" href="how-it-works.html">How it works</a>
+  <a class="nav-link" href="working-with-ren.html">Working with Ren</a>
+  <a class="nav-link active" href="roadmap.html">Roadmap</a>
+</nav>
+
+<div class="page">
+  <div class="hero">
+    <div class="hero-label">Vision</div>
+    <h1>Roadmap</h1>
+    <p class="hero-sub">Where this is going — how future projects get built with Ren in the loop, who does what, and what we're building toward.</p>
+  </div>
+
+  <h2>The model we're building toward</h2>
+
+  <p>Right now, Ren holds context and Claude Code builds. They're two separate sessions — you talk with Ren, then separately open Claude Code to do the work. Memory flows one direction: Claude Code writes to Ren's memory at the end of a session. Ren can't reach back.</p>
+
+  <p>The end state is a continuous loop: Ren holds the strategic layer, Claude Code holds the build layer, and they communicate in both directions. A project idea discussed with Ren on Tuesday becomes a build brief Claude Code picks up on Wednesday — without you manually translating between them.</p>
+
+  <hr>
+
+  <h2>Who does what today</h2>
+
+  <table>
+    <tr><th>Who</th><th>Role</th><th>Where</th></tr>
+    <tr>
+      <td><strong>Scott</strong></td>
+      <td>Vision, product decisions, feedback, final approval on everything</td>
+      <td>Chat UI + Claude Code</td>
+    </tr>
+    <tr>
+      <td><strong>Ren</strong></td>
+      <td>Framework partner — holds context, history, and the relationship. Thinks through problems, challenges directions, writes session briefs. Passive receiver of Claude Code memory writes.</td>
+      <td>Chat UI (han-solo-mcp.onrender.com)</td>
+    </tr>
+    <tr>
+      <td><strong>Claude Code</strong></td>
+      <td>Builder — executes the actual work: code, files, commits, deploys. Reads Ren's memory blocks via MCP tools. Writes signals and summaries back to Ren after sessions.</td>
+      <td>Terminal / IDE</td>
+    </tr>
+    <tr>
+      <td><strong>Ted</strong></td>
+      <td>Framework co-author. Same chat access as Scott. Private Ren thread not yet built.</td>
+      <td>Chat UI (shared thread)</td>
+    </tr>
+  </table>
+
+  <hr>
+
+  <h2>What's on the roadmap</h2>
+
+  <div class="roadmap-item">
+    <div class="roadmap-header">
+      <span class="roadmap-tag roadmap-tag--next">Session 5 — Next</span>
+      <h3>Ren → Claude Code bridge</h3>
+    </div>
+    <p>Today, Claude Code writes to Ren. Ren can't initiate work in Claude Code. The bridge changes that — a webhook that lets Ren post a structured build brief to a waiting Claude Code session.</p>
+    <p>What this unlocks: you discuss a project with Ren, she drafts the brief, and Claude Code picks it up when you open a new session. No copy-paste, no translation. The strategic layer and the build layer become one continuous workflow.</p>
+    <p><strong>Who builds it:</strong> Claude Code, from a design session with Ren and Scott.</p>
+  </div>
+
+  <div class="roadmap-item">
+    <div class="roadmap-header">
+      <span class="roadmap-tag roadmap-tag--planned">Planned</span>
+      <h3>Ted's private thread</h3>
+    </div>
+    <p>Right now the chat is a single shared thread. Ted sees everything Scott sends and vice versa. A private thread would let either of us have a separate conversation with Ren without the other seeing it — useful for personal context, sensitive work context, or just not wanting to clutter a shared space.</p>
+    <p>This requires either separate Letta agents (one per user) or a message routing layer that filters by sender. The tradeoff: separate agents means Ren's memory about Ted and Scott becomes more siloed.</p>
+  </div>
+
+  <div class="roadmap-item">
+    <div class="roadmap-header">
+      <span class="roadmap-tag roadmap-tag--planned">Planned</span>
+      <h3>Image sharing</h3>
+    </div>
+    <p>Letta v0.16.7 doesn't pass image content to Anthropic — the multimodal pipeline isn't wired up. Confirmed broken at the Letta layer, not the Anthropic layer (Haiku and Sonnet both support vision). Deferred until a future Letta release confirms image support is working.</p>
+    <p>When it ships: you'll be able to drop a screenshot, photo, or diagram into the chat and Ren will see it.</p>
+  </div>
+
+  <div class="roadmap-item">
+    <div class="roadmap-header">
+      <span class="roadmap-tag roadmap-tag--considering">Considering</span>
+      <h3>Notes layer</h3>
+    </div>
+    <p>A lightweight structured notes space — not full project management, but a persistent place to capture things mid-session that aren't quite archival passages. Scratch space for Ren that persists across sessions without hitting the core memory block limits.</p>
+    <p>Open question: does this live in another Letta block, in a separate database table, or as a structured format in archival memory?</p>
+  </div>
+
+  <div class="roadmap-item">
+    <div class="roadmap-header">
+      <span class="roadmap-tag roadmap-tag--considering">Considering</span>
+      <h3>Local model option (Ollama)</h3>
+    </div>
+    <p>Letta supports local models via Ollama. Running a local model would eliminate the Anthropic API cost for Ren entirely — useful for high-volume knowledge dump sessions where you don't need frontier model quality, just continuity and memory. </p>
+    <p>The tradeoff is real: local models (even good ones like Llama 3.3 70B) are meaningfully less capable than Haiku or Sonnet for reasoning and nuanced discussion. Worth having as an option for specific session types, not as a default.</p>
+    <p>This requires Ollama on a machine that's always on, or a cheap cloud host running it. Mac Mini or an always-on Mac would work.</p>
+  </div>
+
+  <hr>
+
+  <h2>How future projects get built</h2>
+
+  <p>This is the workflow we're building toward for any new project. It doesn't all exist yet — the bridge (Session 5) is the missing link — but this is the intended shape:</p>
+
+  <ol class="workflow-steps">
+    <li>
+      <strong>Discuss with Ren</strong> — scope the idea, challenge assumptions, figure out what we're actually building and why. Ren holds context from every prior session, so she already knows the framework, Scott's product sensibility, and what's been tried before.
+    </li>
+    <li>
+      <strong>Ren drafts the brief</strong> — structured handoff that captures: what the project is, what phase it starts in, what the first build unit is, what decisions are already made, what's still open. Written to <code>project_state</code> in her core memory.
+    </li>
+    <li>
+      <strong>Claude Code picks it up</strong> — opens a session, reads the brief via MCP, and starts the build. No translation required. Ren's context becomes Claude Code's starting point.
+    </li>
+    <li>
+      <strong>Claude Code builds in phases</strong> — using the Solo Builder Framework phase chain (discover → design → build → QA → deploy). After each session, writes a summary and portrait signals back to Ren.
+    </li>
+    <li>
+      <strong>Ren stays in the loop</strong> — as the build progresses, her memory updates with what shipped, what's pending, and what decisions were made. Any session with Scott or Ted has full context on where the project stands.
+    </li>
+    <li>
+      <strong>Deploy and capture</strong> — when a project ships, the comms cascade updates docs and Ren's memory reflects the shipped state. History is preserved, not lost.
+    </li>
+  </ol>
+
+  <div class="callout">
+    <strong>The goal:</strong> You shouldn't have to manually brief Claude Code on what Ren already knows. And Ren shouldn't have to ask what Claude Code just built. The memory system makes them one continuous operation — with you as the decision-maker in the middle.
+  </div>
+
+  <hr>
+
+  <h2>What's stable vs. what's evolving</h2>
+
+  <table>
+    <tr><th>Component</th><th>Status</th></tr>
+    <tr><td>Core chat (send, receive, Ren responds)</td><td>Stable</td></tr>
+    <tr><td>Session rollover (auto at 50 messages + manual "New session")</td><td>Stable — shipped 2026-05-13</td></tr>
+    <tr><td>Nightly dream (2am session brief)</td><td>Stable</td></tr>
+    <tr><td>Claude Code MCP integration (15 tools)</td><td>Stable</td></tr>
+    <tr><td>Portrait system (forming → trusted)</td><td>Stable, accumulating signals</td></tr>
+    <tr><td>Ren → Claude Code bridge</td><td>Not built — Session 5</td></tr>
+    <tr><td>Ted's private thread</td><td>Not built</td></tr>
+    <tr><td>Image sharing</td><td>Blocked on Letta version</td></tr>
+    <tr><td>Local model option</td><td>Under consideration</td></tr>
+  </table>
+
+</div>
+
+<style>
+.roadmap-item {
+  margin: 2rem 0;
+  padding: 1.4rem 1.6rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.roadmap-item h3 {
+  margin: 0;
+  color: var(--text);
+}
+
+.roadmap-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: .8rem;
+}
+
+.roadmap-tag {
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.roadmap-tag--next {
+  background: rgba(232,151,28,.15);
+  color: var(--gold);
+  border: 1px solid var(--gold-border);
+}
+
+.roadmap-tag--planned {
+  background: rgba(100,160,255,.08);
+  color: #7EB3F5;
+  border: 1px solid rgba(100,160,255,.20);
+}
+
+.roadmap-tag--considering {
+  background: rgba(150,150,150,.08);
+  color: #8A8480;
+  border: 1px solid rgba(150,150,150,.20);
+}
+
+.roadmap-item p { margin-bottom: .7rem; }
+.roadmap-item p:last-child { margin-bottom: 0; }
+
+.workflow-steps {
+  padding-left: 1.5rem;
+  margin-bottom: 1.4rem;
+}
+
+.workflow-steps li {
+  margin-bottom: 1rem;
+  line-height: 1.65;
+}
+</style>
+
+</body>
+</html>

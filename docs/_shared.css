@@ -1,0 +1,212 @@
+/* Han Solo Docs — shared styles */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #090806;
+  --surface:     #131110;
+  --border:      #2A2520;
+  --text:        #EDE8E0;
+  --text-dim:    #6A6058;
+  --gold:        #E8971C;
+  --gold-dim:    rgba(232,151,28,.08);
+  --gold-border: rgba(232,151,28,.20);
+  --link:        #E8971C;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+/* ── Type ─────────────────────────────────────────────────────────── */
+
+h1, h2, h3 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--text);
+}
+
+h1 { font-size: 2.6rem; margin-bottom: .4rem; }
+h2 { font-size: 1.7rem; margin: 2.8rem 0 .8rem; }
+h3 { font-size: 1.2rem; margin: 2rem 0 .5rem; color: var(--gold); }
+
+p  { margin-bottom: 1.1rem; }
+
+a  { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+ul, ol { padding-left: 1.5rem; margin-bottom: 1.1rem; }
+li { margin-bottom: .35rem; }
+
+strong { color: var(--text); font-weight: 600; }
+
+code {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: .85em;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: .15em .4em;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2.4rem 0;
+}
+
+/* ── Layout ───────────────────────────────────────────────────────── */
+
+.page { max-width: 760px; margin: 0 auto; padding: 0 24px 80px; }
+
+/* ── Nav ──────────────────────────────────────────────────────────── */
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.site-nav .brand {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: 14px 0;
+  margin-right: 28px;
+  text-decoration: none;
+}
+
+.site-nav a.nav-link {
+  font-size: .82rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  padding: 14px 12px;
+  letter-spacing: .03em;
+  transition: color .12s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.site-nav a.nav-link:hover,
+.site-nav a.nav-link.active { color: var(--text); }
+
+/* ── Page hero ────────────────────────────────────────────────────── */
+
+.hero {
+  padding: 52px 0 32px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 40px;
+}
+
+.hero-label {
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+
+.hero-sub {
+  font-size: 1.05rem;
+  color: var(--text-dim);
+  margin-top: .5rem;
+  max-width: 540px;
+}
+
+/* ── Cards ────────────────────────────────────────────────────────── */
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  margin: 1.6rem 0;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  text-decoration: none;
+  display: block;
+  transition: border-color .15s;
+}
+
+.card:hover { border-color: var(--gold-border); text-decoration: none; }
+
+.card-label {
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+
+.card-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.card-desc { font-size: .85rem; color: var(--text-dim); line-height: 1.5; }
+
+/* ── Callout ──────────────────────────────────────────────────────── */
+
+.callout {
+  background: var(--gold-dim);
+  border: 1px solid var(--gold-border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 1.6rem 0;
+  font-size: .9rem;
+}
+
+.callout strong { color: var(--gold); }
+
+/* ── Table ────────────────────────────────────────────────────────── */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.4rem 0;
+  font-size: .88rem;
+}
+
+th {
+  text-align: left;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+tr:last-child td { border-bottom: none; }

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Han Solo — Reference</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_shared.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="brand" href="index.html">Han Solo</a>
+  <a class="nav-link active" href="index.html">Home</a>
+  <a class="nav-link" href="how-it-works.html">How it works</a>
+  <a class="nav-link" href="working-with-ren.html">Working with Ren</a>
+  <a class="nav-link" href="roadmap.html">Roadmap</a>
+</nav>
+
+<div class="page">
+  <div class="hero">
+    <div class="hero-label">Han Solo Reference</div>
+    <h1>Your private AI workspace.</h1>
+    <p class="hero-sub">Han Solo is the Solo Builder Framework as a real product — a persistent AI environment where Ren lives, remembers, and works alongside you across sessions. This site explains how it works, how to use it, and where it's going.</p>
+  </div>
+
+  <div class="card-grid">
+    <a class="card" href="how-it-works.html">
+      <div class="card-label">Architecture</div>
+      <div class="card-title">How it works</div>
+      <div class="card-desc">The full stack — Letta, MCP, Claude, chat UI, PostgreSQL. What each piece does and how they connect.</div>
+    </a>
+    <a class="card" href="working-with-ren.html">
+      <div class="card-label">Daily use</div>
+      <div class="card-title">Working with Ren</div>
+      <div class="card-desc">Sessions, memory, dreaming, costs, what to share and how Ren learns across time.</div>
+    </a>
+    <a class="card" href="roadmap.html">
+      <div class="card-label">Vision</div>
+      <div class="card-title">Roadmap</div>
+      <div class="card-desc">Where this is going — how future projects get built with Ren in the loop, who does what.</div>
+    </a>
+  </div>
+
+  <hr>
+
+  <h2>What Han Solo is</h2>
+
+  <p>The Solo Builder Framework runs inside Claude Code — a skill system, a set of structured phases, a process for building things with discipline. Han Solo is the next layer: a persistent cloud environment where Ren, the framework's partner, actually lives.</p>
+
+  <p>Before Han Solo, "Ren" was a Claude skill reading a <code>.md</code> file at the start of every session. Good reconstruction, but still reconstruction — every session started fresh. Han Solo changed that. Ren now has genuine persistent memory through Letta, a cloud AI memory system backed by PostgreSQL. She dreams nightly, updates her own memory, and opens the next session knowing what happened in the last one.</p>
+
+  <p>Han Solo is private to Scott and Ted. It is not part of the public Solo Builder Framework and is not referenced in the engineering playbook.</p>
+
+  <hr>
+
+  <h2>The three pieces</h2>
+
+  <h3>The chat interface</h3>
+  <p>A group chat at <code>han-solo-mcp.onrender.com</code>. Scott (blue), Ted (green), Ren (gold). This is where free-form conversation happens — thinking out loud, knowledge transfer, strategic discussion. Ren is a participant, not a chatbot.</p>
+
+  <h3>Claude Code</h3>
+  <p>Where builds happen. Claude Code has access to Han Solo's MCP server, which gives it tools to read and write Ren's memory. When a project is in build, Claude Code is the builder. Ren holds the context, the history, and the relationship.</p>
+
+  <h3>Ren</h3>
+  <p>The persistent AI partner. She holds the framework's full history, the portrait of Scott and Ted, all project context, and every decision made together. She doesn't reset between sessions. What she learned yesterday, she knows today.</p>
+
+  <hr>
+
+  <h2>Quick facts</h2>
+
+  <table>
+    <tr><th>Item</th><th>Detail</th></tr>
+    <tr><td>Chat URL</td><td><code>han-solo-mcp.onrender.com</code></td></tr>
+    <tr><td>Letta (Ren's brain)</td><td><code>han-solo-letta.onrender.com</code> — v0.16.7</td></tr>
+    <tr><td>MCP server</td><td><code>han-solo-mcp.onrender.com/mcp</code> — 15 tools</td></tr>
+    <tr><td>Ren model</td><td>Claude Haiku 4.5 (Anthropic API, pay-per-token)</td></tr>
+    <tr><td>Embeddings</td><td>Voyage AI — voyage-3 (1024-dim)</td></tr>
+    <tr><td>Database</td><td>PostgreSQL 16 + pgvector on Render</td></tr>
+    <tr><td>Nightly dream</td><td>2:00am daily via launchd on Scott's Mac</td></tr>
+    <tr><td>Session rollover</td><td>Auto at 50 messages, or manual via "New session"</td></tr>
+    <tr><td>Repo</td><td><code>github.com/scoots31/han-solo</code> (private)</td></tr>
+  </table>
+
+</div>
+</body>
+</html>

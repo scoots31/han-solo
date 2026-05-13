@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How it works — Han Solo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_shared.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="brand" href="index.html">Han Solo</a>
+  <a class="nav-link" href="index.html">Home</a>
+  <a class="nav-link active" href="how-it-works.html">How it works</a>
+  <a class="nav-link" href="working-with-ren.html">Working with Ren</a>
+  <a class="nav-link" href="roadmap.html">Roadmap</a>
+</nav>
+
+<div class="page">
+  <div class="hero">
+    <div class="hero-label">Architecture</div>
+    <h1>How it works</h1>
+    <p class="hero-sub">Five pieces working together — each with a distinct role. Understanding the stack means you know what breaks and why, and what it costs.</p>
+  </div>
+
+  <h2>The stack</h2>
+
+  <table>
+    <tr><th>Service</th><th>What it does</th><th>Cost</th></tr>
+    <tr>
+      <td><strong>han-solo-db</strong></td>
+      <td>PostgreSQL 16 + pgvector on Render. Stores everything — Letta agents, memory blocks, archival passages, conversation history. The source of truth for all of Ren's memory.</td>
+      <td>$7/mo</td>
+    </tr>
+    <tr>
+      <td><strong>han-solo-letta</strong></td>
+      <td>Letta v0.16.7 on Render. The AI memory runtime — manages Ren as a MemGPT agent, handles tool calls, conversation storage, and memory compression. Ren's brain lives here.</td>
+      <td>$7/mo</td>
+    </tr>
+    <tr>
+      <td><strong>han-solo-mcp</strong></td>
+      <td>FastMCP server on Render. The bridge between Claude Code and Letta — 15 tools for reading/writing Ren's memory, plus the chat UI and REST API. Deployed from GitHub on every push.</td>
+      <td>$7/mo</td>
+    </tr>
+    <tr>
+      <td><strong>Anthropic API</strong></td>
+      <td>Claude Haiku 4.5 — the model powering Ren's responses. Every message you send hits this API. Pay-per-token, billed separately from the Claude Pro subscription.</td>
+      <td>~$0.003–0.01/message</td>
+    </tr>
+    <tr>
+      <td><strong>Voyage AI</strong></td>
+      <td>Embedding model (voyage-3, 1024-dim) for archival memory search. When Ren searches her memory, Voyage converts the query to a vector and finds semantically similar passages.</td>
+      <td>Minimal</td>
+    </tr>
+  </table>
+
+  <div class="callout">
+    <strong>Total fixed cost:</strong> ~$21/month for Render (3 services). Anthropic API is variable — $50 in credits lasts months at normal usage. The Claude Pro/Max subscription is separate and covers claude.ai and Claude Code only.
+  </div>
+
+  <hr>
+
+  <h2>What happens when you send a message</h2>
+
+  <p>Every message in the chat UI goes through this chain:</p>
+
+  <ol>
+    <li><strong>Chat UI</strong> (browser) — you type a message and hit Send.</li>
+    <li><strong>han-solo-mcp</strong> — receives the message via <code>POST /api/send</code>, authenticates your bearer token, forwards to Letta.</li>
+    <li><strong>Letta</strong> — receives the message, loads Ren's core memory blocks into context (always_loaded_core, pending_thoughts, portraits), and sends everything to Anthropic.</li>
+    <li><strong>Anthropic API</strong> — Claude Haiku generates Ren's response, potentially calling tools (archival search, memory write, web fetch).</li>
+    <li><strong>Letta</strong> — stores the exchange in PostgreSQL, returns the response.</li>
+    <li><strong>han-solo-mcp</strong> — passes the response back to the UI.</li>
+    <li><strong>Chat UI</strong> — renders Ren's reply in gold.</li>
+  </ol>
+
+  <p>Tool calls (when Ren searches memory, writes to a block, or fetches a page) add extra round-trips to Anthropic. Each tool call is a separate LLM inference — this is why sessions with heavy archival searching or page fetching cost more.</p>
+
+  <hr>
+
+  <h2>Ren's memory layers</h2>
+
+  <h3>Core memory blocks (always loaded)</h3>
+  <p>Six blocks loaded into every prompt. This is the baseline context cost — roughly 12,000 characters that Ren carries into every message whether she uses it or not.</p>
+
+  <table>
+    <tr><th>Block</th><th>What it holds</th><th>Limit</th></tr>
+    <tr><td><code>always_loaded_core</code></td><td>Framework context, working norms, Scott's profile summary, memory use instructions, session close-out ritual</td><td>10,000 chars</td></tr>
+    <tr><td><code>pending_thoughts</code></td><td>Session brief — what happened last session, what's open, what's next. Written nightly by the dream script.</td><td>8,000 chars</td></tr>
+    <tr><td><code>scott_portrait_forming</code></td><td>Ren's evolving interpretation of Scott — how he thinks, what he cares about, specific observations</td><td>20,000 chars</td></tr>
+    <tr><td><code>ren_portrait_forming</code></td><td>Ren's self-portrait — what she got right, what she missed, what she wants to develop</td><td>20,000 chars</td></tr>
+    <tr><td><code>seed_signals</code></td><td>Early-session observations, dated signals, relational notes not yet moved to archival</td><td>20,000 chars</td></tr>
+    <tr><td><code>project_state</code></td><td>Current in-flight project context (JSON). Used when a specific project is active.</td><td>10,000 chars</td></tr>
+  </table>
+
+  <h3>Archival memory (searchable)</h3>
+  <p>108+ passages stored as vector embeddings in pgvector. Ren searches this with <code>archival_memory_search</code> when she needs context that isn't in her core blocks. Holds project summaries, ren-memory file chunks, MemPalace drawers, and session-captured insights.</p>
+
+  <p>Archival search is triggered by Ren's judgment — she searches when she knows she might be missing something. You can ask her to search explicitly too.</p>
+
+  <h3>Conversation history</h3>
+  <p>Every message stored in PostgreSQL. Letta loads recent messages into context on each send. This is what fills the context window over time and causes the crash if not managed.</p>
+
+  <div class="callout">
+    <strong>Context window:</strong> 200,000 tokens (Haiku's limit). Core blocks use ~3,000 tokens. Each message exchange uses 500–2,000 tokens. Heavy page fetches can use 10,000+ tokens in a single exchange. Auto-rollover fires at 50 messages to stay well clear of the limit.
+  </div>
+
+  <hr>
+
+  <h2>Session rollover</h2>
+
+  <p>The context window crash that happened on 2026-05-13 (the day this docs site was built) exposed a gap: no way to reset a Letta conversation without losing everything. The fix is now live.</p>
+
+  <p>When the session rolls over — either automatically at 50 messages, or manually via the "New session" button:</p>
+  <ol>
+    <li>All six core memory blocks are copied to a new Letta agent.</li>
+    <li>The old agent is left intact (its conversation history is readable for recovery).</li>
+    <li>The new agent becomes active for all subsequent messages.</li>
+    <li>The chat UI clears and shows a "Session refreshed — memory intact" divider.</li>
+  </ol>
+
+  <p>Ren's memory is never lost in a rollover — only the raw conversation thread resets. The nightly dream captures session content before that happens.</p>
+
+  <hr>
+
+  <h2>The nightly dream</h2>
+
+  <p>Every night at 2:00am, a script on Scott's Mac sends Ren a structured reflection prompt. She:</p>
+  <ol>
+    <li>Searches her conversation history for the day's exchanges</li>
+    <li>Searches archival memory for relevant context</li>
+    <li>Writes a fresh session brief to <code>pending_thoughts</code></li>
+    <li>Adds portrait signals for Scott and herself if anything worth noting happened</li>
+    <li>Checks the Letta GitHub releases page for updates newer than the current version</li>
+  </ol>
+
+  <p>The dream runs via launchd (<code>com.scotth.rendream.plist</code>) and logs to <code>~/Developer/han-solo/logs/dream.log</code>. No external dependencies — stdlib Python only.</p>
+
+  <hr>
+
+  <h2>Claude Code integration</h2>
+
+  <p>Claude Code connects to Han Solo via the MCP server at <code>han-solo-mcp.onrender.com/mcp</code>. This gives Claude Code 15 tools:</p>
+
+  <ul>
+    <li><strong>Memory tools</strong> — read/write core blocks, insert archival passages</li>
+    <li><strong>Portrait tools</strong> — read/write Scott, Ted, and Ren portraits; add portrait signals</li>
+    <li><strong>Phase tools</strong> — project state management</li>
+    <li><strong>Brief tools</strong> — session brief read/write</li>
+    <li><strong>Signal tools</strong> — append dated observations</li>
+  </ul>
+
+  <p>Claude Code uses these tools to keep Ren's memory current after sessions — writing session summaries, portrait signals, and project state updates without requiring manual copy-paste.</p>
+
+  <hr>
+
+  <h2>Deployment</h2>
+
+  <p>All three Render services deploy from <code>github.com/scoots31/han-solo</code>. A push to <code>main</code> triggers automatic redeploy of han-solo-mcp (the only service with code that changes). Letta and the database are stable services that rarely need touching.</p>
+
+  <p>Detailed deployment notes — 16 challenges logged and resolved — are in <code>~/Developer/han-solo/DEPLOYMENT.md</code>. Read that before touching the stack.</p>
+
+</div>
+</body>
+</html>
