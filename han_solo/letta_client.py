@@ -99,12 +99,13 @@ async def get_or_create_ren_agent(name: str) -> str:
         if agent.get("name") == name:
             return agent["id"]
 
-    # 2. Most recent "ren-*" agent (post-rollover cold start)
-    ren_agents = [a for a in agents if a.get("name", "").startswith("ren-")]
+    # 2. Most recent versioned "ren-v*" agent only — session agents (ren-session-*)
+    # are ephemeral and should not survive a server cold restart.
+    ren_agents = [a for a in agents if a.get("name", "").startswith("ren-v")]
     if ren_agents:
         ren_agents.sort(key=lambda a: a.get("created_at", ""), reverse=True)
         found = ren_agents[0]
-        logger.info("Exact name '%s' not found; using most recent ren agent: %s (%s)",
+        logger.info("Exact name '%s' not found; using most recent versioned ren agent: %s (%s)",
                     name, found["name"], found["id"])
         return found["id"]
 
