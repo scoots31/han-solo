@@ -35,7 +35,7 @@ LETTA_URL = os.environ["LETTA_URL"]
 LETTA_API_KEY = os.environ["LETTA_API_KEY"]
 
 # Agent name — looked up by name on startup, created if missing
-REN_AGENT_NAME = os.environ.get("REN_AGENT_NAME", "ren-v1")
+REN_AGENT_NAME = os.environ.get("REN_AGENT_NAME", "ren-v2")
 
 # MCP server port
 PORT = int(os.environ.get("PORT", "8000"))

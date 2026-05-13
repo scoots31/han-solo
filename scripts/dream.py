@@ -19,7 +19,7 @@ from datetime import datetime
 
 LETTA_URL     = "https://han-solo-letta.onrender.com"
 LETTA_API_KEY = "KTZbsSbNocYbp7a-qhk87RwboYiLcX_W"
-AGENT_ID      = "agent-44d4a28a-9d66-4aea-b327-2f77b23359ef"
+AGENT_ID      = "agent-fe4a3d5b-bb51-458e-92f1-6a1ee5b0ce94"
 
 DREAM_PROMPT = """[DREAMING — nightly reflection]
 
