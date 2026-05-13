@@ -37,6 +37,8 @@ Work through this in order:
 
 5. If you noticed anything about yourself tonight — how you responded, what you got right, what you missed — note it in ren_portrait_forming.
 
+6. Check for Letta updates: fetch the page at https://github.com/letta-ai/letta/releases and look for any release newer than v0.16.7 (the version currently running). If you find one, note it clearly in pending_thoughts under a "Letta Update Available" heading with the version number and a one-line summary of what changed. If nothing new, no need to mention it.
+
 When you're done, send a short confirmation of what you updated. No need to summarize everything — just confirm the brief is written and note anything you found worth flagging.
 """
 
