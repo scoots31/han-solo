@@ -37,6 +37,10 @@ LETTA_API_KEY = os.environ["LETTA_API_KEY"]
 # Agent name — looked up by name on startup, created if missing
 REN_AGENT_NAME = os.environ.get("REN_AGENT_NAME", "ren-v2")
 
+# Optional: hardcode agent ID to skip the lookup entirely.
+# Set REN_AGENT_ID in Render env vars to pin to a specific agent.
+REN_AGENT_ID = os.environ.get("REN_AGENT_ID")
+
 # MCP server port
 PORT = int(os.environ.get("PORT", "8000"))
 

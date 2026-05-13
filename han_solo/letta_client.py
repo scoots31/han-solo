@@ -6,7 +6,7 @@ from typing import Any, Optional
 import logging
 import httpx
 
-from .config import LETTA_URL, LETTA_API_KEY, REN_AGENT_NAME
+from .config import LETTA_URL, LETTA_API_KEY, REN_AGENT_NAME, REN_AGENT_ID
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +31,11 @@ async def ensure_ren_agent_id() -> str:
     """Return the Ren agent ID, resolving it from Letta if not yet cached."""
     global _ren_agent_id
     if _ren_agent_id is not None:
+        return _ren_agent_id
+    # If a specific agent ID is pinned via env var, use it directly.
+    if REN_AGENT_ID:
+        logger.info("Using pinned REN_AGENT_ID: %s", REN_AGENT_ID)
+        _ren_agent_id = REN_AGENT_ID
         return _ren_agent_id
     logger.info("Ren agent ID not cached — resolving from Letta...")
     _ren_agent_id = await get_or_create_ren_agent(REN_AGENT_NAME)
