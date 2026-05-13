@@ -82,6 +82,7 @@ _chat_routes = [
     Route("/api/me", chat_api.api_me),
     Route("/api/history", chat_api.api_history),
     Route("/api/send", chat_api.api_send, methods=["POST"]),
+    Route("/api/reset-session", chat_api.api_reset_session, methods=["POST"]),
     Route("/api/memory-panel", chat_api.api_memory_panel),
 ]
 for i, route in enumerate(_chat_routes):

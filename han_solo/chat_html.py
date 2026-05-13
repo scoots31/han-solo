@@ -456,6 +456,27 @@ CHAT_HTML = """<!DOCTYPE html>
       min-height: 18px;
     }
 
+    /* ── Session divider ────────────────────────────────────────────────── */
+
+    .session-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 12px 0;
+      color: var(--text-dim);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .session-divider::before,
+    .session-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
     /* ── Scrollbar ───────────────────────────────────────────────────────── */
 
     ::-webkit-scrollbar       { width: 4px; }
@@ -481,6 +502,7 @@ CHAT_HTML = """<!DOCTYPE html>
   <div class="header-title">Han Solo</div>
   <div class="header-user" id="headerUser"></div>
   <div class="header-actions">
+    <button class="icon-btn" id="newSessionBtn" title="Start a fresh session (memory is preserved)">New session</button>
     <button class="icon-btn" id="themeBtn" title="Toggle theme">Light</button>
     <button class="icon-btn" id="memoryBtn" title="Memory panel">Memory</button>
     <button class="icon-btn" id="logoutBtn" title="Sign out">Sign out</button>
@@ -548,21 +570,22 @@ let _theme    = 'dark';
 
 const $ = id => document.getElementById(id);
 
-const loginOverlay = $('loginOverlay');
-const tokenInput   = $('tokenInput');
-const loginBtn     = $('loginBtn');
-const loginError   = $('loginError');
-const appShell     = $('appShell');
-const appLayout    = $('appLayout');
-const headerUser   = $('headerUser');
-const themeBtn     = $('themeBtn');
-const memoryBtn    = $('memoryBtn');
-const logoutBtn    = $('logoutBtn');
-const messages     = $('messages');
-const emptyState   = $('emptyState');
-const msgInput     = $('msgInput');
-const sendBtn      = $('sendBtn');
-const memoryPanel  = $('memoryPanel');
+const loginOverlay  = $('loginOverlay');
+const tokenInput    = $('tokenInput');
+const loginBtn      = $('loginBtn');
+const loginError    = $('loginError');
+const appShell      = $('appShell');
+const appLayout     = $('appLayout');
+const headerUser    = $('headerUser');
+const newSessionBtn = $('newSessionBtn');
+const themeBtn      = $('themeBtn');
+const memoryBtn     = $('memoryBtn');
+const logoutBtn     = $('logoutBtn');
+const messages      = $('messages');
+const emptyState    = $('emptyState');
+const msgInput      = $('msgInput');
+const sendBtn       = $('sendBtn');
+const memoryPanel   = $('memoryPanel');
 
 // ── Init ───────────────────────────────────────────────────────────────────
 
@@ -629,6 +652,35 @@ function doLogout() {
 loginBtn.addEventListener('click', doLogin);
 tokenInput.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 logoutBtn.addEventListener('click', doLogout);
+
+// ── Session reset ──────────────────────────────────────────────────────────
+
+function addSessionDivider(label = 'New session — memory intact') {
+  const div = document.createElement('div');
+  div.className = 'session-divider';
+  div.textContent = label;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+async function newSession() {
+  if (newSessionBtn.disabled) return;
+  newSessionBtn.disabled = true;
+  newSessionBtn.textContent = 'Resetting…';
+  try {
+    const resp = await apiFetch('/api/reset-session', { method: 'POST' });
+    if (resp.ok) {
+      _msgs = [];
+      renderMessages();
+      addSessionDivider();
+    }
+  } catch {}
+  newSessionBtn.disabled = false;
+  newSessionBtn.textContent = 'New session';
+  msgInput.focus();
+}
+
+newSessionBtn.addEventListener('click', newSession);
 
 // ── Theme ──────────────────────────────────────────────────────────────────
 
@@ -826,6 +878,12 @@ async function sendMessage() {
 
     if (resp.ok) {
       const data = await resp.json();
+      if (data.session_reset) {
+        // Auto-rollover fired before this message — clear UI and show divider
+        _msgs = [];
+        renderMessages();
+        addSessionDivider('Session refreshed — memory intact');
+      }
       if (data.response) {
         _msgs.push({ role: 'assistant', name: 'Ren', text: data.response });
         renderMessages();

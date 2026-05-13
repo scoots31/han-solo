@@ -21,6 +21,11 @@ from .chat_html import CHAT_HTML
 _history: list[dict] = []
 _history_loaded: bool = False
 
+# Auto-rollover: reset Letta session when conversation grows this long.
+# Each exchange is 2 entries (user + assistant). 50 entries ≈ 25 exchanges.
+# Keeps well clear of the 200K-token context limit even with heavy page fetches.
+AUTO_ROLLOVER_AT = 50
+
 
 def _push(name: str, text: str, role: str) -> dict:
     entry = {
@@ -68,7 +73,25 @@ async def api_history(request: Request) -> JSONResponse:
     return JSONResponse(_history)
 
 
+async def api_reset_session(request: Request) -> JSONResponse:
+    """
+    Manually start a fresh Letta conversation session.
+    Copies all core memory blocks to a new agent; clears the history cache.
+    """
+    global _history, _history_loaded
+    get_current_user()
+    try:
+        new_id = await letta.reset_conversation()
+        _history = []
+        _history_loaded = True  # skip Letta rebuild — we know it's empty
+        return JSONResponse({"reset": True, "agent_id": new_id})
+    except Exception as exc:
+        return JSONResponse({"error": str(exc)}, status_code=502)
+
+
 async def api_send(request: Request) -> JSONResponse:
+    global _history, _history_loaded
+
     user = get_current_user()
     body = await request.json()
     message = body.get("message", "").strip()
@@ -76,6 +99,18 @@ async def api_send(request: Request) -> JSONResponse:
 
     if not message and not attachment:
         return JSONResponse({"error": "Empty message"}, status_code=400)
+
+    # Auto-rollover: if conversation is getting long, reset before this message
+    # so it goes to a fresh agent with no context pressure.
+    rolled_over = False
+    if len(_history) >= AUTO_ROLLOVER_AT:
+        try:
+            await letta.reset_conversation()
+            _history = []
+            _history_loaded = True
+            rolled_over = True
+        except Exception:
+            pass  # rollover failed — continue on existing agent rather than dropping the message
 
     # Build the message Ren receives — inline file content when attached
     if attachment:
@@ -98,7 +133,7 @@ async def api_send(request: Request) -> JSONResponse:
     if response_text:
         _push("Ren", response_text, "assistant")
 
-    return JSONResponse({"response": response_text})
+    return JSONResponse({"response": response_text, "session_reset": rolled_over})
 
 
 async def api_memory_panel(request: Request) -> JSONResponse:

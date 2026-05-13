@@ -82,15 +82,33 @@ async def _letta(method: str, url: str, timeout: float = 60.0, **kwargs) -> http
 # ---------------------------------------------------------------------------
 
 async def get_or_create_ren_agent(name: str) -> str:
-    """Return the agent_id for the named Ren agent, creating it if needed."""
+    """
+    Return the agent_id for the active Ren agent.
+
+    Priority:
+      1. Exact name match (handles initial setup and env-var-configured names).
+      2. Most recently created agent whose name starts with "ren-" (handles session
+         rollovers where the active agent has a timestamp name).
+      3. Create a minimal new agent if none found.
+    """
     resp = await _letta("GET", f"{LETTA_URL}/v1/agents")
     agents = resp.json()
 
+    # 1. Exact match
     for agent in agents:
         if agent.get("name") == name:
             return agent["id"]
 
-    # Create a minimal Ren agent — memory blocks seeded separately
+    # 2. Most recent "ren-*" agent (post-rollover cold start)
+    ren_agents = [a for a in agents if a.get("name", "").startswith("ren-")]
+    if ren_agents:
+        ren_agents.sort(key=lambda a: a.get("created_at", ""), reverse=True)
+        found = ren_agents[0]
+        logger.info("Exact name '%s' not found; using most recent ren agent: %s (%s)",
+                    name, found["name"], found["id"])
+        return found["id"]
+
+    # 3. Create minimal agent — memory blocks seeded separately
     payload = {
         "name": name,
         "agent_type": "memgpt_agent",
@@ -100,18 +118,63 @@ async def get_or_create_ren_agent(name: str) -> str:
             "context_window": 200000,
         },
         "embedding_config": {
-            "embedding_endpoint_type": "anthropic",
+            "embedding_endpoint_type": "openai",
+            "embedding_endpoint": "https://api.voyageai.com/v1",
             "embedding_model": "voyage-3",
             "embedding_dim": 1024,
         },
         "memory_blocks": [
             {"label": "always_loaded_core", "value": "", "limit": 10000},
-            {"label": "pending_thoughts", "value": "", "limit": 5000},
+            {"label": "pending_thoughts", "value": "", "limit": 8000},
             {"label": "project_state", "value": "{}", "limit": 10000},
         ],
     }
     resp = await _letta("POST", f"{LETTA_URL}/v1/agents", json=payload)
     return resp.json()["id"]
+
+
+async def reset_conversation() -> str:
+    """
+    Create a fresh Letta agent with all core memory blocks copied from the
+    current agent. Updates the cached agent ID so subsequent calls use the
+    new agent. Returns the new agent ID.
+
+    The old agent is left intact — its conversation history remains readable
+    for recovery if needed.
+    """
+    global _ren_agent_id
+    import time
+
+    current_id = await ensure_ren_agent_id()
+
+    # Read current agent config and blocks
+    config_resp = await _letta("GET", f"{LETTA_URL}/v1/agents/{current_id}")
+    current = config_resp.json()
+
+    blocks_resp = await _letta("GET", f"{LETTA_URL}/v1/agents/{current_id}/core-memory/blocks")
+    blocks = blocks_resp.json()
+
+    new_name = f"ren-session-{int(time.time())}"
+    tool_ids = [t["id"] for t in current.get("tools", [])]
+
+    payload = {
+        "name": new_name,
+        "agent_type": "memgpt_agent",
+        "llm_config": current["llm_config"],
+        "embedding_config": current["embedding_config"],
+        "system": current.get("system", ""),
+        "tool_ids": tool_ids,
+        "memory_blocks": [
+            {"label": b["label"], "value": b["value"], "limit": b["limit"]}
+            for b in blocks
+        ],
+    }
+
+    new_resp = await _letta("POST", f"{LETTA_URL}/v1/agents", json=payload, timeout=90.0)
+    new_id = new_resp.json()["id"]
+    _ren_agent_id = new_id
+    logger.info("Session rolled over: %s → %s (%s)", current_id, new_name, new_id)
+    return new_id
 
 
 # ---------------------------------------------------------------------------
