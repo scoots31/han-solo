@@ -72,13 +72,26 @@ async def api_send(request: Request) -> JSONResponse:
     user = get_current_user()
     body = await request.json()
     message = body.get("message", "").strip()
-    if not message:
+    attachment = body.get("attachment")  # {name, content} or None
+
+    if not message and not attachment:
         return JSONResponse({"error": "Empty message"}, status_code=400)
 
-    _push(user.name, message, "user")
+    # Build the message Ren receives — inline file content when attached
+    if attachment:
+        name = attachment.get("name", "file")
+        content = attachment.get("content", "")
+        file_block = f"\n\n---\n📄 **{name}**\n```\n{content}\n```"
+        letta_message = (message + file_block) if message else f"I'm sharing a file: {name}{file_block}"
+        display_text = f"{message}\n\n📄 {name}" if message else f"📄 {name}"
+    else:
+        letta_message = message
+        display_text = message
+
+    _push(user.name, display_text, "user")
 
     try:
-        response_text = await letta.send_chat_message(message, user.name)
+        response_text = await letta.send_chat_message(letta_message, user.name)
     except Exception as exc:
         return JSONResponse({"error": str(exc)}, status_code=502)
 

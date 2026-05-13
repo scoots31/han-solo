@@ -278,6 +278,43 @@ CHAT_HTML = """<!DOCTYPE html>
 
     textarea::placeholder { color: var(--text-dim); }
 
+    .attach-btn {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      padding: 4px 6px;
+      font-size: 16px;
+      line-height: 1;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+    }
+    .attach-btn:hover { color: var(--text); }
+
+    .file-preview {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 18px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+    .file-preview.visible { display: flex; }
+    .file-preview-name { color: var(--text); font-weight: 600; }
+    .file-preview-remove {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0 4px;
+      line-height: 1;
+    }
+    .file-preview-remove:hover { color: var(--text); }
+
     .send-btn {
       background: var(--send-bg);
       color: var(--send-text);
@@ -459,10 +496,18 @@ CHAT_HTML = """<!DOCTYPE html>
         <div class="empty-sub">Say hello to start your session with Ren.</div>
       </div>
     </div>
+    <div class="file-preview" id="filePreview">
+      <span>📄</span>
+      <span class="file-preview-name" id="filePreviewName"></span>
+      <span id="filePreviewSize"></span>
+      <button class="file-preview-remove" id="fileRemoveBtn" title="Remove file">×</button>
+    </div>
     <div class="input-area">
       <div class="input-wrap">
         <textarea id="msgInput" placeholder="Message Ren…" rows="1"></textarea>
       </div>
+      <button class="attach-btn" id="attachBtn" title="Attach a file">📎</button>
+      <input type="file" id="fileInput" accept=".txt,.md,.py,.js,.ts,.jsx,.tsx,.json,.yaml,.yml,.html,.css,.sql,.sh,.csv,.toml,.env" style="display:none">
       <button class="send-btn" id="sendBtn">Send</button>
     </div>
   </div>
@@ -697,19 +742,71 @@ function stopPolling() {
   if (pollTimer) clearInterval(pollTimer);
 }
 
+// ── File attachment ─────────────────────────────────────────────────────────
+
+const attachBtn     = $('attachBtn');
+const fileInput     = $('fileInput');
+const filePreview   = $('filePreview');
+const filePreviewName = $('filePreviewName');
+const filePreviewSize = $('filePreviewSize');
+const fileRemoveBtn = $('fileRemoveBtn');
+
+const MAX_FILE_BYTES = 100 * 1024; // 100 KB
+let attachment = null; // { name, content } or null
+
+function formatBytes(n) {
+  return n < 1024 ? n + ' B' : (n / 1024).toFixed(1) + ' KB';
+}
+
+function clearAttachment() {
+  attachment = null;
+  fileInput.value = '';
+  filePreview.classList.remove('visible');
+}
+
+attachBtn.addEventListener('click', () => fileInput.click());
+
+fileRemoveBtn.addEventListener('click', clearAttachment);
+
+fileInput.addEventListener('change', () => {
+  const file = fileInput.files[0];
+  if (!file) return;
+
+  if (file.size > MAX_FILE_BYTES) {
+    alert(`File too large (${formatBytes(file.size)}). Max 100 KB.`);
+    fileInput.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    attachment = { name: file.name, content: e.target.result };
+    filePreviewName.textContent = file.name;
+    filePreviewSize.textContent = formatBytes(file.size);
+    filePreview.classList.add('visible');
+  };
+  reader.readAsText(file);
+});
+
 // ── Send ───────────────────────────────────────────────────────────────────
 
 async function sendMessage() {
   const text = msgInput.value.trim();
-  if (!text || sending) return;
+  if ((!text && !attachment) || sending) return;
 
   sending = true;
   sendBtn.disabled = true;
   msgInput.value = '';
   msgInput.style.height = 'auto';
 
-  // Optimistic: show user message immediately
-  _msgs.push({ role: 'user', name: userName, text });
+  const currentAttachment = attachment;
+  clearAttachment();
+
+  // Optimistic: show user message (include filename if attached)
+  const displayText = currentAttachment
+    ? (text ? `${text}\n\n📄 ${currentAttachment.name}` : `📄 ${currentAttachment.name}`)
+    : text;
+  _msgs.push({ role: 'user', name: userName, text: displayText });
   renderMessages();
 
   // Loading indicator
@@ -717,9 +814,12 @@ async function sendMessage() {
   addLoading(loadId);
 
   try {
+    const body = { message: text };
+    if (currentAttachment) body.attachment = currentAttachment;
+
     const resp = await apiFetch('/api/send', {
       method: 'POST',
-      body: JSON.stringify({ message: text }),
+      body: JSON.stringify(body),
     });
 
     removeLoading(loadId);
