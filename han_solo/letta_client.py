@@ -119,7 +119,7 @@ async def get_or_create_ren_agent(name: str) -> str:
         "name": name,
         "agent_type": "memgpt_agent",
         "llm_config": {
-            "model": "claude-sonnet-4-6",
+            "model": "claude-haiku-4-5-20251001",
             "model_endpoint_type": "anthropic",
             "context_window": 200000,
         },
