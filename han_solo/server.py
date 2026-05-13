@@ -21,7 +21,7 @@ from starlette.responses import JSONResponse
 from starlette.routing import Route
 
 from .auth import BearerAuthMiddleware
-from .config import REN_AGENT_NAME
+from .config import REN_AGENT_NAME, REN_AGENT_ID
 from . import letta_client as letta
 from .tools import memory, signals, phase, brief, portraits
 from . import chat_api
@@ -94,11 +94,15 @@ for i, route in enumerate(_chat_routes):
 async def _lifespan(app):
     async with httpx.AsyncClient(timeout=60.0, follow_redirects=False) as client:
         letta.set_client(client)
-        logger.info("Resolving Ren agent '%s'...", REN_AGENT_NAME)
         try:
-            agent_id = await letta.get_or_create_ren_agent(REN_AGENT_NAME)
-            letta.set_ren_agent_id(agent_id)
-            logger.info("Ren agent ready: %s", agent_id)
+            if REN_AGENT_ID:
+                logger.info("Using pinned REN_AGENT_ID: %s", REN_AGENT_ID)
+                letta.set_ren_agent_id(REN_AGENT_ID)
+            else:
+                logger.info("Resolving Ren agent '%s'...", REN_AGENT_NAME)
+                agent_id = await letta.get_or_create_ren_agent(REN_AGENT_NAME)
+                letta.set_ren_agent_id(agent_id)
+                logger.info("Ren agent ready: %s", agent_id)
         except Exception as e:
             logger.error("Failed to initialise Ren agent (will retry on next request): %s", e)
         async with server.session_manager.run():
