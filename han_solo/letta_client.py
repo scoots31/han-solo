@@ -177,6 +177,17 @@ async def reset_conversation() -> str:
     return new_id
 
 
+async def patch_agent_model(model: str) -> dict[str, Any]:
+    """Patch the active Ren agent's LLM model. One-time admin use."""
+    agent_id = await ensure_ren_agent_id()
+    config_resp = await _letta("GET", f"{LETTA_URL}/v1/agents/{agent_id}")
+    current = config_resp.json()
+    llm_config = current["llm_config"]
+    llm_config["model"] = model
+    resp = await _letta("PATCH", f"{LETTA_URL}/v1/agents/{agent_id}", json={"llm_config": llm_config})
+    return resp.json()
+
+
 # ---------------------------------------------------------------------------
 # Core memory (Store 4 always-loaded blocks)
 # ---------------------------------------------------------------------------
