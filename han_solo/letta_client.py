@@ -234,7 +234,8 @@ async def create_core_block(label: str, value: str = "", limit: int = 10000) -> 
 async def insert_passage(content: str, tags: list[str]) -> dict[str, Any]:
     agent_id = await ensure_ren_agent_id()
     resp = await _letta("POST", f"{LETTA_URL}/v1/agents/{agent_id}/archival-memory", json={"text": content})
-    return resp.json()
+    data = resp.json()
+    return data[0] if isinstance(data, list) else data
 
 
 async def search_passages(query: str, limit: int = 20) -> list[dict[str, Any]]:
