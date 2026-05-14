@@ -149,79 +149,40 @@ async def get_or_create_ren_agent(name: str) -> str:
 
 async def reset_conversation(handoff_summary: str | None = None) -> str:
     """
-    Create a fresh Letta agent with all core memory blocks copied from the
-    current agent. Updates the cached agent ID so subsequent calls use the
-    new agent. Returns the new agent ID.
-
-    The old agent is left intact — its conversation history remains readable
-    for recovery if needed.
+    Clear the conversation history on the current agent (same agent, same memory).
+    Writes handoff summary to pending_thoughts first so Ren has context after reset.
+    Returns the agent ID (unchanged).
     """
-    global _ren_agent_id
     import time
 
-    current_id = await ensure_ren_agent_id()
-
-    # Read current agent config and blocks
-    config_resp = await _letta("GET", f"{LETTA_URL}/v1/agents/{current_id}")
-    current = config_resp.json()
-
-    blocks_resp = await _letta("GET", f"{LETTA_URL}/v1/agents/{current_id}/core-memory/blocks")
-    blocks = blocks_resp.json()
-
-    new_name = f"ren-session-{int(time.time())}"
-    tool_ids = [t["id"] for t in current.get("tools", [])]
-
-    # Always pin the model — never inherit a potentially drifted config
-    llm_config = current["llm_config"].copy()
-    llm_config["model"] = "claude-haiku-4-5-20251001"
-
-    payload = {
-        "name": new_name,
-        "agent_type": "memgpt_agent",
-        "llm_config": llm_config,
-        "embedding_config": current["embedding_config"],
-        "system": current.get("system", ""),
-        "tool_ids": tool_ids,
-        "memory_blocks": [
-            {"label": b["label"], "value": b["value"], "limit": b["limit"]}
-            for b in blocks
-        ],
-    }
-
-    new_resp = await _letta("POST", f"{LETTA_URL}/v1/agents", json=payload, timeout=90.0)
-    new_id = new_resp.json()["id"]
-    _ren_agent_id = new_id
-
-    # Persist so restarts wake up as this agent, not the env-pinned baseline.
-    await _db.set_active_agent_id(new_id)
-
-    # Write handoff context to pending_thoughts on the new agent.
-    # If synthesis ran, include the full summary. Otherwise just a rollover marker
-    # so Ren knows context continues from a prior session.
+    agent_id = await ensure_ren_agent_id()
     timestamp = time.strftime('%Y-%m-%d %H:%M UTC', time.gmtime())
+
+    # Write handoff context to pending_thoughts before clearing messages.
     if handoff_summary:
         rollover_note = (
-            f"\n---\nROLLOVER [{timestamp}] — continued from agent {current_id}:\n"
-            f"{handoff_summary}"
+            f"\n---\nNEW SESSION [{timestamp}]:\n{handoff_summary}"
         )
     else:
         rollover_note = (
-            f"\n---\nROLLOVER [{timestamp}]: Continued from agent {current_id}. "
+            f"\n---\nNEW SESSION [{timestamp}]: Context window cleared. "
             f"Raw transcript saved to DB. Synthesis will process within 3 hours."
         )
     try:
-        pt_resp = await _letta("GET", f"{LETTA_URL}/v1/agents/{new_id}/core-memory/blocks/pending_thoughts")
+        pt_resp = await _letta("GET", f"{LETTA_URL}/v1/agents/{agent_id}/core-memory/blocks/pending_thoughts")
         current_pt = pt_resp.json().get("value", "")
         await _letta(
             "PATCH",
-            f"{LETTA_URL}/v1/agents/{new_id}/core-memory/blocks/pending_thoughts",
+            f"{LETTA_URL}/v1/agents/{agent_id}/core-memory/blocks/pending_thoughts",
             json={"value": current_pt + rollover_note},
         )
     except Exception as e:
-        logger.warning("Could not write rollover note to pending_thoughts: %s", e)
+        logger.warning("Could not write session note to pending_thoughts: %s", e)
 
-    logger.info("Session rolled over: %s → %s (%s)", current_id, new_name, new_id)
-    return new_id
+    # Clear message history — same agent, core blocks and archival memory untouched.
+    await _letta("PATCH", f"{LETTA_URL}/v1/agents/{agent_id}/reset-messages", json={})
+    logger.info("Session reset on agent %s — memory intact", agent_id)
+    return agent_id
 
 
 async def patch_agent_model(model: str) -> dict[str, Any]:
