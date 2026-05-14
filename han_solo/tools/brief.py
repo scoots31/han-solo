@@ -6,6 +6,7 @@ from mcp.server.fastmcp import FastMCP
 
 from ..auth import get_current_user
 from .. import letta_client as letta
+from .. import db
 
 
 def register(server: FastMCP) -> None:
@@ -65,3 +66,33 @@ def register(server: FastMCP) -> None:
         get_current_user()
         await letta.write_core_block("pending_thoughts", thoughts)
         return "Pending thoughts saved for next session."
+
+    @server.tool()
+    async def check_memory_health() -> dict:
+        """
+        Check memory system health. Call this at every session start.
+
+        Returns:
+        - failed_transitions_24h: count of failed T1→T2 or T2→T3 promotions in last 24 hours
+        - failed_transitions: list of what failed and why
+        - capture: transcript capture status (db_connected, last_write_at, consecutive_failures)
+
+        Flag anything non-zero to Scott immediately.
+        """
+        get_current_user()
+        failed = await db.get_failed_transitions(hours=24)
+        capture = db.health_status()
+        return {
+            "failed_transitions_24h": len(failed),
+            "failed_transitions": [
+                {
+                    "from_tier": f["from_tier"],
+                    "to_tier": f["to_tier"],
+                    "content_key": f["content_key"],
+                    "error": f["error"],
+                    "attempted_at": f["attempted_at"].isoformat() if f.get("attempted_at") else None,
+                }
+                for f in failed
+            ],
+            "capture": capture,
+        }

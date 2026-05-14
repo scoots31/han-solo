@@ -136,6 +136,56 @@ async def api_write_signal_rest(request: Request) -> JSONResponse:
         return JSONResponse({"error": str(exc)}, status_code=502)
 
 
+async def api_list_archival_passages(request: Request) -> JSONResponse:
+    """List archival passages for the synthesis cron's T2→T3 promotion pass."""
+    limit = int(request.query_params.get("limit", "500"))
+    try:
+        passages = await letta.list_passages(limit=limit)
+        return JSONResponse([
+            {
+                "id": p.get("id"),
+                "text": p.get("text", ""),
+                "created_at": p.get("created_at", ""),
+            }
+            for p in passages
+        ])
+    except Exception as exc:
+        return JSONResponse({"error": str(exc)}, status_code=502)
+
+
+async def api_delete_archival_passage(request: Request) -> JSONResponse:
+    """Delete a single archival passage by ID. Used by T2→T3 promotion after rewrite."""
+    body = await request.json()
+    passage_id = body.get("id", "").strip()
+    if not passage_id:
+        return JSONResponse({"error": "id required"}, status_code=400)
+    try:
+        await letta.delete_passage(passage_id)
+        return JSONResponse({"deleted": True, "id": passage_id})
+    except Exception as exc:
+        return JSONResponse({"error": str(exc)}, status_code=502)
+
+
+async def api_memory_health(request: Request) -> JSONResponse:
+    """Return memory system health: failed transitions + capture stats."""
+    failed = await db.get_failed_transitions(hours=24)
+    health = db.health_status()
+    return JSONResponse({
+        "capture": health,
+        "failed_transitions_24h": len(failed),
+        "failed_transitions": [
+            {
+                "from_tier": f["from_tier"],
+                "to_tier": f["to_tier"],
+                "content_key": f["content_key"],
+                "error": f["error"],
+                "attempted_at": f["attempted_at"].isoformat() if f.get("attempted_at") else None,
+            }
+            for f in failed
+        ],
+    })
+
+
 _chat_routes = [
     Route("/", chat_api.chat_index),
     Route("/health", health),
@@ -144,8 +194,11 @@ _chat_routes = [
     Route("/api/send", chat_api.api_send, methods=["POST"]),
     Route("/api/reset-session", chat_api.api_reset_session, methods=["POST"]),
     Route("/api/memory-panel", chat_api.api_memory_panel),
+    Route("/api/memory-health", api_memory_health),
     Route("/api/write-core-block", api_write_core_block, methods=["POST"]),
     Route("/api/write-signal", api_write_signal_rest, methods=["POST"]),
+    Route("/api/archival-passages", api_list_archival_passages),
+    Route("/api/archival-passage/delete", api_delete_archival_passage, methods=["POST"]),
     Route("/api/admin/agent-info", admin_agent_info),
     Route("/api/admin/patch-model", admin_patch_model, methods=["POST"]),
 ]

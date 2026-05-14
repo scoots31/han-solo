@@ -257,6 +257,11 @@ async def list_passages(limit: int = 50) -> list[dict[str, Any]]:
     return resp.json()
 
 
+async def delete_passage(passage_id: str) -> None:
+    agent_id = await ensure_ren_agent_id()
+    await _letta("DELETE", f"{LETTA_URL}/v1/agents/{agent_id}/archival-memory/{passage_id}")
+
+
 # ---------------------------------------------------------------------------
 # Chat history — read conversation messages from Letta
 # ---------------------------------------------------------------------------

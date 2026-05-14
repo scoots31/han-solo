@@ -353,6 +353,100 @@ async def promote_old_entries(
 
 
 # ---------------------------------------------------------------------------
+# T2 → T3 promotion (tag tier:foundational on old archival passages)
+# ---------------------------------------------------------------------------
+
+FOUNDATIONAL_TAG = "[tier:foundational]"
+T3_AGE_DAYS = 90
+
+
+def _tag_foundational(pool, cutoff_days: int = T3_AGE_DAYS) -> tuple[int, int]:
+    """
+    Synchronous wrapper: find archival passages older than cutoff_days that
+    aren't already tagged tier:foundational, rewrite them with the tag, then
+    delete the originals.
+
+    Returns (tagged_count, failed_count).
+    Write-before-delete invariant: old passage is only deleted after new one confirmed.
+    """
+    import asyncio as _asyncio
+
+    async def _run():
+        tagged, failed = 0, 0
+        cutoff = datetime.now(timezone.utc) - timedelta(days=cutoff_days)
+
+        try:
+            resp = _mcp_request("GET", f"/api/archival-passages?limit=500")
+            passages = resp if isinstance(resp, list) else resp.get("passages", resp.get("data", []))
+        except Exception as e:
+            print(f"  ✗ Could not fetch archival passages for T3 pass: {e}", file=sys.stderr)
+            return 0, 0
+
+        candidates = []
+        for p in passages:
+            if FOUNDATIONAL_TAG in p.get("text", ""):
+                continue  # already tagged
+            created_str = p.get("created_at", "")
+            if not created_str:
+                continue
+            try:
+                created = datetime.fromisoformat(created_str.replace("Z", "+00:00"))
+            except ValueError:
+                continue
+            if created < cutoff:
+                candidates.append(p)
+
+        if not candidates:
+            print("  — No archival passages eligible for T3 tagging")
+            return 0, 0
+
+        print(f"  Found {len(candidates)} passage(s) eligible for T3 tagging")
+
+        for p in candidates:
+            passage_id = p["id"]
+            original_text = p["text"]
+            tagged_text = f"{FOUNDATIONAL_TAG}\n{original_text}"
+            content_key = f"archival_{passage_id[:8]}"
+
+            transition_id = await log_transition(pool, "T2", "T3", content_key)
+
+            # 1. Write new tagged passage
+            try:
+                _mcp_request("POST", "/api/write-signal", {
+                    "signal_type": "texture",
+                    "subject": "ren",
+                    "content": tagged_text,
+                    "session_date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+                })
+            except Exception as e:
+                err = f"T3 write failed: {e}"
+                if transition_id:
+                    await fail_transition(pool, transition_id, err)
+                print(f"  ✗ {err}", file=sys.stderr)
+                failed += 1
+                continue
+
+            # 2. Delete old untagged passage — only after write confirmed
+            try:
+                _mcp_request("POST", "/api/archival-passage/delete", {"id": passage_id})
+                if transition_id:
+                    await complete_transition(pool, transition_id)
+                tagged += 1
+                print(f"  ✓ Tagged T2→T3: {content_key}")
+            except Exception as e:
+                # New tagged version exists, old untagged also exists — log for cleanup
+                err = f"T3 delete failed (duplicate exists): {e}"
+                if transition_id:
+                    await fail_transition(pool, transition_id, err)
+                print(f"  ✗ {err}", file=sys.stderr)
+                failed += 1
+
+        return tagged, failed
+
+    return _asyncio.get_event_loop().run_until_complete(_run())
+
+
+# ---------------------------------------------------------------------------
 # Synthesis
 # ---------------------------------------------------------------------------
 
@@ -508,6 +602,17 @@ async def run():
                 print("  — pending_thoughts is empty, nothing to promote")
         except Exception as e:
             print(f"  ✗ Promotion check failed: {e}", file=sys.stderr)
+
+        # T2 → T3 promotion: tag old archival passages tier:foundational
+        print("\nRunning T2→T3 foundational tagging pass...")
+        try:
+            tagged, tag_failed = _tag_foundational(pool, cutoff_days=T3_AGE_DAYS)
+            if tagged:
+                print(f"  ✓ Tagged {tagged} passage(s) as tier:foundational")
+            if tag_failed:
+                print(f"  ✗ {tag_failed} passage(s) failed — logged in memory_transitions")
+        except Exception as e:
+            print(f"  ✗ T3 tagging pass failed: {e}", file=sys.stderr)
 
         # Purge old processed transcripts
         purged = await purge_old(pool, days=5)
