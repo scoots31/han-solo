@@ -192,3 +192,102 @@ Ren reads a summary of `memory_transitions` at every session start. She flags:
    - *T4 write source:* `source: ren` if artifact produced in Ren chat, `source: claude_code` if produced in the framework. Same schema either way.
 
 4. **project_id registry** — declared in `projects.md` at project kickoff. T4 slug is derived from the project name at that moment and recorded there. One entry point, mechanical anchor never changes even if the project is renamed later.
+
+---
+
+## Build Plan
+
+Builds are sequenced. Do not start a phase until the previous one is complete and verified.
+
+---
+
+### Phase 1 — T1 Foundation (build this first)
+
+**Goal:** Three scoped core blocks, each with one job. `open_threads` doesn't exist yet.
+
+**Steps:**
+1. Create `open_threads` core block on ren-v2 via Letta API — empty, limit 4,000 chars
+2. Add `memory_transitions` table to `db.py` — schema is in the Failsafe Layer section above. Table is created automatically on pool init.
+3. Update `always_loaded_core` to reference `open_threads` as the place for active flags and unresolved questions
+4. Verify all three T1 blocks are visible in the memory panel
+
+**Files touched:** `han_solo/db.py`, Letta API (direct call to create block)
+
+---
+
+### Phase 2 — T1 → T2 Promotion (synthesis cron update)
+
+**Goal:** Synthesis cron promotes old `pending_thoughts` entries to archival and trims the block. Every transition is logged.
+
+**Steps:**
+1. Add `log_transition()` function to `db.py` — writes to `memory_transitions` with status `pending`
+2. Add `complete_transition()` — updates status to `success` or `failed` with timestamp and error
+3. Update `scripts/synthesize.py` to add a second pass after transcript synthesis:
+   - Parse `pending_thoughts` entries by `---` separator
+   - Identify entries older than 3 days (by embedded date)
+   - For each old entry: log transition intent → write to archival → confirm write → mark `success` → trim from `pending_thoughts`
+   - If archival write fails: mark `failed`, leave entry in T1, move on
+   - Rewrite `pending_thoughts` with only the 2 most recent entries after promotion pass completes
+4. Add failed transition count to the health summary returned by `health_status()`
+
+**Files touched:** `han_solo/db.py`, `scripts/synthesize.py`
+
+**Invariant:** Nothing removed from T1 until T2 write is confirmed.
+
+---
+
+### Phase 3 — T2 → T3 Tagging (synthesis cron update)
+
+**Goal:** Entries approaching 90 days in archival get tagged `tier:foundational`. No deletion.
+
+**Steps:**
+1. Update `scripts/synthesize.py` to add a third pass:
+   - Query archival passages without `tier:foundational` tag
+   - For each passage older than 90 days: append `[tier:foundational]` marker to text, rewrite passage
+   - Log transition in `memory_transitions`
+2. Verify Letta archival supports updating existing passages (PATCH on passage ID)
+
+**Files touched:** `scripts/synthesize.py`
+
+**Note:** If Letta v0.16.7 does not support passage updates, tag at write time instead — every new archival write includes an `inserted_at` date in the text so age can be calculated later.
+
+---
+
+### Phase 4 — T4 Project Memory
+
+**Goal:** Project-scoped archival entries, written by both Ren and Claude Code using a shared schema.
+
+**Steps:**
+1. Add `write_t4_entry()` MCP tool — accepts `project_id`, `entry_type`, `source`, `content`. Formats and writes to archival with `[t4]` and `[project:{slug}]` tags.
+2. Add `search_t4()` MCP tool — searches archival filtered by project slug tag
+3. Update the framework `start` skill to write a bootstrap T4 entry at project creation (entry_type: context, source: claude_code)
+4. Update `projects.md` template to include T4 slug field
+5. Document Ren's write pattern: during design sessions she calls `write_t4_entry` for decisions and context
+
+**Files touched:** `han_solo/server.py`, `han_solo/letta_client.py`, engineering-playbook `start` skill, `projects.md`
+
+---
+
+### Phase 5 — Health surfacing to Ren
+
+**Goal:** Ren sees memory health at every session start without having to ask.
+
+**Steps:**
+1. Add `get_transition_failures()` to `db.py` — returns failed transitions from last 24 hours
+2. Add transition failure count and last cron run time to `health_status()` response
+3. Update `always_loaded_core` session health check instructions to include: check `memory_transitions` for recent failures via MCP, flag if any `status: failed` in last 24 hours
+4. Add `/api/memory-health` endpoint that returns transition log summary — callable by Ren via MCP tool
+
+**Files touched:** `han_solo/db.py`, `han_solo/server.py`, `always_loaded_core` block
+
+---
+
+### Build order summary
+
+| Phase | What | Scope |
+|-------|------|-------|
+| 1 | T1 foundation — `open_threads` block + `memory_transitions` table | Small, start here |
+| 2 | T1→T2 promotion in synthesis cron | Medium |
+| 3 | T2→T3 tagging in synthesis cron | Small, depends on Phase 2 |
+| 4 | T4 project memory — MCP tools + framework integration | Large, separate session |
+| 5 | Health surfacing to Ren | Small, can run parallel with Phase 3 |
