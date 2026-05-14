@@ -879,10 +879,12 @@ async function sendMessage() {
     if (resp.ok) {
       const data = await resp.json();
       if (data.session_reset) {
-        // Auto-rollover fired before this message — clear UI and show divider
         _msgs = [];
         renderMessages();
         addSessionDivider('Session refreshed — memory intact');
+      }
+      if (data.session_warning) {
+        addSessionDivider(data.session_warning);
       }
       if (data.response) {
         _msgs.push({ role: 'assistant', name: 'Ren', text: data.response });

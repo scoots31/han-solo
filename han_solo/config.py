@@ -41,6 +41,9 @@ REN_AGENT_NAME = os.environ.get("REN_AGENT_NAME", "ren-v2")
 # Set REN_AGENT_ID in Render env vars to pin to a specific agent.
 REN_AGENT_ID = os.environ.get("REN_AGENT_ID")
 
+# Anthropic API — used for inline synthesis at rollover and by the cron script
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+
 # MCP server port
 PORT = int(os.environ.get("PORT", "8000"))
 

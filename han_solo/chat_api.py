@@ -10,8 +10,11 @@ PostgreSQL as it arrives. This is the durable source that survives rollovers,
 restarts, and context crashes. The synthesis script reads from here.
 """
 import asyncio
+import json
+import logging
 from datetime import datetime, timezone
 
+import httpx
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse
 
@@ -19,6 +22,9 @@ from .auth import get_current_user
 from . import letta_client as letta
 from . import db
 from .chat_html import CHAT_HTML
+from .config import ANTHROPIC_API_KEY
+
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Message history cache — rebuilt from Letta on cold start
@@ -27,10 +33,13 @@ from .chat_html import CHAT_HTML
 _history: list[dict] = []
 _history_loaded: bool = False
 
-# Auto-rollover: reset Letta session when conversation grows this long.
-# Each exchange is 2 entries (user + assistant). 50 entries ≈ 25 exchanges.
-# Keeps well clear of the 200K-token context limit even with heavy page fetches.
-AUTO_ROLLOVER_AT = 50
+# Session length thresholds. Each exchange = 2 entries (user + assistant).
+# WARN_AT: surface a note in the UI so Scott can choose a clean stopping point.
+# HARD_LIMIT_AT: safety rollover to prevent Letta context crashes — same as
+#   what used to happen at 50, but pushed back and only fires if Scott doesn't
+#   start a new session himself.
+WARN_AT = 40
+HARD_LIMIT_AT = 80
 
 # Capture cadence: write to transcript table every N messages.
 # Set to 1 to capture every message — safest, minimal DB overhead.
@@ -98,6 +107,54 @@ async def _flush_capture_buffer(session_id: str) -> None:
         await db.write_messages_bulk(session_id, to_write)
 
 
+async def _synthesize_handoff(messages: list[dict]) -> str | None:
+    """
+    Call Anthropic directly to produce a brief handoff summary of the current
+    session. Written to pending_thoughts on the new agent so Ren has immediate
+    context after a rollover — no 3-hour wait for the cron.
+
+    Returns None if the API key is not set or the call fails.
+    """
+    if not ANTHROPIC_API_KEY or not messages:
+        return None
+
+    # Take the last 60 messages to keep the prompt bounded.
+    recent = messages[-60:]
+    transcript = "\n".join(
+        f"{m.get('name', m.get('role', 'unknown'))}: {m.get('text', '')}"
+        for m in recent
+    )
+
+    prompt = (
+        "Summarize this conversation in 4-6 bullets. Cover: main topics discussed, "
+        "decisions made, anything left unresolved, and anything Ren should surface "
+        "at the start of the next session. Be specific — names, decisions, open threads. "
+        "No preamble.\n\n"
+        f"TRANSCRIPT:\n{transcript}"
+    )
+
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.post(
+                "https://api.anthropic.com/v1/messages",
+                headers={
+                    "x-api-key": ANTHROPIC_API_KEY,
+                    "anthropic-version": "2023-06-01",
+                    "content-type": "application/json",
+                },
+                json={
+                    "model": "claude-sonnet-4-6",
+                    "max_tokens": 600,
+                    "messages": [{"role": "user", "content": prompt}],
+                },
+            )
+        resp.raise_for_status()
+        return resp.json()["content"][0]["text"]
+    except Exception as e:
+        logger.warning("Handoff synthesis failed — rollover continues without it: %s", e)
+        return None
+
+
 # ---------------------------------------------------------------------------
 # Route handlers
 # ---------------------------------------------------------------------------
@@ -120,15 +177,16 @@ async def api_history(request: Request) -> JSONResponse:
 async def api_reset_session(request: Request) -> JSONResponse:
     """
     Manually start a fresh Letta conversation session.
-    Archives current transcript buffer, copies all core memory blocks to a
-    new agent, clears the history cache.
+    Synthesizes the current session inline so Ren wakes up with context,
+    then archives the transcript buffer and creates a new agent.
     """
     global _history, _history_loaded
     get_current_user()
     try:
         current_id = await letta.ensure_ren_agent_id()
         await _flush_capture_buffer(current_id)
-        new_id = await letta.reset_conversation()
+        summary = await _synthesize_handoff(_history)
+        new_id = await letta.reset_conversation(handoff_summary=summary)
         _history = []
         _history_loaded = True
         return JSONResponse({"reset": True, "agent_id": new_id})
@@ -147,18 +205,24 @@ async def api_send(request: Request) -> JSONResponse:
     if not message and not attachment:
         return JSONResponse({"error": "Empty message"}, status_code=400)
 
-    # Auto-rollover: archive transcript buffer first, then reset.
+    # Warn at WARN_AT, hard rollover at HARD_LIMIT_AT.
     rolled_over = False
-    if len(_history) >= AUTO_ROLLOVER_AT:
+    session_warning = None
+    history_len = len(_history)
+
+    if history_len >= HARD_LIMIT_AT:
         try:
             current_id = await letta.ensure_ren_agent_id()
             await _flush_capture_buffer(current_id)
-            await letta.reset_conversation()
+            summary = await _synthesize_handoff(_history)
+            await letta.reset_conversation(handoff_summary=summary)
             _history = []
             _history_loaded = True
             rolled_over = True
         except Exception:
             pass  # rollover failed — continue on existing agent
+    elif history_len == WARN_AT:
+        session_warning = "Getting long — good time to start a new session at a natural stopping point."
 
     # Build the message Ren receives — inline file content when attached
     if attachment:
@@ -188,6 +252,7 @@ async def api_send(request: Request) -> JSONResponse:
     return JSONResponse({
         "response": response_text,
         "session_reset": rolled_over,
+        "session_warning": session_warning,
         "capture_health": db.health_status(),
     })
 

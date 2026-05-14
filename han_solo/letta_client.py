@@ -147,7 +147,7 @@ async def get_or_create_ren_agent(name: str) -> str:
     return resp.json()["id"]
 
 
-async def reset_conversation() -> str:
+async def reset_conversation(handoff_summary: str | None = None) -> str:
     """
     Create a fresh Letta agent with all core memory blocks copied from the
     current agent. Updates the cached agent ID so subsequent calls use the
@@ -195,13 +195,20 @@ async def reset_conversation() -> str:
     # Persist so restarts wake up as this agent, not the env-pinned baseline.
     await _db.set_active_agent_id(new_id)
 
-    # Append a rollover marker to pending_thoughts on the new agent so Ren
-    # knows a rollover just happened even before synthesis runs.
-    rollover_note = (
-        f"\n---\nROLLOVER [{time.strftime('%Y-%m-%d %H:%M UTC', time.gmtime())}]: "
-        f"Continued from agent {current_id}. Raw transcript saved to DB. "
-        f"Synthesis will process within 3 hours."
-    )
+    # Write handoff context to pending_thoughts on the new agent.
+    # If synthesis ran, include the full summary. Otherwise just a rollover marker
+    # so Ren knows context continues from a prior session.
+    timestamp = time.strftime('%Y-%m-%d %H:%M UTC', time.gmtime())
+    if handoff_summary:
+        rollover_note = (
+            f"\n---\nROLLOVER [{timestamp}] — continued from agent {current_id}:\n"
+            f"{handoff_summary}"
+        )
+    else:
+        rollover_note = (
+            f"\n---\nROLLOVER [{timestamp}]: Continued from agent {current_id}. "
+            f"Raw transcript saved to DB. Synthesis will process within 3 hours."
+        )
     try:
         pt_resp = await _letta("GET", f"{LETTA_URL}/v1/agents/{new_id}/core-memory/blocks/pending_thoughts")
         current_pt = pt_resp.json().get("value", "")
@@ -211,7 +218,7 @@ async def reset_conversation() -> str:
             json={"value": current_pt + rollover_note},
         )
     except Exception as e:
-        logger.warning("Could not append rollover note to pending_thoughts: %s", e)
+        logger.warning("Could not write rollover note to pending_thoughts: %s", e)
 
     logger.info("Session rolled over: %s → %s (%s)", current_id, new_name, new_id)
     return new_id
