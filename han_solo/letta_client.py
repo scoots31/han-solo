@@ -7,6 +7,7 @@ import logging
 import httpx
 
 from .config import LETTA_URL, LETTA_API_KEY, REN_AGENT_NAME, REN_AGENT_ID
+from . import db as _db
 
 logger = logging.getLogger(__name__)
 
@@ -28,11 +29,18 @@ def set_ren_agent_id(agent_id: str) -> None:
 
 
 async def ensure_ren_agent_id() -> str:
-    """Return the Ren agent ID, resolving it from Letta if not yet cached."""
+    """Return the Ren agent ID, resolving it from DB → env var → Letta lookup."""
     global _ren_agent_id
     if _ren_agent_id is not None:
         return _ren_agent_id
-    # If a specific agent ID is pinned via env var, use it directly.
+    # DB is authoritative after any rollover — check it first so restarts
+    # wake up as the correct rolled-over agent, not the env-pinned baseline.
+    db_id = await _db.get_active_agent_id()
+    if db_id:
+        logger.info("Using persisted active_agent_id from DB: %s", db_id)
+        _ren_agent_id = db_id
+        return _ren_agent_id
+    # Fall back to env var (used on first deploy before any rollover).
     if REN_AGENT_ID:
         logger.info("Using pinned REN_AGENT_ID: %s", REN_AGENT_ID)
         _ren_agent_id = REN_AGENT_ID
@@ -183,6 +191,28 @@ async def reset_conversation() -> str:
     new_resp = await _letta("POST", f"{LETTA_URL}/v1/agents", json=payload, timeout=90.0)
     new_id = new_resp.json()["id"]
     _ren_agent_id = new_id
+
+    # Persist so restarts wake up as this agent, not the env-pinned baseline.
+    await _db.set_active_agent_id(new_id)
+
+    # Append a rollover marker to pending_thoughts on the new agent so Ren
+    # knows a rollover just happened even before synthesis runs.
+    rollover_note = (
+        f"\n---\nROLLOVER [{time.strftime('%Y-%m-%d %H:%M UTC', time.gmtime())}]: "
+        f"Continued from agent {current_id}. Raw transcript saved to DB. "
+        f"Synthesis will process within 3 hours."
+    )
+    try:
+        pt_resp = await _letta("GET", f"{LETTA_URL}/v1/agents/{new_id}/core-memory/blocks/pending_thoughts")
+        current_pt = pt_resp.json().get("value", "")
+        await _letta(
+            "PATCH",
+            f"{LETTA_URL}/v1/agents/{new_id}/core-memory/blocks/pending_thoughts",
+            json={"value": current_pt + rollover_note},
+        )
+    except Exception as e:
+        logger.warning("Could not append rollover note to pending_thoughts: %s", e)
+
     logger.info("Session rolled over: %s → %s (%s)", current_id, new_name, new_id)
     return new_id
 

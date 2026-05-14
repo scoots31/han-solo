@@ -35,6 +35,11 @@ CREATE INDEX IF NOT EXISTS idx_transcripts_session
     ON chat_transcripts(session_id);
 CREATE INDEX IF NOT EXISTS idx_transcripts_unprocessed
     ON chat_transcripts(processed, created_at);
+CREATE TABLE IF NOT EXISTS han_solo_config (
+    key   TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
 """
 
 # Health tracking — last successful write timestamp
@@ -192,6 +197,42 @@ async def purge_old_processed(days: int = 5) -> int:
     except Exception as e:
         logger.error("Failed to purge old transcripts: %s", e)
         return 0
+
+
+async def get_active_agent_id() -> Optional[str]:
+    """Return the last persisted active agent ID, or None if not set."""
+    if not _pool:
+        return None
+    try:
+        async with _pool.acquire() as conn:
+            row = await conn.fetchrow(
+                "SELECT value FROM han_solo_config WHERE key = 'active_agent_id'"
+            )
+        return row["value"] if row else None
+    except Exception as e:
+        logger.error("Failed to read active_agent_id: %s", e)
+        return None
+
+
+async def set_active_agent_id(agent_id: str) -> bool:
+    """Persist the active agent ID so it survives service restarts."""
+    if not _pool:
+        return False
+    try:
+        async with _pool.acquire() as conn:
+            await conn.execute(
+                """
+                INSERT INTO han_solo_config (key, value, updated_at)
+                VALUES ('active_agent_id', $1, NOW())
+                ON CONFLICT (key) DO UPDATE SET value = $1, updated_at = NOW()
+                """,
+                agent_id,
+            )
+        logger.info("Persisted active_agent_id: %s", agent_id)
+        return True
+    except Exception as e:
+        logger.error("Failed to persist active_agent_id: %s", e)
+        return False
 
 
 def health_status() -> dict:
