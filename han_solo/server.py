@@ -76,6 +76,26 @@ async def health(request: Request) -> JSONResponse:
 _mcp_app = server.streamable_http_app()
 
 # Step 2 — inject custom routes before the /mcp route
+async def admin_agent_info(request: Request) -> JSONResponse:
+    agent_id = await letta.ensure_ren_agent_id()
+    resp = await letta._letta("GET", f"{letta.LETTA_URL}/v1/agents/{agent_id}/")
+    data = resp.json()
+    return JSONResponse({
+        "agent_id": agent_id,
+        "name": data.get("name"),
+        "llm_config": data.get("llm_config"),
+    })
+
+
+async def admin_patch_model(request: Request) -> JSONResponse:
+    body = await request.json()
+    model = body.get("model", "").strip()
+    if not model:
+        return JSONResponse({"error": "model required"}, status_code=400)
+    result = await letta.patch_agent_model(model)
+    return JSONResponse({"patched": True, "llm_config": result.get("llm_config")})
+
+
 _chat_routes = [
     Route("/", chat_api.chat_index),
     Route("/health", health),
@@ -84,6 +104,8 @@ _chat_routes = [
     Route("/api/send", chat_api.api_send, methods=["POST"]),
     Route("/api/reset-session", chat_api.api_reset_session, methods=["POST"]),
     Route("/api/memory-panel", chat_api.api_memory_panel),
+    Route("/api/admin/agent-info", admin_agent_info),
+    Route("/api/admin/patch-model", admin_patch_model, methods=["POST"]),
 ]
 for i, route in enumerate(_chat_routes):
     _mcp_app.router.routes.insert(i, route)
