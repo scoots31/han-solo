@@ -20,12 +20,13 @@ Environment vars required:
 """
 import json
 import os
+import re
 import sys
 import urllib.request
 import urllib.error
 import asyncio
 import asyncpg
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 DATABASE_URL      = os.environ["DATABASE_URL"]
 ANTHROPIC_API_KEY = os.environ["ANTHROPIC_API_KEY"]
@@ -162,6 +163,196 @@ async def purge_old(pool: asyncpg.Pool, days: int = 5) -> int:
 
 
 # ---------------------------------------------------------------------------
+# Transition logging (memory_transitions table)
+# ---------------------------------------------------------------------------
+
+async def log_transition(pool: asyncpg.Pool, from_tier: str, to_tier: str, content_key: str) -> int | None:
+    """Insert a pending transition record. Returns id, or None on failure."""
+    try:
+        row = await pool.fetchrow(
+            """
+            INSERT INTO memory_transitions (from_tier, to_tier, content_key, status)
+            VALUES ($1, $2, $3, 'pending')
+            RETURNING id
+            """,
+            from_tier, to_tier, content_key,
+        )
+        return row["id"] if row else None
+    except Exception as e:
+        print(f"  ✗ Failed to log transition: {e}", file=sys.stderr)
+        return None
+
+
+async def complete_transition(pool: asyncpg.Pool, transition_id: int) -> None:
+    try:
+        await pool.execute(
+            "UPDATE memory_transitions SET status = 'success', completed_at = NOW() WHERE id = $1",
+            transition_id,
+        )
+    except Exception as e:
+        print(f"  ✗ Failed to complete transition {transition_id}: {e}", file=sys.stderr)
+
+
+async def fail_transition(pool: asyncpg.Pool, transition_id: int, error: str) -> None:
+    try:
+        await pool.execute(
+            "UPDATE memory_transitions SET status = 'failed', completed_at = NOW(), error = $2 WHERE id = $1",
+            transition_id, error,
+        )
+    except Exception as e:
+        print(f"  ✗ Failed to record transition failure {transition_id}: {e}", file=sys.stderr)
+
+
+# ---------------------------------------------------------------------------
+# T1 → T2 promotion
+# ---------------------------------------------------------------------------
+
+# Matches the header written by synthesize.py: SYNTHESIS [YYYY-MM-DD session XXXXXXXX]:
+_SYNTHESIS_HEADER_RE = re.compile(r"^SYNTHESIS \[(\d{4}-\d{2}-\d{2}) session ([^\]]+)\]:")
+
+
+def _parse_pending_thoughts(text: str) -> list[dict]:
+    """
+    Split pending_thoughts into sections.
+
+    Returns a list of dicts:
+        {
+            "raw": str,          # full section text
+            "is_synthesis": bool,
+            "date": date | None, # only set for synthesis entries
+            "session_key": str,  # short session id, or empty string
+        }
+
+    Sections are separated by lines that contain only "---" (with optional
+    surrounding blank lines). Non-synthesis sections are left untouched.
+    """
+    # Normalise separators: any line that is just "---" with optional whitespace
+    parts = re.split(r"\n\s*---\s*\n", text)
+    sections = []
+    for part in parts:
+        part = part.strip()
+        if not part:
+            continue
+        first_line = part.split("\n", 1)[0].strip()
+        m = _SYNTHESIS_HEADER_RE.match(first_line)
+        if m:
+            date_str, session_key = m.group(1), m.group(2)
+            try:
+                entry_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+            except ValueError:
+                entry_date = None
+            sections.append({
+                "raw": part,
+                "is_synthesis": True,
+                "date": entry_date,
+                "session_key": session_key.strip(),
+            })
+        else:
+            sections.append({
+                "raw": part,
+                "is_synthesis": False,
+                "date": None,
+                "session_key": "",
+            })
+    return sections
+
+
+async def promote_old_entries(
+    pool: asyncpg.Pool,
+    current_pt: str,
+    cutoff_days: int = 3,
+) -> tuple[str, int]:
+    """
+    Promote pending_thoughts SYNTHESIS entries older than cutoff_days to T2 archival.
+    Trim to the 2 most recent SYNTHESIS entries after confirmed promotions.
+
+    Returns (new_pending_thoughts_value, promoted_count).
+
+    Write-before-trim invariant: an entry is only removed from T1 after the T2
+    write is confirmed. If T2 write fails, the entry stays, the failure is logged,
+    and the function moves on.
+    """
+    today = datetime.now(timezone.utc).date()
+    cutoff = today - timedelta(days=cutoff_days)
+
+    sections = _parse_pending_thoughts(current_pt)
+    synthesis_sections = [s for s in sections if s["is_synthesis"]]
+    other_sections = [s for s in sections if not s["is_synthesis"]]
+
+    if not synthesis_sections:
+        return current_pt, 0
+
+    # Sort synthesis entries newest-first so we can identify the 2 to keep
+    dated = [s for s in synthesis_sections if s["date"] is not None]
+    undated = [s for s in synthesis_sections if s["date"] is None]
+    dated.sort(key=lambda s: s["date"], reverse=True)
+
+    to_keep = dated[:2]
+    keep_keys = {s["session_key"] for s in to_keep}
+
+    old_entries = [
+        s for s in dated[2:]  # anything beyond the 2 most recent
+        if s["date"] <= cutoff    # and older than cutoff
+    ]
+    # Also promote dated entries beyond index 2 that are within cutoff — keep them for now
+    # (they'll get promoted on a future run once they age out)
+
+    promoted = 0
+    failed_to_promote = []
+
+    for entry in old_entries:
+        content_key = f"pt_{entry['session_key']}" if entry["session_key"] else f"pt_{entry['date']}"
+        transition_id = await log_transition(pool, "T1", "T2", content_key)
+
+        # Write to T2 archival via MCP
+        archival_text = (
+            f"[T2 promoted from pending_thoughts | session {entry['session_key']} | {entry['date']}]\n"
+            f"{entry['raw']}"
+        )
+        try:
+            _mcp_request("POST", "/api/write-signal", {
+                "signal_type": "texture",
+                "subject": "ren",
+                "content": archival_text,
+                "session_date": entry["date"].isoformat(),
+            })
+            if transition_id is not None:
+                await complete_transition(pool, transition_id)
+            promoted += 1
+            print(f"  ✓ Promoted T1→T2: {content_key}")
+        except Exception as e:
+            err = str(e)
+            if transition_id is not None:
+                await fail_transition(pool, transition_id, err)
+            failed_to_promote.append(entry["session_key"])
+            print(f"  ✗ T2 write failed for {content_key}: {err}", file=sys.stderr)
+            # Entry stays in T1 — do not add to keep set exclusion
+            keep_keys.add(entry["session_key"])
+
+    if promoted == 0 and not old_entries:
+        # Nothing to promote, nothing to trim
+        return current_pt, 0
+
+    # Rebuild pending_thoughts: non-synthesis content + the 2 most recent synthesis entries
+    # + any dated entries within cutoff that weren't in the top 2 (kept until they age out)
+    # + any entries that failed to promote
+    surviving_synthesis = []
+    for s in dated:
+        if s["session_key"] in keep_keys or s["date"] > cutoff:
+            surviving_synthesis.append(s)
+
+    # Always keep undated synthesis entries (Ren wrote them, Ren trims them)
+    surviving_synthesis.extend(undated)
+
+    all_surviving = other_sections + surviving_synthesis
+    if not all_surviving:
+        return "", promoted
+
+    rebuilt = "\n\n---\n".join(s["raw"] for s in all_surviving)
+    return rebuilt, promoted
+
+
+# ---------------------------------------------------------------------------
 # Synthesis
 # ---------------------------------------------------------------------------
 
@@ -240,19 +431,35 @@ def write_to_letta(synthesis: dict, session_id: str) -> bool:
 # Main
 # ---------------------------------------------------------------------------
 
+_ENSURE_TABLES_SQL = """
+CREATE TABLE IF NOT EXISTS memory_transitions (
+    id           SERIAL PRIMARY KEY,
+    attempted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    from_tier    TEXT        NOT NULL,
+    to_tier      TEXT        NOT NULL,
+    content_key  TEXT        NOT NULL,
+    status       TEXT        NOT NULL,
+    completed_at TIMESTAMPTZ,
+    error        TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_transitions_status
+    ON memory_transitions(status, attempted_at);
+"""
+
+
 async def run():
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M')}] Synthesis starting...")
 
     pool = await asyncpg.create_pool(DATABASE_URL, min_size=1, max_size=3)
 
     try:
+        await pool.execute(_ENSURE_TABLES_SQL)
         sessions = await get_unprocessed_sessions(pool)
 
         if not sessions:
-            print("No unprocessed sessions. Nothing to do.")
-            return
-
-        print(f"Found {len(sessions)} unprocessed session(s).")
+            print("No unprocessed sessions.")
+        else:
+            print(f"Found {len(sessions)} unprocessed session(s).")
 
         for session in sessions:
             session_id = session["session_id"]
@@ -278,6 +485,29 @@ async def run():
                 print(f"  ✓ Session marked processed")
             else:
                 print(f"  ✗ Not marking processed — writes incomplete", file=sys.stderr)
+
+        # T1 → T2 promotion: promote and trim pending_thoughts
+        print("\nRunning T1→T2 promotion check...")
+        try:
+            current = _mcp_request("GET", "/api/memory-panel")
+            blocks = current.get("blocks", [])
+            pt_block = next((b for b in blocks if b["label"] == "pending_thoughts"), None)
+            current_pt = pt_block["value"] if pt_block else ""
+
+            if current_pt:
+                new_pt, promoted_count = await promote_old_entries(pool, current_pt)
+                if promoted_count > 0:
+                    _mcp_request("POST", "/api/write-core-block", {
+                        "label": "pending_thoughts",
+                        "value": new_pt,
+                    })
+                    print(f"  ✓ pending_thoughts trimmed after {promoted_count} promotion(s)")
+                else:
+                    print("  — No entries eligible for promotion")
+            else:
+                print("  — pending_thoughts is empty, nothing to promote")
+        except Exception as e:
+            print(f"  ✗ Promotion check failed: {e}", file=sys.stderr)
 
         # Purge old processed transcripts
         purged = await purge_old(pool, days=5)

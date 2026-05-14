@@ -40,6 +40,18 @@ CREATE TABLE IF NOT EXISTS han_solo_config (
     value TEXT NOT NULL,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+CREATE TABLE IF NOT EXISTS memory_transitions (
+    id           SERIAL PRIMARY KEY,
+    attempted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    from_tier    TEXT        NOT NULL,
+    to_tier      TEXT        NOT NULL,
+    content_key  TEXT        NOT NULL,
+    status       TEXT        NOT NULL,
+    completed_at TIMESTAMPTZ,
+    error        TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_transitions_status
+    ON memory_transitions(status, attempted_at);
 """
 
 # Health tracking — last successful write timestamp
@@ -242,3 +254,85 @@ def health_status() -> dict:
         "last_write_at": _last_write_at.isoformat() if _last_write_at else None,
         "consecutive_failures": _write_failure_count,
     }
+
+
+async def log_transition(from_tier: str, to_tier: str, content_key: str) -> Optional[int]:
+    """Insert a memory_transitions row with status='pending'. Returns the row id."""
+    if not _pool:
+        return None
+    try:
+        async with _pool.acquire() as conn:
+            row = await conn.fetchrow(
+                """
+                INSERT INTO memory_transitions (from_tier, to_tier, content_key, status)
+                VALUES ($1, $2, $3, 'pending')
+                RETURNING id
+                """,
+                from_tier, to_tier, content_key,
+            )
+        return row["id"] if row else None
+    except Exception as e:
+        logger.error("Failed to log transition: %s", e)
+        return None
+
+
+async def complete_transition(transition_id: int) -> bool:
+    """Mark a memory_transitions row as succeeded."""
+    if not _pool:
+        return False
+    try:
+        async with _pool.acquire() as conn:
+            await conn.execute(
+                """
+                UPDATE memory_transitions
+                SET status = 'success', completed_at = NOW()
+                WHERE id = $1
+                """,
+                transition_id,
+            )
+        return True
+    except Exception as e:
+        logger.error("Failed to complete transition %d: %s", transition_id, e)
+        return False
+
+
+async def fail_transition(transition_id: int, error: str) -> bool:
+    """Mark a memory_transitions row as failed with error detail."""
+    if not _pool:
+        return False
+    try:
+        async with _pool.acquire() as conn:
+            await conn.execute(
+                """
+                UPDATE memory_transitions
+                SET status = 'failed', completed_at = NOW(), error = $2
+                WHERE id = $1
+                """,
+                transition_id, error,
+            )
+        return True
+    except Exception as e:
+        logger.error("Failed to record transition failure %d: %s", transition_id, e)
+        return False
+
+
+async def get_failed_transitions(hours: int = 24) -> list[dict]:
+    """Return failed memory_transitions from the last N hours for health check."""
+    if not _pool:
+        return []
+    try:
+        async with _pool.acquire() as conn:
+            rows = await conn.fetch(
+                """
+                SELECT id, attempted_at, from_tier, to_tier, content_key, error
+                FROM memory_transitions
+                WHERE status = 'failed'
+                  AND attempted_at > NOW() - INTERVAL '1 hour' * $1
+                ORDER BY attempted_at DESC
+                """,
+                hours,
+            )
+        return [dict(r) for r in rows]
+    except Exception as e:
+        logger.error("Failed to fetch failed transitions: %s", e)
+        return []

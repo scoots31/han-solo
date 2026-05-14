@@ -219,13 +219,18 @@ async def list_core_blocks() -> list[dict[str, Any]]:
 
 
 async def create_core_block(label: str, value: str = "", limit: int = 10000) -> dict[str, Any]:
-    """Create a new memory block and attach it to the Ren agent."""
+    """Create a new memory block in Letta's global store and attach it to the Ren agent.
+
+    Letta attach endpoint: PATCH /v1/agents/{id}/core-memory/blocks/attach/{block_id}
+    The old PATCH-by-label approach fails for blocks not yet part of the agent's memory.
+    """
     agent_id = await ensure_ren_agent_id()
 
     resp = await _letta("POST", f"{LETTA_URL}/v1/blocks", json={"label": label, "value": value, "limit": limit})
     block = resp.json()
+    block_id = block["id"]
 
-    await _letta("PATCH", f"{LETTA_URL}/v1/agents/{agent_id}/core-memory/blocks/{label}", json={"value": value})
+    await _letta("PATCH", f"{LETTA_URL}/v1/agents/{agent_id}/core-memory/blocks/attach/{block_id}")
     return block
 
 
