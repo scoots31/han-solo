@@ -1,6 +1,6 @@
 # Han Solo — Memory Architecture
 
-**Status:** Design complete, pending build  
+**Status:** Design locked — ready to build  
 **Last updated:** 2026-05-14  
 **Authors:** Scott, Ren, Claude Code
 
@@ -180,12 +180,15 @@ Ren reads a summary of `memory_transitions` at every session start. She flags:
 
 ---
 
-## Open Questions (Pre-Build)
+## Decisions Locked
 
-1. **T4 bootstrap timing** — does Claude Code write the bootstrap entry at project creation (start skill) or at first slice? Needs a decision before T4 build.
+1. **T4 bootstrap timing** — T4 is created at project creation, not first slice. Every framework phase that produces an artifact (brainstorm, discover, PRD, design) writes to T4 from day one. T4 is the full project record, not just the build record.
 
-2. **`open_threads` ownership** — who trims it? Ren during close-out, or the cron? Probably Ren — she knows what's actually resolved.
+2. **`open_threads` ownership** — Ren owns trimming. She knows what's actually resolved vs. quieted down. The cron does not touch `open_threads`.
 
-3. **Primary interface question** — when does Scott use Ren vs. Claude Code for design work? This affects how and when T4 gets written. Still unresolved.
+3. **Primary interface — pre and post bridge:**
+   - *Pre-bridge (today):* Brainstorm and discovery can happen with Ren or in Claude Code — wherever the thinking flows. If produced with Ren, output is pasted into Claude Code to kick off the framework phase. Everything from design sprint through deploy runs in Claude Code, writing back to Ren's memory via MCP at session end.
+   - *Post-bridge:* Same split, no manual seam. Artifacts produced with Ren write directly to T4. Claude Code reads them at session start. Both reading from the same source of truth throughout.
+   - *T4 write source:* `source: ren` if artifact produced in Ren chat, `source: claude_code` if produced in the framework. Same schema either way.
 
-4. **project_id registry** — `projects.md` in engineering-playbook currently tracks active projects. T4 slugs need to align with that registry. Who keeps them in sync?
+4. **project_id registry** — declared in `projects.md` at project kickoff. T4 slug is derived from the project name at that moment and recorded there. One entry point, mechanical anchor never changes even if the project is renamed later.
