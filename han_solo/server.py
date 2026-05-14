@@ -23,6 +23,7 @@ from starlette.routing import Route
 from .auth import BearerAuthMiddleware
 from .config import REN_AGENT_NAME, REN_AGENT_ID
 from . import letta_client as letta
+from . import db
 from .tools import memory, signals, phase, brief, portraits
 from . import chat_api
 
@@ -96,6 +97,45 @@ async def admin_patch_model(request: Request) -> JSONResponse:
     return JSONResponse({"patched": True, "llm_config": result.get("llm_config")})
 
 
+async def api_write_core_block(request: Request) -> JSONResponse:
+    """REST endpoint for synthesis script to update a core memory block."""
+    body = await request.json()
+    label = body.get("label", "").strip()
+    value = body.get("value", "")
+    if not label:
+        return JSONResponse({"error": "label required"}, status_code=400)
+    try:
+        result = await letta.write_core_block(label, value)
+        return JSONResponse({"written": True, "label": label})
+    except Exception as exc:
+        return JSONResponse({"error": str(exc)}, status_code=502)
+
+
+async def api_write_signal_rest(request: Request) -> JSONResponse:
+    """REST endpoint for synthesis script to write an archival signal."""
+    from datetime import date as _date
+    body = await request.json()
+    signal_type = body.get("signal_type", "").strip()
+    subject = body.get("subject", "").strip()
+    content = body.get("content", "").strip()
+    session_date = body.get("session_date", "") or _date.today().isoformat()
+
+    if not all([signal_type, subject, content]):
+        return JSONResponse({"error": "signal_type, subject, content required"}, status_code=400)
+
+    valid_types = {"relational", "directional", "ren", "texture"}
+    valid_subjects = {"scott", "ted", "ren", "project", "framework"}
+    if signal_type not in valid_types or subject not in valid_subjects:
+        return JSONResponse({"error": "invalid signal_type or subject"}, status_code=400)
+
+    try:
+        tags = ["signal", signal_type, subject, session_date, "author:synthesis"]
+        result = await letta.insert_passage(content=content, tags=tags)
+        return JSONResponse({"written": True, "id": result.get("id")})
+    except Exception as exc:
+        return JSONResponse({"error": str(exc)}, status_code=502)
+
+
 _chat_routes = [
     Route("/", chat_api.chat_index),
     Route("/health", health),
@@ -104,6 +144,8 @@ _chat_routes = [
     Route("/api/send", chat_api.api_send, methods=["POST"]),
     Route("/api/reset-session", chat_api.api_reset_session, methods=["POST"]),
     Route("/api/memory-panel", chat_api.api_memory_panel),
+    Route("/api/write-core-block", api_write_core_block, methods=["POST"]),
+    Route("/api/write-signal", api_write_signal_rest, methods=["POST"]),
     Route("/api/admin/agent-info", admin_agent_info),
     Route("/api/admin/patch-model", admin_patch_model, methods=["POST"]),
 ]
@@ -127,8 +169,12 @@ async def _lifespan(app):
                 logger.info("Ren agent ready: %s", agent_id)
         except Exception as e:
             logger.error("Failed to initialise Ren agent (will retry on next request): %s", e)
-        async with server.session_manager.run():
-            yield
+        await db.init_pool()
+        try:
+            async with server.session_manager.run():
+                yield
+        finally:
+            await db.close_pool()
 
 
 _mcp_app.router.lifespan_context = _lifespan

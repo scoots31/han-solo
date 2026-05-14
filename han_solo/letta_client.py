@@ -163,10 +163,14 @@ async def reset_conversation() -> str:
     new_name = f"ren-session-{int(time.time())}"
     tool_ids = [t["id"] for t in current.get("tools", [])]
 
+    # Always pin the model — never inherit a potentially drifted config
+    llm_config = current["llm_config"].copy()
+    llm_config["model"] = "claude-haiku-4-5-20251001"
+
     payload = {
         "name": new_name,
         "agent_type": "memgpt_agent",
-        "llm_config": current["llm_config"],
+        "llm_config": llm_config,
         "embedding_config": current["embedding_config"],
         "system": current.get("system", ""),
         "tool_ids": tool_ids,

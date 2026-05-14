@@ -1,0 +1,203 @@
+"""
+db.py — Direct PostgreSQL connection for raw transcript capture.
+
+Separate from Letta's database access. This module owns the chat_transcripts
+table — raw message capture that survives rollovers, restarts, and context crashes.
+
+The transcripts table is the durable source the synthesis script reads from.
+Letta's conversation store is volatile; this is not.
+"""
+import logging
+import os
+from datetime import datetime, timezone
+from typing import Optional
+
+import asyncpg
+
+logger = logging.getLogger(__name__)
+
+DATABASE_URL = os.environ.get("DATABASE_URL", "")
+
+_pool: Optional[asyncpg.Pool] = None
+
+CREATE_TABLE_SQL = """
+CREATE TABLE IF NOT EXISTS chat_transcripts (
+    id          SERIAL PRIMARY KEY,
+    session_id  TEXT        NOT NULL,
+    role        TEXT        NOT NULL,
+    name        TEXT        NOT NULL,
+    content     TEXT        NOT NULL,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    processed   BOOLEAN     NOT NULL DEFAULT FALSE,
+    processed_at TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS idx_transcripts_session
+    ON chat_transcripts(session_id);
+CREATE INDEX IF NOT EXISTS idx_transcripts_unprocessed
+    ON chat_transcripts(processed, created_at);
+"""
+
+# Health tracking — last successful write timestamp
+_last_write_at: Optional[datetime] = None
+_write_failure_count: int = 0
+
+
+async def init_pool() -> None:
+    global _pool
+    if not DATABASE_URL:
+        logger.warning("DATABASE_URL not set — transcript capture disabled")
+        return
+    try:
+        _pool = await asyncpg.create_pool(DATABASE_URL, min_size=1, max_size=5)
+        async with _pool.acquire() as conn:
+            await conn.execute(CREATE_TABLE_SQL)
+        logger.info("Transcript DB pool ready")
+    except Exception as e:
+        logger.error("Failed to init transcript DB pool: %s", e)
+        _pool = None
+
+
+async def close_pool() -> None:
+    global _pool
+    if _pool:
+        await _pool.close()
+        _pool = None
+
+
+async def write_message(session_id: str, role: str, name: str, content: str) -> bool:
+    """Write a single message to the transcript table. Returns True on success."""
+    global _last_write_at, _write_failure_count
+    if not _pool:
+        return False
+    try:
+        async with _pool.acquire() as conn:
+            await conn.execute(
+                """
+                INSERT INTO chat_transcripts (session_id, role, name, content)
+                VALUES ($1, $2, $3, $4)
+                """,
+                session_id, role, name, content,
+            )
+        _last_write_at = datetime.now(timezone.utc)
+        _write_failure_count = 0
+        return True
+    except Exception as e:
+        _write_failure_count += 1
+        logger.error("Transcript write failed (failure #%d): %s", _write_failure_count, e)
+        return False
+
+
+async def write_messages_bulk(session_id: str, messages: list[dict]) -> bool:
+    """Write a list of {role, name, content} messages. Used for pre-rollover archive."""
+    global _last_write_at, _write_failure_count
+    if not _pool or not messages:
+        return False
+    try:
+        async with _pool.acquire() as conn:
+            await conn.executemany(
+                """
+                INSERT INTO chat_transcripts (session_id, role, name, content)
+                VALUES ($1, $2, $3, $4)
+                """,
+                [(session_id, m["role"], m["name"], m["content"]) for m in messages],
+            )
+        _last_write_at = datetime.now(timezone.utc)
+        _write_failure_count = 0
+        return True
+    except Exception as e:
+        _write_failure_count += 1
+        logger.error("Bulk transcript write failed: %s", e)
+        return False
+
+
+async def get_unprocessed_sessions() -> list[dict]:
+    """Return distinct sessions with unprocessed messages, oldest first."""
+    if not _pool:
+        return []
+    try:
+        async with _pool.acquire() as conn:
+            rows = await conn.fetch(
+                """
+                SELECT session_id, MIN(created_at) as first_msg, COUNT(*) as msg_count
+                FROM chat_transcripts
+                WHERE processed = FALSE
+                GROUP BY session_id
+                ORDER BY first_msg ASC
+                """
+            )
+        return [dict(r) for r in rows]
+    except Exception as e:
+        logger.error("Failed to fetch unprocessed sessions: %s", e)
+        return []
+
+
+async def get_session_messages(session_id: str) -> list[dict]:
+    """Return all messages for a session in order."""
+    if not _pool:
+        return []
+    try:
+        async with _pool.acquire() as conn:
+            rows = await conn.fetch(
+                """
+                SELECT role, name, content, created_at
+                FROM chat_transcripts
+                WHERE session_id = $1
+                ORDER BY created_at ASC
+                """,
+                session_id,
+            )
+        return [dict(r) for r in rows]
+    except Exception as e:
+        logger.error("Failed to fetch session messages: %s", e)
+        return []
+
+
+async def mark_session_processed(session_id: str) -> bool:
+    """Mark all messages in a session as processed. Only call after confirmed write to Letta."""
+    if not _pool:
+        return False
+    try:
+        async with _pool.acquire() as conn:
+            await conn.execute(
+                """
+                UPDATE chat_transcripts
+                SET processed = TRUE, processed_at = NOW()
+                WHERE session_id = $1
+                """,
+                session_id,
+            )
+        return True
+    except Exception as e:
+        logger.error("Failed to mark session processed: %s", e)
+        return False
+
+
+async def purge_old_processed(days: int = 5) -> int:
+    """Delete processed transcripts older than N days. Returns count deleted."""
+    if not _pool:
+        return 0
+    try:
+        async with _pool.acquire() as conn:
+            result = await conn.execute(
+                """
+                DELETE FROM chat_transcripts
+                WHERE processed = TRUE
+                  AND processed_at < NOW() - INTERVAL '1 day' * $1
+                """,
+                days,
+            )
+        count = int(result.split()[-1])
+        logger.info("Purged %d old processed transcript rows", count)
+        return count
+    except Exception as e:
+        logger.error("Failed to purge old transcripts: %s", e)
+        return 0
+
+
+def health_status() -> dict:
+    """Return current transcript capture health for the memory panel."""
+    return {
+        "db_connected": _pool is not None,
+        "last_write_at": _last_write_at.isoformat() if _last_write_at else None,
+        "consecutive_failures": _write_failure_count,
+    }
