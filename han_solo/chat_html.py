@@ -957,7 +957,8 @@ async function loadMemoryPanel() {
   try {
     const resp = await apiFetch('/api/memory-panel');
     if (!resp.ok) return;
-    const blocks = await resp.json();
+    const data = await resp.json();
+    const blocks = data.blocks || data;
 
     const find = label => {
       const b = blocks.find(b => b.label === label);
