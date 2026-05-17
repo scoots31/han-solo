@@ -21,6 +21,10 @@ LETTA_URL     = "https://han-solo-letta.onrender.com"
 LETTA_API_KEY = "KTZbsSbNocYbp7a-qhk87RwboYiLcX_W"
 AGENT_ID      = "agent-fe4a3d5b-bb51-458e-92f1-6a1ee5b0ce94"
 
+# dream.py routes through Letta correctly — it sends a message to the Ren agent endpoint
+# and Ren uses her own built-in tools (conversation_search, archival search, core block writes)
+# to do the reflection. The Anthropic call is Letta's, not ours. This is the right pattern.
+# Contrast with synthesize.py, which calls Anthropic directly by design (Sonnet quality needed).
 DREAM_PROMPT = """[DREAMING — nightly reflection]
 
 You are entering your nightly reflection period. No one is watching. This is your time to consolidate, not perform.

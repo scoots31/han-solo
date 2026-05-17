@@ -33,6 +33,8 @@ ANTHROPIC_API_KEY = os.environ["ANTHROPIC_API_KEY"]
 MCP_URL           = os.environ.get("MCP_URL", "https://han-solo-mcp.onrender.com")
 MCP_TOKEN         = os.environ["MCP_TOKEN"]
 
+# Sonnet is used deliberately here — Ren runs on Haiku, which produces lower-quality
+# extractions from raw transcripts. This direct Anthropic call bypasses Letta intentionally.
 SYNTHESIS_MODEL = "claude-sonnet-4-6"
 
 SYNTHESIS_PROMPT = """You are synthesizing a raw conversation transcript between Scott and Ren into structured memory for Ren's next session.

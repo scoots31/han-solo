@@ -245,6 +245,9 @@ async def insert_passage(content: str, tags: list[str]) -> dict[str, Any]:
     return data[0] if isinstance(data, list) else data
 
 
+# NOTE: This function exists and works — Voyage AI embeddings, pgvector, semantic search.
+# It is NOT yet exposed as an MCP tool that Ren or Claude Code can call directly.
+# Exposing it is the next step for T2/T3 retrieval — the infrastructure is ready.
 async def search_passages(query: str, limit: int = 20) -> list[dict[str, Any]]:
     agent_id = await ensure_ren_agent_id()
     resp = await _letta("GET", f"{LETTA_URL}/v1/agents/{agent_id}/archival-memory", params={"query_text": query, "limit": limit})
