@@ -21,7 +21,7 @@ def lookup_token(token: str) -> Optional[UserIdentity]:
     return TOKEN_REGISTRY.get(token)
 
 
-EXEMPT_PATHS = {"/health", "/"}
+EXEMPT_PATHS = {"/health", "/", "/api/jobs-status"}
 
 
 class BearerAuthMiddleware:
