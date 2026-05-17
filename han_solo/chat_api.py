@@ -257,6 +257,23 @@ async def api_send(request: Request) -> JSONResponse:
     })
 
 
+async def api_jobs_status(request: Request) -> JSONResponse:
+    """Public endpoint — no auth required. Returns current jobs_paused state."""
+    paused = await db.get_jobs_paused()
+    return JSONResponse({"paused": paused})
+
+
+async def api_set_jobs_paused(request: Request) -> JSONResponse:
+    """Toggle automated jobs on/off. Requires auth."""
+    get_current_user()
+    body = await request.json()
+    paused = bool(body.get("paused", False))
+    ok = await db.set_jobs_paused(paused)
+    if not ok:
+        return JSONResponse({"error": "DB write failed"}, status_code=500)
+    return JSONResponse({"paused": paused})
+
+
 async def api_memory_panel(request: Request) -> JSONResponse:
     get_current_user()
     blocks = await letta.list_core_blocks()

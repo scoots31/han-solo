@@ -536,6 +536,14 @@ CHAT_HTML = """<!DOCTYPE html>
 
   <div class="memory-panel" id="memoryPanel">
     <div>
+      <div class="panel-section-title">Automated Jobs</div>
+      <div class="panel-block-label">dream &amp; synthesize</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+        <span id="jobsStatusText" style="font-size:12px;">—</span>
+        <button id="jobsToggleBtn" style="font-size:11px;padding:3px 10px;border-radius:4px;border:1px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;" onclick="toggleJobs()">—</button>
+      </div>
+    </div>
+    <div>
       <div class="panel-section-title">Active Context</div>
       <div class="panel-block-label">project_state</div>
       <div class="panel-block-content" id="panelProject">—</div>
@@ -957,9 +965,18 @@ memoryBtn.addEventListener('click', async () => {
 
 async function loadMemoryPanel() {
   try {
-    const resp = await apiFetch('/api/memory-panel');
-    if (!resp.ok) return;
-    const data = await resp.json();
+    const [memResp, jobsResp] = await Promise.all([
+      apiFetch('/api/memory-panel'),
+      fetch('/api/jobs-status'),
+    ]);
+
+    if (jobsResp.ok) {
+      const jobsData = await jobsResp.json();
+      renderJobsStatus(jobsData.paused);
+    }
+
+    if (!memResp.ok) return;
+    const data = await memResp.json();
     const blocks = data.blocks || data;
 
     const find = label => {
@@ -972,6 +989,30 @@ async function loadMemoryPanel() {
     $('panelPending').textContent = find('pending_thoughts');
   } catch {
     $('panelCore').textContent = 'Error loading memory.';
+  }
+}
+
+function renderJobsStatus(paused) {
+  $('jobsStatusText').textContent = paused ? 'Paused' : 'Running';
+  $('jobsStatusText').style.color = paused ? '#aaa' : 'var(--gold)';
+  $('jobsToggleBtn').textContent  = paused ? 'Resume' : 'Pause';
+}
+
+async function toggleJobs() {
+  const currentlyPaused = $('jobsStatusText').textContent === 'Paused';
+  $('jobsToggleBtn').textContent = '...';
+  try {
+    const resp = await apiFetch('/api/jobs-paused', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paused: !currentlyPaused }),
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      renderJobsStatus(data.paused);
+    }
+  } catch {
+    $('jobsToggleBtn').textContent = 'Error';
   }
 }
 

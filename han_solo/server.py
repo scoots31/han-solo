@@ -193,6 +193,8 @@ _chat_routes = [
     Route("/api/history", chat_api.api_history),
     Route("/api/send", chat_api.api_send, methods=["POST"]),
     Route("/api/reset-session", chat_api.api_reset_session, methods=["POST"]),
+    Route("/api/jobs-status", chat_api.api_jobs_status),
+    Route("/api/jobs-paused", chat_api.api_set_jobs_paused, methods=["POST"]),
     Route("/api/memory-panel", chat_api.api_memory_panel),
     Route("/api/memory-health", api_memory_health),
     Route("/api/write-core-block", api_write_core_block, methods=["POST"]),

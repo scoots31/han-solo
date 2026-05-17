@@ -316,6 +316,42 @@ async def fail_transition(transition_id: int, error: str) -> bool:
         return False
 
 
+async def get_jobs_paused() -> bool:
+    """Return True if automated jobs (dream, synthesize) are paused."""
+    if not _pool:
+        return False
+    try:
+        async with _pool.acquire() as conn:
+            row = await conn.fetchrow(
+                "SELECT value FROM han_solo_config WHERE key = 'jobs_paused'"
+            )
+        return row["value"] == "true" if row else False
+    except Exception as e:
+        logger.error("Failed to read jobs_paused: %s", e)
+        return False
+
+
+async def set_jobs_paused(paused: bool) -> bool:
+    """Set the jobs_paused flag. Returns True on success."""
+    if not _pool:
+        return False
+    try:
+        async with _pool.acquire() as conn:
+            await conn.execute(
+                """
+                INSERT INTO han_solo_config (key, value, updated_at)
+                VALUES ('jobs_paused', $1, NOW())
+                ON CONFLICT (key) DO UPDATE SET value = $1, updated_at = NOW()
+                """,
+                "true" if paused else "false",
+            )
+        logger.info("jobs_paused set to %s", paused)
+        return True
+    except Exception as e:
+        logger.error("Failed to set jobs_paused: %s", e)
+        return False
+
+
 async def get_failed_transitions(hours: int = 24) -> list[dict]:
     """Return failed memory_transitions from the last N hours for health check."""
     if not _pool:

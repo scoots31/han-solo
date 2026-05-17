@@ -75,8 +75,28 @@ def letta_request(method, path, body=None, timeout=180):
 # Main
 # ---------------------------------------------------------------------------
 
+MCP_URL = "https://han-solo-mcp.onrender.com"
+
+
+def jobs_paused() -> bool:
+    """Check if automated jobs are paused. Returns True if paused, False on any error."""
+    try:
+        req = urllib.request.Request(f"{MCP_URL}/api/jobs-status")
+        with urllib.request.urlopen(req, timeout=10) as r:
+            data = json.loads(r.read())
+        return bool(data.get("paused", False))
+    except Exception as e:
+        print(f"Could not check jobs-status ({e}) — proceeding with dream.", file=sys.stderr)
+        return False
+
+
 def main():
     today = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    if jobs_paused():
+        print(f"[{today}] Automated jobs paused — skipping dream session.")
+        sys.exit(0)
+
     print(f"[{today}] Starting Ren dream session...")
 
     payload = {

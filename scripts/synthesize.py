@@ -544,6 +544,17 @@ CREATE INDEX IF NOT EXISTS idx_transitions_status
 async def run():
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M')}] Synthesis starting...")
 
+    # Check jobs_paused flag before doing any work
+    try:
+        pool = await asyncpg.create_pool(DATABASE_URL, min_size=1, max_size=1)
+        row = await pool.fetchrow("SELECT value FROM han_solo_config WHERE key = 'jobs_paused'")
+        await pool.close()
+        if row and row["value"] == "true":
+            print("Automated jobs paused — skipping synthesis.")
+            return
+    except Exception as e:
+        print(f"Could not check jobs_paused ({e}) — proceeding with synthesis.", file=sys.stderr)
+
     pool = await asyncpg.create_pool(DATABASE_URL, min_size=1, max_size=3)
 
     try:
