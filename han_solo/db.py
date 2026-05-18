@@ -494,6 +494,37 @@ async def search_t4(
         return []
 
 
+async def delete_t4_entry(
+    project_slug: str,
+    entry_type: str,
+    entry_id: str | None = None,
+) -> dict:
+    """
+    Delete a T4 entry (or all entries of a type for a project).
+    If entry_id is None, deletes all entries matching project_slug + entry_type.
+    Returns count of deleted rows.
+    """
+    if not _pool:
+        return {"error": "no pool"}
+    try:
+        async with _pool.acquire() as conn:
+            if entry_id:
+                result = await conn.execute(
+                    "DELETE FROM t4_entries WHERE project_slug=$1 AND entry_type=$2 AND entry_id=$3",
+                    project_slug, entry_type, entry_id,
+                )
+            else:
+                result = await conn.execute(
+                    "DELETE FROM t4_entries WHERE project_slug=$1 AND entry_type=$2",
+                    project_slug, entry_type,
+                )
+        count = int(result.split()[-1])
+        return {"deleted": count}
+    except Exception as e:
+        logger.error("Failed to delete T4 entry: %s", e)
+        return {"error": str(e)}
+
+
 async def set_jobs_paused(paused: bool) -> bool:
     """Set the jobs_paused flag. Returns True on success."""
     if not _pool:

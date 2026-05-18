@@ -270,3 +270,32 @@ def register(server: FastMCP) -> None:
                 "updated_at": r["updated_at"].isoformat() if r.get("updated_at") else None,
             })
         return results
+
+    @server.tool()
+    async def delete_t4_entry(
+        project_slug: str,
+        entry_type: str,
+        entry_id: str = "",
+    ) -> dict:
+        """
+        Delete a T4 entry by project, type, and ID.
+
+        project_slug: kebab-case project name
+        entry_type: the artifact type
+        entry_id: omit to delete ALL entries of this type for the project
+
+        Returns count of deleted rows.
+        """
+        get_current_user()
+
+        if entry_type not in WRITE_BEHAVIORS:
+            return {"error": f"unknown entry_type '{entry_type}'"}
+
+        result = await db.delete_t4_entry(
+            project_slug=project_slug,
+            entry_type=entry_type,
+            entry_id=entry_id or None,
+        )
+        if "error" in result:
+            return {"error": result["error"]}
+        return {"deleted": result["deleted"], "project_slug": project_slug, "entry_type": entry_type, "entry_id": entry_id or "(all)"}
