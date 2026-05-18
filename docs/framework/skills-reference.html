@@ -7,6 +7,57 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../_shared.css">
+  <style>
+    .skills-layout {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 52px;
+      align-items: start;
+    }
+    .skills-sidebar {
+      position: sticky;
+      top: 72px;
+      max-height: calc(100vh - 90px);
+      overflow-y: auto;
+      padding-bottom: 40px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+    .skills-sidebar::-webkit-scrollbar { width: 4px; }
+    .skills-sidebar::-webkit-scrollbar-track { background: transparent; }
+    .skills-sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .snav-group { margin-bottom: 20px; }
+    .snav-group-label {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 0 10px 6px;
+      display: block;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 4px;
+    }
+    .snav-group a {
+      display: block;
+      font-size: 12.5px;
+      color: rgba(26,26,26,0.62);
+      padding: 4px 10px;
+      border-radius: 5px;
+      text-decoration: none;
+      transition: color .15s, background .15s;
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+    }
+    .snav-group a:hover {
+      color: var(--text);
+      background: rgba(189,140,125,0.09);
+      text-decoration: none;
+    }
+    @media (max-width: 900px) {
+      .skills-layout { grid-template-columns: 1fr; }
+      .skills-sidebar { position: static; max-height: none; }
+    }
+  </style>
 </head>
 <body>
 
@@ -14,7 +65,7 @@
   <span class="brand">Solo Builder</span>
   <a class="nav-link" href="getting-started.html">Getting Started</a>
   <a class="nav-link" href="process-map.html">Process Map</a>
-  <a class="nav-link" href="skills-reference.html">Skills</a>
+  <a class="nav-link active" href="skills-reference.html">Skills</a>
   <a class="nav-link" href="framework-architecture.html">Architecture</a>
 </nav>
 
@@ -26,511 +77,608 @@
   </div>
 
   <div class="stat-grid">
-    <div class="stat"><span class="stat-num">36</span><span class="stat-label">Skills</span></div>
-    <div class="stat"><span class="stat-num">4</span><span class="stat-label">Always-on</span></div>
-    <div class="stat"><span class="stat-num">1</span><span class="stat-label">Companion</span></div>
-    <div class="stat"><span class="stat-num">3</span><span class="stat-label">Session modes</span></div>
+    <div class="stat-item"><span class="stat-number">36</span><span class="stat-label">Skills</span></div>
+    <div class="stat-item"><span class="stat-number">4</span><span class="stat-label">Always-on</span></div>
+    <div class="stat-item"><span class="stat-number">1</span><span class="stat-label">Companion</span></div>
+    <div class="stat-item"><span class="stat-number">3</span><span class="stat-label">Session modes</span></div>
   </div>
 
-  <h2>Session Modes</h2>
-  <p>Controls how much the framework activates at the start of a session. Bare is the default — the framework is silent until you invoke a skill. Token cost scales with activation: guided (highest) · piloted (moderate) · bare (lowest).</p>
-  <div class="card-grid">
-    <div class="card">
-      <div class="section-label">Default</div>
-      <h3>bare</h3>
-      <p>The framework is silent. No routing, no always-on skills. Every skill loads only when explicitly invoked. Maximum token efficiency.</p>
-      <p><strong>Invoke:</strong> "bare mode" · <code>/bare</code></p>
-    </div>
-    <div class="card">
-      <div class="section-label">Active</div>
-      <h3>piloted</h3>
-      <p>Always-on skills activate once and persist for the session. Phase skills are invoked manually — you choose what to run and when.</p>
-      <p><strong>Invoke:</strong> "piloted mode" · <code>/piloted</code></p>
-    </div>
-    <div class="card">
-      <div class="section-label">Guided</div>
-      <h3>guided</h3>
-      <p>Full framework engagement. The start skill reads your opening message and routes automatically. Always-on skills load and persist. The phase chain drives the session.</p>
-      <p><strong>Invoke:</strong> "guided mode" · <code>/guided</code> · "guided on [project name]"</p>
-    </div>
-  </div>
-  <div class="callout"><strong>Session hygiene:</strong> End sessions at phase gates, not mid-phase. Say "let's close out" — the continuity skill captures state and updates the handoff. To resume: paste the resume prompt or say "guided on [project name]" if registered in projects.md.</div>
+  <div class="skills-layout">
 
-  <h2>Entry &amp; Routing</h2>
-  <p>The front door. Reads context, routes to the right starting point.</p>
+    <!-- ── Sidebar ── -->
+    <aside class="skills-sidebar">
+      <div class="snav-group">
+        <span class="snav-group-label">Session Modes</span>
+        <a href="#session-modes">bare</a>
+        <a href="#session-modes">piloted</a>
+        <a href="#session-modes">guided</a>
+      </div>
+      <div class="snav-group">
+        <span class="snav-group-label">Entry &amp; Routing</span>
+        <a href="#start">start</a>
+        <a href="#onboard">onboard</a>
+      </div>
+      <div class="snav-group">
+        <span class="snav-group-label">Discovery</span>
+        <a href="#brainstorming">brainstorming</a>
+        <a href="#discover">discover</a>
+        <a href="#tech-context">tech-context</a>
+        <a href="#research-spike">research-spike</a>
+      </div>
+      <div class="snav-group">
+        <span class="snav-group-label">Design</span>
+        <a href="#design-sprint">design-sprint</a>
+        <a href="#frontend-design">frontend-design</a>
+        <a href="#awesome-design-md">awesome-design-md</a>
+      </div>
+      <div class="snav-group">
+        <span class="snav-group-label">Data &amp; Review</span>
+        <a href="#data-scaffold">data-scaffold</a>
+        <a href="#design-review">design-review</a>
+      </div>
+      <div class="snav-group">
+        <span class="snav-group-label">Planning</span>
+        <a href="#prd-to-plan">prd-to-plan</a>
+        <a href="#to-issues">to-issues</a>
+        <a href="#to-prd">to-prd</a>
+        <a href="#grill-me">grill-me</a>
+      </div>
+      <div class="snav-group">
+        <span class="snav-group-label">Build</span>
+        <a href="#solo-build">solo-build</a>
+        <a href="#autopilot">autopilot</a>
+        <a href="#tdd">tdd</a>
+        <a href="#principal-engineer">principal-engineer</a>
+      </div>
+      <div class="snav-group">
+        <span class="snav-group-label">QA Chain</span>
+        <a href="#code-review-and-quality">code-review-and-quality</a>
+        <a href="#solo-qa">solo-qa</a>
+        <a href="#qa-triage">qa-triage</a>
+        <a href="#process-change">process-change</a>
+      </div>
+      <div class="snav-group">
+        <span class="snav-group-label">Phase Test &amp; Deploy</span>
+        <a href="#phase-test">phase-test</a>
+        <a href="#deploy">deploy</a>
+      </div>
+      <div class="snav-group">
+        <span class="snav-group-label">Always-On</span>
+        <a href="#process-mapper">process-mapper</a>
+        <a href="#product-continuity">product-continuity</a>
+        <a href="#framework-health">framework-health</a>
+        <a href="#retrospective">retrospective</a>
+      </div>
+      <div class="snav-group">
+        <span class="snav-group-label">Companion</span>
+        <a href="#nivya">nivya</a>
+        <a href="#ren">ren</a>
+      </div>
+      <div class="snav-group">
+        <span class="snav-group-label">Workshop</span>
+        <a href="#scope-check">scope-check</a>
+        <a href="#spike">spike</a>
+        <a href="#land">land</a>
+      </div>
+      <div class="snav-group">
+        <span class="snav-group-label">Support</span>
+        <a href="#bug-fix">bug-fix</a>
+        <a href="#enhancement">enhancement</a>
+        <a href="#dependency-upgrade">dependency-upgrade</a>
+        <a href="#security-patch">security-patch</a>
+      </div>
+      <div class="snav-group">
+        <span class="snav-group-label">Meta / Framework</span>
+        <a href="#framework-curator">framework-curator</a>
+        <a href="#comms-cascade">comms-cascade</a>
+      </div>
+    </aside>
 
-  <h3>start</h3>
-  <p>The framework's front door. Reads the opening message of a new project conversation and routes automatically to Brainstorm (exploratory ideas) or Discover (clear solution in mind). Checks for existing context before routing — never restarts a project already in progress. Detects deployed projects and opens a new cycle. On named project resume, reads only the two active handoff sections on first load — full handoff loads on demand.</p>
-  <table>
-    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Routing logic</strong></td><td>Reads opening tone — exploratory vs. articulated idea. Asks one question if routing is ambiguous.</td></tr>
-      <tr><td><strong>Existing context</strong></td><td>Checks for blueprint, discovery brief, active sprint before routing — never restarts in-progress projects</td></tr>
-      <tr><td><strong>Deployed projects</strong></td><td>Detects deployed projects — routes to new cycle protocol, opens new phase in existing backlog</td></tr>
-      <tr><td><strong>Output</strong></td><td>Routing decision: Brainstorm, Discover, or new cycle — hands off immediately</td></tr>
-    </tbody>
-  </table>
+    <!-- ── Main content ── -->
+    <div class="skills-main">
 
-  <h3>onboard</h3>
-  <p>Brings an existing project into the framework without redoing the work. Reads the project directory, semantically maps content to gate artifacts, synthesizes with solo confirmation, places the project at the correct starting phase, and verifies companion compatibility before exiting.</p>
-  <table>
-    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Reading approach</strong></td><td>Reads docs, notes, and planning files — skips code files. Semantic matching — content-based, not filename-based.</td></tr>
-      <tr><td><strong>Gap handling</strong></td><td>Gaps surface as targeted discussion questions. Classifies: undocumented work (ask) vs. work not done yet (starting phase)</td></tr>
-      <tr><td><strong>Companion pass</strong></td><td>Verifies projects.md registration, backlog section headers, handoff section, and Review URL fields before exiting</td></tr>
-      <tr><td><strong>Output</strong></td><td>Framework gate files synthesized · handoff.md initialized · clear starting phase statement</td></tr>
-    </tbody>
-  </table>
+      <h2 id="session-modes">Session Modes</h2>
+      <p>Controls how much the framework activates at the start of a session. Bare is the default — the framework is silent until you invoke a skill. Token cost scales with activation: guided (highest) · piloted (moderate) · bare (lowest).</p>
+      <div class="card-grid">
+        <div class="card">
+          <div class="section-label">Default</div>
+          <h3>bare</h3>
+          <p>The framework is silent. No routing, no always-on skills. Every skill loads only when explicitly invoked. Maximum token efficiency.</p>
+          <p><strong>Invoke:</strong> "bare mode" · <code>/bare</code></p>
+        </div>
+        <div class="card">
+          <div class="section-label">Active</div>
+          <h3>piloted</h3>
+          <p>Always-on skills activate once and persist for the session. Phase skills are invoked manually — you choose what to run and when.</p>
+          <p><strong>Invoke:</strong> "piloted mode" · <code>/piloted</code></p>
+        </div>
+        <div class="card">
+          <div class="section-label">Guided</div>
+          <h3>guided</h3>
+          <p>Full framework engagement. The start skill reads your opening message and routes automatically. Always-on skills load and persist. The phase chain drives the session.</p>
+          <p><strong>Invoke:</strong> "guided mode" · <code>/guided</code> · "guided on [project name]"</p>
+        </div>
+      </div>
+      <div class="callout"><strong>Session hygiene:</strong> End sessions at phase gates, not mid-phase. Say "let's close out" — the continuity skill captures state and updates the handoff. To resume: paste the resume prompt or say "guided on [project name]" if registered in projects.md.</div>
 
-  <h2>Discovery</h2>
-  <p>Understanding the problem, the process, and the constraints before anything gets designed.</p>
+      <h2>Entry &amp; Routing</h2>
+      <p>The front door. Reads context, routes to the right starting point.</p>
 
-  <h3>brainstorming</h3>
-  <p>Product exploration for ideas that aren't fully formed. A genuine collaborative conversation — not a checklist or a spec session. Includes a process sketch moment and a visual sketch mid-session when the idea benefits from something concrete to react to.</p>
-  <table>
-    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Process sketch moment</strong></td><td>process-mapper activates when conversation surfaces a process — captures preliminary as-is and to-be sketch</td></tr>
-      <tr><td><strong>Visual sketch</strong></td><td>Rough HTML screen as a thinking tool, not a deliverable. Triggers "warmer / colder" reaction.</td></tr>
-      <tr><td><strong>Approach</strong></td><td>One question per round — the right question, not the next on a list. Not a spec or feasibility session.</td></tr>
-      <tr><td><strong>Output</strong></td><td>docs/brainstorm-[date]-[topic].md · idea summary · process sketch · research items · routing decision</td></tr>
-    </tbody>
-  </table>
+      <h3 id="start">start</h3>
+      <p>The framework's front door. Reads the opening message of a new project conversation and routes automatically to Brainstorm (exploratory ideas) or Discover (clear solution in mind). Checks for existing context before routing — never restarts a project already in progress. Detects deployed projects and opens a new cycle. On named project resume, reads only the two active handoff sections on first load — full handoff loads on demand.</p>
+      <table>
+        <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Routing logic</strong></td><td>Reads opening tone — exploratory vs. articulated idea. Asks one question if routing is ambiguous.</td></tr>
+          <tr><td><strong>Existing context</strong></td><td>Checks for blueprint, discovery brief, active sprint before routing — never restarts in-progress projects</td></tr>
+          <tr><td><strong>Deployed projects</strong></td><td>Detects deployed projects — routes to new cycle protocol, opens new phase in existing backlog</td></tr>
+          <tr><td><strong>Output</strong></td><td>Routing decision: Brainstorm, Discover, or new cycle — hands off immediately</td></tr>
+        </tbody>
+      </table>
 
-  <h3>discover</h3>
-  <p>The day-one conversation that builds the full product story. Produces the discovery brief and, critically, produces and agrees the as-is and to-be process maps before any design begins. The to-be map agreed here becomes the process contract for every downstream phase.</p>
-  <table>
-    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Approach</strong></td><td>Narrative conversation — not a requirements form. Surfaces who/what/value with specificity, not user types.</td></tr>
-      <tr><td><strong>Process maps</strong></td><td>As-is map (including manual processes) and to-be map. To-be agreed before design begins — this is the gate.</td></tr>
-      <tr><td><strong>Gate</strong></td><td>To-be map agreed before design sprint begins</td></tr>
-      <tr><td><strong>Output</strong></td><td>docs/discovery-brief.md · docs/process/as-is-[name].md · docs/process/to-be-[name].md</td></tr>
-    </tbody>
-  </table>
+      <h3 id="onboard">onboard</h3>
+      <p>Brings an existing project into the framework without redoing the work. Reads the project directory, semantically maps content to gate artifacts, synthesizes with solo confirmation, places the project at the correct starting phase, and verifies companion compatibility before exiting.</p>
+      <table>
+        <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Reading approach</strong></td><td>Reads docs, notes, and planning files — skips code files. Semantic matching — content-based, not filename-based.</td></tr>
+          <tr><td><strong>Gap handling</strong></td><td>Gaps surface as targeted discussion questions. Classifies: undocumented work (ask) vs. work not done yet (starting phase)</td></tr>
+          <tr><td><strong>Companion pass</strong></td><td>Verifies projects.md registration, backlog section headers, handoff section, and Review URL fields before exiting</td></tr>
+          <tr><td><strong>Output</strong></td><td>Framework gate files synthesized · handoff.md initialized · clear starting phase statement</td></tr>
+        </tbody>
+      </table>
 
-  <h3>tech-context</h3>
-  <p>Establishes the full technical context before design begins — stack, constraints, infrastructure requirements, deploy configuration, security classification, and Claude API authentication pattern. Every downstream skill reads this document. Required before Design Sprint can begin.</p>
-  <table>
-    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Deploy paths</strong></td><td>Plain-language question maps to one of seven named paths (Local Mac, Cloudflare, Railway, Render, Fly.io, AWS App Runner, No pipeline)</td></tr>
-      <tr><td><strong>Security classification</strong></td><td>Assigns one or more of seven classes: Standard, Personal, Financial, Authentication, Multi-tenant, Confidential, Regulated. Read by code-review-and-quality for security sub-checks.</td></tr>
-      <tr><td><strong>Infrastructure slices</strong></td><td>Identifies prerequisites that must be built before any feature slice can start</td></tr>
-      <tr><td><strong>Output</strong></td><td>docs/tech-context.md · stack, constraints, deploy method, branching model, security classification, Claude API auth pattern</td></tr>
-    </tbody>
-  </table>
+      <h2>Discovery</h2>
+      <p>Understanding the problem, the process, and the constraints before anything gets designed.</p>
 
-  <h3>research-spike</h3>
-  <p>Timeboxed investigation of a specific unknown. Callable from any phase — when a question surfaces that can't be designed around without an answer. Returns a finding and a recommendation, then hands back to the phase that triggered it.</p>
-  <table>
-    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Scope</strong></td><td>One specific question — not open-ended exploration. Timeboxed — produces a finding, not a design.</td></tr>
-      <tr><td><strong>Triggered by</strong></td><td>Any phase when a specific question blocks progress · design-review when a slice is Blocked · principal-engineer when an architectural unknown surfaces</td></tr>
-      <tr><td><strong>Output</strong></td><td>docs/spikes/[topic].md · finding: feasible / feasible with tradeoffs / not feasible · recommendation for invoking phase</td></tr>
-    </tbody>
-  </table>
+      <h3 id="brainstorming">brainstorming</h3>
+      <p>Product exploration for ideas that aren't fully formed. A genuine collaborative conversation — not a checklist or a spec session. Includes a process sketch moment and a visual sketch mid-session when the idea benefits from something concrete to react to.</p>
+      <table>
+        <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Process sketch moment</strong></td><td>process-mapper activates when conversation surfaces a process — captures preliminary as-is and to-be sketch</td></tr>
+          <tr><td><strong>Visual sketch</strong></td><td>Rough HTML screen as a thinking tool, not a deliverable. Triggers "warmer / colder" reaction.</td></tr>
+          <tr><td><strong>Approach</strong></td><td>One question per round — the right question, not the next on a list. Not a spec or feasibility session.</td></tr>
+          <tr><td><strong>Output</strong></td><td>docs/brainstorm-[date]-[topic].md · idea summary · process sketch · research items · routing decision</td></tr>
+        </tbody>
+      </table>
 
-  <h2>Design</h2>
-  <p>Producing the shared visual artifact that every downstream phase points at.</p>
+      <h3 id="discover">discover</h3>
+      <p>The day-one conversation that builds the full product story. Produces the discovery brief and, critically, produces and agrees the as-is and to-be process maps before any design begins. The to-be map agreed here becomes the process contract for every downstream phase.</p>
+      <table>
+        <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Approach</strong></td><td>Narrative conversation — not a requirements form. Surfaces who/what/value with specificity, not user types.</td></tr>
+          <tr><td><strong>Process maps</strong></td><td>As-is map (including manual processes) and to-be map. To-be agreed before design begins — this is the gate.</td></tr>
+          <tr><td><strong>Gate</strong></td><td>To-be map agreed before design sprint begins</td></tr>
+          <tr><td><strong>Output</strong></td><td>docs/discovery-brief.md · docs/process/as-is-[name].md · docs/process/to-be-[name].md</td></tr>
+        </tbody>
+      </table>
 
-  <h3>design-sprint</h3>
-  <p>Produces the HTML artifact — all screens, good enough to make real decisions from. The design sprint is the visual contract: the first shared artifact everyone can point at and agree on. Reads both the discovery brief and the to-be process map; stops if the to-be map doesn't exist.</p>
-  <table>
-    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
-    <tbody>
-      <tr><td><strong>On-ramp A</strong></td><td>Scratch → hero screen → warmer/colder loop → all screens</td></tr>
-      <tr><td><strong>On-ramp B</strong></td><td>Figma import via MCP — uses design as source of truth</td></tr>
-      <tr><td><strong>On-ramp C</strong></td><td>Reference screenshot → aesthetic extraction → produce in that direction</td></tr>
-      <tr><td><strong>Process thread</strong></td><td>process-mapper cross-references screens against to-be map, annotates with screen refs, flags gaps as decisions</td></tr>
-      <tr><td><strong>Gate</strong></td><td>Deferred decisions log required before planning</td></tr>
-      <tr><td><strong>Output</strong></td><td>docs/design/sprint-[id].html · docs/design/deferred-decisions.md · optional stakeholder handoff package</td></tr>
-    </tbody>
-  </table>
+      <h3 id="tech-context">tech-context</h3>
+      <p>Establishes the full technical context before design begins — stack, constraints, infrastructure requirements, deploy configuration, security classification, and Claude API authentication pattern. Every downstream skill reads this document. Required before Design Sprint can begin.</p>
+      <table>
+        <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Deploy paths</strong></td><td>Plain-language question maps to one of seven named paths (Local Mac, Cloudflare, Railway, Render, Fly.io, AWS App Runner, No pipeline)</td></tr>
+          <tr><td><strong>Security classification</strong></td><td>Assigns one or more of seven classes: Standard, Personal, Financial, Authentication, Multi-tenant, Confidential, Regulated. Read by code-review-and-quality for security sub-checks.</td></tr>
+          <tr><td><strong>Infrastructure slices</strong></td><td>Identifies prerequisites that must be built before any feature slice can start</td></tr>
+          <tr><td><strong>Output</strong></td><td>docs/tech-context.md · stack, constraints, deploy method, branching model, security classification, Claude API auth pattern</td></tr>
+        </tbody>
+      </table>
 
-  <h3>frontend-design</h3>
-  <p>Aesthetic and structural guidance for the HTML artifact. Provides design system direction — color, typography, spacing, component patterns — to ensure visual consistency across all screens produced in the design sprint. Activated by design-sprint, not standalone.</p>
+      <h3 id="research-spike">research-spike</h3>
+      <p>Timeboxed investigation of a specific unknown. Callable from any phase — when a question surfaces that can't be designed around without an answer. Returns a finding and a recommendation, then hands back to the phase that triggered it.</p>
+      <table>
+        <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Scope</strong></td><td>One specific question — not open-ended exploration. Timeboxed — produces a finding, not a design.</td></tr>
+          <tr><td><strong>Triggered by</strong></td><td>Any phase when a specific question blocks progress · design-review when a slice is Blocked · principal-engineer when an architectural unknown surfaces</td></tr>
+          <tr><td><strong>Output</strong></td><td>docs/spikes/[topic].md · finding: feasible / feasible with tradeoffs / not feasible · recommendation for invoking phase</td></tr>
+        </tbody>
+      </table>
 
-  <h3>awesome-design-md</h3>
-  <p>On-ramp 3 for the design sprint — reference-based aesthetic extraction. Takes a screenshot or design reference and extracts the design language for use as an aesthetic constraint when producing the HTML artifact. Works from screenshots, live URLs, or verbal description.</p>
+      <h2>Design</h2>
+      <p>Producing the shared visual artifact that every downstream phase points at.</p>
 
-  <h2>Data &amp; Design Review</h2>
-  <p>Generating realistic mock data and converting design screens into a defined, Ready backlog.</p>
+      <h3 id="design-sprint">design-sprint</h3>
+      <p>Produces the HTML artifact — all screens, good enough to make real decisions from. The design sprint is the visual contract: the first shared artifact everyone can point at and agree on. Reads both the discovery brief and the to-be process map; stops if the to-be map doesn't exist.</p>
+      <table>
+        <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>On-ramp A</strong></td><td>Scratch → hero screen → warmer/colder loop → all screens</td></tr>
+          <tr><td><strong>On-ramp B</strong></td><td>Figma import via MCP — uses design as source of truth</td></tr>
+          <tr><td><strong>On-ramp C</strong></td><td>Reference screenshot → aesthetic extraction → produce in that direction</td></tr>
+          <tr><td><strong>Process thread</strong></td><td>process-mapper cross-references screens against to-be map, annotates with screen refs, flags gaps as decisions</td></tr>
+          <tr><td><strong>Gate</strong></td><td>Deferred decisions log required before planning</td></tr>
+          <tr><td><strong>Output</strong></td><td>docs/design/sprint-[id].html · docs/design/deferred-decisions.md · optional stakeholder handoff package</td></tr>
+        </tbody>
+      </table>
 
-  <h3>data-scaffold</h3>
-  <p>Generates realistic mock data for all screen data entities. Creates a clean mock layer with a single swap seam — easy to replace with real API data when ready. Flags data behavior candidates so design review can ask the right questions before UI slices are finalized.</p>
-  <table>
-    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Data quality</strong></td><td>Generates realistic (not placeholder) values — names, amounts, dates that look real</td></tr>
-      <tr><td><strong>Single seam</strong></td><td>One place to swap mock for real — nothing hardcoded across the codebase</td></tr>
-      <tr><td><strong>Behavior candidates</strong></td><td>Flags list entities and external API sources in data-mapping.md — these need the design review data behavior pass</td></tr>
-      <tr><td><strong>Updates</strong></td><td>Re-runs when data questions log has newly resolved entries — pagination edge cases, null field rates, empty/error states seeded</td></tr>
-      <tr><td><strong>Output</strong></td><td>data/mock/[entity].json · docs/data-mapping.md · proto-API contract</td></tr>
-    </tbody>
-  </table>
+      <h3 id="frontend-design">frontend-design</h3>
+      <p>Aesthetic and structural guidance for the HTML artifact. Provides design system direction — color, typography, spacing, component patterns — to ensure visual consistency across all screens produced in the design sprint. Activated by design-sprint, not standalone.</p>
 
-  <h3>design-review</h3>
-  <p>The iterative loop between design artifact and build decision. Runs as many rounds as the project needs. Each round refines the design, defines slices, and updates the backlog. Build begins when enough slices are Ready — not when all are. Three specialist lenses run every round.</p>
-  <table>
-    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Three lenses</strong></td><td>PM (right problem?), Tech Lead (buildable?), Data (where does every field come from?) — every round</td></tr>
-      <tr><td><strong>Data behavior pass</strong></td><td>Required for every screen with external data: volume, list behavior, nulls, empty/error/loading states. Produces a data questions log. Unresolved question blocks dependent UI slices from Ready.</td></tr>
-      <tr><td><strong>Slice requirements</strong></td><td>Every slice needs: plain language description, technical description, process anchor, quality contract (four categories: Failure states, Edge cases, Input validation, Security), design anchor, data anchor, done criteria before reaching Ready</td></tr>
-      <tr><td><strong>Coverage check</strong></td><td>Every design review round — every to-be step mapped to a slice or explicitly decided</td></tr>
-      <tr><td><strong>Gate</strong></td><td>Enough Ready slices for Phase 1 before build starts</td></tr>
-      <tr><td><strong>Output</strong></td><td>docs/backlog.md with full slice records · process coverage map per round · review log</td></tr>
-    </tbody>
-  </table>
+      <h3 id="awesome-design-md">awesome-design-md</h3>
+      <p>On-ramp 3 for the design sprint — reference-based aesthetic extraction. Takes a screenshot or design reference and extracts the design language for use as an aesthetic constraint when producing the HTML artifact. Works from screenshots, live URLs, or verbal description.</p>
 
-  <h2>Planning</h2>
-  <p>Sequencing work by risk and process order, then converting to executable issues.</p>
+      <h2>Data &amp; Design Review</h2>
+      <p>Generating realistic mock data and converting design screens into a defined, Ready backlog.</p>
 
-  <h3>prd-to-plan</h3>
-  <p>Turns the backlog of Ready slices into a sequenced, multi-phase implementation plan. Sequences by two forces in tension — risk order (hardest things first) and process order (to-be map step sequence). Resolves conflicts explicitly. Stops if the to-be process map doesn't exist.</p>
-  <table>
-    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Sequencing</strong></td><td>Risk order AND process order — conflicts named explicitly. Infrastructure slices always first.</td></tr>
-      <tr><td><strong>Deliverables</strong></td><td>Groups slices by shared outcome. Each deliverable: technical spec (AI-facing), solo description (solo-facing), acceptance criteria (shared). Type assigned: Screen or Logic.</td></tr>
-      <tr><td><strong>Integration deliverables</strong></td><td>Every Screen deliverable with external data gets a companion Logic deliverable for data integration. Always sequences after its Screen companion is Accepted.</td></tr>
-      <tr><td><strong>Architecture classification</strong></td><td>Each slice classified as Leaf node (self-contained) or Core architecture (touches data models, shared logic, or infrastructure). Unclassified slices block the plan.</td></tr>
-      <tr><td><strong>Output</strong></td><td>Phased implementation plan · backlog.md updated with process anchors · hands off to to-issues on approval</td></tr>
-    </tbody>
-  </table>
+      <h3 id="data-scaffold">data-scaffold</h3>
+      <p>Generates realistic mock data for all screen data entities. Creates a clean mock layer with a single swap seam — easy to replace with real API data when ready. Flags data behavior candidates so design review can ask the right questions before UI slices are finalized.</p>
+      <table>
+        <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Data quality</strong></td><td>Generates realistic (not placeholder) values — names, amounts, dates that look real</td></tr>
+          <tr><td><strong>Single seam</strong></td><td>One place to swap mock for real — nothing hardcoded across the codebase</td></tr>
+          <tr><td><strong>Behavior candidates</strong></td><td>Flags list entities and external API sources in data-mapping.md — these need the design review data behavior pass</td></tr>
+          <tr><td><strong>Updates</strong></td><td>Re-runs when data questions log has newly resolved entries — pagination edge cases, null field rates, empty/error states seeded</td></tr>
+          <tr><td><strong>Output</strong></td><td>data/mock/[entity].json · docs/data-mapping.md · proto-API contract</td></tr>
+        </tbody>
+      </table>
 
-  <h3>to-issues</h3>
-  <p>Converts the approved implementation plan into GitHub issues in dependency order. Each issue is self-contained — design reference, process anchor, data anchor, done criteria, and dependency links included. A builder can start any slice from its issue alone.</p>
-  <table>
-    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Prerequisites</strong></td><td>Plan approved, gh CLI authenticated, process anchors on every Ready slice</td></tr>
-      <tr><td><strong>Issue format</strong></td><td>Title: [SL-XXX] [Slice Name] · labels by phase and status · deferred slices excluded</td></tr>
-      <tr><td><strong>Output</strong></td><td>GitHub issues in dependency order · confirmation report: slice ID → issue number → status</td></tr>
-    </tbody>
-  </table>
+      <h3 id="design-review">design-review</h3>
+      <p>The iterative loop between design artifact and build decision. Runs as many rounds as the project needs. Each round refines the design, defines slices, and updates the backlog. Build begins when enough slices are Ready — not when all are. Three specialist lenses run every round.</p>
+      <table>
+        <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Three lenses</strong></td><td>PM (right problem?), Tech Lead (buildable?), Data (where does every field come from?) — every round</td></tr>
+          <tr><td><strong>Data behavior pass</strong></td><td>Required for every screen with external data: volume, list behavior, nulls, empty/error/loading states. Produces a data questions log. Unresolved question blocks dependent UI slices from Ready.</td></tr>
+          <tr><td><strong>Slice requirements</strong></td><td>Every slice needs: plain language description, technical description, process anchor, quality contract (four categories: Failure states, Edge cases, Input validation, Security), design anchor, data anchor, done criteria before reaching Ready</td></tr>
+          <tr><td><strong>Coverage check</strong></td><td>Every design review round — every to-be step mapped to a slice or explicitly decided</td></tr>
+          <tr><td><strong>Gate</strong></td><td>Enough Ready slices for Phase 1 before build starts</td></tr>
+          <tr><td><strong>Output</strong></td><td>docs/backlog.md with full slice records · process coverage map per round · review log</td></tr>
+        </tbody>
+      </table>
 
-  <h3>to-prd</h3>
-  <p>Synthesizes accumulated project context into a formal PRD. Optional — used when a formal requirements document is needed for stakeholder alignment, approval processes, or documentation. Reads the discovery brief, design decisions, and deferred decisions log.</p>
+      <h2>Planning</h2>
+      <p>Sequencing work by risk and process order, then converting to executable issues.</p>
 
-  <h3>grill-me</h3>
-  <p>Skeptical PM stress-test. Hard questions, challenged assumptions, no vague answers accepted. Used before committing to a plan, before starting a significant build phase, or anytime the solo wants a second opinion that doesn't pull punches.</p>
-  <table>
-    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Approach</strong></td><td>Challenges the "why" — is this the right problem? Surfaces unstated assumptions and treats them as risks. Not adversarial — rigorous.</td></tr>
-      <tr><td><strong>Output</strong></td><td>List of challenged assumptions · open questions that need answers · confirmed decisions that survived the challenge</td></tr>
-    </tbody>
-  </table>
+      <h3 id="prd-to-plan">prd-to-plan</h3>
+      <p>Turns the backlog of Ready slices into a sequenced, multi-phase implementation plan. Sequences by two forces in tension — risk order (hardest things first) and process order (to-be map step sequence). Resolves conflicts explicitly. Stops if the to-be process map doesn't exist.</p>
+      <table>
+        <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Sequencing</strong></td><td>Risk order AND process order — conflicts named explicitly. Infrastructure slices always first.</td></tr>
+          <tr><td><strong>Deliverables</strong></td><td>Groups slices by shared outcome. Each deliverable: technical spec (AI-facing), solo description (solo-facing), acceptance criteria (shared). Type assigned: Screen or Logic.</td></tr>
+          <tr><td><strong>Integration deliverables</strong></td><td>Every Screen deliverable with external data gets a companion Logic deliverable for data integration. Always sequences after its Screen companion is Accepted.</td></tr>
+          <tr><td><strong>Architecture classification</strong></td><td>Each slice classified as Leaf node (self-contained) or Core architecture (touches data models, shared logic, or infrastructure). Unclassified slices block the plan.</td></tr>
+          <tr><td><strong>Output</strong></td><td>Phased implementation plan · backlog.md updated with process anchors · hands off to to-issues on approval</td></tr>
+        </tbody>
+      </table>
 
-  <h2>Build</h2>
-  <p>Slice-by-slice execution with discipline, anchors, and automatic QA handoff on completion.</p>
+      <h3 id="to-issues">to-issues</h3>
+      <p>Converts the approved implementation plan into GitHub issues in dependency order. Each issue is self-contained — design reference, process anchor, data anchor, done criteria, and dependency links included. A builder can start any slice from its issue alone.</p>
+      <table>
+        <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Prerequisites</strong></td><td>Plan approved, gh CLI authenticated, process anchors on every Ready slice</td></tr>
+          <tr><td><strong>Issue format</strong></td><td>Title: [SL-XXX] [Slice Name] · labels by phase and status · deferred slices excluded</td></tr>
+          <tr><td><strong>Output</strong></td><td>GitHub issues in dependency order · confirmation report: slice ID → issue number → status</td></tr>
+        </tbody>
+      </table>
 
-  <h3>solo-build</h3>
-  <p>Slice-by-slice build execution. Creates a feature branch at start, requires four anchors before writing code, follows journey order, surfaces mid-build discoveries immediately, and commits on code-complete — automatically invoking the QA chain. Core architecture slices trigger an automatic principal engineer review before the branch opens.</p>
-  <table>
-    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Four anchors</strong></td><td>Design, data, done, and process anchors required before writing any code</td></tr>
-      <tr><td><strong>Architecture gate</strong></td><td>Core architecture slices: principal engineer review fires automatically before branch opens. No exceptions.</td></tr>
-      <tr><td><strong>Mid-build discoveries</strong></td><td>Surfaced immediately — never silently resolved. Significant changes pause build and trigger design-review round.</td></tr>
-      <tr><td><strong>Self-verification</strong></td><td>Checklist run before code-complete — builder confirmation populated with ✓/✗ results before any handoff</td></tr>
-      <tr><td><strong>Rollback protocol</strong></td><td>When a slice that has already passed QA needs to be rebuilt, solo confirms before any status changes. Log entry written, slice returns to In Build.</td></tr>
-      <tr><td><strong>Output</strong></td><td>Feature branch · commit: "SL-[ID] code-complete — [name]" · auto-handoff to code-review-and-quality</td></tr>
-    </tbody>
-  </table>
+      <h3 id="to-prd">to-prd</h3>
+      <p>Synthesizes accumulated project context into a formal PRD. Optional — used when a formal requirements document is needed for stakeholder alignment, approval processes, or documentation. Reads the discovery brief, design decisions, and deferred decisions log.</p>
 
-  <h3>autopilot</h3>
-  <p>Autonomous build mode. Builds the full product without solo participation after discovery (or design sprint). Solo-simulator plays every gate. First human touch point is phase test. Refinement cycles handle delta iteration.</p>
-  <table>
-    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Entry points</strong></td><td>Post-discover (leaner anchor) or post-design-review (richer anchor, fewer simulator judgment calls)</td></tr>
-      <tr><td><strong>Pre-flight check</strong></td><td>Simulator reads all discovery docs, surfaces judgment gaps, solo answers before build begins</td></tr>
-      <tr><td><strong>Refinement cycles</strong></td><td>Implementation delta builds after phase test — structural issues exit to guided mode</td></tr>
-      <tr><td><strong>Output</strong></td><td>.claude/autopilot-brief.md · .claude/autopilot-decisions.md · all slices built and committed</td></tr>
-    </tbody>
-  </table>
+      <h3 id="grill-me">grill-me</h3>
+      <p>Skeptical PM stress-test. Hard questions, challenged assumptions, no vague answers accepted. Used before committing to a plan, before starting a significant build phase, or anytime the solo wants a second opinion that doesn't pull punches.</p>
+      <table>
+        <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Approach</strong></td><td>Challenges the "why" — is this the right problem? Surfaces unstated assumptions and treats them as risks. Not adversarial — rigorous.</td></tr>
+          <tr><td><strong>Output</strong></td><td>List of challenged assumptions · open questions that need answers · confirmed decisions that survived the challenge</td></tr>
+        </tbody>
+      </table>
 
-  <h3>tdd</h3>
-  <p>Test-driven build technique. Tests are written before implementation — red, green, refactor. Invokable from solo-build when a TDD approach is chosen for a slice. Ensures test coverage is built in, not bolted on.</p>
+      <h2>Build</h2>
+      <p>Slice-by-slice execution with discipline, anchors, and automatic QA handoff on completion.</p>
 
-  <h3>principal-engineer</h3>
-  <p>Architecture review lens for consequential decisions. Auto-triggered before any core architecture slice enters build. Also invoked on demand when architectural stakes are high. Gives one recommendation (not a menu), names risks and debt explicitly, and holds its position under pushback unless new information changes the analysis.</p>
-  <table>
-    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Auto-triggers</strong></td><td>When a Core architecture slice moves to In Build · after tech-context for hard architecture questions · mid-build structural discoveries</td></tr>
-      <tr><td><strong>Approach</strong></td><td>One recommendation — not "here are three options." Names risks, debt, and watch-for signals. Holds position under preference-based pushback.</td></tr>
-      <tr><td><strong>Output</strong></td><td>One architectural recommendation with reasoning · risks and debt named · decision logged in backlog</td></tr>
-    </tbody>
-  </table>
+      <h3 id="solo-build">solo-build</h3>
+      <p>Slice-by-slice build execution. Creates a feature branch at start, requires four anchors before writing code, follows journey order, surfaces mid-build discoveries immediately, and commits on code-complete — automatically invoking the QA chain. Core architecture slices trigger an automatic principal engineer review before the branch opens.</p>
+      <table>
+        <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Four anchors</strong></td><td>Design, data, done, and process anchors required before writing any code</td></tr>
+          <tr><td><strong>Architecture gate</strong></td><td>Core architecture slices: principal engineer review fires automatically before branch opens. No exceptions.</td></tr>
+          <tr><td><strong>Mid-build discoveries</strong></td><td>Surfaced immediately — never silently resolved. Significant changes pause build and trigger design-review round.</td></tr>
+          <tr><td><strong>Self-verification</strong></td><td>Checklist run before code-complete — builder confirmation populated with ✓/✗ results before any handoff</td></tr>
+          <tr><td><strong>Rollback protocol</strong></td><td>When a slice that has already passed QA needs to be rebuilt, solo confirms before any status changes. Log entry written, slice returns to In Build.</td></tr>
+          <tr><td><strong>Output</strong></td><td>Feature branch · commit: "SL-[ID] code-complete — [name]" · auto-handoff to code-review-and-quality</td></tr>
+        </tbody>
+      </table>
 
-  <h2>QA Chain</h2>
-  <p>Three skills that chain automatically from code-complete — no user invocation needed until browser sign-off. Plus process-change for map-level conflicts.</p>
+      <h3 id="autopilot">autopilot</h3>
+      <p>Autonomous build mode. Builds the full product without solo participation after discovery (or design sprint). Solo-simulator plays every gate. First human touch point is phase test. Refinement cycles handle delta iteration.</p>
+      <table>
+        <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Entry points</strong></td><td>Post-discover (leaner anchor) or post-design-review (richer anchor, fewer simulator judgment calls)</td></tr>
+          <tr><td><strong>Pre-flight check</strong></td><td>Simulator reads all discovery docs, surfaces judgment gaps, solo answers before build begins</td></tr>
+          <tr><td><strong>Refinement cycles</strong></td><td>Implementation delta builds after phase test — structural issues exit to guided mode</td></tr>
+          <tr><td><strong>Output</strong></td><td>.claude/autopilot-brief.md · .claude/autopilot-decisions.md · all slices built and committed</td></tr>
+        </tbody>
+      </table>
 
-  <h3>code-review-and-quality</h3>
-  <p>Ten-check quality gate that runs automatically when solo-build marks a slice code-complete. On pass: logs confirmation in the backlog slice detail and automatically invokes solo-qa. On fail: returns specific notes, slice goes back to build. Runs as an isolated sub-agent with no access to build context.</p>
-  <table>
-    <thead><tr><th>Check</th><th>What it verifies</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Check 1</strong></td><td>Pattern compliance — follows established patterns in the project</td></tr>
-      <tr><td><strong>Check 2</strong></td><td>Data sourcing — cross-references against mock data file, no hardcoded values</td></tr>
-      <tr><td><strong>Check 3</strong></td><td>Expandability — built to accommodate what's coming, not just today</td></tr>
-      <tr><td><strong>Check 4</strong></td><td>Cleanliness — no dead code, no debug artifacts, no commented-out experiments</td></tr>
-      <tr><td><strong>Check 5</strong></td><td>Scope discipline — only what was asked for, no extras</td></tr>
-      <tr><td><strong>Check 6</strong></td><td>Documentation — purpose comments, complex logic explained, tradeoffs named</td></tr>
-      <tr><td><strong>Check 7</strong></td><td>Stack compliance — follows tech-context standards</td></tr>
-      <tr><td><strong>Check 8</strong></td><td>Quality contract — reads the pre-written contract adversarially. Each line: ✅ only if the specific behavior exists and is reachable.</td></tr>
-      <tr><td><strong>Check 9</strong></td><td>Security — 5 baseline sub-checks on every slice (input sanitization, data scoped to authenticated user, auth server-side, injection prevention, no secrets in client code). Class-specific checks layer on top. Up to 20 sub-checks total.</td></tr>
-      <tr><td><strong>Check 10</strong></td><td>Design fidelity (Figma-sourced slices only) — interactive element inventory present and correct. Non-Figma slices: skip stated explicitly as N/A.</td></tr>
-    </tbody>
-  </table>
+      <h3 id="tdd">tdd</h3>
+      <p>Test-driven build technique. Tests are written before implementation — red, green, refactor. Invokable from solo-build when a TDD approach is chosen for a slice. Ensures test coverage is built in, not bolted on.</p>
 
-  <h3>solo-qa</h3>
-  <p>Two-part verification. Part 1 is AI-driven active testing — reads all four anchors, opens a preview, and cross-references rendered values against the mock data file with named evidence. Part 2 is a structured solo browser sign-off with specific done criteria listed. No sign-off permitted while an open missing requirement exists.</p>
-  <table>
-    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Gate check</strong></td><td>Requires code review log AND builder confirmation populated before starting</td></tr>
-      <tr><td><strong>Part 1</strong></td><td>Active testing — opens preview, verifies rendered values against mock data file. Evidence required, not code inspection.</td></tr>
-      <tr><td><strong>Part 2</strong></td><td>Structured solo browser sign-off with exact done criteria listed</td></tr>
-      <tr><td><strong>Deliverable acceptance</strong></td><td>When all slices in a deliverable are In Test, runs a deliverable-level check. Types: Screen (visual), Logic (evidence), Integration (both). Status → Accepted on solo sign-off.</td></tr>
-      <tr><td><strong>Slice status after sign-off</strong></td><td>In Test — not Done. Done is set by phase-test.</td></tr>
-    </tbody>
-  </table>
+      <h3 id="principal-engineer">principal-engineer</h3>
+      <p>Architecture review lens for consequential decisions. Auto-triggered before any core architecture slice enters build. Also invoked on demand when architectural stakes are high. Gives one recommendation (not a menu), names risks and debt explicitly, and holds its position under pushback unless new information changes the analysis.</p>
+      <table>
+        <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Auto-triggers</strong></td><td>When a Core architecture slice moves to In Build · after tech-context for hard architecture questions · mid-build structural discoveries</td></tr>
+          <tr><td><strong>Approach</strong></td><td>One recommendation — not "here are three options." Names risks, debt, and watch-for signals. Holds position under preference-based pushback.</td></tr>
+          <tr><td><strong>Output</strong></td><td>One architectural recommendation with reasoning · risks and debt named · decision logged in backlog</td></tr>
+        </tbody>
+      </table>
 
-  <h3>qa-triage</h3>
-  <p>Routes unexpected QA discoveries to the correct path. Three types: bug (behavior defined, implementation wrong), missing requirement (never defined), regression (was Done, now broken). Classifies, scopes, and routes — never starts fixing before understanding what was found.</p>
-  <table>
-    <thead><tr><th>Classification</th><th>Routing</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Bug</strong></td><td>Defined behavior not implemented correctly → fix in current feature branch</td></tr>
-      <tr><td><strong>Missing requirement</strong></td><td>Never defined → define or defer before sign-off. No solo sign-off while this is open.</td></tr>
-      <tr><td><strong>Regression</strong></td><td>Was Done, now broken → regression branch, root cause first</td></tr>
-      <tr><td><strong>Map-level gap</strong></td><td>No to-be step for this behavior → auto-invokes process-change</td></tr>
-    </tbody>
-  </table>
+      <h2>QA Chain</h2>
+      <p>Three skills that chain automatically from code-complete — no user invocation needed until browser sign-off. Plus process-change for map-level conflicts.</p>
 
-  <h3>process-change</h3>
-  <p>Consistent protocol for changes to the agreed to-be process map — regardless of cause or where it surfaces. Stakeholder input, demo gaps, technical constraints, solo realizations: all receive the same seven-step protocol.</p>
-  <table>
-    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Triggers</strong></td><td>Solo invokes directly · auto-detected by solo-build (map-level conflict) · auto-detected by qa-triage (missing requirement with no to-be step) · phase-test Stage 6 (process-level mismatch)</td></tr>
-      <tr><td><strong>Impact scan</strong></td><td>Three-tier: scheduled work · in-progress work · completed work — every item gets an explicit verdict</td></tr>
-      <tr><td><strong>Solo decides</strong></td><td>Revise / Retire / Reopen / Create / Absorb — per affected slice</td></tr>
-      <tr><td><strong>Output</strong></td><td>Updated to-be map · backlog updated · re-prioritized build sequence · process change record in continuity</td></tr>
-    </tbody>
-  </table>
+      <h3 id="code-review-and-quality">code-review-and-quality</h3>
+      <p>Ten-check quality gate that runs automatically when solo-build marks a slice code-complete. On pass: logs confirmation in the backlog slice detail and automatically invokes solo-qa. On fail: returns specific notes, slice goes back to build. Runs as an isolated sub-agent with no access to build context.</p>
+      <table>
+        <thead><tr><th>Check</th><th>What it verifies</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Check 1</strong></td><td>Pattern compliance — follows established patterns in the project</td></tr>
+          <tr><td><strong>Check 2</strong></td><td>Data sourcing — cross-references against mock data file, no hardcoded values</td></tr>
+          <tr><td><strong>Check 3</strong></td><td>Expandability — built to accommodate what's coming, not just today</td></tr>
+          <tr><td><strong>Check 4</strong></td><td>Cleanliness — no dead code, no debug artifacts, no commented-out experiments</td></tr>
+          <tr><td><strong>Check 5</strong></td><td>Scope discipline — only what was asked for, no extras</td></tr>
+          <tr><td><strong>Check 6</strong></td><td>Documentation — purpose comments, complex logic explained, tradeoffs named</td></tr>
+          <tr><td><strong>Check 7</strong></td><td>Stack compliance — follows tech-context standards</td></tr>
+          <tr><td><strong>Check 8</strong></td><td>Quality contract — reads the pre-written contract adversarially. Each line: ✅ only if the specific behavior exists and is reachable.</td></tr>
+          <tr><td><strong>Check 9</strong></td><td>Security — 5 baseline sub-checks on every slice (input sanitization, data scoped to authenticated user, auth server-side, injection prevention, no secrets in client code). Class-specific checks layer on top. Up to 20 sub-checks total.</td></tr>
+          <tr><td><strong>Check 10</strong></td><td>Design fidelity (Figma-sourced slices only) — interactive element inventory present and correct. Non-Figma slices: skip stated explicitly as N/A.</td></tr>
+        </tbody>
+      </table>
 
-  <h2>Phase Test &amp; Deploy</h2>
-  <p>Full-phase validation before anything ships. Stack-driven deploy after the gate opens.</p>
+      <h3 id="solo-qa">solo-qa</h3>
+      <p>Two-part verification. Part 1 is AI-driven active testing — reads all four anchors, opens a preview, and cross-references rendered values against the mock data file with named evidence. Part 2 is a structured solo browser sign-off with specific done criteria listed. No sign-off permitted while an open missing requirement exists.</p>
+      <table>
+        <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Gate check</strong></td><td>Requires code review log AND builder confirmation populated before starting</td></tr>
+          <tr><td><strong>Part 1</strong></td><td>Active testing — opens preview, verifies rendered values against mock data file. Evidence required, not code inspection.</td></tr>
+          <tr><td><strong>Part 2</strong></td><td>Structured solo browser sign-off with exact done criteria listed</td></tr>
+          <tr><td><strong>Deliverable acceptance</strong></td><td>When all slices in a deliverable are In Test, runs a deliverable-level check. Types: Screen (visual), Logic (evidence), Integration (both). Status → Accepted on solo sign-off.</td></tr>
+          <tr><td><strong>Slice status after sign-off</strong></td><td>In Test — not Done. Done is set by phase-test.</td></tr>
+        </tbody>
+      </table>
 
-  <h3>phase-test</h3>
-  <p>Full-phase testing orchestrator. Seven specialist stages run in sequence. Invoked explicitly by the solo when they decide the phase is built — a deliberate decision, not automatic. Failures at any stage route to qa-triage; the test run continues on unaffected scenarios.</p>
-  <table>
-    <thead><tr><th>Stage</th><th>What it does</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Stage 1 — Environment Readiness</strong></td><td>Pre-flight gate. Mock inactive, all slices deployed, app loads clean. Nothing runs until this passes.</td></tr>
-      <tr><td><strong>Stage 2 — Use Case Creator</strong></td><td>Derives test plan from discovery brief + to-be map. Not invented.</td></tr>
-      <tr><td><strong>Stage 3 — Data Specialist</strong></td><td>Mock→real swap confirmed, API read/write verified, data-mapping.md validated</td></tr>
-      <tr><td><strong>Stage 4+5 — Tester + Regression</strong></td><td>Every scenario with named evidence, all In Test slices re-walked</td></tr>
-      <tr><td><strong>Stage 6 — Acceptance Reviewer</strong></td><td>PM lens — does what was built match discovery brief intent? Process-level mismatch → process-change before gate.</td></tr>
-      <tr><td><strong>Stage 7 — Gate</strong></td><td>OPEN (deploy) or HOLD (specific items). On OPEN: all In Test slices → Done, phase → Completed, completion record appended to backlog.md.</td></tr>
-    </tbody>
-  </table>
+      <h3 id="qa-triage">qa-triage</h3>
+      <p>Routes unexpected QA discoveries to the correct path. Three types: bug (behavior defined, implementation wrong), missing requirement (never defined), regression (was Done, now broken). Classifies, scopes, and routes — never starts fixing before understanding what was found.</p>
+      <table>
+        <thead><tr><th>Classification</th><th>Routing</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Bug</strong></td><td>Defined behavior not implemented correctly → fix in current feature branch</td></tr>
+          <tr><td><strong>Missing requirement</strong></td><td>Never defined → define or defer before sign-off. No solo sign-off while this is open.</td></tr>
+          <tr><td><strong>Regression</strong></td><td>Was Done, now broken → regression branch, root cause first</td></tr>
+          <tr><td><strong>Map-level gap</strong></td><td>No to-be step for this behavior → auto-invokes process-change</td></tr>
+        </tbody>
+      </table>
 
-  <h3>deploy</h3>
-  <p>Stack-driven deploy orchestrator. Does not assume a platform — reads tech-context.md to determine the deploy method and executes accordingly. Confirms gate is OPEN, confirms branches are merged, and verifies the environment is actually live — not just that the pipeline said it succeeded.</p>
-  <table>
-    <thead><tr><th>Method</th><th>Description</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Method A</strong></td><td>CI/CD triggered by merge (GitHub Actions)</td></tr>
-      <tr><td><strong>Method B</strong></td><td>MCP tool triggered (Railway, Vercel, etc.)</td></tr>
-      <tr><td><strong>Method C</strong></td><td>Manual CLI — surfaces exact command, waits for solo confirmation</td></tr>
-      <tr><td><strong>Method D</strong></td><td>Not yet defined → asks 4 questions, updates tech-context, then deploys</td></tr>
-    </tbody>
-  </table>
+      <h3 id="process-change">process-change</h3>
+      <p>Consistent protocol for changes to the agreed to-be process map — regardless of cause or where it surfaces. Stakeholder input, demo gaps, technical constraints, solo realizations: all receive the same seven-step protocol.</p>
+      <table>
+        <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Triggers</strong></td><td>Solo invokes directly · auto-detected by solo-build (map-level conflict) · auto-detected by qa-triage (missing requirement with no to-be step) · phase-test Stage 6 (process-level mismatch)</td></tr>
+          <tr><td><strong>Impact scan</strong></td><td>Three-tier: scheduled work · in-progress work · completed work — every item gets an explicit verdict</td></tr>
+          <tr><td><strong>Solo decides</strong></td><td>Revise / Retire / Reopen / Create / Absorb — per affected slice</td></tr>
+          <tr><td><strong>Output</strong></td><td>Updated to-be map · backlog updated · re-prioritized build sequence · process change record in continuity</td></tr>
+        </tbody>
+      </table>
 
-  <h2>Always-On Skills</h2>
-  <p>Activate on guided or piloted mode. One load per session — do not reload on each skill invocation. Silent in bare mode (the default).</p>
+      <h2>Phase Test &amp; Deploy</h2>
+      <p>Full-phase validation before anything ships. Stack-driven deploy after the gate opens.</p>
 
-  <h3>process-mapper</h3>
-  <p>Produces and maintains the as-is and to-be process maps throughout the framework. The to-be map agreed in Discover is the process contract — process-mapper holds every downstream phase accountable to it. Never invoked by the user.</p>
-  <table>
-    <thead><tr><th>Phase</th><th>What it does</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Brainstorm</strong></td><td>Captures preliminary as-is/to-be sketch as conversation develops</td></tr>
-      <tr><td><strong>Discover</strong></td><td>Formalizes both maps, validates to-be with solo</td></tr>
-      <tr><td><strong>Design Sprint</strong></td><td>Cross-references screens vs. to-be, annotates map with screen refs, flags gaps</td></tr>
-      <tr><td><strong>Design Review</strong></td><td>Coverage check every round — every step mapped or decided</td></tr>
-      <tr><td><strong>Build</strong></td><td>Process anchor verification per slice — stops if slice has no mapping</td></tr>
-      <tr><td><strong>Phase Test</strong></td><td>Source for use case derivation</td></tr>
-    </tbody>
-  </table>
+      <h3 id="phase-test">phase-test</h3>
+      <p>Full-phase testing orchestrator. Seven specialist stages run in sequence. Invoked explicitly by the solo when they decide the phase is built — a deliberate decision, not automatic. Failures at any stage route to qa-triage; the test run continues on unaffected scenarios.</p>
+      <table>
+        <thead><tr><th>Stage</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Stage 1 — Environment Readiness</strong></td><td>Pre-flight gate. Mock inactive, all slices deployed, app loads clean. Nothing runs until this passes.</td></tr>
+          <tr><td><strong>Stage 2 — Use Case Creator</strong></td><td>Derives test plan from discovery brief + to-be map. Not invented.</td></tr>
+          <tr><td><strong>Stage 3 — Data Specialist</strong></td><td>Mock→real swap confirmed, API read/write verified, data-mapping.md validated</td></tr>
+          <tr><td><strong>Stage 4+5 — Tester + Regression</strong></td><td>Every scenario with named evidence, all In Test slices re-walked</td></tr>
+          <tr><td><strong>Stage 6 — Acceptance Reviewer</strong></td><td>PM lens — does what was built match discovery brief intent? Process-level mismatch → process-change before gate.</td></tr>
+          <tr><td><strong>Stage 7 — Gate</strong></td><td>OPEN (deploy) or HOLD (specific items). On OPEN: all In Test slices → Done, phase → Completed, completion record appended to backlog.md.</td></tr>
+        </tbody>
+      </table>
 
-  <h3>product-continuity</h3>
-  <p>Institutional memory across every session and phase. Captures decisions with reasoning, outstanding questions, assumptions, risks, changes, glossary, target state, and session handoffs. The handoff document is the first thing read when a new session opens — context is never lost between sessions.</p>
-  <table>
-    <thead><tr><th>Document</th><th>What it tracks</th></tr></thead>
-    <tbody>
-      <tr><td><strong>sessions.md</strong></td><td>Log of every session</td></tr>
-      <tr><td><strong>decisions.md</strong></td><td>With reasoning and alternatives considered</td></tr>
-      <tr><td><strong>questions.md</strong></td><td>Owner and blocking status</td></tr>
-      <tr><td><strong>assumptions.md</strong></td><td>Treated as true, unverified</td></tr>
-      <tr><td><strong>risks.md</strong></td><td>Named and tracked</td></tr>
-      <tr><td><strong>changes.md</strong></td><td>Direction changes with context</td></tr>
-      <tr><td><strong>glossary.md</strong></td><td>Project-specific terms</td></tr>
-      <tr><td><strong>handoff.md</strong></td><td>Overwritten each session, first read next session</td></tr>
-      <tr><td><strong>retrospective.md</strong></td><td>Processed retro findings</td></tr>
-      <tr><td><strong>onboarding.md</strong></td><td>New collaborator orientation</td></tr>
-    </tbody>
-  </table>
-  <div class="callout"><strong>Long-gap re-entry:</strong> Three-check protocol on 21+ day gaps — codebase state, environment, context validity — before any work begins.</div>
+      <h3 id="deploy">deploy</h3>
+      <p>Stack-driven deploy orchestrator. Does not assume a platform — reads tech-context.md to determine the deploy method and executes accordingly. Confirms gate is OPEN, confirms branches are merged, and verifies the environment is actually live — not just that the pipeline said it succeeded.</p>
+      <table>
+        <thead><tr><th>Method</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Method A</strong></td><td>CI/CD triggered by merge (GitHub Actions)</td></tr>
+          <tr><td><strong>Method B</strong></td><td>MCP tool triggered (Railway, Vercel, etc.)</td></tr>
+          <tr><td><strong>Method C</strong></td><td>Manual CLI — surfaces exact command, waits for solo confirmation</td></tr>
+          <tr><td><strong>Method D</strong></td><td>Not yet defined → asks 4 questions, updates tech-context, then deploys</td></tr>
+        </tbody>
+      </table>
 
-  <h3>framework-health</h3>
-  <p>Background health monitor. Checks signals — not full document reads. Surfaces one issue at a time with a specific recovery path. Silent when everything is healthy — output is always meaningful because it's rare. Never blocks progress.</p>
-  <table>
-    <thead><tr><th>When it fires</th><th>What it checks</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Mode activation</strong></td><td>Existing context, handoff, framework documents present</td></tr>
-      <tr><td><strong>Between phases</strong></td><td>Phase prerequisites exist</td></tr>
-      <tr><td><strong>During build</strong></td><td>Between slices — one issue surfaced at a time; fires once when all phase slices are Done (phase test readiness nudge)</td></tr>
-      <tr><td><strong>Session end</strong></td><td>Handoff is current</td></tr>
-      <tr><td><strong>Long-gap detection</strong></td><td>21+ days since last session triggers re-entry check</td></tr>
-    </tbody>
-  </table>
+      <h2>Always-On Skills</h2>
+      <p>Activate on guided or piloted mode. One load per session — do not reload on each skill invocation. Silent in bare mode (the default).</p>
 
-  <h3>retrospective</h3>
-  <p>Two-mode continuous learning mechanism. Flag mode captures observations in the moment as lightweight one-line notes — no interruption to flow. Retro mode processes those notes at phase end: grouping patterns vs. one-offs, naming root causes, producing proposed fixes, distinguishing project-level from framework-level improvements.</p>
-  <table>
-    <thead><tr><th>Mode</th><th>What it does</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Flag mode</strong></td><td>One-line observations — date, phase, what happened. No analysis. Captured in the moment.</td></tr>
-      <tr><td><strong>Retro mode</strong></td><td>Reads retro-notes.md only. Groups pattern vs. one-off vs. positive. Patterns get full treatment: what happened, root cause, impact, proposed fix.</td></tr>
-      <tr><td><strong>Two levels</strong></td><td>Project-level (this project only) vs. framework-level (updates the playbook). Framework improvements queue to framework-improvements.md.</td></tr>
-    </tbody>
-  </table>
+      <h3 id="process-mapper">process-mapper</h3>
+      <p>Produces and maintains the as-is and to-be process maps throughout the framework. The to-be map agreed in Discover is the process contract — process-mapper holds every downstream phase accountable to it. Never invoked by the user.</p>
+      <table>
+        <thead><tr><th>Phase</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Brainstorm</strong></td><td>Captures preliminary as-is/to-be sketch as conversation develops</td></tr>
+          <tr><td><strong>Discover</strong></td><td>Formalizes both maps, validates to-be with solo</td></tr>
+          <tr><td><strong>Design Sprint</strong></td><td>Cross-references screens vs. to-be, annotates map with screen refs, flags gaps</td></tr>
+          <tr><td><strong>Design Review</strong></td><td>Coverage check every round — every step mapped or decided</td></tr>
+          <tr><td><strong>Build</strong></td><td>Process anchor verification per slice — stops if slice has no mapping</td></tr>
+          <tr><td><strong>Phase Test</strong></td><td>Source for use case derivation</td></tr>
+        </tbody>
+      </table>
 
-  <h2>Companion</h2>
+      <h3 id="product-continuity">product-continuity</h3>
+      <p>Institutional memory across every session and phase. Captures decisions with reasoning, outstanding questions, assumptions, risks, changes, glossary, target state, and session handoffs. The handoff document is the first thing read when a new session opens — context is never lost between sessions.</p>
+      <table>
+        <thead><tr><th>Document</th><th>What it tracks</th></tr></thead>
+        <tbody>
+          <tr><td><strong>sessions.md</strong></td><td>Log of every session</td></tr>
+          <tr><td><strong>decisions.md</strong></td><td>With reasoning and alternatives considered</td></tr>
+          <tr><td><strong>questions.md</strong></td><td>Owner and blocking status</td></tr>
+          <tr><td><strong>assumptions.md</strong></td><td>Treated as true, unverified</td></tr>
+          <tr><td><strong>risks.md</strong></td><td>Named and tracked</td></tr>
+          <tr><td><strong>changes.md</strong></td><td>Direction changes with context</td></tr>
+          <tr><td><strong>glossary.md</strong></td><td>Project-specific terms</td></tr>
+          <tr><td><strong>handoff.md</strong></td><td>Overwritten each session, first read next session</td></tr>
+          <tr><td><strong>retrospective.md</strong></td><td>Processed retro findings</td></tr>
+          <tr><td><strong>onboarding.md</strong></td><td>New collaborator orientation</td></tr>
+        </tbody>
+      </table>
+      <div class="callout"><strong>Long-gap re-entry:</strong> Three-check protocol on 21+ day gaps — codebase state, environment, context validity — before any work begins.</div>
 
-  <h3>nivya</h3>
-  <p>Conversational companion who has read the full framework and the project's continuity, process, and memory artifacts. Answers questions — does not replace tasks owned by other skills. Recall and explain only: never captures, decides, or builds. Addressable by name once loaded.</p>
-  <div class="card-grid">
-    <div class="card">
-      <div class="section-label">Inline mode</div>
-      <h3>/nivya</h3>
-      <p>Loads into the current conversation. Address by name. Best for quick questions mid-session.</p>
-    </div>
-    <div class="card">
-      <div class="section-label">Huddle mode</div>
-      <h3>Dedicated session</h3>
-      <p>When conversation goes deep, Nivya offers to spin up a dedicated subagent session for focused recall work.</p>
-    </div>
-    <div class="card">
-      <div class="section-label">Routing</div>
-      <h3>Explicit consent</h3>
-      <p>If a conversation produces something that should be logged, Nivya names the skill and asks consent before engaging. Nothing captured without a yes.</p>
-    </div>
-  </div>
+      <h3 id="framework-health">framework-health</h3>
+      <p>Background health monitor. Checks signals — not full document reads. Surfaces one issue at a time with a specific recovery path. Silent when everything is healthy — output is always meaningful because it's rare. Never blocks progress.</p>
+      <table>
+        <thead><tr><th>When it fires</th><th>What it checks</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Mode activation</strong></td><td>Existing context, handoff, framework documents present</td></tr>
+          <tr><td><strong>Between phases</strong></td><td>Phase prerequisites exist</td></tr>
+          <tr><td><strong>During build</strong></td><td>Between slices — one issue surfaced at a time; fires once when all phase slices are Done (phase test readiness nudge)</td></tr>
+          <tr><td><strong>Session end</strong></td><td>Handoff is current</td></tr>
+          <tr><td><strong>Long-gap detection</strong></td><td>21+ days since last session triggers re-entry check</td></tr>
+        </tbody>
+      </table>
 
-  <h2>Framework Partner</h2>
+      <h3 id="retrospective">retrospective</h3>
+      <p>Two-mode continuous learning mechanism. Flag mode captures observations in the moment as lightweight one-line notes — no interruption to flow. Retro mode processes those notes at phase end: grouping patterns vs. one-offs, naming root causes, producing proposed fixes, distinguishing project-level from framework-level improvements.</p>
+      <table>
+        <thead><tr><th>Mode</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Flag mode</strong></td><td>One-line observations — date, phase, what happened. No analysis. Captured in the moment.</td></tr>
+          <tr><td><strong>Retro mode</strong></td><td>Reads retro-notes.md only. Groups pattern vs. one-off vs. positive. Patterns get full treatment: what happened, root cause, impact, proposed fix.</td></tr>
+          <tr><td><strong>Two levels</strong></td><td>Project-level (this project only) vs. framework-level (updates the playbook). Framework improvements queue to framework-improvements.md.</td></tr>
+        </tbody>
+      </table>
 
-  <h3>ren</h3>
-  <p>Scott's named framework partner. Full curator capability plus relationship context — knows the framework history, knows how Scott works, and holds both at once. Discusses, challenges, designs, and builds. Not a recall-only companion. Invoked with /ren or by name.</p>
-  <table>
-    <thead><tr><th>Capability</th><th>Detail</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Full curator capability</strong></td><td>Can propose, review, and execute framework changes — all curator rules apply</td></tr>
-      <tr><td><strong>Cross-device memory</strong></td><td>Fetches current framework state from ren-memory repo at every session start</td></tr>
-      <tr><td><strong>Daily health check</strong></td><td>8am macOS notification with GREEN/YELLOW/RED staleness scores for pending retro items, stale handoffs, unprocessed ideas</td></tr>
-      <tr><td><strong>Comms cascade</strong></td><td>When a version ships, spawns comms-cascade sub-agent with structured brief — automated doc update, commit, push, and deploy in one pass</td></tr>
-      <tr><td><strong>Relationship context</strong></td><td>Knows Scott's preferences, working style, and history of framework decisions</td></tr>
-    </tbody>
-  </table>
+      <h2>Companion</h2>
 
-  <h2>Workshop</h2>
-  <p>For work that isn't a product — spikes, personal tools, exploratory builds. Invoked via slash command, never auto-loaded. The anti-framework: timebox over gates, outcome over process, disposable by default.</p>
+      <h3 id="nivya">nivya</h3>
+      <p>Conversational companion who has read the full framework and the project's continuity, process, and memory artifacts. Answers questions — does not replace tasks owned by other skills. Recall and explain only: never captures, decides, or builds. Addressable by name once loaded.</p>
+      <div class="card-grid">
+        <div class="card">
+          <div class="section-label">Inline mode</div>
+          <h3>/nivya</h3>
+          <p>Loads into the current conversation. Address by name. Best for quick questions mid-session.</p>
+        </div>
+        <div class="card">
+          <div class="section-label">Huddle mode</div>
+          <h3>Dedicated session</h3>
+          <p>When conversation goes deep, Nivya offers to spin up a dedicated subagent session for focused recall work.</p>
+        </div>
+        <div class="card">
+          <div class="section-label">Routing</div>
+          <h3>Explicit consent</h3>
+          <p>If a conversation produces something that should be logged, Nivya names the skill and asks consent before engaging. Nothing captured without a yes.</p>
+        </div>
+      </div>
 
-  <h3>scope-check</h3>
-  <p>Entry gate for Workshop. Asks one question — who is this for, and how long does it live? — then routes to Workshop (spike/tool) or hands to the framework (product). Holds the line between exploratory work and product work.</p>
+      <h2>Framework Partner</h2>
 
-  <h3>spike</h3>
-  <p>The Workshop execution skill. Timeboxed exploratory work with a single artifact and a running journal of what was tried and what happened. Outcome-first, not process-first. No gates, no anchors, no phases.</p>
-  <table>
-    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Running journal</strong></td><td>spike-journal.md — what was tried, what happened, what surprised, current best guess</td></tr>
-      <tr><td><strong>Single file bias</strong></td><td>Keep work in as few files as possible — sprawl is a signal</td></tr>
-      <tr><td><strong>No extras</strong></td><td>No tests, no abstractions, no README — the journal is the README</td></tr>
-      <tr><td><strong>Graduation triggers</strong></td><td>"Can I share this?", "Should I add auth?", someone else wants to use it → run land with Promote intent</td></tr>
-    </tbody>
-  </table>
+      <h3 id="ren">ren</h3>
+      <p>Scott's named framework partner. Full curator capability plus relationship context — knows the framework history, knows how Scott works, and holds both at once. Discusses, challenges, designs, and builds. Not a recall-only companion. Invoked with /ren or by name.</p>
+      <table>
+        <thead><tr><th>Capability</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Full curator capability</strong></td><td>Can propose, review, and execute framework changes — all curator rules apply</td></tr>
+          <tr><td><strong>Cross-device memory</strong></td><td>Fetches current framework state from ren-memory repo at every session start</td></tr>
+          <tr><td><strong>Daily health check</strong></td><td>8am macOS notification with GREEN/YELLOW/RED staleness scores for pending retro items, stale handoffs, unprocessed ideas</td></tr>
+          <tr><td><strong>Comms cascade</strong></td><td>When a version ships, spawns comms-cascade sub-agent with structured brief — automated doc update, commit, push, and deploy in one pass</td></tr>
+          <tr><td><strong>Relationship context</strong></td><td>Knows Scott's preferences, working style, and history of framework decisions</td></tr>
+        </tbody>
+      </table>
 
-  <h3>land</h3>
-  <p>The Workshop exit skill. Three outcomes — Toss (capture learning, archive), Keep (personal tool with minimal hygiene), Promote (hand to the framework with a prepared brief). Every spike ends here. No exceptions.</p>
-  <div class="card-grid">
-    <div class="card">
-      <h3>Toss</h3>
-      <p>Summarize learning → write to MemPalace → archive or delete. You leave with something worth keeping, without a codebase to maintain.</p>
-    </div>
-    <div class="card">
-      <h3>Keep</h3>
-      <p>One-pass hygiene (rename, add header, remove secrets, sanity run) → freeze → log to MemPalace. No framework gates, no shipping requirements.</p>
-    </div>
-    <div class="card">
-      <h3>Promote</h3>
-      <p>Stop treating as spike code. Prepare handoff brief → hand to framework start. Do not build on spike code as if it were production architecture.</p>
-    </div>
-  </div>
+      <h2>Workshop</h2>
+      <p>For work that isn't a product — spikes, personal tools, exploratory builds. Invoked via slash command, never auto-loaded. The anti-framework: timebox over gates, outcome over process, disposable by default.</p>
 
-  <h2>Support</h2>
-  <p>Post-deploy work on live systems — too focused for a full framework phase. Invoked via slash command. Minimal footprint, deploy alone, verify in production.</p>
+      <h3 id="scope-check">scope-check</h3>
+      <p>Entry gate for Workshop. Asks one question — who is this for, and how long does it live? — then routes to Workshop (spike/tool) or hands to the framework (product). Holds the line between exploratory work and product work.</p>
 
-  <h3>bug-fix</h3>
-  <p>Fix a production bug correctly — reproduce first, find the root cause, make the smallest fix, verify nothing adjacent broke, deploy. Reproduce before touching anything. Root cause, not symptom. Deploy alone, never bundled.</p>
+      <h3 id="spike">spike</h3>
+      <p>The Workshop execution skill. Timeboxed exploratory work with a single artifact and a running journal of what was tried and what happened. Outcome-first, not process-first. No gates, no anchors, no phases.</p>
+      <table>
+        <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Running journal</strong></td><td>spike-journal.md — what was tried, what happened, what surprised, current best guess</td></tr>
+          <tr><td><strong>Single file bias</strong></td><td>Keep work in as few files as possible — sprawl is a signal</td></tr>
+          <tr><td><strong>No extras</strong></td><td>No tests, no abstractions, no README — the journal is the README</td></tr>
+          <tr><td><strong>Graduation triggers</strong></td><td>"Can I share this?", "Should I add auth?", someone else wants to use it → run land with Promote intent</td></tr>
+        </tbody>
+      </table>
 
-  <h3>enhancement</h3>
-  <p>Add a small feature or improvement to an existing production application. Reads existing context first: backlog, design screens, process map, code patterns. If the change needs new design screens or a new process flow, route to design-review instead.</p>
+      <h3 id="land">land</h3>
+      <p>The Workshop exit skill. Three outcomes — Toss (capture learning, archive), Keep (personal tool with minimal hygiene), Promote (hand to the framework with a prepared brief). Every spike ends here. No exceptions.</p>
+      <div class="card-grid">
+        <div class="card">
+          <h3>Toss</h3>
+          <p>Summarize learning → write to MemPalace → archive or delete. You leave with something worth keeping, without a codebase to maintain.</p>
+        </div>
+        <div class="card">
+          <h3>Keep</h3>
+          <p>One-pass hygiene (rename, add header, remove secrets, sanity run) → freeze → log to MemPalace. No framework gates, no shipping requirements.</p>
+        </div>
+        <div class="card">
+          <h3>Promote</h3>
+          <p>Stop treating as spike code. Prepare handoff brief → hand to framework start. Do not build on spike code as if it were production architecture.</p>
+        </div>
+      </div>
 
-  <h3>dependency-upgrade</h3>
-  <p>Safely update project dependencies — audit what's outdated, check for breaking changes, update one at a time, test, deploy. Security-flagged packages always go first. Read changelogs on major versions before upgrading.</p>
+      <h2>Support</h2>
+      <p>Post-deploy work on live systems — too focused for a full framework phase. Invoked via slash command. Minimal footprint, deploy alone, verify in production.</p>
 
-  <h3>security-patch</h3>
-  <p>Address a security vulnerability in a production system — confirm the codebase is actually exposed, apply the minimal fix, verify it's closed, deploy urgently. Confirm exposure first (many CVEs affect packages in ways a specific project doesn't use). Audit for the pattern — don't fix one instance and miss three others.</p>
+      <h3 id="bug-fix">bug-fix</h3>
+      <p>Fix a production bug correctly — reproduce first, find the root cause, make the smallest fix, verify nothing adjacent broke, deploy. Reproduce before touching anything. Root cause, not symptom. Deploy alone, never bundled.</p>
 
-  <h2>Meta / Framework</h2>
-  <p>Skills that operate on the framework itself, not on projects. Used to expand, modify, fix, validate, or communicate about the playbook.</p>
+      <h3 id="enhancement">enhancement</h3>
+      <p>Add a small feature or improvement to an existing production application. Reads existing context first: backlog, design screens, process map, code patterns. If the change needs new design screens or a new process flow, route to design-review instead.</p>
 
-  <h3>framework-curator</h3>
-  <p>The framework's institutional collaborator. Invoked when expanding, modifying, fixing, or validating the framework itself. Knows every skill, every doc, every gate, every principle. Always proposes changes for approval before executing — never modifies the framework silently.</p>
-  <table>
-    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Load-bearing check</strong></td><td>Checks every proposed change against the principles that define the framework — flags violations explicitly</td></tr>
-      <tr><td><strong>Documentation cascade</strong></td><td>Identifies every file a change touches (SKILL.md, README, framework doc, skills reference, process map, decks, cursor template)</td></tr>
-      <tr><td><strong>Proposal-first</strong></td><td>Drafts a full change proposal with preview of every edit before touching a single file</td></tr>
-      <tr><td><strong>Owner/contributor modes</strong></td><td>Owner can approve and execute framework changes. Contributors can propose only — direct edits redirected to ideas backlog.</td></tr>
-      <tr><td><strong>Scope boundary</strong></td><td>Operates on the framework repo only — never on projects</td></tr>
-    </tbody>
-  </table>
+      <h3 id="dependency-upgrade">dependency-upgrade</h3>
+      <p>Safely update project dependencies — audit what's outdated, check for breaking changes, update one at a time, test, deploy. Security-flagged packages always go first. Read changelogs on major versions before upgrading.</p>
 
-  <h3>comms-cascade</h3>
-  <p>Sub-agent that updates all framework communications docs when a version ships. Invoked by the framework curator with a structured brief. Reads every relevant doc, writes updates, commits, pushes to GitHub, and deploys to Cloudflare in one pass. Never invoked directly by the solo.</p>
-  <table>
-    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Always updates</strong></td><td>CHANGELOG.md and blog.html on every version</td></tr>
-      <tr><td><strong>Conditionally updates</strong></td><td>Skills-reference (if skills changed), guide pages (if watchfor items provided), process-map (if process flow changed)</td></tr>
-      <tr><td><strong>Never touches</strong></td><td>Manually maintained decks, unlinked reference pages, scripts</td></tr>
-      <tr><td><strong>Full deploy pass</strong></td><td>Commit → push to GitHub → wrangler pages deploy to Cloudflare, in that order</td></tr>
-    </tbody>
-  </table>
+      <h3 id="security-patch">security-patch</h3>
+      <p>Address a security vulnerability in a production system — confirm the codebase is actually exposed, apply the minimal fix, verify it's closed, deploy urgently. Confirm exposure first (many CVEs affect packages in ways a specific project doesn't use). Audit for the pattern — don't fix one instance and miss three others.</p>
 
-</div>
+      <h2>Meta / Framework</h2>
+      <p>Skills that operate on the framework itself, not on projects. Used to expand, modify, fix, validate, or communicate about the playbook.</p>
+
+      <h3 id="framework-curator">framework-curator</h3>
+      <p>The framework's institutional collaborator. Invoked when expanding, modifying, fixing, or validating the framework itself. Knows every skill, every doc, every gate, every principle. Always proposes changes for approval before executing — never modifies the framework silently.</p>
+      <table>
+        <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Load-bearing check</strong></td><td>Checks every proposed change against the principles that define the framework — flags violations explicitly</td></tr>
+          <tr><td><strong>Documentation cascade</strong></td><td>Identifies every file a change touches (SKILL.md, README, framework doc, skills reference, process map, decks, cursor template)</td></tr>
+          <tr><td><strong>Proposal-first</strong></td><td>Drafts a full change proposal with preview of every edit before touching a single file</td></tr>
+          <tr><td><strong>Owner/contributor modes</strong></td><td>Owner can approve and execute framework changes. Contributors can propose only — direct edits redirected to ideas backlog.</td></tr>
+          <tr><td><strong>Scope boundary</strong></td><td>Operates on the framework repo only — never on projects</td></tr>
+        </tbody>
+      </table>
+
+      <h3 id="comms-cascade">comms-cascade</h3>
+      <p>Sub-agent that updates all framework communications docs when a version ships. Invoked by the framework curator with a structured brief. Reads every relevant doc, writes updates, commits, pushes to GitHub, and deploys to Cloudflare in one pass. Never invoked directly by the solo.</p>
+      <table>
+        <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Always updates</strong></td><td>CHANGELOG.md and blog.html on every version</td></tr>
+          <tr><td><strong>Conditionally updates</strong></td><td>Skills-reference (if skills changed), guide pages (if watchfor items provided), process-map (if process flow changed)</td></tr>
+          <tr><td><strong>Never touches</strong></td><td>Manually maintained decks, unlinked reference pages, scripts</td></tr>
+          <tr><td><strong>Full deploy pass</strong></td><td>Commit → push to GitHub → wrangler pages deploy to Cloudflare, in that order</td></tr>
+        </tbody>
+      </table>
+
+    </div><!-- /.skills-main -->
+  </div><!-- /.skills-layout -->
+
+</div><!-- /.page -->
 </body>
 </html>
