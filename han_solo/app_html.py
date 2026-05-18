@@ -855,38 +855,6 @@ APP_HTML = """<!DOCTYPE html>
           </div>
         </div>
 
-        <!-- Han Solo Docs -->
-        <div class="sbf-section">
-          <div class="sbf-section-label">Han Solo</div>
-          <div class="sbf-grid">
-            <a class="sbf-card" href="/docs/index.html" target="_blank">
-              <div class="sbf-card-icon">🧠</div>
-              <div class="sbf-card-title">Reference</div>
-              <div class="sbf-card-sub">Stack, tools, memory model overview</div>
-            </a>
-            <a class="sbf-card" href="/docs/how-it-works.html" target="_blank">
-              <div class="sbf-card-icon">⚙️</div>
-              <div class="sbf-card-title">How it Works</div>
-              <div class="sbf-card-sub">Architecture and session flow</div>
-            </a>
-            <a class="sbf-card" href="/docs/architecture.html" target="_blank">
-              <div class="sbf-card-icon">🏗️</div>
-              <div class="sbf-card-title">Architecture + Flows</div>
-              <div class="sbf-card-sub">Technical diagrams and data flows</div>
-            </a>
-            <a class="sbf-card" href="/docs/roadmap.html" target="_blank">
-              <div class="sbf-card-icon">📍</div>
-              <div class="sbf-card-title">Roadmap</div>
-              <div class="sbf-card-sub">What's built, what's next</div>
-            </a>
-            <a class="sbf-card" href="/docs/working-with-ren.html" target="_blank">
-              <div class="sbf-card-icon">✦</div>
-              <div class="sbf-card-title">Working with Ren</div>
-              <div class="sbf-card-sub">Partnership, memory, session patterns</div>
-            </a>
-          </div>
-        </div>
-
       </div>
     </div>
 
