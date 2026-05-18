@@ -202,7 +202,7 @@ Four local web apps running on Scott's Mac. Python stdlib only — no external p
 | CTL Trips | 8702 | Photography trip planner with Google Maps integration |
 | Weekly Budget | 8765 | Personal finance tracker |
 
-Dark theme throughout: --bg:#090806 --text:#EDE8E0 --gold:#E8971C. Fonts: Cormorant Garamond (display), DM Sans (body).
+Dark theme throughout: --bg:#090806 --text:#EDE8E0 --gold:#E8971C. Font: Space Grotesk.
 
 Data: ~/Apps/data/ (gitignored). Google Maps API key in ~/Apps/data/chase_the_light/config.json — never hardcoded or committed.
 
