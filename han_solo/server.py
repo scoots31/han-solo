@@ -188,6 +188,7 @@ async def api_memory_health(request: Request) -> JSONResponse:
 
 _chat_routes = [
     Route("/", chat_api.chat_index),
+    Route("/chat", chat_api.chat_legacy),
     Route("/health", health),
     Route("/api/me", chat_api.api_me),
     Route("/api/history", chat_api.api_history),

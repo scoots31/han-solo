@@ -21,6 +21,7 @@ from starlette.responses import HTMLResponse, JSONResponse
 from .auth import get_current_user
 from . import letta_client as letta
 from . import db
+from .app_html import APP_HTML
 from .chat_html import CHAT_HTML
 from .config import ANTHROPIC_API_KEY
 
@@ -160,6 +161,10 @@ async def _synthesize_handoff(messages: list[dict]) -> str | None:
 # ---------------------------------------------------------------------------
 
 async def chat_index(request: Request) -> HTMLResponse:
+    return HTMLResponse(APP_HTML)
+
+
+async def chat_legacy(request: Request) -> HTMLResponse:
     return HTMLResponse(CHAT_HTML)
 
 
