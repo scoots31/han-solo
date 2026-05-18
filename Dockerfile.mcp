@@ -6,6 +6,7 @@ COPY han_solo/requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY han_solo/ han_solo/
+COPY docs/ docs/
 
 EXPOSE 8000
 

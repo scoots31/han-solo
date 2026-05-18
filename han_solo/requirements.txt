@@ -4,3 +4,4 @@ starlette>=0.41.0
 uvicorn>=0.30.0
 python-dotenv>=1.0.0
 asyncpg>=0.29.0
+aiofiles>=23.0.0
