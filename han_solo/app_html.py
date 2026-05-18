@@ -493,7 +493,7 @@ APP_HTML = """<!DOCTYPE html>
           <span class="nav-label">Decisions</span>
           <span class="nav-soon">SOON</span>
         </div>
-        <div class="nav-item" onclick="showScreen('notecards')">
+        <div class="nav-item" onclick="showScreen('notecards',this)">
           <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="2" width="10" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 5h5M4.5 7.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
           <span class="nav-label">Notecards</span>
         </div>
@@ -525,7 +525,7 @@ APP_HTML = """<!DOCTYPE html>
 
       <div class="nav-section" style="margin-top:8px">
         <div class="nav-section-label">Frameworks</div>
-        <div class="nav-item" onclick="showScreen('solo-framework')">
+        <div class="nav-item" onclick="showScreen('solo-framework',this)">
           <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.3"/><rect x="8.5" y="1.5" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.3"/><rect x="1.5" y="8.5" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.3"/><rect x="8.5" y="8.5" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.3"/></svg></div>
           <span class="nav-label">Solo Builder</span>
         </div>
