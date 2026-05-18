@@ -467,10 +467,9 @@ APP_HTML = """<!DOCTYPE html>
           <span class="nav-label">Decisions</span>
           <span class="nav-soon">SOON</span>
         </div>
-        <div class="nav-item disabled">
+        <div class="nav-item" onclick="showScreen('notecards')">
           <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="2" width="10" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 5h5M4.5 7.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
           <span class="nav-label">Notecards</span>
-          <span class="nav-soon">SOON</span>
         </div>
       </div>
 
