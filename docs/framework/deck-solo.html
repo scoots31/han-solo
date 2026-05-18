@@ -11,14 +11,14 @@
     --navy: #0F1729;
     --navy-mid: #1A2744;
     --navy-light: #243357;
-    --blue: #3B82F6;
-    --blue-light: #60A5FA;
-    --teal: #0D9488;
-    --teal-light: #2DD4BF;
+    --blue: #bd8c7d;
+    --blue-light: rgba(209,191,167,0.20);
+    --teal: #8e8e90;
+    --teal-light: rgba(142,142,144,0.15);
     --gold: #F59E0B;
     --gold-light: #FCD34D;
     --purple: #bd8c7d;
-    --purple-light: #A78BFA;
+    --purple-light: #d1bfa7;
     --white: #FFFFFF;
     --off-white: #F1F5F9;
     --gray: #94A3B8;
@@ -137,8 +137,8 @@
     border-radius:6px; font-family:'SF Mono','Fira Code',monospace;
     white-space:nowrap;
   }
-  .chip-blue { background:rgba(59,130,246,0.18); color:var(--blue-light); }
-  .chip-teal { background:rgba(13,148,136,0.18); color:var(--teal-light); }
+  .chip-blue { background:rgba(189,140,125,0.18); color:var(--blue-light); }
+  .chip-teal { background:rgba(142,142,144,0.18); color:var(--teal-light); }
   .chip-gold { background:rgba(245,158,11,0.18); color:var(--gold-light); }
   .chip-purple { background:rgba(189,140,125,0.18); color:var(--purple-light); }
   .chip-gray { background:rgba(255,255,255,0.08); color:var(--gray-light); }
@@ -189,8 +189,8 @@
 
   .pill-row { display:flex; flex-wrap:wrap; gap:10px; margin-top:8px; }
   .pill { padding:8px 16px; border-radius:24px; font-size:14px; font-weight:600; border:1.5px solid; }
-  .pill-blue { background:rgba(59,130,246,0.15); border-color:rgba(59,130,246,0.4); color:var(--blue-light); }
-  .pill-teal { background:rgba(13,148,136,0.15); border-color:rgba(13,148,136,0.4); color:var(--teal-light); }
+  .pill-blue { background:rgba(189,140,125,0.15); border-color:rgba(189,140,125,0.4); color:var(--blue-light); }
+  .pill-teal { background:rgba(142,142,144,0.15); border-color:rgba(142,142,144,0.4); color:var(--teal-light); }
   .pill-gold { background:rgba(245,158,11,0.15); border-color:rgba(245,158,11,0.4); color:var(--gold-light); }
   .pill-white { background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.2); color:rgba(255,255,255,0.8); }
 
@@ -241,7 +241,7 @@
     <div class="section-label sl-blue">Where You Start</div>
     <h2 class="slide-h2">Three entry points — the framework routes for you</h2>
     <div class="entry-grid">
-      <div class="entry-card" style="border-color:rgba(96,165,250,0.3)">
+      <div class="entry-card" style="border-color:rgba(209,191,167,0.3)">
         <div class="entry-label" style="color:var(--blue-light)">Entry 1</div>
         <div class="entry-title">You know what you want to build</div>
         <div class="entry-desc">The idea is clear. Who it's for, what it does, what value it delivers. Skip brainstorming — go straight to Discover.</div>
@@ -260,7 +260,7 @@
         <div class="entry-trigger"><strong>Signals:</strong> existing repo, mid-flight work, "bring this into the framework"</div>
       </div>
     </div>
-    <p style="color:var(--gray);font-size:13px;margin-top:24px;line-height:1.5">The <code style="color:var(--blue-light);background:rgba(59,130,246,0.1);padding:2px 7px;border-radius:4px;font-size:12px">start</code> skill reads your opening message and routes automatically — one question if it's ambiguous. All three entry points converge into the same lifecycle.</p>
+    <p style="color:var(--gray);font-size:13px;margin-top:24px;line-height:1.5">The <code style="color:var(--blue-light);background:rgba(189,140,125,0.1);padding:2px 7px;border-radius:4px;font-size:12px">start</code> skill reads your opening message and routes automatically — one question if it's ambiguous. All three entry points converge into the same lifecycle.</p>
   </div>
 
   <!-- ── SLIDE 4: FRAMEWORK OVERVIEW ── -->
@@ -290,7 +290,7 @@
     </div>
     <ul class="point-list">
       <li>
-        <div class="pt-icon" style="background:rgba(96,165,250,0.12);color:var(--blue-light)">→</div>
+        <div class="pt-icon" style="background:rgba(209,191,167,0.12);color:var(--blue-light)">→</div>
         <div class="pt-text"><strong>You bring:</strong> the idea, domain knowledge, "warmer / colder" judgment, and final decisions</div>
       </li>
       <li>
@@ -314,10 +314,10 @@
         <div style="font-size:13px;color:var(--gray-light);line-height:1.6;margin-bottom:12px">Nothing loads until you ask for it. You invoke the skill you need, it runs, the framework stays out of the way.</div>
         <div style="font-size:12px;color:var(--gray);border-top:1px solid rgba(255,255,255,0.07);padding-top:10px"><strong style="color:var(--gray-light)">Right for:</strong> focused work where you know exactly what you want.</div>
       </div>
-      <div style="background:rgba(96,165,250,0.08);border:1px solid rgba(96,165,250,0.25);border-radius:12px;padding:22px">
+      <div style="background:rgba(209,191,167,0.08);border:1px solid rgba(209,191,167,0.25);border-radius:12px;padding:22px">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue-light);margin-bottom:8px">piloted</div>
         <div style="font-size:13px;color:var(--gray-light);line-height:1.6;margin-bottom:12px">You're flying it. The four always-on skills load at session start — memory, continuity, process accountability, health. You set the course: you choose which phase to run next.</div>
-        <div style="font-size:12px;color:var(--gray);border-top:1px solid rgba(96,165,250,0.15);padding-top:10px"><strong style="color:var(--gray-light)">Right for:</strong> builders who want instruments live while staying in control.</div>
+        <div style="font-size:12px;color:var(--gray);border-top:1px solid rgba(209,191,167,0.15);padding-top:10px"><strong style="color:var(--gray-light)">Right for:</strong> builders who want instruments live while staying in control.</div>
       </div>
       <div style="background:rgba(45,212,191,0.08);border:1px solid rgba(45,212,191,0.25);border-radius:12px;padding:22px">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--teal-light);margin-bottom:8px">guided</div>
@@ -380,19 +380,19 @@
       <div class="accent-line accent-blue"></div>
       <ul class="point-list">
         <li>
-          <div class="pt-icon" style="background:rgba(96,165,250,0.2)">📊</div>
+          <div class="pt-icon" style="background:rgba(209,191,167,0.2)">📊</div>
           <div class="pt-text"><strong>Data questions</strong> — every field on screen gets "where does this come from?" answered before build</div>
         </li>
         <li>
-          <div class="pt-icon" style="background:rgba(96,165,250,0.2)">🔄</div>
+          <div class="pt-icon" style="background:rgba(209,191,167,0.2)">🔄</div>
           <div class="pt-text"><strong>Process gaps</strong> — missing steps, decision points, and handoffs surface when you see the flow</div>
         </li>
         <li>
-          <div class="pt-icon" style="background:rgba(96,165,250,0.2)">✂️</div>
+          <div class="pt-icon" style="background:rgba(209,191,167,0.2)">✂️</div>
           <div class="pt-text"><strong>Scope decisions</strong> — every element on screen becomes an explicit build/defer decision</div>
         </li>
         <li>
-          <div class="pt-icon" style="background:rgba(96,165,250,0.2)">⚙️</div>
+          <div class="pt-icon" style="background:rgba(209,191,167,0.2)">⚙️</div>
           <div class="pt-text"><strong>Implied infrastructure</strong> — a simple toggle may hide a data pipeline. The design surfaces it before code commits to it.</div>
         </li>
       </ul>
@@ -438,7 +438,7 @@
         <div style="padding:12px 16px;font-size:13px;color:var(--gray);border-left:1px solid rgba(255,255,255,0.06)">Shared contract — agreed before build, self-verified by the framework, confirmed by the solo</div>
       </div>
     </div>
-    <p style="font-size:12px;color:rgba(255,255,255,0.35);line-height:1.5">Two views available at any time — <code style="color:var(--teal-light);background:rgba(13,148,136,0.12);padding:2px 7px;border-radius:4px;font-size:11px">show progress</code> for the active deliverable &nbsp;·&nbsp; <code style="color:var(--teal-light);background:rgba(13,148,136,0.12);padding:2px 7px;border-radius:4px;font-size:11px">show plan</code> for the full build</p>
+    <p style="font-size:12px;color:rgba(255,255,255,0.35);line-height:1.5">Two views available at any time — <code style="color:var(--teal-light);background:rgba(142,142,144,0.12);padding:2px 7px;border-radius:4px;font-size:11px">show progress</code> for the active deliverable &nbsp;·&nbsp; <code style="color:var(--teal-light);background:rgba(142,142,144,0.12);padding:2px 7px;border-radius:4px;font-size:11px">show plan</code> for the full build</p>
   </div>
 
   <!-- ── SLIDE 9: BUILD DISCIPLINE ── -->
@@ -503,7 +503,7 @@
         <div class="cn-pass" style="color:var(--gray-light)">Accepted → next deliverable or phase gate</div>
       </div>
     </div>
-    <p style="color:var(--gray);font-size:13px;line-height:1.5;max-width:780px">When testing surfaces something unexpected → <code style="color:var(--teal-light);background:rgba(13,148,136,0.12);padding:2px 7px;border-radius:4px;font-size:11px">qa-triage</code> classifies it: bug / missing requirement / regression — then routes it correctly. Fix the right thing, not the nearest thing.</p>
+    <p style="color:var(--gray);font-size:13px;line-height:1.5;max-width:780px">When testing surfaces something unexpected → <code style="color:var(--teal-light);background:rgba(142,142,144,0.12);padding:2px 7px;border-radius:4px;font-size:11px">qa-triage</code> classifies it: bug / missing requirement / regression — then routes it correctly. Fix the right thing, not the nearest thing.</p>
   </div>
 
   <!-- ── SLIDE 11: PROCESS THREAD ── -->

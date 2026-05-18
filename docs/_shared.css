@@ -406,9 +406,9 @@ tr:hover td { background: #fdf8f4; }
 }
 
 .roadmap-tag--planned {
-  background: rgba(100,160,255,.07);
-  color: #3b82f6;
-  border: 1px solid rgba(59,130,246,.18);
+  background: rgba(189,140,125,.07);
+  color: #bd8c7d;
+  border: 1px solid rgba(189,140,125,.18);
 }
 
 .roadmap-tag--considering {
