@@ -27,7 +27,7 @@ html { scroll-behavior: smooth; }
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'DM Sans', system-ui, sans-serif;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
   font-size: 16px;
   line-height: 1.75;
   min-height: 100vh;
@@ -36,7 +36,7 @@ body {
 /* ── Type ─────────────────────────────────────────────────────────── */
 
 h1, h2, h3, h4 {
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
   font-weight: 600;
   line-height: 1.2;
   color: var(--text);
@@ -117,7 +117,7 @@ hr {
 }
 
 .site-nav .brand {
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
   font-size: 1.3rem;
   font-weight: 700;
   color: var(--dark);
@@ -246,7 +246,7 @@ hr {
 }
 
 .card-title {
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
   font-size: 1.55rem;
   font-weight: 600;
   color: var(--text);
@@ -294,7 +294,7 @@ hr {
 }
 
 .stat-number {
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
   font-size: 3.2rem;
   font-weight: 600;
   color: var(--dark);
@@ -443,7 +443,7 @@ tr:hover td { background: #fdf8f4; }
   position: absolute;
   left: 0;
   top: .1em;
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--purple);
