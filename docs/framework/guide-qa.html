@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA &amp; Acceptance — Solo Builder Framework Phase Guide</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0F1729;
+    --navy-mid: #1E3A5F;
+    --rose: #BE123C;
+    --rose-light: #FFE4E6;
+    --rose-mid: #F43F5E;
+    --gray-50: #F8FAFC;
+    --gray-100: #F1F5F9;
+    --gray-200: #E2E8F0;
+    --gray-300: #CBD5E1;
+    --gray-500: #64748B;
+    --gray-700: #334155;
+    --gray-900: #0F172A;
+    --green: #15803D;
+    --green-light: #DCFCE7;
+    --amber: #B45309;
+    --amber-light: #FEF3C7;
+    --red: #DC2626;
+    --red-light: #FEE2E2;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-900);
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background: var(--navy);
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    overflow-y: auto;
+    padding: 28px 0 40px;
+    z-index: 10;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+  .sidebar-header {
+    padding: 0 20px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 16px;
+  }
+  .sidebar-header .sh-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 6px;
+  }
+  .sidebar-header .sh-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.3;
+  }
+
+  .nav-group { margin-bottom: 6px; }
+  .nav-group-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    padding: 8px 20px 4px;
+    display: block;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .nav-item:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.06);
+  }
+  .nav-item.skill-link {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .nav-item.active {
+    color: #fff;
+    border-left-color: var(--rose);
+    background: rgba(255,255,255,0.06);
+  }
+  .nav-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--rose);
+  }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: 240px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    background: var(--navy);
+    color: #fff;
+    padding: 48px 60px 40px;
+  }
+  .page-header .ph-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 12px;
+  }
+  .page-header h1 {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+    line-height: 1.1;
+  }
+  .page-header h1 span {
+    color: var(--rose-mid);
+  }
+  .page-header p {
+    font-size: 15px;
+    color: rgba(255,255,255,0.55);
+    max-width: 640px;
+    line-height: 1.6;
+  }
+  .header-stats {
+    display: flex;
+    gap: 32px;
+    margin-top: 28px;
+    padding-top: 28px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .header-stat .hs-num {
+    font-size: 28px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+  .header-stat .hs-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 2px;
+  }
+
+  /* ── CONTENT ── */
+  .content {
+    padding: 48px 60px 80px;
+    max-width: 960px;
+  }
+
+  /* ── SECTION ── */
+  .section {
+    margin-bottom: 52px;
+    scroll-margin-top: 24px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--gray-200);
+  }
+  .section-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: var(--rose-light);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--rose);
+    letter-spacing: -0.3px;
+  }
+  .section-subtitle {
+    font-size: 13px;
+    color: var(--gray-500);
+    margin-top: 2px;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--rose);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    letter-spacing: -0.3px;
+    flex: 1;
+  }
+  .card-title-plain {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--gray-900);
+    letter-spacing: -0.3px;
+    flex: 1;
+  }
+  .card-badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 2px;
+    background: var(--rose-light);
+    color: var(--rose);
+  }
+  .card-badge.auto {
+    background: var(--green-light);
+    color: var(--green);
+  }
+  .card-badge.gate {
+    background: var(--amber-light);
+    color: var(--amber);
+  }
+  .card-badge.warn {
+    background: var(--red-light);
+    color: var(--red);
+  }
+  .card-desc {
+    padding: 16px 24px;
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.65;
+    border-bottom: 1px solid var(--gray-100);
+    background: var(--gray-50);
+  }
+  .card-body {
+    padding: 20px 24px;
+  }
+
+  /* ── SKILL CARD GRID ── */
+  .skill-card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+  }
+  .skill-cell {
+    padding: 18px 22px;
+    border-right: 1px solid var(--gray-100);
+  }
+  .skill-cell:last-child { border-right: none; }
+  .skill-cell-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--rose);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .skill-cell-label::before {
+    content: '';
+    width: 3px; height: 12px;
+    border-radius: 2px;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+  .skill-cell ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .skill-cell ul li {
+    font-size: 12.5px;
+    color: var(--gray-700);
+    line-height: 1.5;
+    padding-left: 12px;
+    position: relative;
+  }
+  .skill-cell ul li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--gray-300);
+    font-size: 14px;
+    line-height: 1.35;
+  }
+  .skill-cell ul li strong { color: var(--gray-900); font-weight: 600; }
+
+  /* ── BODY PROSE ── */
+  .body-prose {
+    padding: 20px 24px;
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.7;
+  }
+  .body-prose p { margin-bottom: 12px; }
+  .body-prose p:last-child { margin-bottom: 0; }
+
+  /* ── CHAIN DIAGRAM ── */
+  .chain {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 20px;
+  }
+  .chain-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--gray-500);
+    margin-bottom: 20px;
+  }
+  .chain-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .chain-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    position: relative;
+  }
+  .chain-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 32px;
+    bottom: -4px;
+    width: 2px;
+    background: var(--gray-200);
+    z-index: 0;
+  }
+  .chain-node {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    flex-shrink: 0;
+    z-index: 1;
+    position: relative;
+  }
+  .chain-node.trigger { background: var(--gray-200); color: var(--gray-700); }
+  .chain-node.qa-step { background: var(--rose-light); color: var(--rose); }
+  .chain-node.done { background: var(--green-light); color: var(--green); }
+  .chain-content {
+    padding-bottom: 20px;
+    flex: 1;
+  }
+  .chain-content:last-child { padding-bottom: 0; }
+  .chain-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 4px;
+    margin-top: 6px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .chain-label.plain {
+    font-family: inherit;
+  }
+  .chain-desc {
+    font-size: 12.5px;
+    color: var(--gray-500);
+    line-height: 1.5;
+  }
+
+  /* ── CHECK LIST ── */
+  .check-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 20px 24px;
+  }
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .check-num {
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    background: var(--rose-light);
+    color: var(--rose);
+    font-size: 11px;
+    font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .check-content { flex: 1; }
+  .check-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 3px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .check-desc {
+    font-size: 12px;
+    color: var(--gray-500);
+    line-height: 1.5;
+  }
+
+  /* ── DONE TABLE ── */
+  .done-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  .done-table th {
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--gray-500);
+    padding: 10px 16px;
+    background: var(--gray-50);
+    border-bottom: 2px solid var(--gray-200);
+  }
+  .done-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--gray-100);
+    color: var(--gray-700);
+    line-height: 1.5;
+    vertical-align: top;
+  }
+  .done-table tr:last-child td { border-bottom: none; }
+  .done-table td:first-child { font-weight: 600; color: var(--gray-900); width: 36%; }
+  .done-table td:nth-child(2) { width: 20%; }
+  .done-check {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--green-light);
+    color: var(--green);
+  }
+
+  /* ── TRIAGE TABLE ── */
+  .triage-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    padding: 20px 24px;
+  }
+  .triage-col {
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .triage-col-header {
+    padding: 12px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .triage-col-header.bug { background: var(--red-light); color: var(--red); }
+  .triage-col-header.missing { background: var(--amber-light); color: var(--amber); }
+  .triage-col-header.regression { background: var(--rose-light); color: var(--rose); }
+  .triage-col-body {
+    padding: 14px 16px;
+    background: #fff;
+  }
+  .triage-definition {
+    font-size: 12px;
+    color: var(--gray-700);
+    line-height: 1.55;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .triage-rule {
+    font-size: 12px;
+    color: var(--gray-700);
+    line-height: 1.55;
+    margin-bottom: 8px;
+    padding-left: 10px;
+    position: relative;
+  }
+  .triage-rule::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--gray-300);
+  }
+  .triage-rule:last-child { margin-bottom: 0; }
+  .triage-rule strong { color: var(--gray-900); font-weight: 600; }
+
+  /* ── GATE BLOCK ── */
+  .gate-block {
+    background: #fff;
+    border: 2px solid var(--rose);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .gate-header {
+    background: var(--rose);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .gate-header-text {
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.2px;
+  }
+  .gate-body {
+    padding: 20px 24px;
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.65;
+  }
+  .gate-body strong { color: var(--gray-900); }
+
+  /* ── HANDOFF BLOCK ── */
+  .handoff-block {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .handoff-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--gray-200);
+    background: var(--gray-50);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .handoff-header-text {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gray-900);
+  }
+  .handoff-header-note {
+    font-size: 12px;
+    color: var(--gray-500);
+    margin-left: auto;
+  }
+  .handoff-artifacts {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+  }
+  .handoff-artifact {
+    padding: 18px 22px;
+    border-right: 1px solid var(--gray-100);
+  }
+  .handoff-artifact:last-child { border-right: none; }
+  .artifact-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 6px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .artifact-desc {
+    font-size: 12px;
+    color: var(--gray-500);
+    line-height: 1.5;
+  }
+
+  /* ── ANTI-PATTERN BLOCK ── */
+  .antipattern-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .antipattern-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    padding: 14px 16px;
+    border-left: 3px solid var(--red);
+  }
+  .antipattern-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .antipattern-content { flex: 1; }
+  .antipattern-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--red);
+    margin-bottom: 4px;
+  }
+  .antipattern-desc {
+    font-size: 12.5px;
+    color: var(--gray-500);
+    line-height: 1.5;
+  }
+  .antipattern-desc strong { color: var(--gray-700); font-weight: 600; }
+
+  /* ── INLINE CODE ── */
+  code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    background: var(--gray-100);
+    color: var(--rose);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  /* ── FLOW ARROW ── */
+  .flow-arrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 24px 16px;
+    flex-wrap: wrap;
+  }
+  .flow-node {
+    font-size: 11.5px;
+    font-weight: 700;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: var(--rose-light);
+    color: var(--rose);
+    white-space: nowrap;
+  }
+  .flow-node.trigger-node {
+    background: var(--gray-100);
+    color: var(--gray-700);
+  }
+  .flow-node.done-node {
+    background: var(--green-light);
+    color: var(--green);
+  }
+  .flow-chevron {
+    color: var(--gray-300);
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .page-header { padding: 32px 40px; }
+    .content { padding: 32px 40px 60px; }
+    .card { break-inside: avoid; }
+    @page { size: A4; margin: 15mm; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="sh-label">Phase Guide</div>
+    <div class="sh-title">QA &amp; Acceptance</div>
+  </div>
+
+  <div class="nav-group">
+    <span class="nav-group-label" style="color:rgba(251,113,133,0.6)">On this page</span>
+    <a href="#what-this-phase-is" class="nav-item"><span class="nav-dot"></span>What this phase is</a>
+    <a href="#skills" class="nav-item"><span class="nav-dot"></span>Skills in this phase</a>
+    <a href="#auto-chain" class="nav-item"><span class="nav-dot"></span>The auto-chain</a>
+    <a href="#seven-checks" class="nav-item"><span class="nav-dot"></span>The 7 checks</a>
+    <a href="#done-definition" class="nav-item"><span class="nav-dot"></span>What "Done" requires</a>
+    <a href="#triage" class="nav-item"><span class="nav-dot"></span>qa-triage — when it fires</a>
+    <a href="#gate" class="nav-item"><span class="nav-dot"></span>The gate</a>
+    <a href="#handoff" class="nav-item"><span class="nav-dot"></span>Handoff to Phase Test</a>
+    <a href="#watch-for" class="nav-item"><span class="nav-dot"></span>What to watch for</a>
+  </div>
+
+  <div class="nav-group">
+    <span class="nav-group-label" style="color:rgba(251,113,133,0.6)">Skills</span>
+    <a href="#skill-code-review" class="nav-item skill-link" style="color:rgba(251,113,133,0.7)"><span class="nav-dot"></span>code-review-and-quality</a>
+    <a href="#skill-solo-qa" class="nav-item skill-link" style="color:rgba(251,113,133,0.7)"><span class="nav-dot"></span>solo-qa</a>
+    <a href="#skill-qa-triage" class="nav-item skill-link" style="color:rgba(251,113,133,0.7)"><span class="nav-dot"></span>qa-triage</a>
+  </div>
+
+  <div class="nav-group">
+    <span class="nav-group-label" style="color:rgba(148,163,184,0.5)">Other guides</span>
+    <a href="guide-build.html" class="nav-item" style="color:rgba(148,163,184,0.55)">Build phase</a>
+    <a href="skills-reference.html" class="nav-item" style="color:rgba(148,163,184,0.55)">Skills reference</a>
+    <a href="index.html" class="nav-item" style="color:rgba(148,163,184,0.55)">Framework home</a>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+  <div class="page-header">
+    <div class="ph-eyebrow">Solo Builder Framework — Phase Guide</div>
+    <h1>QA &amp; <span>Acceptance</span></h1>
+    <p>QA is not a step at the end of build. It is a chain that auto-activates the moment code-complete is declared. A slice is Done only when all three links in the chain have passed. No shortcuts — no exceptions.</p>
+    <div class="header-stats">
+      <div class="header-stat"><div class="hs-num">3</div><div class="hs-label">Skills in chain</div></div>
+      <div class="header-stat"><div class="hs-num">7</div><div class="hs-label">Quality checks</div></div>
+      <div class="header-stat"><div class="hs-num">2</div><div class="hs-label">Signatures required for Done</div></div>
+      <div class="header-stat"><div class="hs-num">3</div><div class="hs-label">Triage classifications</div></div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══════════════ WHAT THIS PHASE IS ══════════════ -->
+    <div class="section" id="what-this-phase-is">
+      <div class="section-header">
+        <div class="section-icon">&#x2713;</div>
+        <div>
+          <div class="section-title">What this phase is</div>
+          <div class="section-subtitle">Code-complete is not Done. This is what it takes to get there.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body body-prose">
+          <p>The moment <code>solo-build</code> declares a slice code-complete, the QA chain activates automatically. It does not wait for the solo to invoke it. It does not skip. It runs.</p>
+          <p>There are three links in the chain. Each one covers something the previous cannot verify. Code quality is not sufficient on its own. AI verification is not sufficient on its own. The solo's eyes in a running browser are not optional. All three are required, in order, for a slice to reach Done.</p>
+          <p><strong>Link 1 — code-review-and-quality:</strong> Auto-invoked by solo-build on code-complete. Runs 7 structured checks against quality standards: pattern conformance, data sourcing discipline, expandability, cleanliness, scope adherence, documentation, and stack. This is the gate before verification can begin. On pass, it logs confirmation in the backlog and invokes solo-qa. On fail, the slice returns to In Build.</p>
+          <p><strong>Link 2 — solo-qa Part 1 (AI verification):</strong> The AI reads the full slice spec — all four anchors — then actively tests every done criterion against the running output with named evidence. Not code inspection. Not assumptions from reading source. Evidence means values cross-referenced against mock data, states observed in the preview, edge cases checked against the seeded mock. Design fidelity is verified against the design screen. If anything fails, the slice goes back to In Build with specific notes.</p>
+          <p><strong>Link 3 — solo-qa Part 2 (solo browser sign-off):</strong> The AI cannot do this part. The solo opens the running slice in a browser, alongside the design reference, and confirms each done criterion holds in practice. Not from memory. Not from a summary. Live, running software in the browser. This is the final gate and it cannot be substituted or skipped.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ SKILLS IN THIS PHASE ══════════════ -->
+    <div class="section" id="skills">
+      <div class="section-header">
+        <div class="section-icon">&#x2692;</div>
+        <div>
+          <div class="section-title">Skills in this phase</div>
+          <div class="section-subtitle">Three skills. One chain. Each one covering what the last cannot.</div>
+        </div>
+      </div>
+
+      <!-- code-review-and-quality -->
+      <div class="card" id="skill-code-review">
+        <div class="card-header">
+          <div class="card-title">code-review-and-quality</div>
+          <div class="card-badge auto">Auto-invoked</div>
+        </div>
+        <div class="card-desc">
+          The quality gate that runs first. Invoked automatically by solo-build when a slice is declared code-complete. Runs 7 structured checks. On pass, logs confirmation in the backlog and chains directly to solo-qa. On fail, the slice returns to In Build — QA does not proceed.
+        </div>
+        <div class="skill-card-grid">
+          <div class="skill-cell">
+            <div class="skill-cell-label">Invocation</div>
+            <ul>
+              <li>Auto-invoked by <strong>solo-build</strong> on code-complete</li>
+              <li>Never invoked manually mid-slice</li>
+              <li>Can be run directly if a solo suspects a quality issue outside of a formal build session</li>
+            </ul>
+          </div>
+          <div class="skill-cell">
+            <div class="skill-cell-label">What it checks</div>
+            <ul>
+              <li>7 structured quality checks (see full list below)</li>
+              <li>Pattern conformance, data sourcing, expandability, cleanliness, scope, docs, stack</li>
+            </ul>
+          </div>
+          <div class="skill-cell">
+            <div class="skill-cell-label">Outcomes</div>
+            <ul>
+              <li><strong>Pass:</strong> logs confirmation in backlog, invokes solo-qa automatically</li>
+              <li><strong>Fail:</strong> returns slice to In Build with specific notes — QA does not proceed</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- solo-qa -->
+      <div class="card" id="skill-solo-qa">
+        <div class="card-header">
+          <div class="card-title">solo-qa</div>
+          <div class="card-badge">Two-part</div>
+        </div>
+        <div class="card-desc">
+          Active verification that the right thing was built — and confirmation in practice that it works. Part 1 is the AI actively testing against the full slice spec with evidence. Part 2 is the solo confirming in the browser. Both are required. Neither can substitute for the other.
+        </div>
+        <div class="skill-card-grid">
+          <div class="skill-cell">
+            <div class="skill-cell-label">Part 1 — AI</div>
+            <ul>
+              <li>Gate check: code review pass logged in backlog</li>
+              <li>Read all 4 anchors: design, data, done criteria, process</li>
+              <li>Active verification of each done criterion with named evidence</li>
+              <li>Design fidelity against the design screen</li>
+              <li>Edge cases verified from mock data</li>
+            </ul>
+          </div>
+          <div class="skill-cell">
+            <div class="skill-cell-label">Part 2 — Solo</div>
+            <ul>
+              <li>Open the running slice in the browser — not a screenshot</li>
+              <li>Design reference open alongside</li>
+              <li>Confirm each done criterion holds in practice</li>
+              <li>Visual check, behavior check, feel check</li>
+              <li>Cannot be performed by the AI</li>
+            </ul>
+          </div>
+          <div class="skill-cell">
+            <div class="skill-cell-label">Outcomes</div>
+            <ul>
+              <li><strong>Pass:</strong> slice marked Done, backlog updated, git action per branching model</li>
+              <li><strong>Fail (Part 1):</strong> back to In Build with specific notes</li>
+              <li><strong>Unexpected discovery:</strong> invoke qa-triage immediately</li>
+              <li><strong>Open missing req:</strong> define or defer before sign-off prompt</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- qa-triage -->
+      <div class="card" id="skill-qa-triage">
+        <div class="card-header">
+          <div class="card-title">qa-triage</div>
+          <div class="card-badge">On-demand</div>
+        </div>
+        <div class="card-desc">
+          Routes unexpected discoveries during QA to the correct path. Invoked from solo-qa when something surfaces that isn't a clean pass or a simple build fix. Also invokable directly when the solo notices something outside a formal QA session. Classifies the discovery — bug, missing requirement, or regression — before deciding what to do.
+        </div>
+        <div class="skill-card-grid">
+          <div class="skill-cell">
+            <div class="skill-cell-label">When it fires</div>
+            <ul>
+              <li>During solo-qa when something unexpected surfaces</li>
+              <li>During build when the solo spots something unexpected</li>
+              <li>Post-deploy if a defect surfaces in use</li>
+              <li>Any time the right response isn't clearly "pass" or "back to In Build"</li>
+            </ul>
+          </div>
+          <div class="skill-cell">
+            <div class="skill-cell-label">What it does</div>
+            <ul>
+              <li>Classifies: bug, missing requirement, or regression</li>
+              <li>Determines scope: current slice, Done slice, unbuilt, adjacent, flow-level</li>
+              <li>Routes to the correct path based on type + scope</li>
+              <li>Logs every triage decision in the backlog</li>
+            </ul>
+          </div>
+          <div class="skill-cell">
+            <div class="skill-cell-label">Key behavior</div>
+            <ul>
+              <li>QA chain continues on <strong>unaffected</strong> scenarios while triage runs</li>
+              <li>Small scope discoveries resolved fast — large scope routed to design review</li>
+              <li>Every decision is logged — next session inherits the context</li>
+              <li>Never patch a regression without finding the root cause first</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ THE AUTO-CHAIN ══════════════ -->
+    <div class="section" id="auto-chain">
+      <div class="section-header">
+        <div class="section-icon">&#x25B6;</div>
+        <div>
+          <div class="section-title">The auto-chain</div>
+          <div class="section-subtitle">No manual handoffs. The chain runs.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-plain">How the QA chain triggers and runs</div>
+          <div class="card-badge auto">Automatic</div>
+        </div>
+        <div class="card-desc">
+          The chain starts the moment solo-build declares code-complete. From that point, each step invokes the next. There are no manual handoffs between links — the structure enforces the sequence. The solo's only required action is sign-off in Part 2 of solo-qa, which the AI cannot perform on their behalf.
+        </div>
+        <div class="flow-arrow">
+          <div class="flow-node trigger-node">solo-build declares code-complete</div>
+          <div class="flow-chevron">›</div>
+          <div class="flow-node">code-review-and-quality</div>
+          <div class="flow-chevron">›</div>
+          <div class="flow-node">solo-qa Part 1 (AI)</div>
+          <div class="flow-chevron">›</div>
+          <div class="flow-node">solo-qa Part 2 (solo)</div>
+          <div class="flow-chevron">›</div>
+          <div class="flow-node" style="background:#F0FDF4;color:#15803D;border:1px solid #86EFAC">In Test</div>
+          <div class="flow-chevron">›</div>
+          <div class="flow-node done-node">Done (via phase-test)</div>
+        </div>
+        <div class="chain" style="margin: 0 24px 20px; background: var(--gray-50);">
+          <div class="chain-title">Step by step</div>
+          <div class="chain-steps">
+            <div class="chain-step">
+              <div class="chain-node trigger">1</div>
+              <div class="chain-content">
+                <div class="chain-label plain">solo-build declares code-complete</div>
+                <div class="chain-desc">The slice passes the build. solo-build automatically invokes code-review-and-quality. Slice status moves to In QA.</div>
+              </div>
+            </div>
+            <div class="chain-step">
+              <div class="chain-node qa-step">2</div>
+              <div class="chain-content">
+                <div class="chain-label">code-review-and-quality</div>
+                <div class="chain-desc">Runs 7 checks. On pass: logs confirmation in backlog, auto-invokes solo-qa. On fail: returns slice to In Build with specific notes. QA does not proceed until this passes.</div>
+              </div>
+            </div>
+            <div class="chain-step">
+              <div class="chain-node qa-step">3</div>
+              <div class="chain-content">
+                <div class="chain-label">solo-qa Part 1 — AI verification</div>
+                <div class="chain-desc">Gate check confirms code review pass is logged and builder confirmation is populated. AI reads all 4 anchors, actively tests each done criterion against the running output with named evidence, and verifies design fidelity. If anything fails: slice returns to In Build with specific notes.</div>
+              </div>
+            </div>
+            <div class="chain-step">
+              <div class="chain-node qa-step">4</div>
+              <div class="chain-content">
+                <div class="chain-label">solo-qa Part 2 — Solo browser sign-off</div>
+                <div class="chain-desc">AI presents the sign-off request with builder confirmation already shown. Solo opens the running slice in browser alongside the design reference, walks through each done criterion, and confirms. The AI waits. In Test is not marked until the solo confirms.</div>
+              </div>
+            </div>
+            <div class="chain-step">
+              <div class="chain-node" style="background:#F0FDF4;color:#15803D;border:2px solid #86EFAC;font-size:10px;font-weight:800">5</div>
+              <div class="chain-content">
+                <div class="chain-label plain">In Test logged in backlog</div>
+                <div class="chain-desc">Backlog updated: status → In Test. QA pass summary logged with code review, AI verification, and solo sign-off recorded. Dependent slices checked for unblocking. Version control action taken per branching model. The slice reaches Done when phase-test gate opens.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ THE 7 CHECKS ══════════════ -->
+    <div class="section" id="seven-checks">
+      <div class="section-header">
+        <div class="section-icon">&#x26AC;</div>
+        <div>
+          <div class="section-title">The 7 checks</div>
+          <div class="section-subtitle">Every check in code-review-and-quality. All 7 must pass before QA proceeds.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-plain">code-review-and-quality quality gate</div>
+          <div class="card-badge gate">All 7 required</div>
+        </div>
+        <div class="card-desc">
+          These checks are not a suggestion list — they are all required. A single fail returns the slice to In Build. The code review does not proceed to partial confirmation. The chain does not continue to solo-qa until all 7 pass.
+        </div>
+        <div class="check-grid">
+          <div class="check-item">
+            <div class="check-num">1</div>
+            <div class="check-content">
+              <div class="check-name">pattern</div>
+              <div class="check-desc">The implementation follows established patterns in the codebase. No new patterns introduced without justification. Style, structure, and naming conventions match what already exists.</div>
+            </div>
+          </div>
+          <div class="check-item">
+            <div class="check-num">2</div>
+            <div class="check-content">
+              <div class="check-name">data sourcing</div>
+              <div class="check-desc">Data flows from the mock layer correctly. Values are read from the defined mock files — not hardcoded in the component. Fields match the established data model. No silent assumptions about data shape.</div>
+            </div>
+          </div>
+          <div class="check-item">
+            <div class="check-num">3</div>
+            <div class="check-content">
+              <div class="check-name">expandability</div>
+              <div class="check-desc">The implementation can accommodate future slices without requiring structural rewrites. Seams exist where needed. Hardcoded structure that will need to change is flagged, not silently introduced.</div>
+            </div>
+          </div>
+          <div class="check-item">
+            <div class="check-num">4</div>
+            <div class="check-content">
+              <div class="check-name">cleanliness</div>
+              <div class="check-desc">No dead code, commented-out blocks, debug artifacts, or unused imports. The implementation is production-clean — not just functional. Code that only exists for debugging was removed before code-complete was declared.</div>
+            </div>
+          </div>
+          <div class="check-item">
+            <div class="check-num">5</div>
+            <div class="check-content">
+              <div class="check-name">scope</div>
+              <div class="check-desc">The implementation covers exactly the slice spec — nothing more, nothing less. Features not in the slice definition were not speculatively added. No slice drift. Adjacent concerns that surfaced were noted, not silently absorbed.</div>
+            </div>
+          </div>
+          <div class="check-item">
+            <div class="check-num">6</div>
+            <div class="check-content">
+              <div class="check-name">docs</div>
+              <div class="check-desc">Anything that needs to be understood by the next session is documented at the appropriate level. Non-obvious decisions have a brief note. Complex logic has a comment. Nothing requires archaeology to understand intent.</div>
+            </div>
+          </div>
+          <div class="check-item" style="grid-column: 1 / -1; max-width: 100%;">
+            <div class="check-num">7</div>
+            <div class="check-content">
+              <div class="check-name">stack</div>
+              <div class="check-desc">The implementation stays within the defined stack and architecture constraints from <code>docs/tech-context.md</code>. No new dependencies introduced without explicit decision. No architectural deviations from the established patterns. The slice builds within the system, not around it.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ DONE DEFINITION ══════════════ -->
+    <div class="section" id="done-definition">
+      <div class="section-header">
+        <div class="section-icon">&#x25CF;</div>
+        <div>
+          <div class="section-title">What "Done" actually requires</div>
+          <div class="section-subtitle">Four checks, two statuses. Solo sign-off moves the slice to In Test. Phase-test moves it to Done.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-plain">The complete Done definition</div>
+          <div class="card-badge gate">All required</div>
+        </div>
+        <div class="card-desc">
+          A slice moves through two status milestones before it is truly Done. Solo QA sign-off is not the finish line — it is the gate to In Test. Done requires phase-test to confirm the slice works as part of the complete phase, end-to-end with real data. Meeting all QA checks is required but not sufficient on its own.
+        </div>
+        <div style="padding: 0 0 0 0; overflow-x: auto;">
+          <table class="done-table">
+            <thead>
+              <tr>
+                <th>What</th>
+                <th>Who</th>
+                <th>Status</th>
+                <th>What it means in practice</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Code review logged</td>
+                <td>code-review-and-quality</td>
+                <td><span class="done-check">logged in backlog</span></td>
+                <td>All 7 quality checks passed and the confirmation is recorded in the slice's backlog entry with the date. This is the gate that solo-qa checks before beginning Part 1.</td>
+              </tr>
+              <tr>
+                <td>AI verified with evidence</td>
+                <td>solo-qa Part 1</td>
+                <td><span class="done-check">named evidence</span></td>
+                <td>Every done criterion tested actively against the running output — not inferred from code. Evidence means: a value observed in the preview cross-referenced against the mock file. A state rendered in the UI. Not "the code reads from mock data."</td>
+              </tr>
+              <tr>
+                <td>Solo confirmed in browser</td>
+                <td>solo-qa Part 2</td>
+                <td><span class="done-check">solo sign-off → In Test</span></td>
+                <td>The solo looked at the running slice in a browser — not a screenshot, not a summary — with the design reference open alongside. Walked through each criterion. Gave an explicit confirmation. Slice moves to <strong>In Test</strong>. Not Done yet — phase-test is the final gate.</td>
+              </tr>
+              <tr>
+                <td>Phase-level verification</td>
+                <td>phase-test</td>
+                <td><span class="done-check">gate open → Done</span></td>
+                <td>Phase-test confirms all slices work together as a complete experience with real data. When the gate opens, every In Test slice in the phase moves to <strong>Done</strong> and the phase record moves to <strong>Completed</strong>.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="body-prose" style="padding-top: 16px;">
+          <p><strong>One hard rule:</strong> no solo sign-off while an open missing requirement exists. If testing surfaces behavior that was never defined, it must be defined (added to the slice's done criteria) or explicitly deferred to a new slice before the sign-off prompt goes out. Undefined behavior that ships with a sign-off becomes assumed behavior — and assumed behavior is a debt that compounds across slices.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ QA TRIAGE ══════════════ -->
+    <div class="section" id="triage">
+      <div class="section-header">
+        <div class="section-icon">&#x2194;</div>
+        <div>
+          <div class="section-title">qa-triage — when it fires</div>
+          <div class="section-subtitle">Not everything that surfaces during QA is a clean pass or a simple build fix.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-plain">Three classifications. Each one routes differently.</div>
+        </div>
+        <div class="card-desc">
+          When something unexpected appears during QA — during AI verification, during solo sign-off, or at any other moment — invoke qa-triage immediately. Do not improvise a fix without classifying what was found first. The classification determines the correct path. Getting it wrong produces the wrong fix, or no fix at all.
+        </div>
+        <div class="triage-grid">
+          <div class="triage-col">
+            <div class="triage-col-header bug">Bug</div>
+            <div class="triage-col-body">
+              <div class="triage-definition">The behavior is defined. The implementation doesn't match it. The spec exists — the code doesn't follow it.</div>
+              <div class="triage-rule"><strong>Current slice:</strong> Return to In Build with specific notes. Re-run full QA chain when fixed.</div>
+              <div class="triage-rule"><strong>Done slice:</strong> Reopen that slice. Status → In Build. Full QA chain before returning to Done.</div>
+              <div class="triage-rule"><strong>Unbuilt slice:</strong> Add a note to that slice's backlog record. Continue current QA — don't pause.</div>
+              <div class="triage-rule"><strong>Flow-level:</strong> Flag for design review. Don't try to fix it in QA.</div>
+            </div>
+          </div>
+          <div class="triage-col">
+            <div class="triage-col-header missing">Missing Requirement</div>
+            <div class="triage-col-body">
+              <div class="triage-definition">The behavior was never defined. This is a specification gap — not a code defect. The implementation may be reasonable, but it was never agreed on.</div>
+              <div class="triage-rule"><strong>Small gap (1 behavior):</strong> Define it now. Add to done criteria. Verify before sign-off.</div>
+              <div class="triage-rule"><strong>Larger gap (slice-level):</strong> Create a new slice. Current slice ships with an explicit scope note referencing the new slice ID.</div>
+              <div class="triage-rule"><strong>Multiple slices / flow:</strong> Design review trigger. Don't define slice-spanning requirements in a QA session.</div>
+              <div class="triage-rule"><strong>Hard rule:</strong> No solo sign-off on a slice with an open missing requirement.</div>
+            </div>
+          </div>
+          <div class="triage-col">
+            <div class="triage-col-header regression">Regression</div>
+            <div class="triage-col-body">
+              <div class="triage-definition">Something previously Done and working is now broken. A later slice, shared component change, or dependency update caused it.</div>
+              <div class="triage-rule"><strong>Single Done slice:</strong> Reopen it. Root cause note required — what changed and why. Full QA chain before Done again.</div>
+              <div class="triage-rule"><strong>Multiple Done slices:</strong> Identify the shared cause first. Fix the root, then re-QA affected slices together.</div>
+              <div class="triage-rule"><strong>Widespread:</strong> Flag before touching anything. Diagnose root cause and blast radius before fixing anything.</div>
+            </div>
+          </div>
+        </div>
+        <div class="body-prose">
+          <p>The QA chain continues on unaffected scenarios while triage handles the discovery. A bug in an unbuilt slice does not stop QA on slices currently in flight. A missing requirement with a clean scope boundary does not stall the entire build. Large-scope discoveries — flow-level issues — do pause affected slices and route to design review, but the rest of the build continues.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ THE GATE ══════════════ -->
+    <div class="section" id="gate">
+      <div class="section-header">
+        <div class="section-icon">&#x25A0;</div>
+        <div>
+          <div class="section-title">The gate</div>
+          <div class="section-subtitle">When this phase is complete and the next can begin.</div>
+        </div>
+      </div>
+
+      <div class="gate-block">
+        <div class="gate-header">
+          <div class="gate-header-text">Gate condition: all phase slices at In Test status</div>
+        </div>
+        <div class="gate-body">
+          <p style="margin-bottom: 12px;">Every slice in the phase must reach <strong>In Test</strong> status before the phase gate opens. Not most of them. Not the important ones. Every one. A slice reaches In Test only when all QA chain links have passed: code-review-and-quality confirmed, AI verified with evidence, solo confirmed in browser.</p>
+          <p>When all slices in a deliverable are In Test, QA runs a deliverable-level acceptance check. This is a separate, higher-level verification — not a repeat of slice QA. solo-qa reads the deliverable's plain language description, technical description, screens list, and acceptance criteria from the backlog record. Three deliverable types, three review methods: <strong>Screen</strong> deliverables get a visual pass in the browser against the deliverable acceptance criteria. <strong>Logic</strong> deliverables get an evidence pass — test results, data state, or a simulated flow. <strong>Integration</strong> deliverables get both — visual output and data source evidence. When the solo accepts, deliverable status moves to <strong>Accepted</strong>.</p>
+          <p>Once all deliverables are Accepted, the phase is ready for Phase Test. Phase Test does not auto-trigger — <strong>the solo invokes it explicitly.</strong> Phase Test confirms the complete phase works end-to-end with real data, and its gate-open moves all In Test slices to <strong>Done</strong> and the phase to <strong>Completed</strong>.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ HANDOFF TO PHASE TEST ══════════════ -->
+    <div class="section" id="handoff">
+      <div class="section-header">
+        <div class="section-icon">&#x21E8;</div>
+        <div>
+          <div class="section-title">Handoff to Phase Test</div>
+          <div class="section-subtitle">What phase test reads when the solo invokes it.</div>
+        </div>
+      </div>
+
+      <div class="handoff-block">
+        <div class="handoff-header">
+          <div class="handoff-header-text">What phase test reads at invocation</div>
+          <div class="handoff-header-note">Invoked explicitly by the solo — not auto-triggered</div>
+        </div>
+        <div class="handoff-artifacts">
+          <div class="handoff-artifact">
+            <div class="artifact-name">docs/backlog.md</div>
+            <div class="artifact-desc">The primary reference. All slices at Done status with code review, AI verification, and solo sign-off recorded in each slice's detail. Phase test reads this to know what was built, what criteria were met, and that the QA chain passed for every slice.</div>
+          </div>
+          <div class="handoff-artifact">
+            <div class="artifact-name">design screens</div>
+            <div class="artifact-desc">The fidelity reference. Phase test's design reviewer compares the running implementation against the design screens to assess whether what was shipped matches the intent of what was designed. The sprint artifact from design-sprint is the authoritative source.</div>
+          </div>
+          <div class="handoff-artifact">
+            <div class="artifact-name">discovery brief</div>
+            <div class="artifact-desc">The intent reference. Phase test's acceptance reviewer (PM lens) checks whether what was built matches what discovery established as the product intent — not just whether it matches the design. Problems surface here when implementation is technically correct but misses the point.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body body-prose">
+          <p>Phase test runs 7 specialist lenses across the completed phase: functional testing, regression testing, data integrity, UX review, accessibility, design fidelity, and acceptance review. It produces a gate decision — <strong>OPEN</strong> (proceed to deploy) or <strong>HOLD</strong> (specific items to resolve before proceeding). Failures at any stage in phase test invoke qa-triage, but the test run continues on unaffected scenarios.</p>
+          <p>The output of phase test is a phase test report appended to <code>backlog.md</code>. A gate OPEN decision is what authorizes the deploy skill to run.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ WHAT TO WATCH FOR ══════════════ -->
+    <div class="section" id="watch-for">
+      <div class="section-header">
+        <div class="section-icon">&#x26A0;</div>
+        <div>
+          <div class="section-title">What to watch for</div>
+          <div class="section-subtitle">The failures that happen here are quiet ones. They don't announce themselves.</div>
+        </div>
+      </div>
+
+      <div class="antipattern-list">
+        <div class="antipattern-item">
+          <div class="antipattern-icon">&#x2715;</div>
+          <div class="antipattern-content">
+            <div class="antipattern-title">Declaring Done without solo browser sign-off</div>
+            <div class="antipattern-desc">This is the most common failure. The AI verification passes, everything looks correct in the evidence, and there's a pull to mark it Done and move on. The solo sign-off is not a rubber stamp — it is a genuine check the AI cannot perform. It requires the solo to look at running software in a browser. "I'll check it later" is not a sign-off. A summary of what was built is not a sign-off. <strong>Wait for it. Every time.</strong></div>
+          </div>
+        </div>
+        <div class="antipattern-item">
+          <div class="antipattern-icon">&#x2715;</div>
+          <div class="antipattern-content">
+            <div class="antipattern-title">Solo sign-off with an open missing requirement</div>
+            <div class="antipattern-desc">If testing surfaces behavior that was never defined, it must be classified and handled before sign-off. Define it (add to done criteria and verify) or defer it to a new slice with an explicit scope note. Giving a sign-off with undefined behavior in the slice is not a QA pass — it is undefined behavior shipping as if it were intentional. <strong>Define or defer. Then sign off.</strong></div>
+          </div>
+        </div>
+        <div class="antipattern-item">
+          <div class="antipattern-icon">&#x2715;</div>
+          <div class="antipattern-content">
+            <div class="antipattern-title">Silently absorbing unexpected discoveries instead of routing through qa-triage</div>
+            <div class="antipattern-desc">When something unexpected surfaces — a behavior that seems off, a state that wasn't accounted for, something that was Done but now looks wrong — the instinct is often to fix it and move on. This produces bad fixes. A missing requirement patched as a bug produces code that solves the wrong problem. A regression fixed in the current slice without finding the root cause reappears in the next build. <strong>Classify it first. Then route it. Then fix it.</strong></div>
+          </div>
+        </div>
+        <div class="antipattern-item">
+          <div class="antipattern-icon">&#x2715;</div>
+          <div class="antipattern-content">
+            <div class="antipattern-title">Treating code inspection as active verification</div>
+            <div class="antipattern-desc">Evidence in solo-qa Part 1 means values observed in the running preview cross-referenced against mock files. "The code reads <code>slot_target</code> from the mock layer" is not evidence — it is code inspection. It does not confirm the rendered value matches the mock. It does not confirm edge cases render without breaking. <strong>Open the preview. Look at the output. Cross-reference the values.</strong></div>
+          </div>
+        </div>
+        <div class="antipattern-item">
+          <div class="antipattern-icon">&#x2715;</div>
+          <div class="antipattern-content">
+            <div class="antipattern-title">Starting solo-qa without a code review confirmation in the backlog</div>
+            <div class="antipattern-desc">solo-qa Part 1 begins with a gate check: is the code review pass logged in the backlog for this slice? If it isn't there, Part 1 stops immediately and returns a specific message. The chain does not run in reverse order. Code review before QA. <strong>No confirmation in the backlog means run code-review-and-quality first.</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.content -->
+</main>
+
+</body>
+</html>

@@ -73,7 +73,7 @@
     <li><strong>Anthropic API</strong> — Claude Haiku generates Ren's response, potentially calling tools (archival search, memory write, web fetch).</li>
     <li><strong>Letta</strong> — stores the exchange in PostgreSQL, returns the response.</li>
     <li><strong>han-solo-mcp</strong> — passes the response back to the UI.</li>
-    <li><strong>Chat UI</strong> — renders Ren's reply in gold.</li>
+    <li><strong>Chat UI</strong> — renders Ren's reply.</li>
   </ol>
 
   <p>Tool calls (when Ren searches memory, writes to a block, or fetches a page) add extra round-trips to Anthropic. Each tool call is a separate LLM inference — this is why sessions with heavy archival searching or page fetching cost more.</p>

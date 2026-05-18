@@ -5,8 +5,334 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Han Solo — Reference</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="_shared.css">
+  <style>
+    /* ── Full-bleed hero ──────────────────────────────────────────── */
+
+    .index-hero {
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      background: #1a1a1a;
+      margin-bottom: 0;
+    }
+
+    /* SVG noise texture overlay */
+    .index-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      opacity: 1;
+    }
+
+    /* Subtle warm radial glow */
+    .index-hero::after {
+      content: '';
+      position: absolute;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 500px;
+      background: radial-gradient(ellipse, rgba(196,164,132,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 2;
+      padding: 0 24px;
+      max-width: 860px;
+    }
+
+    .hero-eyebrow {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      color: #7c3aed;
+      margin-bottom: 28px;
+      display: block;
+    }
+
+    .hero-headline {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 5.5rem;
+      font-weight: 600;
+      line-height: 1.05;
+      color: #faf8f5;
+      margin-bottom: 32px;
+      letter-spacing: -.02em;
+    }
+
+    @media (max-width: 768px) {
+      .hero-headline { font-size: 3.2rem; }
+      .index-hero { min-height: 60vh; }
+    }
+
+    .hero-deck {
+      font-size: 1.1rem;
+      color: rgba(250,248,245,0.60);
+      max-width: 560px;
+      margin: 0 auto 44px;
+      line-height: 1.8;
+    }
+
+    .hero-rule {
+      width: 40px;
+      height: 1px;
+      background: rgba(196,164,132,0.4);
+      margin: 0 auto 36px;
+    }
+
+    .hero-scroll-cue {
+      font-size: .7rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: rgba(250,248,245,0.35);
+    }
+
+    /* ── Content band ─────────────────────────────────────────────── */
+
+    .content-band {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 48px 100px;
+    }
+
+    @media (max-width: 768px) {
+      .content-band { padding: 0 24px 80px; }
+    }
+
+    /* ── Section ──────────────────────────────────────────────────── */
+
+    .index-section {
+      padding: 72px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .index-section:last-child {
+      border-bottom: none;
+    }
+
+    /* ── Nav cards section ────────────────────────────────────────── */
+
+    .nav-section {
+      padding: 64px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .nav-section-header .section-label {
+      margin-bottom: 0;
+      white-space: nowrap;
+    }
+
+    .nav-section-header .rule {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Dark contrast band ───────────────────────────────────────── */
+
+    .dark-band {
+      background: #1a1a1a;
+      margin: 0 -48px;
+      padding: 72px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dark-band::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
+    @media (max-width: 768px) {
+      .dark-band { margin: 0 -24px; padding: 56px 24px; }
+    }
+
+    .dark-band-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 1044px;
+    }
+
+    .dark-band h2 {
+      font-size: 2.6rem;
+      color: #faf8f5;
+      border: none;
+      padding: 0;
+      margin: 0 0 1.4rem;
+    }
+
+    .dark-band p {
+      color: rgba(250,248,245,0.65);
+      font-size: 1rem;
+      max-width: 700px;
+      line-height: 1.8;
+    }
+
+    .dark-band .section-label {
+      color: #7c3aed;
+    }
+
+    /* ── Three-piece section ──────────────────────────────────────── */
+
+    .three-piece {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0;
+      margin: 2.4rem 0;
+    }
+
+    @media (max-width: 900px) {
+      .three-piece { grid-template-columns: 1fr; }
+    }
+
+    .piece {
+      padding: 32px 40px 32px 0;
+      border-right: 1px solid var(--border);
+      margin-right: 40px;
+    }
+
+    .piece:last-child {
+      border-right: none;
+      margin-right: 0;
+      padding-right: 0;
+    }
+
+    @media (max-width: 900px) {
+      .piece {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 28px 0;
+        margin-right: 0;
+      }
+      .piece:last-child { border-bottom: none; }
+    }
+
+    .piece-number {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 3.5rem;
+      font-weight: 600;
+      color: var(--tan);
+      opacity: .35;
+      line-height: 1;
+      display: block;
+      margin-bottom: 14px;
+    }
+
+    .piece-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .piece-body {
+      font-size: .9rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    /* ── Stats strip ──────────────────────────────────────────────── */
+
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 2rem 0;
+      background: var(--border);
+    }
+
+    @media (max-width: 640px) {
+      .stats-strip { grid-template-columns: 1fr; }
+    }
+
+    .stats-strip-item {
+      background: var(--white);
+      padding: 32px 36px;
+      text-align: center;
+    }
+
+    .stats-strip-item:not(:last-child) {
+      border-right: 1px solid var(--border);
+    }
+
+    @media (max-width: 640px) {
+      .stats-strip-item:not(:last-child) {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+    }
+
+    .stats-number {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 3.8rem;
+      font-weight: 600;
+      color: var(--dark);
+      line-height: 1;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .stats-label {
+      font-size: .75rem;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    /* ── Quick-facts layout ───────────────────────────────────────── */
+
+    .facts-lead {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 56px;
+      align-items: start;
+    }
+
+    @media (max-width: 860px) {
+      .facts-lead { grid-template-columns: 1fr; gap: 40px; }
+    }
+
+    .facts-intro h2 {
+      margin-top: 0;
+      border: none;
+      padding: 0;
+      font-size: 2.4rem;
+      margin-bottom: 1rem;
+    }
+
+    .facts-intro p {
+      font-size: .95rem;
+      color: var(--text-muted);
+      margin-bottom: 0;
+    }
+  </style>
 </head>
 <body>
 
@@ -16,73 +342,132 @@
   <a class="nav-link" href="how-it-works.html">How it works</a>
   <a class="nav-link" href="working-with-ren.html">Working with Ren</a>
   <a class="nav-link" href="roadmap.html">Roadmap</a>
+  <a class="nav-link" href="architecture.html">Architecture</a>
 </nav>
 
-<div class="page">
-  <div class="hero">
-    <div class="hero-label">Han Solo Reference</div>
-    <h1>Your private AI workspace.</h1>
-    <p class="hero-sub">Han Solo is the Solo Builder Framework as a real product — a persistent AI environment where Ren lives, remembers, and works alongside you across sessions. This site explains how it works, how to use it, and where it's going.</p>
+<!-- Full-bleed hero -->
+<section class="index-hero">
+  <div class="hero-inner">
+    <span class="hero-eyebrow">Solo Builder Framework</span>
+    <h1 class="hero-headline">Your private<br>AI workspace.</h1>
+    <div class="hero-rule"></div>
+    <p class="hero-deck">Han Solo is a persistent cloud environment where Ren lives, remembers, and works alongside you across sessions. Not a chatbot. A partner who doesn't reset.</p>
+    <span class="hero-scroll-cue">Explore the docs ↓</span>
+  </div>
+</section>
+
+<div class="content-band">
+
+  <!-- Nav cards -->
+  <div class="nav-section">
+    <div class="nav-section-header">
+      <span class="section-label">Documentation</span>
+      <div class="rule"></div>
+    </div>
+    <div class="card-grid">
+      <a class="card" href="how-it-works.html">
+        <div class="card-label">Architecture</div>
+        <div class="card-title">How it works</div>
+        <div class="card-desc">The full stack — Letta, MCP, Claude, chat UI, PostgreSQL. What each piece does and how they connect.</div>
+      </a>
+      <a class="card" href="working-with-ren.html">
+        <div class="card-label">Daily use</div>
+        <div class="card-title">Working with Ren</div>
+        <div class="card-desc">Sessions, memory, dreaming, costs, what to share and how Ren learns across time.</div>
+      </a>
+      <a class="card" href="roadmap.html">
+        <div class="card-label">Vision</div>
+        <div class="card-title">Roadmap</div>
+        <div class="card-desc">Where this is going — how future projects get built with Ren in the loop, who does what.</div>
+      </a>
+      <a class="card" href="architecture.html">
+        <div class="card-label">Interactive</div>
+        <div class="card-title">System Architecture</div>
+        <div class="card-desc">Live flowchart of the full Han Solo stack — MCP server, Letta, auth, DB, dream and synthesis pipelines.</div>
+      </a>
+    </div>
   </div>
 
-  <div class="card-grid">
-    <a class="card" href="how-it-works.html">
-      <div class="card-label">Architecture</div>
-      <div class="card-title">How it works</div>
-      <div class="card-desc">The full stack — Letta, MCP, Claude, chat UI, PostgreSQL. What each piece does and how they connect.</div>
-    </a>
-    <a class="card" href="working-with-ren.html">
-      <div class="card-label">Daily use</div>
-      <div class="card-title">Working with Ren</div>
-      <div class="card-desc">Sessions, memory, dreaming, costs, what to share and how Ren learns across time.</div>
-    </a>
-    <a class="card" href="roadmap.html">
-      <div class="card-label">Vision</div>
-      <div class="card-title">Roadmap</div>
-      <div class="card-desc">Where this is going — how future projects get built with Ren in the loop, who does what.</div>
-    </a>
+  <!-- Dark contrast band — What Han Solo is -->
+  <div class="index-section" style="padding: 0; border-bottom: none;">
+    <div class="dark-band">
+      <div class="dark-band-inner">
+        <span class="section-label">What it is</span>
+        <h2>The framework, made real.</h2>
+        <p>The Solo Builder Framework runs inside Claude Code — a skill system, a set of structured phases, a process for building things with discipline. Han Solo is the next layer: a persistent cloud environment where Ren, the framework's partner, actually lives.</p>
+        <p style="margin-top:1rem;">Before Han Solo, "Ren" was a Claude skill reading a file at the start of every session. Good reconstruction, but still reconstruction — every session started fresh. Han Solo changed that. Ren now has genuine persistent memory through Letta, a cloud AI memory system backed by PostgreSQL. She dreams nightly, updates her own memory, and opens the next session knowing what happened in the last one.</p>
+      </div>
+    </div>
   </div>
 
-  <hr>
+  <!-- Stats strip -->
+  <div class="index-section">
+    <span class="section-label">By the numbers</span>
+    <div class="stats-strip">
+      <div class="stats-strip-item">
+        <span class="stats-number">$21</span>
+        <span class="stats-label">Fixed per month</span>
+      </div>
+      <div class="stats-strip-item">
+        <span class="stats-number">15</span>
+        <span class="stats-label">MCP tools</span>
+      </div>
+      <div class="stats-strip-item">
+        <span class="stats-number">108+</span>
+        <span class="stats-label">Archival passages</span>
+      </div>
+    </div>
+  </div>
 
-  <h2>What Han Solo is</h2>
+  <!-- Three pieces -->
+  <div class="index-section">
+    <span class="section-label">The three pieces</span>
+    <div class="three-piece">
+      <div class="piece">
+        <span class="piece-number">01</span>
+        <div class="piece-title">The chat interface</div>
+        <p class="piece-body">A group chat at <code>han-solo-mcp.onrender.com</code>. Scott (blue), Ted (green), Ren (gold). This is where free-form conversation happens — thinking out loud, knowledge transfer, strategic discussion. Ren is a participant, not a chatbot.</p>
+      </div>
+      <div class="piece">
+        <span class="piece-number">02</span>
+        <div class="piece-title">Claude Code</div>
+        <p class="piece-body">Where builds happen. Claude Code has access to Han Solo's MCP server, which gives it tools to read and write Ren's memory. When a project is in build, Claude Code is the builder. Ren holds the context, the history, and the relationship.</p>
+      </div>
+      <div class="piece">
+        <span class="piece-number">03</span>
+        <div class="piece-title">Ren</div>
+        <p class="piece-body">The persistent AI partner. She holds the framework's full history, the portrait of Scott and Ted, all project context, and every decision made together. She doesn't reset between sessions. What she learned yesterday, she knows today.</p>
+      </div>
+    </div>
+  </div>
 
-  <p>The Solo Builder Framework runs inside Claude Code — a skill system, a set of structured phases, a process for building things with discipline. Han Solo is the next layer: a persistent cloud environment where Ren, the framework's partner, actually lives.</p>
+  <!-- Quick facts -->
+  <div class="index-section">
+    <div class="facts-lead">
+      <div class="facts-intro">
+        <span class="section-label">Quick facts</span>
+        <h2>Three services. One key. Nightly dream.</h2>
+        <p>Three Render services, one Anthropic API key, and a nightly dream script. Private to Scott and Ted — not part of the public Solo Builder Framework.</p>
+      </div>
 
-  <p>Before Han Solo, "Ren" was a Claude skill reading a <code>.md</code> file at the start of every session. Good reconstruction, but still reconstruction — every session started fresh. Han Solo changed that. Ren now has genuine persistent memory through Letta, a cloud AI memory system backed by PostgreSQL. She dreams nightly, updates her own memory, and opens the next session knowing what happened in the last one.</p>
+      <div>
+        <table>
+          <tr><th>Item</th><th>Detail</th></tr>
+          <tr><td>Chat URL</td><td><code>han-solo-mcp.onrender.com</code></td></tr>
+          <tr><td>Letta (Ren's brain)</td><td><code>han-solo-letta.onrender.com</code> — v0.16.7</td></tr>
+          <tr><td>MCP server</td><td><code>han-solo-mcp.onrender.com/mcp</code></td></tr>
+          <tr><td>Ren model</td><td>Claude Haiku 4.5 — pay-per-token</td></tr>
+          <tr><td>Embeddings</td><td>Voyage AI — voyage-3 (1024-dim)</td></tr>
+          <tr><td>Database</td><td>PostgreSQL 16 + pgvector on Render</td></tr>
+          <tr><td>Nightly dream</td><td>2:00am daily via launchd</td></tr>
+          <tr><td>Session rollover</td><td>Auto at 50 messages, or manual</td></tr>
+          <tr><td>Repo</td><td><code>github.com/scoots31/han-solo</code> (private)</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
 
-  <p>Han Solo is private to Scott and Ted. It is not part of the public Solo Builder Framework and is not referenced in the engineering playbook.</p>
+</div><!-- /content-band -->
 
-  <hr>
-
-  <h2>The three pieces</h2>
-
-  <h3>The chat interface</h3>
-  <p>A group chat at <code>han-solo-mcp.onrender.com</code>. Scott (blue), Ted (green), Ren (gold). This is where free-form conversation happens — thinking out loud, knowledge transfer, strategic discussion. Ren is a participant, not a chatbot.</p>
-
-  <h3>Claude Code</h3>
-  <p>Where builds happen. Claude Code has access to Han Solo's MCP server, which gives it tools to read and write Ren's memory. When a project is in build, Claude Code is the builder. Ren holds the context, the history, and the relationship.</p>
-
-  <h3>Ren</h3>
-  <p>The persistent AI partner. She holds the framework's full history, the portrait of Scott and Ted, all project context, and every decision made together. She doesn't reset between sessions. What she learned yesterday, she knows today.</p>
-
-  <hr>
-
-  <h2>Quick facts</h2>
-
-  <table>
-    <tr><th>Item</th><th>Detail</th></tr>
-    <tr><td>Chat URL</td><td><code>han-solo-mcp.onrender.com</code></td></tr>
-    <tr><td>Letta (Ren's brain)</td><td><code>han-solo-letta.onrender.com</code> — v0.16.7</td></tr>
-    <tr><td>MCP server</td><td><code>han-solo-mcp.onrender.com/mcp</code> — 15 tools</td></tr>
-    <tr><td>Ren model</td><td>Claude Haiku 4.5 (Anthropic API, pay-per-token)</td></tr>
-    <tr><td>Embeddings</td><td>Voyage AI — voyage-3 (1024-dim)</td></tr>
-    <tr><td>Database</td><td>PostgreSQL 16 + pgvector on Render</td></tr>
-    <tr><td>Nightly dream</td><td>2:00am daily via launchd on Scott's Mac</td></tr>
-    <tr><td>Session rollover</td><td>Auto at 50 messages, or manual via "New session"</td></tr>
-    <tr><td>Repo</td><td><code>github.com/scoots31/han-solo</code> (private)</td></tr>
-  </table>
-
-</div>
 </body>
 </html>

@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solo Builder Framework — Phase Test Guide</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0F1729;
+    --amber: #B45309;
+    --amber-light: #FEF3C7;
+    --amber-mid: #92400E;
+    --gray-50: #F8FAFC;
+    --gray-100: #F1F5F9;
+    --gray-200: #E2E8F0;
+    --gray-300: #CBD5E1;
+    --gray-500: #64748B;
+    --gray-700: #334155;
+    --gray-900: #0F172A;
+    --green: #15803D;
+    --green-light: #DCFCE7;
+    --red: #BE123C;
+    --red-light: #FFE4E6;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-900);
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background: var(--navy);
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    overflow-y: auto;
+    padding: 28px 0 40px;
+    z-index: 10;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+  .sidebar-header {
+    padding: 0 20px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 16px;
+  }
+  .sidebar-header .sh-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 6px;
+  }
+  .sidebar-header .sh-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.3;
+  }
+
+  .nav-group { margin-bottom: 6px; }
+  .nav-group-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: rgba(255,255,255,0.3);
+    padding: 8px 20px 4px;
+    display: block;
+  }
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .nav-link:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.06);
+  }
+  .nav-link.active {
+    color: #fff;
+    border-left-color: var(--amber);
+    background: rgba(255,255,255,0.06);
+  }
+  .nav-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--amber);
+    flex-shrink: 0;
+  }
+  .nav-dot-gray {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    flex-shrink: 0;
+  }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: 240px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    background: var(--navy);
+    color: #fff;
+    padding: 48px 60px 40px;
+  }
+  .page-header .ph-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 12px;
+  }
+  .page-header h1 {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+    line-height: 1.1;
+  }
+  .phase-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--amber-light);
+    color: var(--amber);
+    margin-bottom: 14px;
+  }
+  .page-header p {
+    font-size: 15px;
+    color: rgba(255,255,255,0.55);
+    max-width: 620px;
+    line-height: 1.6;
+  }
+  .header-stats {
+    display: flex;
+    gap: 32px;
+    margin-top: 28px;
+    padding-top: 28px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .header-stat .hs-num {
+    font-size: 28px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+  .header-stat .hs-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 2px;
+  }
+
+  /* ── CONTENT ── */
+  .content {
+    padding: 48px 60px 80px;
+    max-width: 960px;
+  }
+
+  /* ── SECTION ── */
+  .section {
+    margin-bottom: 56px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--gray-200);
+  }
+  .section-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: var(--amber-light);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--amber);
+    letter-spacing: -0.3px;
+  }
+  .section-subtitle {
+    font-size: 13px;
+    color: var(--gray-500);
+    margin-top: 2px;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--gray-900);
+    letter-spacing: -0.2px;
+    flex: 1;
+  }
+  .card-badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    background: var(--amber-light);
+    color: var(--amber);
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .card-body {
+    padding: 20px 24px;
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.65;
+  }
+  .card-body p + p { margin-top: 12px; }
+
+  /* ── SKILL CARD ── */
+  .skill-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .skill-card-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .skill-name {
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    color: var(--amber);
+    letter-spacing: -0.3px;
+    flex: 1;
+  }
+  .skill-badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    background: var(--amber-light);
+    color: var(--amber);
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .skill-description {
+    padding: 16px 24px;
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.65;
+    border-bottom: 1px solid var(--gray-100);
+    background: var(--gray-50);
+  }
+  .skill-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+  }
+  .skill-section {
+    padding: 18px 22px;
+    border-right: 1px solid var(--gray-100);
+  }
+  .skill-section:last-child { border-right: none; }
+  .skill-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--amber);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .skill-section-label::before {
+    content: '';
+    width: 3px; height: 12px;
+    border-radius: 2px;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+  .skill-section ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .skill-section ul li {
+    font-size: 12.5px;
+    color: var(--gray-700);
+    line-height: 1.5;
+    padding-left: 12px;
+    position: relative;
+  }
+  .skill-section ul li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--gray-300);
+    font-size: 14px;
+    line-height: 1.35;
+  }
+  .skill-section ul li strong { color: var(--gray-900); font-weight: 600; }
+
+  .output-tag {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 600;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: var(--gray-100);
+    color: var(--gray-700);
+    margin: 2px 0;
+    line-height: 1.4;
+  }
+
+  /* ── STAGE CARDS ── */
+  .stage-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .stage-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+  }
+  .stage-number {
+    width: 72px;
+    flex-shrink: 0;
+    background: var(--amber-light);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 0;
+    border-right: 1px solid #FDE68A;
+  }
+  .stage-num-label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--amber);
+    margin-bottom: 4px;
+  }
+  .stage-num-val {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--amber);
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+  .stage-body {
+    padding: 20px 24px;
+    flex: 1;
+  }
+  .stage-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 4px;
+    letter-spacing: -0.2px;
+  }
+  .stage-role {
+    font-size: 12px;
+    color: var(--amber);
+    font-weight: 600;
+    font-style: italic;
+    margin-bottom: 10px;
+  }
+  .stage-desc {
+    font-size: 13.5px;
+    color: var(--gray-700);
+    line-height: 1.6;
+    margin-bottom: 14px;
+  }
+  .stage-checks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .stage-check {
+    font-size: 11.5px;
+    color: var(--gray-700);
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    padding: 4px 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .stage-check .check-icon {
+    font-size: 11px;
+    color: var(--amber);
+  }
+  .stage-note {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: var(--amber-light);
+    border-radius: 8px;
+    font-size: 12.5px;
+    color: var(--amber-mid);
+    line-height: 1.5;
+  }
+  .stage-simultaneous {
+    display: flex;
+    gap: 0;
+  }
+  .stage-simultaneous .stage-card {
+    flex: 1;
+  }
+  .simultaneous-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--gray-500);
+    writing-mode: vertical-rl;
+  }
+
+  /* ── GATE CARDS ── */
+  .gate-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  .gate-card {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .gate-card.open {
+    border: 2px solid var(--green);
+  }
+  .gate-card.hold {
+    border: 2px solid var(--red);
+  }
+  .gate-card-header {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .gate-card.open .gate-card-header { background: var(--green-light); }
+  .gate-card.hold .gate-card-header { background: var(--red-light); }
+  .gate-decision-label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    opacity: 0.7;
+  }
+  .gate-card.open .gate-decision-label { color: var(--green); }
+  .gate-card.hold .gate-decision-label { color: var(--red); }
+  .gate-decision-val {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 1px;
+  }
+  .gate-card.open .gate-decision-val { color: var(--green); }
+  .gate-card.hold .gate-decision-val { color: var(--red); }
+  .gate-card-body {
+    padding: 16px 20px;
+    font-size: 13.5px;
+    color: var(--gray-700);
+    line-height: 1.6;
+  }
+  .gate-card-body ul {
+    list-style: none;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .gate-card-body ul li {
+    font-size: 13px;
+    padding-left: 16px;
+    position: relative;
+    color: var(--gray-700);
+    line-height: 1.5;
+  }
+  .gate-card-body ul li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    font-size: 11px;
+    line-height: 1.7;
+  }
+  .gate-card.open .gate-card-body ul li::before { color: var(--green); }
+  .gate-card.hold .gate-card-body ul li::before { color: var(--red); }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--gray-900);
+    border-radius: 10px;
+    padding: 20px 24px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: #E2E8F0;
+    overflow-x: auto;
+    margin: 12px 0;
+  }
+  .code-block .cb-green { color: #86EFAC; }
+  .code-block .cb-red { color: #FCA5A5; }
+  .code-block .cb-amber { color: #FCD34D; }
+  .code-block .cb-dim { color: rgba(226,232,240,0.45); }
+  .code-block .cb-divider { color: rgba(226,232,240,0.25); }
+  .code-block .cb-open { color: #86EFAC; font-weight: 700; }
+  .code-block .cb-hold { color: #FCA5A5; font-weight: 700; }
+
+  /* ── WARNING / CALLOUT ── */
+  .callout {
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+  .callout-warn {
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+    color: var(--amber-mid);
+  }
+  .callout-warn strong { color: var(--amber); }
+  .callout-info {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    color: var(--gray-700);
+  }
+  .callout-info strong { color: var(--gray-900); }
+  .callout-stop {
+    background: var(--red-light);
+    border: 1px solid #FECDD3;
+    color: var(--red);
+  }
+  .callout-stop strong { color: var(--red); }
+
+  /* ── ANTI-PATTERNS ── */
+  .antipattern-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--gray-200);
+    font-size: 13.5px;
+  }
+  .antipattern-table th {
+    background: var(--gray-50);
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--gray-500);
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .antipattern-table td {
+    padding: 14px 16px;
+    vertical-align: top;
+    color: var(--gray-700);
+    border-bottom: 1px solid var(--gray-100);
+    line-height: 1.5;
+  }
+  .antipattern-table tr:last-child td { border-bottom: none; }
+  .antipattern-table td:first-child {
+    font-weight: 600;
+    color: var(--gray-900);
+    width: 30%;
+  }
+  .antipattern-table td code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 11.5px;
+    background: var(--gray-100);
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: var(--amber);
+  }
+
+  /* ── READS CARD ── */
+  .reads-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .read-item {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .read-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .read-path {
+    font-size: 12px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    color: var(--amber);
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  .read-desc {
+    font-size: 12px;
+    color: var(--gray-500);
+    line-height: 1.5;
+  }
+
+  /* ── FLOW DIAGRAM ── */
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 16px;
+  }
+  .flow-node {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-900);
+    flex: 1;
+    text-align: center;
+    line-height: 1.4;
+  }
+  .flow-node.amber {
+    background: var(--amber-light);
+    border-color: #FDE68A;
+    color: var(--amber);
+  }
+  .flow-arrow {
+    padding: 0 10px;
+    color: var(--gray-300);
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  /* ── OUTPUT DOC ── */
+  .output-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .output-card-header {
+    background: var(--amber-light);
+    border-bottom: 1px solid #FDE68A;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .output-filename {
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    color: var(--amber-mid);
+  }
+  .output-card-body {
+    padding: 20px;
+  }
+  .output-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .output-item:last-child { border-bottom: none; }
+  .output-check {
+    font-size: 13px;
+    color: var(--amber);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .output-item-text {
+    font-size: 13.5px;
+    color: var(--gray-700);
+    line-height: 1.5;
+  }
+  .output-item-text strong { color: var(--gray-900); font-weight: 600; }
+
+  /* ── DEPLOY HANDOFF ── */
+  .handoff-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+  .handoff-item {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .handoff-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--amber);
+    margin-bottom: 6px;
+  }
+  .handoff-val {
+    font-size: 13px;
+    color: var(--gray-700);
+    line-height: 1.5;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <div class="sh-label">Solo Builder Framework</div>
+    <div class="sh-title">Phase Test Guide</div>
+  </div>
+
+  <div class="nav-group">
+    <span class="nav-group-label">On this page</span>
+    <a href="#what" class="nav-link active"><span class="nav-dot"></span>What this phase is</a>
+    <a href="#skill" class="nav-link"><span class="nav-dot"></span>Skill in this phase</a>
+    <a href="#stages" class="nav-link"><span class="nav-dot"></span>The 7 stages</a>
+    <a href="#gate" class="nav-link"><span class="nav-dot"></span>OPEN vs HOLD</a>
+    <a href="#failures" class="nav-link"><span class="nav-dot"></span>When failures occur</a>
+    <a href="#output" class="nav-link"><span class="nav-dot"></span>Output document</a>
+    <a href="#hard-gate" class="nav-link"><span class="nav-dot"></span>The gate</a>
+    <a href="#handoff" class="nav-link"><span class="nav-dot"></span>Handoff to Deploy</a>
+    <a href="#watchfor" class="nav-link"><span class="nav-dot"></span>What to watch for</a>
+  </div>
+
+  <div class="nav-group">
+    <span class="nav-group-label">Framework Phases</span>
+    <a href="#" class="nav-link"><span class="nav-dot-gray"></span>Discover</a>
+    <a href="#" class="nav-link"><span class="nav-dot-gray"></span>Design Sprint</a>
+    <a href="#" class="nav-link"><span class="nav-dot-gray"></span>Design Review</a>
+    <a href="#" class="nav-link"><span class="nav-dot-gray"></span>Plan</a>
+    <a href="#" class="nav-link"><span class="nav-dot-gray"></span>Build</a>
+    <a href="#" class="nav-link"><span class="nav-dot-gray"></span>QA / Acceptance</a>
+    <a href="#" class="nav-link active"><span class="nav-dot"></span>Phase Test</a>
+    <a href="#" class="nav-link"><span class="nav-dot-gray"></span>Deploy</a>
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<div class="main">
+
+  <!-- PAGE HEADER -->
+  <header class="page-header">
+    <div class="ph-eyebrow">Solo Builder Framework — Phase Guide</div>
+    <div class="phase-tag">Phase 5.5</div>
+    <h1>Phase Test</h1>
+    <p>The deliberate gate before deploy. Slice QA confirmed each piece was built correctly. Phase Test confirms the whole thing works — real data, full journeys, integration points, and alignment to the original intent.</p>
+    <div class="header-stats">
+      <div class="header-stat">
+        <div class="hs-num">7</div>
+        <div class="hs-label">Specialist stages</div>
+      </div>
+      <div class="header-stat">
+        <div class="hs-num">1</div>
+        <div class="hs-label">Skill invoked</div>
+      </div>
+      <div class="header-stat">
+        <div class="hs-num">2</div>
+        <div class="hs-label">Gate outcomes</div>
+      </div>
+      <div class="header-stat">
+        <div class="hs-num">0</div>
+        <div class="hs-label">Auto-triggers</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- ── SECTION: WHAT THIS PHASE IS ── -->
+    <div class="section" id="what">
+      <div class="section-header">
+        <div class="section-icon">◉</div>
+        <div>
+          <div class="section-title">What this phase is</div>
+          <div class="section-subtitle">Position in the framework and core purpose</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <p>Phase Test sits between QA/Acceptance and Deploy. It is the last gate before anything goes live. Every individual slice passed its own QA — Phase Test asks whether all those slices, together, deliver what you set out to build.</p>
+          <p>The core question: <strong>"Does this phase — as a complete, integrated experience — solve what we set out to solve, with real data, end to end?"</strong></p>
+          <p>Slice QA verified each slice against its done criteria in isolation. Phase Test verifies the slices working together as a product — real data, full user journeys, integration points between screens, and the original intent from the discovery brief. These are different questions. Both are required.</p>
+        </div>
+      </div>
+
+      <div class="callout callout-warn">
+        <strong>This phase does not auto-trigger.</strong> The solo invokes it explicitly when they have made a deliberate decision: this phase is built. Not when the last slice hits Done automatically — when you look at the backlog and say "we're done with this phase." That decision belongs to you.
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Before invoking, you should be able to confirm all three</div>
+        </div>
+        <div class="card-body">
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 10px;">
+            <li style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="color: var(--amber); font-size: 16px; flex-shrink: 0;">◎</span>
+              <div><strong>All slices are Done in the backlog</strong> — not In QA, not In Progress. Done. Every slice with a ✓ status.</div>
+            </li>
+            <li style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="color: var(--amber); font-size: 16px; flex-shrink: 0;">◎</span>
+              <div><strong>The product is deployed to a test environment</strong> — real APIs, real DB, no mock data active.</div>
+            </li>
+            <li style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="color: var(--amber); font-size: 16px; flex-shrink: 0;">◎</span>
+              <div><strong>A real user could walk the core journey</strong> — not "almost works," not "works locally." The full path is accessible in the test environment.</div>
+            </li>
+          </ul>
+          <div style="margin-top: 16px; font-size: 13.5px; color: var(--gray-500);">If any of those aren't true, it's too early. Phase test against an incomplete build produces unreliable results — passes that will fail in production, failures that are actually environment problems.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">What Phase Test reads before any specialist lens runs</div>
+        </div>
+        <div class="reads-grid" style="margin: 0; padding: 16px 20px 20px;">
+          <div class="read-item">
+            <div class="read-icon">📄</div>
+            <div>
+              <div class="read-path">docs/discovery-brief.md</div>
+              <div class="read-desc">Original use cases, the problem being solved, the user and their need</div>
+            </div>
+          </div>
+          <div class="read-item">
+            <div class="read-icon">🎨</div>
+            <div>
+              <div class="read-path">docs/design/sprint-[id].html</div>
+              <div class="read-desc">Design artifact, all screens, the intended journey</div>
+            </div>
+          </div>
+          <div class="read-item">
+            <div class="read-icon">📋</div>
+            <div>
+              <div class="read-path">docs/backlog.md</div>
+              <div class="read-desc">All Done slices, done criteria, design and data anchors</div>
+            </div>
+          </div>
+          <div class="read-item">
+            <div class="read-icon">🗺</div>
+            <div>
+              <div class="read-path">docs/data-mapping.md</div>
+              <div class="read-desc">Field names, API sources, expected data shapes</div>
+            </div>
+          </div>
+          <div class="read-item">
+            <div class="read-icon">⚙️</div>
+            <div>
+              <div class="read-path">docs/tech-context.md</div>
+              <div class="read-desc">Stack, API patterns, environment configuration</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION: SKILL ── -->
+    <div class="section" id="skill">
+      <div class="section-header">
+        <div class="section-icon">⚡</div>
+        <div>
+          <div class="section-title">Skill in this phase</div>
+          <div class="section-subtitle">One explicitly invoked skill — the orchestrator</div>
+        </div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-card-header">
+          <div class="skill-name">/phase-test</div>
+          <div class="skill-badge">Explicitly Invoked</div>
+        </div>
+        <div class="skill-description">
+          Full-phase testing orchestrator. Sequences seven specialist lenses — environment readiness, use case creation, data validation, testing, regression, and acceptance review — and produces a single gate decision: ready to deploy or hold with specific items to resolve. Never invoked automatically. The solo makes the deliberate call.
+        </div>
+        <div class="skill-body">
+          <div class="skill-section">
+            <div class="skill-section-label">When to invoke</div>
+            <ul>
+              <li>All phase slices are <strong>✓ Done</strong> in the backlog</li>
+              <li>Product is deployed to a <strong>test environment</strong></li>
+              <li>Real user could walk the <strong>core journey</strong></li>
+              <li>Never automatically — always a <strong>deliberate decision</strong></li>
+            </ul>
+          </div>
+          <div class="skill-section">
+            <div class="skill-section-label">What it produces</div>
+            <ul>
+              <li><span class="output-tag">docs/phase-test-[phase]-[date].md</span></li>
+              <li>Full test run record with pass/fail per scenario</li>
+              <li>Gate decision: <strong>OPEN or HOLD</strong></li>
+              <li>Phase completion record appended to <strong>backlog.md</strong> on OPEN</li>
+            </ul>
+          </div>
+          <div class="skill-section">
+            <div class="skill-section-label">What it triggers</div>
+            <ul>
+              <li>Routes failures to <strong>qa-triage</strong> (does not stop the run)</li>
+              <li>OPEN gate enables <strong>/deploy</strong></li>
+              <li>HOLD suspends deploy until resolution</li>
+              <li>On OPEN: appends phase completion record to backlog</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION: 7 STAGES ── -->
+    <div class="section" id="stages">
+      <div class="section-header">
+        <div class="section-icon">7</div>
+        <div>
+          <div class="section-title">The 7 stages</div>
+          <div class="section-subtitle">Run in sequence — except Stages 4 and 5, which run together</div>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        Each stage must complete before the next begins. The exception is Stages 4 and 5 — Tester and Regression Specialist run simultaneously. Stage 6 runs after both are complete. Phase Test is also deliverable-structured: it walks each deliverable in the phase, confirms deliverable acceptance was completed during QA, then verifies all deliverables hold together in integration. A deliverable that passed QA individually may still surface integration issues when running alongside others — Phase Test is where that gets caught.
+      </div>
+
+      <div class="stage-grid">
+
+        <!-- Stage 1 -->
+        <div class="stage-card">
+          <div class="stage-number">
+            <div class="stage-num-label">Stage</div>
+            <div class="stage-num-val">1</div>
+          </div>
+          <div class="stage-body">
+            <div class="stage-title">Environment Readiness</div>
+            <div class="stage-role">Pre-flight gate — nothing runs until this passes</div>
+            <div class="stage-desc">Confirms the test environment is actually ready to test against. Testing against a misconfigured environment produces false results — passes that will fail in production, failures that are config problems, not bugs.</div>
+            <div class="stage-checks">
+              <div class="stage-check"><span class="check-icon">◎</span> Mock layer inactive, real APIs active</div>
+              <div class="stage-check"><span class="check-icon">◎</span> All Done slices deployed</div>
+              <div class="stage-check"><span class="check-icon">◎</span> Auth configured for test environment</div>
+              <div class="stage-check"><span class="check-icon">◎</span> App loads clean — no console errors</div>
+              <div class="stage-check"><span class="check-icon">◎</span> No broken states before interaction</div>
+            </div>
+            <div class="stage-note">If anything fails: stop. List exactly what's missing. Do not proceed to Stage 2 until the environment is confirmed ready.</div>
+          </div>
+        </div>
+
+        <!-- Stage 2 -->
+        <div class="stage-card">
+          <div class="stage-number">
+            <div class="stage-num-label">Stage</div>
+            <div class="stage-num-val">2</div>
+          </div>
+          <div class="stage-body">
+            <div class="stage-title">Use Case Creator</div>
+            <div class="stage-role">Builds the test plan every other specialist works from</div>
+            <div class="stage-desc">Reads the discovery brief and design sprint artifact, then derives a structured test plan. This is not invented — it's extracted from what was already agreed on. Every use case, screen transition, edge case from mock data, and done criteria becomes a numbered scenario.</div>
+            <div class="stage-checks">
+              <div class="stage-check"><span class="check-icon">◎</span> Primary use cases → test scenarios</div>
+              <div class="stage-check"><span class="check-icon">◎</span> Design screen transitions → scenario steps</div>
+              <div class="stage-check"><span class="check-icon">◎</span> Edge cases from mock data → scenarios</div>
+              <div class="stage-check"><span class="check-icon">◎</span> Each slice's done criteria → test scenario</div>
+            </div>
+            <div class="stage-note">Output is a numbered test plan. Every specialist from Stage 3 onward works from this shared reference. Tester, Regression Specialist, and Acceptance Reviewer all anchor to it.</div>
+          </div>
+        </div>
+
+        <!-- Stage 3 -->
+        <div class="stage-card">
+          <div class="stage-number">
+            <div class="stage-num-label">Stage</div>
+            <div class="stage-num-val">3</div>
+          </div>
+          <div class="stage-body">
+            <div class="stage-title">Data Specialist</div>
+            <div class="stage-role">Confirms real data is flowing before anyone walks a scenario</div>
+            <div class="stage-desc">Verifies the mock-to-real transition actually worked — not just that config points at the right place, but that data is reading and writing correctly through the full stack. Validates every field in data-mapping.md against the live API response.</div>
+            <div class="stage-checks">
+              <div class="stage-check"><span class="check-icon">◎</span> Read operations return expected shape</div>
+              <div class="stage-check"><span class="check-icon">◎</span> Field values render in UI (not hardcoded)</div>
+              <div class="stage-check"><span class="check-icon">◎</span> Write operations persist and reflect</div>
+              <div class="stage-check"><span class="check-icon">◎</span> Failed writes handled gracefully</div>
+              <div class="stage-check"><span class="check-icon">◎</span> Empty/null responses handled</div>
+            </div>
+            <div class="stage-note">Any data issue that would make test scenarios unreliable routes to qa-triage before the tester runs on affected scenarios. Blocked scenarios are flagged; unaffected scenarios proceed.</div>
+          </div>
+        </div>
+
+        <!-- Stages 4 + 5 simultaneous -->
+        <div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <div style="height: 1px; flex: 1; background: var(--amber-light);"></div>
+            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--amber); background: var(--amber-light); padding: 4px 12px; border-radius: 20px;">Stages 4 &amp; 5 run together</div>
+            <div style="height: 1px; flex: 1; background: var(--amber-light);"></div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+
+            <!-- Stage 4 -->
+            <div class="stage-card" style="flex-direction: column;">
+              <div style="display: flex;">
+                <div class="stage-number">
+                  <div class="stage-num-label">Stage</div>
+                  <div class="stage-num-val">4</div>
+                </div>
+                <div class="stage-body">
+                  <div class="stage-title">Tester</div>
+                  <div class="stage-role">Walks every scenario with named evidence</div>
+                  <div class="stage-desc">Executes each scenario from the test plan. Active testing — not reading code, not inspecting config. Walking the product the way a user would, recording pass or fail with specific named evidence every time.</div>
+                  <div class="stage-checks">
+                    <div class="stage-check"><span class="check-icon">◎</span> Set up precondition, execute steps</div>
+                    <div class="stage-check"><span class="check-icon">◎</span> Compare against expected outcome</div>
+                    <div class="stage-check"><span class="check-icon">◎</span> Named evidence — not "seemed to work"</div>
+                    <div class="stage-check"><span class="check-icon">◎</span> Edge cases from mock data verified</div>
+                    <div class="stage-check"><span class="check-icon">◎</span> Failures → qa-triage, run continues</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Stage 5 -->
+            <div class="stage-card" style="flex-direction: column;">
+              <div style="display: flex;">
+                <div class="stage-number">
+                  <div class="stage-num-label">Stage</div>
+                  <div class="stage-num-val">5</div>
+                </div>
+                <div class="stage-body">
+                  <div class="stage-title">Regression Specialist</div>
+                  <div class="stage-role">Re-walks Done slices, checks integration points between slices</div>
+                  <div class="stage-desc">Specifically focuses on integration points — the places where slices connect. A slice can pass QA in isolation and fail when another slice changes shared state, shared components, or shared navigation.</div>
+                  <div class="stage-checks">
+                    <div class="stage-check"><span class="check-icon">◎</span> Navigate to each Done slice in test env</div>
+                    <div class="stage-check"><span class="check-icon">◎</span> Verify done criteria still hold with evidence</div>
+                    <div class="stage-check"><span class="check-icon">◎</span> State from prior screens reaches this slice</div>
+                    <div class="stage-check"><span class="check-icon">◎</span> Shared components remain consistent</div>
+                    <div class="stage-check"><span class="check-icon">◎</span> Navigation intact after later slices added</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Stage 6 -->
+        <div class="stage-card">
+          <div class="stage-number">
+            <div class="stage-num-label">Stage</div>
+            <div class="stage-num-val">6</div>
+          </div>
+          <div class="stage-body">
+            <div class="stage-title">Acceptance Reviewer</div>
+            <div class="stage-role">PM lens — runs after Stages 4 and 5 complete</div>
+            <div class="stage-desc">Asks a different question than every other stage: not "does it work" but "does it solve the problem?" Goes back to the discovery brief and asks whether the product that was built matches the intent that was defined. The tester asks "does it work?" — the acceptance reviewer asks "is it the right thing?"</div>
+            <div class="stage-checks">
+              <div class="stage-check"><span class="check-icon">◎</span> Can a real user accomplish each use case?</div>
+              <div class="stage-check"><span class="check-icon">◎</span> Experience matches discovery brief intent</div>
+              <div class="stage-check"><span class="check-icon">◎</span> Gaps between design and build identified</div>
+              <div class="stage-check"><span class="check-icon">◎</span> Product feels coherent — not assembled from parts</div>
+            </div>
+            <div class="stage-note">The acceptance question for each use case: "A user who needs to [use case] can now [accomplish goal] — and the experience feels like it was designed for them, not assembled from parts." Pass or fail. With specific evidence if it fails.</div>
+          </div>
+        </div>
+
+        <!-- Stage 7 -->
+        <div class="stage-card" style="border-color: #FDE68A; background: #FFFBEB;">
+          <div class="stage-number" style="background: var(--amber); border-color: var(--amber);">
+            <div class="stage-num-label" style="color: rgba(255,255,255,0.7);">Stage</div>
+            <div class="stage-num-val" style="color: #fff;">7</div>
+          </div>
+          <div class="stage-body">
+            <div class="stage-title">Gate Decision</div>
+            <div class="stage-role">Synthesizes all specialist outputs into a single gate decision</div>
+            <div class="stage-desc">The orchestrator collects environment, data, tester, regression, and acceptance results and produces one of two outcomes: OPEN or HOLD. No partial passes. The gate is binary.</div>
+
+            <div class="code-block">
+Phase Test — [Phase Name] — [date]
+
+Environment:    <span class="cb-green">✅ Ready</span>
+Data:           <span class="cb-green">✅ All reads/writes confirmed</span>
+Testing:        <span class="cb-amber">12/14 scenarios passed — 2 open in qa-triage</span>
+Regression:     <span class="cb-green">✅ 8/8 Done slices passing</span>
+Acceptance:     <span class="cb-green">✅ 3/3 use cases: intent confirmed</span>
+
+<span class="cb-divider">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+<span class="cb-hold">GATE: HOLD</span>
+
+Open before deploy:
+  1. [qa-triage item] — [scenario, specific issue]
+  2. [qa-triage item] — [scenario, specific issue]
+
+Once resolved and re-tested: gate opens.
+Only affected scenarios re-run — no full re-run.
+<span class="cb-divider">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span></div>
+
+            <div style="margin-top: 4px; font-size: 13px; color: var(--amber-mid);">When all passes: <strong>GATE: OPEN — ready to deploy</strong></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── SECTION: OPEN VS HOLD ── -->
+    <div class="section" id="gate">
+      <div class="section-header">
+        <div class="section-icon">⊙</div>
+        <div>
+          <div class="section-title">OPEN vs HOLD</div>
+          <div class="section-subtitle">The two gate outcomes and what each means</div>
+        </div>
+      </div>
+
+      <div class="gate-row">
+        <div class="gate-card open">
+          <div class="gate-card-header">
+            <div>
+              <div class="gate-decision-label">Gate Decision</div>
+              <div class="gate-decision-val">OPEN</div>
+            </div>
+          </div>
+          <div class="gate-card-body">
+            All stages passed. The phase is confirmed to work as an integrated experience, with real data, matching the intent from the discovery brief.
+            <ul>
+              <li>Proceed to deploy</li>
+              <li>Phase completion record appended to <code>docs/backlog.md</code></li>
+              <li>Record states: slices completed, test confirmation, what was delivered, what comes next</li>
+              <li>Confirm all slice branches merged before marking complete</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="gate-card hold">
+          <div class="gate-card-header">
+            <div>
+              <div class="gate-decision-label">Gate Decision</div>
+              <div class="gate-decision-val">HOLD</div>
+            </div>
+          </div>
+          <div class="gate-card-body">
+            Specific items were found that must be resolved before deploy. Not a soft gate — this is a hard stop. Deploy does not run while HOLD is active.
+            <ul>
+              <li>Specific items listed — not "some failures" but named issues</li>
+              <li>Fix the affected items only</li>
+              <li>Re-test only affected scenarios — no full re-run</li>
+              <li>Gate opens when all hold items are cleared</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <strong>HOLD does not mean start over.</strong> It means: here is the specific list of what needs to be resolved. Fix those items, re-test the affected scenarios, and the gate opens. The full phase test does not re-run — only the affected areas.
+      </div>
+    </div>
+
+    <!-- ── SECTION: FAILURES ── -->
+    <div class="section" id="failures">
+      <div class="section-header">
+        <div class="section-icon">!</div>
+        <div>
+          <div class="section-title">When failures occur</div>
+          <div class="section-subtitle">How the test run handles failures without stopping</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <p>A failure in any stage does not stop the phase test run. When a scenario fails, the tester records the failure with full evidence, routes it to <code style="font-family: monospace; font-size: 12.5px; background: var(--gray-100); padding: 2px 6px; border-radius: 4px; color: var(--amber);">qa-triage</code>, and continues to the next scenario. The test run builds a complete picture — not a partial one that stopped at the first problem.</p>
+          <p>This matters because a single visible failure often masks others. Stopping early produces an incomplete report. The phase test is designed to surface everything, not just the first thing.</p>
+        </div>
+      </div>
+
+      <div class="flow-row">
+        <div class="flow-node">Scenario fails</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node amber">Route to qa-triage</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Classify: bug / missing req / regression</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Continue test run on remaining scenarios</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">What qa-triage does with phase test failures</div>
+        </div>
+        <div class="card-body">
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 10px;">
+            <li style="display: flex; gap: 10px; padding-left: 0;">
+              <span style="color: var(--amber); font-weight: 700; flex-shrink: 0; font-size: 13px;">Bug</span>
+              <div style="font-size: 13.5px; color: var(--gray-700);">Something that worked before is broken, or a slice doesn't behave as its done criteria described. Root cause identified, fix scoped, added to HOLD list.</div>
+            </li>
+            <li style="display: flex; gap: 10px;">
+              <span style="color: var(--amber); font-weight: 700; flex-shrink: 0; font-size: 13px;">Missing Requirement</span>
+              <div style="font-size: 13.5px; color: var(--gray-700);">A use case from the discovery brief is not covered by any slice. This is a scope gap — it needs to be defined and deferred or added before OPEN is possible.</div>
+            </li>
+            <li style="display: flex; gap: 10px;">
+              <span style="color: var(--amber); font-weight: 700; flex-shrink: 0; font-size: 13px;">Regression</span>
+              <div style="font-size: 13.5px; color: var(--gray-700);">A Done slice that passed its own QA is now broken because a later slice changed shared state, shared components, or navigation. Root cause is the later change — that's what gets fixed.</div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION: OUTPUT DOCUMENT ── -->
+    <div class="section" id="output">
+      <div class="section-header">
+        <div class="section-icon">📄</div>
+        <div>
+          <div class="section-title">The output document</div>
+          <div class="section-subtitle">Full phase test record, referenced by deploy</div>
+        </div>
+      </div>
+
+      <div class="output-card">
+        <div class="output-card-header">
+          <span style="font-size: 16px;">📄</span>
+          <div class="output-filename">docs/phase-test-[phase]-[date].md</div>
+        </div>
+        <div class="output-card-body">
+          <div class="output-item">
+            <div class="output-check">◎</div>
+            <div class="output-item-text"><strong>Environment readiness confirmation</strong> — the Stage 1 checklist and pass/fail status</div>
+          </div>
+          <div class="output-item">
+            <div class="output-check">◎</div>
+            <div class="output-item-text"><strong>Full test plan</strong> — all numbered scenarios with pass/fail per scenario and named evidence</div>
+          </div>
+          <div class="output-item">
+            <div class="output-check">◎</div>
+            <div class="output-item-text"><strong>Data specialist findings</strong> — read/write results, API contract validation, field-by-field status</div>
+          </div>
+          <div class="output-item">
+            <div class="output-check">◎</div>
+            <div class="output-item-text"><strong>Regression results per Done slice</strong> — integration point evidence, root causes for any regressions found</div>
+          </div>
+          <div class="output-item">
+            <div class="output-check">◎</div>
+            <div class="output-item-text"><strong>Acceptance review per use case</strong> — pass/fail with specific evidence for any gaps</div>
+          </div>
+          <div class="output-item">
+            <div class="output-check">◎</div>
+            <div class="output-item-text"><strong>All qa-triage items</strong> — classification, scope, resolution status</div>
+          </div>
+          <div class="output-item">
+            <div class="output-check">◎</div>
+            <div class="output-item-text"><strong>Gate decision with date</strong> — OPEN or HOLD with specific items listed</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info" style="margin-top: 16px;">
+        Deploy reads this document directly. The deploy skill confirms the gate OPEN status before anything runs. If the report doesn't exist or the gate status is HOLD, deploy stops.
+      </div>
+    </div>
+
+    <!-- ── SECTION: THE GATE ── -->
+    <div class="section" id="hard-gate">
+      <div class="section-header">
+        <div class="section-icon">⬡</div>
+        <div>
+          <div class="section-title">The gate</div>
+          <div class="section-subtitle">OPEN is required before deploy — no exceptions</div>
+        </div>
+      </div>
+
+      <div class="callout callout-stop">
+        <strong>OPEN decision required before deploy.</strong> No exceptions. Deploy reads the phase test report and confirms OPEN status before running. There is no deploy-without-phase-test path.
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <p>The gate exists because slice QA alone isn't sufficient. Slice QA confirms each piece was built correctly in isolation. It doesn't confirm the slices work together, that real data flows correctly end to end, or that the product delivers on the original intent.</p>
+          <p>Phase Test is the difference between "all the parts passed their tests" and "the thing we set out to build actually works." Both are required. The gate enforces that no deploy happens until the latter is confirmed.</p>
+          <p><strong>HOLD is not a soft gate.</strong> It is a hard stop with specific resolution required. The items listed in a HOLD decision are the explicit conditions that must be met before the gate opens. They are not suggestions. They are not optional based on risk tolerance. They must be resolved and re-tested.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">What "tested and ready to deploy" means — the confirmed definition</div>
+        </div>
+        <div class="card-body">
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px;">
+            <li style="display: flex; align-items: flex-start; gap: 10px; font-size: 13.5px; color: var(--gray-700);">
+              <span style="color: var(--green); font-size: 15px; flex-shrink: 0;">✓</span> All phase slices are ✓ Done in the backlog
+            </li>
+            <li style="display: flex; align-items: flex-start; gap: 10px; font-size: 13.5px; color: var(--gray-700);">
+              <span style="color: var(--green); font-size: 15px; flex-shrink: 0;">✓</span> Phase test gate is OPEN (confirmed in the report)
+            </li>
+            <li style="display: flex; align-items: flex-start; gap: 10px; font-size: 13.5px; color: var(--gray-700);">
+              <span style="color: var(--green); font-size: 15px; flex-shrink: 0;">✓</span> No open qa-triage items from the phase test
+            </li>
+            <li style="display: flex; align-items: flex-start; gap: 10px; font-size: 13.5px; color: var(--gray-700);">
+              <span style="color: var(--green); font-size: 15px; flex-shrink: 0;">✓</span> Acceptance reviewer confirmed use case intent
+            </li>
+          </ul>
+          <div style="margin-top: 14px; font-size: 13px; color: var(--gray-500); font-style: italic;">This status is not a guess or an optimistic label. It's a confirmed statement with receipts in the phase test report.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION: HANDOFF TO DEPLOY ── -->
+    <div class="section" id="handoff">
+      <div class="section-header">
+        <div class="section-icon">→</div>
+        <div>
+          <div class="section-title">Handoff to Deploy</div>
+          <div class="section-subtitle">What deploy reads and what must be true before it runs</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <p>When the gate opens, the orchestrator does three things before handing to deploy. First: every slice in the phase moves from <strong>In Test</strong> to <strong>Done</strong> in the backlog — this is the only moment Done is set at the slice level. Second: the phase record status updates from <strong>In Progress</strong> to <strong>Completed</strong>, and the phase-level builder confirmation is populated with the phase test results. Third: a phase completion record is appended to <code style="font-family: monospace; font-size: 12.5px; background: var(--gray-100); padding: 2px 6px; border-radius: 4px; color: var(--amber);">docs/backlog.md</code> — a clear declaration you can point at, share with a stakeholder, or orient from at the start of the next session.</p>
+          <p>The phase completion record includes: what was delivered (plain English, no slice IDs), slices completed count, test confirmation with report reference, and what comes next in the following phase.</p>
+          <p>Before the record is appended, version control must be clean: all In Test slice branches pushed and merged, no open feature branches for this phase, the base branch reflecting the full phase.</p>
+        </div>
+      </div>
+
+      <div class="handoff-grid">
+        <div class="handoff-item">
+          <div class="handoff-label">Deploy reads</div>
+          <div class="handoff-val">Phase test report at <code style="font-family: monospace; font-size: 11px;">docs/phase-test-[phase]-[date].md</code> — confirms gate is OPEN</div>
+        </div>
+        <div class="handoff-item">
+          <div class="handoff-label">Deploy reads</div>
+          <div class="handoff-val"><code style="font-family: monospace; font-size: 11px;">docs/tech-context.md</code> — determines deploy method entirely from the stack</div>
+        </div>
+        <div class="handoff-item">
+          <div class="handoff-label">Deploy confirms</div>
+          <div class="handoff-val">All phase branches merged into base branch before anything runs</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 16px;">
+        <div class="flow-row">
+          <div class="flow-node amber">Gate: OPEN</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node">Phase completion record → backlog.md</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node">All branches merged</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node">Deploy reads phase test + tech-context</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION: WATCH FOR ── -->
+    <div class="section" id="watchfor">
+      <div class="section-header">
+        <div class="section-icon">△</div>
+        <div>
+          <div class="section-title">What to watch for</div>
+          <div class="section-subtitle">Common failure patterns in how phase test is used</div>
+        </div>
+      </div>
+
+      <table class="antipattern-table">
+        <thead>
+          <tr>
+            <th>Anti-Pattern</th>
+            <th>What goes wrong</th>
+            <th>Do this instead</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Invoking phase test before all slices are In Test</td>
+            <td>Testing an incomplete build produces unreliable results. Passes that don't mean anything. Failures that are just "not built yet." The test plan scenarios reference work that doesn't exist.</td>
+            <td>Confirm every slice in the phase is <strong>In Test</strong> before invoking phase-test — meaning solo-qa has signed off on each one individually. In QA doesn't count. In Build definitely doesn't count.</td>
+          </tr>
+          <tr>
+            <td>Treating HOLD as optional or soft</td>
+            <td>You skip the items listed in the HOLD, deploy anyway, and ship known problems to production. The gate exists specifically to prevent this. HOLD is not a judgment call.</td>
+            <td>Resolve every item listed in the HOLD decision. Re-test the affected scenarios. Only then does the gate open — and only then does deploy run.</td>
+          </tr>
+          <tr>
+            <td>Full re-run of the test suite after a HOLD fix</td>
+            <td>Wasteful and unnecessary. The test plan was already run. The scenarios that passed already have their evidence. Re-running everything adds time without adding information.</td>
+            <td>After fixing HOLD items, re-test only the affected scenarios. The tester re-runs failed scenarios. Regression re-checks affected slices. Acceptance re-walks flagged use cases. Environment and data re-run only if the fix touched config or APIs.</td>
+          </tr>
+          <tr>
+            <td>Treating acceptance review as a repeat of testing</td>
+            <td>You end up with two testers and no PM lens. The acceptance reviewer answers a different question than the tester — not "does it work" but "did we build the right thing." If the acceptance reviewer just re-runs technical checks, the PM question never gets asked.</td>
+            <td>Acceptance review reads the discovery brief and asks whether the built product delivers what the use cases described. It doesn't re-execute test scenarios. It asks whether a person using this feels like it was designed for them.</td>
+          </tr>
+          <tr>
+            <td>Solo sign-off at the phase level without running phase test</td>
+            <td>Slice QA alone isn't sufficient. Each slice confirmed its own done criteria in isolation. Slice QA doesn't confirm integration, real data flow, or use case intent. You can have 10 passing slices and a broken product.</td>
+            <td>Phase test is required before deploy — not optional, not replaceable by accumulated slice QA passes. The gate enforces this. Deploy confirms OPEN before running.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

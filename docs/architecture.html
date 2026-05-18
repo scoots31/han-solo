@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Han Solo — Architecture &amp; Flows</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#faf8f5;
+  --surface:#ffffff;
+  --surface2:#fdf8f4;
+  --border:#e8ddd4;
+  --text:#1a1a1a;
+  --dim:rgba(26,26,26,0.45);
+  --gold:#E8971C;
+  --gold-dim:rgba(232,151,28,.15);
+  --gold-border:rgba(232,151,28,.28);
+  --blue:#4A90D9;
+  --blue-dim:rgba(74,144,217,.12);
+  --blue-border:rgba(74,144,217,.28);
+  --green:#5BA85A;
+  --green-dim:rgba(91,168,90,.12);
+  --green-border:rgba(91,168,90,.28);
+  --purple:#9B7FD4;
+  --purple-dim:rgba(155,127,212,.12);
+  --purple-border:rgba(155,127,212,.28);
+  --red:#D95040;
+  --red-dim:rgba(217,80,64,.12);
+  --red-border:rgba(217,80,64,.28);
+  --teal:#48B8B0;
+  --teal-dim:rgba(72,184,176,.12);
+  --teal-border:rgba(72,184,176,.28);
+  --highlight:#7c3aed;
+  --highlight-glow:rgba(124,58,237,0.25);
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  font-size:14px;
+  line-height:1.5;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+/* ── Header ── */
+header{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  padding:10px 20px;
+  border-bottom:1px solid var(--border);
+  background:#ffffff;
+  flex-shrink:0;
+}
+.h-title{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#7c3aed}
+.h-sub{font-size:12px;color:rgba(26,26,26,0.45)}
+.h-badge{
+  margin-left:auto;
+  font-size:11px;
+  color:rgba(26,26,26,0.45);
+  background:#fdf8f4;
+  border:1px solid var(--border);
+  padding:3px 10px;
+  border-radius:20px;
+}
+
+/* ── Main layout ── */
+.layout{display:flex;flex:1;min-height:0}
+
+/* ── Canvas area ── */
+.canvas-wrap{
+  flex:1;
+  position:relative;
+  overflow:hidden;
+  background:#faf8f5;
+  background-image:radial-gradient(circle,#e8ddd4 1px,transparent 1px);
+  background-size:28px 28px;
+}
+
+svg#flowchart{
+  width:100%;height:100%;
+  cursor:grab;
+  user-select:none;
+}
+svg#flowchart:active{cursor:grabbing}
+
+/* ── Sidebar ── */
+.sidebar{
+  width:340px;
+  flex-shrink:0;
+  border-left:1px solid var(--border);
+  background:#ffffff;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+.sidebar-flows{
+  flex:0 0 auto;
+  border-bottom:1px solid var(--border);
+  padding:14px 16px;
+  max-height:280px;
+  overflow-y:auto;
+}
+.sidebar-steps{
+  flex:1;
+  overflow-y:auto;
+  padding:14px 16px;
+}
+
+.s-section-label{
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.10em;
+  text-transform:uppercase;
+  color:#7c3aed;
+  margin-bottom:10px;
+}
+
+.flow-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 10px;
+  border-radius:6px;
+  cursor:pointer;
+  border:1px solid var(--border);
+  margin-bottom:4px;
+  transition:background .1s,border-color .1s;
+  font-size:12px;
+  background:#ffffff;
+  color:var(--text);
+}
+.flow-item:hover{background:#fdf8f4;border-color:var(--border)}
+.flow-item.active{background:rgba(124,58,237,0.06);border-left:3px solid #7c3aed;border-color:#7c3aed;color:var(--text)}
+.flow-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+.step-list{display:flex;flex-direction:column;gap:10px}
+.step{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+}
+.step-num{
+  flex-shrink:0;
+  width:22px;height:22px;
+  border-radius:50%;
+  background:#fdf8f4;
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;
+  color:rgba(26,26,26,0.45);
+}
+.step-body{}
+.step-title{font-size:12px;font-weight:600;margin-bottom:2px;color:var(--text)}
+.step-desc{font-size:11px;color:rgba(26,26,26,0.55);line-height:1.5}
+.step-ref{
+  display:inline-block;
+  margin-top:3px;
+  font-size:10px;
+  font-family:monospace;
+  background:#fdf8f4;
+  border:1px solid var(--border);
+  padding:1px 6px;
+  border-radius:3px;
+  color:rgba(26,26,26,0.45);
+}
+
+.empty-state{
+  color:rgba(26,26,26,0.45);
+  font-size:12px;
+  text-align:center;
+  padding:24px 0;
+}
+
+/* ── Legend ── */
+.legend{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  padding:8px 20px;
+  border-top:1px solid var(--border);
+  background:#ffffff;
+  flex-shrink:0;
+  font-size:11px;
+}
+.leg-item{display:flex;align-items:center;gap:5px;color:rgba(26,26,26,0.55)}
+.leg-swatch{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+/* ── SVG node styles (applied via class in SVG) ── */
+.node-rect{
+  rx:8;ry:8;
+  transition:filter .15s;
+}
+.node-group{cursor:pointer}
+.node-group:hover .node-rect{filter:brightness(0.95)}
+.node-group.highlighted .node-rect{
+  stroke:var(--highlight)!important;
+  stroke-width:2.5!important;
+  filter:drop-shadow(0 0 8px var(--highlight-glow));
+}
+.node-group.highlighted text{fill:var(--highlight)!important}
+.edge{
+  fill:none;
+  stroke-width:1.5;
+  opacity:.55;
+  transition:opacity .15s,stroke-width .15s;
+}
+.edge.highlighted{
+  opacity:1;
+  stroke:var(--highlight)!important;
+  stroke-width:2.5;
+}
+.edge-label{
+  font-size:9px;
+  fill:rgba(26,26,26,0.45);
+}
+.edge-label.highlighted{fill:var(--highlight)}
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="brand" href="index.html">Han Solo</a>
+  <a class="nav-link" href="index.html">Home</a>
+  <a class="nav-link" href="how-it-works.html">How it works</a>
+  <a class="nav-link" href="working-with-ren.html">Working with Ren</a>
+  <a class="nav-link" href="roadmap.html">Roadmap</a>
+  <a class="nav-link active" href="architecture.html">Architecture</a>
+</nav>
+
+<header>
+  <div class="h-title">Han Solo</div>
+  <div class="h-sub">Architecture &amp; Flows</div>
+  <div class="h-badge">Click any node or flow to trace the path</div>
+</header>
+
+<div class="layout">
+  <!-- ── Flowchart canvas ── -->
+  <div class="canvas-wrap">
+    <svg id="flowchart" viewBox="0 0 1400 920" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 Z" fill="#b8a89a"/>
+        </marker>
+        <marker id="arr-hi" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 Z" fill="#7c3aed"/>
+        </marker>
+      </defs>
+
+      <!-- ════════════════════════════════════════════════
+           EXTERNAL CLIENTS — top row
+      ════════════════════════════════════════════════ -->
+
+      <!-- Claude (MCP client) -->
+      <g class="node-group" data-node="claude" onclick="nodeClick('claude')">
+        <rect class="node-rect" x="40" y="30" width="130" height="52"
+              fill="#fdf8f4" stroke="#E8971C" stroke-width="1.5"/>
+        <text x="105" y="52" text-anchor="middle" fill="#E8971C" font-size="12" font-weight="700">Claude</text>
+        <text x="105" y="69" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">(any MCP client)</text>
+      </g>
+
+      <!-- Web browser (Scott/Ted) -->
+      <g class="node-group" data-node="browser" onclick="nodeClick('browser')">
+        <rect class="node-rect" x="210" y="30" width="130" height="52"
+              fill="#fdf8f4" stroke="#4A90D9" stroke-width="1.5"/>
+        <text x="275" y="52" text-anchor="middle" fill="#4A90D9" font-size="12" font-weight="700">Web Browser</text>
+        <text x="275" y="69" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">Scott / Ted</text>
+      </g>
+
+      <!-- Dream script -->
+      <g class="node-group" data-node="dream" onclick="nodeClick('dream')">
+        <rect class="node-rect" x="380" y="30" width="130" height="52"
+              fill="#fdf8f4" stroke="#9B7FD4" stroke-width="1.5"/>
+        <text x="445" y="52" text-anchor="middle" fill="#9B7FD4" font-size="12" font-weight="700">dream.py</text>
+        <text x="445" y="69" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">nightly cron (launchd)</text>
+      </g>
+
+      <!-- Synthesize script -->
+      <g class="node-group" data-node="synthesize" onclick="nodeClick('synthesize')">
+        <rect class="node-rect" x="550" y="30" width="130" height="52"
+              fill="#fdf8f4" stroke="#48B8B0" stroke-width="1.5"/>
+        <text x="615" y="52" text-anchor="middle" fill="#48B8B0" font-size="12" font-weight="700">synthesize.py</text>
+        <text x="615" y="69" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">cron (Render / launchd)</text>
+      </g>
+
+      <!-- Render health check -->
+      <g class="node-group" data-node="render-health" onclick="nodeClick('render-health')">
+        <rect class="node-rect" x="720" y="30" width="130" height="52"
+              fill="#fdf8f4" stroke="#5BA85A" stroke-width="1.5"/>
+        <text x="785" y="52" text-anchor="middle" fill="#5BA85A" font-size="12" font-weight="700">Render</text>
+        <text x="785" y="69" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">health check / deploy</text>
+      </g>
+
+      <!-- ════════════════════════════════════════════════
+           MCP SERVER — middle band
+      ════════════════════════════════════════════════ -->
+
+      <!-- BearerAuthMiddleware -->
+      <g class="node-group" data-node="auth-middleware" onclick="nodeClick('auth-middleware')">
+        <rect class="node-rect" x="40" y="150" width="160" height="52"
+              fill="#fdf8f4" stroke="#D95040" stroke-width="1.5"/>
+        <text x="120" y="172" text-anchor="middle" fill="#D95040" font-size="12" font-weight="700">BearerAuthMiddleware</text>
+        <text x="120" y="189" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">auth.py · raw ASGI</text>
+      </g>
+
+      <!-- FastMCP server -->
+      <g class="node-group" data-node="fastmcp" onclick="nodeClick('fastmcp')">
+        <rect class="node-rect" x="240" y="150" width="160" height="52"
+              fill="#fdf8f4" stroke="#5BA85A" stroke-width="1.5"/>
+        <text x="320" y="172" text-anchor="middle" fill="#5BA85A" font-size="12" font-weight="700">FastMCP Server</text>
+        <text x="320" y="189" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">server.py · /mcp endpoint</text>
+      </g>
+
+      <!-- config.py -->
+      <g class="node-group" data-node="config" onclick="nodeClick('config')">
+        <rect class="node-rect" x="440" y="150" width="130" height="52"
+              fill="#fdf8f4" stroke="#9B7FD4" stroke-width="1.5"/>
+        <text x="505" y="172" text-anchor="middle" fill="#9B7FD4" font-size="12" font-weight="700">config.py</text>
+        <text x="505" y="189" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">TOKEN_REGISTRY · env vars</text>
+      </g>
+
+      <!-- validation.py -->
+      <g class="node-group" data-node="validation" onclick="nodeClick('validation')">
+        <rect class="node-rect" x="610" y="150" width="130" height="52"
+              fill="#fdf8f4" stroke="#D95040" stroke-width="1.5"/>
+        <text x="675" y="172" text-anchor="middle" fill="#D95040" font-size="12" font-weight="700">validation.py</text>
+        <text x="675" y="189" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">write contract enforcement</text>
+      </g>
+
+      <!-- chat_api.py -->
+      <g class="node-group" data-node="chat-api" onclick="nodeClick('chat-api')">
+        <rect class="node-rect" x="780" y="150" width="150" height="52"
+              fill="#fdf8f4" stroke="#4A90D9" stroke-width="1.5"/>
+        <text x="855" y="172" text-anchor="middle" fill="#4A90D9" font-size="12" font-weight="700">chat_api.py</text>
+        <text x="855" y="189" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">REST routes · history cache</text>
+      </g>
+
+      <!-- ════════════════════════════════════════════════
+           TOOL LAYER — third band
+      ════════════════════════════════════════════════ -->
+
+      <g class="node-group" data-node="tool-memory" onclick="nodeClick('tool-memory')">
+        <rect class="node-rect" x="40" y="280" width="130" height="52"
+              fill="#fdf8f4" stroke="#5BA85A" stroke-width="1.5"/>
+        <text x="105" y="302" text-anchor="middle" fill="#5BA85A" font-size="12" font-weight="700">tools/memory</text>
+        <text x="105" y="319" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">read/write core blocks</text>
+      </g>
+
+      <g class="node-group" data-node="tool-signals" onclick="nodeClick('tool-signals')">
+        <rect class="node-rect" x="200" y="280" width="130" height="52"
+              fill="#fdf8f4" stroke="#5BA85A" stroke-width="1.5"/>
+        <text x="265" y="302" text-anchor="middle" fill="#5BA85A" font-size="12" font-weight="700">tools/signals</text>
+        <text x="265" y="319" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">archival signal writes</text>
+      </g>
+
+      <g class="node-group" data-node="tool-phase" onclick="nodeClick('tool-phase')">
+        <rect class="node-rect" x="360" y="280" width="130" height="52"
+              fill="#fdf8f4" stroke="#5BA85A" stroke-width="1.5"/>
+        <text x="425" y="302" text-anchor="middle" fill="#5BA85A" font-size="12" font-weight="700">tools/phase</text>
+        <text x="425" y="319" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">phase gates · project state</text>
+      </g>
+
+      <g class="node-group" data-node="tool-brief" onclick="nodeClick('tool-brief')">
+        <rect class="node-rect" x="520" y="280" width="130" height="52"
+              fill="#fdf8f4" stroke="#5BA85A" stroke-width="1.5"/>
+        <text x="585" y="302" text-anchor="middle" fill="#5BA85A" font-size="12" font-weight="700">tools/brief</text>
+        <text x="585" y="319" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">session brief · health</text>
+      </g>
+
+      <g class="node-group" data-node="tool-portraits" onclick="nodeClick('tool-portraits')">
+        <rect class="node-rect" x="680" y="280" width="130" height="52"
+              fill="#fdf8f4" stroke="#5BA85A" stroke-width="1.5"/>
+        <text x="745" y="302" text-anchor="middle" fill="#5BA85A" font-size="12" font-weight="700">tools/portraits</text>
+        <text x="745" y="319" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">forming · trusted layers</text>
+      </g>
+
+      <!-- ════════════════════════════════════════════════
+           LETTA CLIENT — fourth band
+      ════════════════════════════════════════════════ -->
+
+      <g class="node-group" data-node="letta-client" onclick="nodeClick('letta-client')">
+        <rect class="node-rect" x="180" y="420" width="380" height="60"
+              fill="#fdf8f4" stroke="#E8971C" stroke-width="1.5"/>
+        <text x="370" y="445" text-anchor="middle" fill="#E8971C" font-size="13" font-weight="700">letta_client.py</text>
+        <text x="370" y="463" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">async httpx · auth headers · redirect handling · agent ID resolution</text>
+      </g>
+
+      <!-- ════════════════════════════════════════════════
+           EXTERNAL SERVICES — right column
+      ════════════════════════════════════════════════ -->
+
+      <!-- Letta API -->
+      <g class="node-group" data-node="letta-api" onclick="nodeClick('letta-api')">
+        <rect class="node-rect" x="900" y="280" width="170" height="200"
+              fill="#fdf8f4" stroke="#E8971C" stroke-width="1.5"/>
+        <text x="985" y="306" text-anchor="middle" fill="#E8971C" font-size="13" font-weight="700">Letta API</text>
+        <text x="985" y="324" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">han-solo-letta.onrender.com</text>
+        <!-- sub-items -->
+        <line x1="910" y1="334" x2="1060" y2="334" stroke="#e8ddd4" stroke-width="1"/>
+        <text x="985" y="351" text-anchor="middle" fill="rgba(26,26,26,0.60)" font-size="10">Core Memory Blocks</text>
+        <text x="985" y="368" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="9">always_loaded_core</text>
+        <text x="985" y="383" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="9">pending_thoughts</text>
+        <text x="985" y="398" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="9">project_state</text>
+        <text x="985" y="413" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="9">*_portrait_forming/trusted</text>
+        <line x1="910" y1="422" x2="1060" y2="422" stroke="#e8ddd4" stroke-width="1"/>
+        <text x="985" y="440" text-anchor="middle" fill="rgba(26,26,26,0.60)" font-size="10">Archival Memory (vector)</text>
+        <text x="985" y="457" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="9">signals · session summaries</text>
+        <text x="985" y="472" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="9">foundational passages</text>
+      </g>
+
+      <!-- Ren agent -->
+      <g class="node-group" data-node="ren-agent" onclick="nodeClick('ren-agent')">
+        <rect class="node-rect" x="1100" y="280" width="160" height="80"
+              fill="#fdf8f4" stroke="#E8971C" stroke-width="2"/>
+        <text x="1180" y="310" text-anchor="middle" fill="#E8971C" font-size="14" font-weight="700">Ren Agent</text>
+        <text x="1180" y="330" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">claude-haiku-4-5</text>
+        <text x="1180" y="346" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">memgpt_agent type</text>
+      </g>
+
+      <!-- Anthropic API -->
+      <g class="node-group" data-node="anthropic-api" onclick="nodeClick('anthropic-api')">
+        <rect class="node-rect" x="1100" y="400" width="160" height="60"
+              fill="#fdf8f4" stroke="#C89A14" stroke-width="1.5"/>
+        <text x="1180" y="425" text-anchor="middle" fill="#9A7410" font-size="12" font-weight="700">Anthropic API</text>
+        <text x="1180" y="443" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">claude-sonnet-4-6</text>
+      </g>
+
+      <!-- VoyageAI embeddings -->
+      <g class="node-group" data-node="voyage-ai" onclick="nodeClick('voyage-ai')">
+        <rect class="node-rect" x="1100" y="490" width="160" height="52"
+              fill="#fdf8f4" stroke="#48B8B0" stroke-width="1.5"/>
+        <text x="1180" y="512" text-anchor="middle" fill="#48B8B0" font-size="12" font-weight="700">VoyageAI</text>
+        <text x="1180" y="529" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">voyage-3 embeddings</text>
+      </g>
+
+      <!-- ════════════════════════════════════════════════
+           DATABASE — bottom band
+      ════════════════════════════════════════════════ -->
+
+      <!-- db.py -->
+      <g class="node-group" data-node="db" onclick="nodeClick('db')">
+        <rect class="node-rect" x="180" y="590" width="380" height="60"
+              fill="#fdf8f4" stroke="#9B7FD4" stroke-width="1.5"/>
+        <text x="370" y="615" text-anchor="middle" fill="#9B7FD4" font-size="13" font-weight="700">db.py</text>
+        <text x="370" y="633" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">asyncpg pool · health tracking · jobs_paused flag</text>
+      </g>
+
+      <!-- PostgreSQL -->
+      <g class="node-group" data-node="postgres" onclick="nodeClick('postgres')">
+        <rect class="node-rect" x="180" y="720" width="380" height="100"
+              fill="#fdf8f4" stroke="#9B7FD4" stroke-width="1.5"/>
+        <text x="370" y="745" text-anchor="middle" fill="#9B7FD4" font-size="13" font-weight="700">PostgreSQL</text>
+        <text x="370" y="763" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">Render managed DB</text>
+        <line x1="190" y1="772" x2="550" y2="772" stroke="#e8ddd4" stroke-width="1"/>
+        <text x="280" y="790" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="9">chat_transcripts</text>
+        <text x="280" y="806" text-anchor="middle" fill="rgba(26,26,26,0.40)" font-size="9">session_id · role · content · processed</text>
+        <text x="460" y="790" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="9">han_solo_config</text>
+        <text x="370" y="815" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="9">memory_transitions (T1→T2→T3 audit log)</text>
+      </g>
+
+      <!-- ════════════════════════════════════════════════
+           DOCKER / DEPLOY — far right bottom
+      ════════════════════════════════════════════════ -->
+
+      <g class="node-group" data-node="docker-mcp" onclick="nodeClick('docker-mcp')">
+        <rect class="node-rect" x="900" y="590" width="175" height="52"
+              fill="#fdf8f4" stroke="#5BA85A" stroke-width="1.5"/>
+        <text x="987" y="612" text-anchor="middle" fill="#5BA85A" font-size="12" font-weight="700">Dockerfile (MCP)</text>
+        <text x="987" y="629" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">based on han-solo image</text>
+      </g>
+
+      <g class="node-group" data-node="docker-synth" onclick="nodeClick('docker-synth')">
+        <rect class="node-rect" x="900" y="662" width="175" height="52"
+              fill="#fdf8f4" stroke="#48B8B0" stroke-width="1.5"/>
+        <text x="987" y="684" text-anchor="middle" fill="#48B8B0" font-size="12" font-weight="700">Dockerfile.synth</text>
+        <text x="987" y="701" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">python:3.11-slim · asyncpg</text>
+      </g>
+
+      <g class="node-group" data-node="letta-docker" onclick="nodeClick('letta-docker')">
+        <rect class="node-rect" x="1100" y="590" width="160" height="52"
+              fill="#fdf8f4" stroke="#E8971C" stroke-width="1.5"/>
+        <text x="1180" y="612" text-anchor="middle" fill="#E8971C" font-size="12" font-weight="700">letta/letta:0.16.7</text>
+        <text x="1180" y="629" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">+ psycopg2-binary</text>
+      </g>
+
+      <!-- ════════════════════════════════════════════════
+           CHAT UI (HTML) — left side
+      ════════════════════════════════════════════════ -->
+
+      <g class="node-group" data-node="chat-ui" onclick="nodeClick('chat-ui')">
+        <rect class="node-rect" x="40" y="150" width="0" height="0" fill="none" stroke="none"/>
+        <!-- invisible placeholder — rendered via chat-api path -->
+      </g>
+
+      <g class="node-group" data-node="chat-html" onclick="nodeClick('chat-html')">
+        <rect class="node-rect" x="900" y="150" width="160" height="52"
+              fill="#fdf8f4" stroke="#4A90D9" stroke-width="1.5"/>
+        <text x="980" y="172" text-anchor="middle" fill="#4A90D9" font-size="12" font-weight="700">chat_html.py</text>
+        <text x="980" y="189" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">CHAT_HTML constant</text>
+      </g>
+
+      <!-- Session manager (Starlette lifespan) -->
+      <g class="node-group" data-node="lifespan" onclick="nodeClick('lifespan')">
+        <rect class="node-rect" x="40" y="420" width="150" height="60"
+              fill="#fdf8f4" stroke="#4A90D9" stroke-width="1.5"/>
+        <text x="115" y="445" text-anchor="middle" fill="#4A90D9" font-size="12" font-weight="700">Lifespan</text>
+        <text x="115" y="463" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">httpx init · DB pool</text>
+        <text x="115" y="477" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">session manager</text>
+      </g>
+
+      <!-- ════════════════════════════════════════════════
+           EDGES
+      ════════════════════════════════════════════════ -->
+
+      <!-- Client → Auth Middleware -->
+      <path class="edge" id="e-claude-auth" d="M105,82 L105,150" stroke="#E8971C" marker-end="url(#arr)" data-edges='["claude","auth-middleware"]'/>
+      <path class="edge" id="e-browser-chatapi" d="M275,82 L275,220 L780,220 L780,176" stroke="#4A90D9" marker-end="url(#arr)" data-edges='["browser","chat-api"]'/>
+      <path class="edge" id="e-dream-letta" d="M445,82 L445,420" stroke="#9B7FD4" marker-end="url(#arr)" data-edges='["dream","letta-client"]'/>
+      <path class="edge" id="e-synth-db" d="M615,82 L615,590" stroke="#48B8B0" marker-end="url(#arr)" data-edges='["synthesize","db"]'/>
+      <path class="edge" id="e-synth-mcp" d="M615,82 L700,82 L700,176 L930,176" stroke="#48B8B0" stroke-dasharray="4,3" marker-end="url(#arr)" data-edges='["synthesize","chat-html"]'/>
+      <path class="edge" id="e-render-health" d="M785,82 L785,150 L710,150 L710,176" stroke="#5BA85A" marker-end="url(#arr)" data-edges='["render-health","validation"]'/>
+
+      <!-- Auth → FastMCP -->
+      <path class="edge" id="e-auth-fastmcp" d="M200,176 L240,176" stroke="#D95040" marker-end="url(#arr)" data-edges='["auth-middleware","fastmcp"]'/>
+      <!-- Auth → config -->
+      <path class="edge" id="e-auth-config" d="M120,150 L460,150 L460,202" stroke="#D95040" stroke-dasharray="4,3" marker-end="url(#arr)" data-edges='["auth-middleware","config"]'/>
+
+      <!-- FastMCP → tools -->
+      <path class="edge" id="e-mcp-tmem" d="M280,202 L105,280" stroke="#5BA85A" marker-end="url(#arr)" data-edges='["fastmcp","tool-memory"]'/>
+      <path class="edge" id="e-mcp-tsig" d="M300,202 L265,280" stroke="#5BA85A" marker-end="url(#arr)" data-edges='["fastmcp","tool-signals"]'/>
+      <path class="edge" id="e-mcp-tpha" d="M320,202 L425,280" stroke="#5BA85A" marker-end="url(#arr)" data-edges='["fastmcp","tool-phase"]'/>
+      <path class="edge" id="e-mcp-tbri" d="M340,202 L585,280" stroke="#5BA85A" marker-end="url(#arr)" data-edges='["fastmcp","tool-brief"]'/>
+      <path class="edge" id="e-mcp-tpor" d="M360,202 L745,280" stroke="#5BA85A" marker-end="url(#arr)" data-edges='["fastmcp","tool-portraits"]'/>
+
+      <!-- tools → validation -->
+      <path class="edge" id="e-tmem-val" d="M170,310 L610,176" stroke="#D95040" stroke-dasharray="3,3" marker-end="url(#arr)" data-edges='["tool-memory","validation"]'/>
+      <path class="edge" id="e-tsig-val" d="M330,310 L630,202" stroke="#D95040" stroke-dasharray="3,3" marker-end="url(#arr)" data-edges='["tool-signals","validation"]'/>
+
+      <!-- tools → letta_client -->
+      <path class="edge" id="e-tmem-lc" d="M105,332 L260,450" stroke="#E8971C" marker-end="url(#arr)" data-edges='["tool-memory","letta-client"]'/>
+      <path class="edge" id="e-tsig-lc" d="M265,332 L290,420" stroke="#E8971C" marker-end="url(#arr)" data-edges='["tool-signals","letta-client"]'/>
+      <path class="edge" id="e-tpha-lc" d="M425,332 L380,420" stroke="#E8971C" marker-end="url(#arr)" data-edges='["tool-phase","letta-client"]'/>
+      <path class="edge" id="e-tbri-lc" d="M585,332 L480,420" stroke="#E8971C" marker-end="url(#arr)" data-edges='["tool-brief","letta-client"]'/>
+      <path class="edge" id="e-tpor-lc" d="M745,332 L540,420" stroke="#E8971C" marker-end="url(#arr)" data-edges='["tool-portraits","letta-client"]'/>
+
+      <!-- chat_api → letta_client -->
+      <path class="edge" id="e-chatapi-lc" d="M855,202 L855,240 L560,420" stroke="#4A90D9" marker-end="url(#arr)" data-edges='["chat-api","letta-client"]'/>
+      <!-- chat_api → db -->
+      <path class="edge" id="e-chatapi-db" d="M930,176 L960,176 L960,560 L560,620" stroke="#9B7FD4" stroke-dasharray="4,3" marker-end="url(#arr)" data-edges='["chat-api","db"]'/>
+      <!-- chat_api → anthropic (rollover synthesis) -->
+      <path class="edge" id="e-chatapi-ant" d="M930,176 L1100,430" stroke="#C89A14" stroke-dasharray="4,3" marker-end="url(#arr)" data-edges='["chat-api","anthropic-api"]'/>
+
+      <!-- chat_html → chat_api -->
+      <path class="edge" id="e-chathtml-api" d="M980,202 L930,202" stroke="#4A90D9" marker-end="url(#arr)" data-edges='["chat-html","chat-api"]'/>
+
+      <!-- letta_client → letta API -->
+      <path class="edge" id="e-lc-letta" d="M560,450 L900,360" stroke="#E8971C" stroke-width="2" marker-end="url(#arr)" data-edges='["letta-client","letta-api"]'/>
+
+      <!-- letta API → ren agent -->
+      <path class="edge" id="e-letta-ren" d="M1070,340 L1100,320" stroke="#E8971C" stroke-width="2" marker-end="url(#arr)" data-edges='["letta-api","ren-agent"]'/>
+      <!-- ren → anthropic -->
+      <path class="edge" id="e-ren-ant" d="M1180,360 L1180,400" stroke="#C89A14" marker-end="url(#arr)" data-edges='["ren-agent","anthropic-api"]'/>
+      <!-- ren → voyage -->
+      <path class="edge" id="e-ren-voy" d="M1250,320 L1270,320 L1270,490 L1260,516" stroke="#48B8B0" stroke-dasharray="4,3" marker-end="url(#arr)" data-edges='["ren-agent","voyage-ai"]'/>
+
+      <!-- db → postgres -->
+      <path class="edge" id="e-db-pg" d="M370,650 L370,720" stroke="#9B7FD4" stroke-width="2" marker-end="url(#arr)" data-edges='["db","postgres"]'/>
+
+      <!-- lifespan → db -->
+      <path class="edge" id="e-ls-db" d="M115,480 L200,610" stroke="#4A90D9" stroke-dasharray="4,3" marker-end="url(#arr)" data-edges='["lifespan","db"]'/>
+      <!-- lifespan → letta_client -->
+      <path class="edge" id="e-ls-lc" d="M190,450 L180,450" stroke="#4A90D9" stroke-dasharray="4,3" marker-end="url(#arr)" data-edges='["lifespan","letta-client"]'/>
+
+      <!-- docker edges -->
+      <path class="edge" id="e-doc-mcp" d="M987,642 L987,700 L600,700 L560,650" stroke="#5BA85A" stroke-dasharray="4,3" marker-end="url(#arr)" data-edges='["docker-mcp","db"]'/>
+      <path class="edge" id="e-doc-synth" d="M987,714 L615,714 L615,82" stroke="#48B8B0" stroke-dasharray="4,3" marker-end="url(#arr)" data-edges='["docker-synth","synthesize"]'/>
+      <path class="edge" id="e-letta-doc" d="M1180,590 L1180,560 L1070,490" stroke="#E8971C" stroke-dasharray="4,3" marker-end="url(#arr)" data-edges='["letta-docker","voyage-ai"]'/>
+
+      <!-- synthesize → anthropic -->
+      <path class="edge" id="e-synth-ant" d="M680,56 L1100,420" stroke="#C89A14" stroke-dasharray="4,3" marker-end="url(#arr)" data-edges='["synthesize","anthropic-api"]'/>
+
+      <!-- dream → letta-api directly -->
+      <path class="edge" id="e-dream-lapi" d="M510,56 L860,56 L860,350 L900,360" stroke="#9B7FD4" stroke-dasharray="4,3" marker-end="url(#arr)" data-edges='["dream","letta-api"]'/>
+
+      <!-- section labels -->
+      <text x="22" y="26" fill="rgba(26,26,26,0.35)" font-size="10" font-weight="700" letter-spacing=".06em">CLIENTS</text>
+      <text x="22" y="145" fill="rgba(26,26,26,0.35)" font-size="10" font-weight="700" letter-spacing=".06em">AUTH / SERVER</text>
+      <text x="22" y="275" fill="rgba(26,26,26,0.35)" font-size="10" font-weight="700" letter-spacing=".06em">MCP TOOLS</text>
+      <text x="22" y="415" fill="rgba(26,26,26,0.35)" font-size="10" font-weight="700" letter-spacing=".06em">LETTA CLIENT</text>
+      <text x="22" y="585" fill="rgba(26,26,26,0.35)" font-size="10" font-weight="700" letter-spacing=".06em">DATABASE</text>
+      <text x="875" y="145" fill="rgba(26,26,26,0.35)" font-size="10" font-weight="700" letter-spacing=".06em">EXTERNAL SERVICES</text>
+    </svg>
+  </div>
+
+  <!-- ── Sidebar ── -->
+  <div class="sidebar">
+    <div class="sidebar-flows">
+      <div class="s-section-label">Flows — click to trace</div>
+      <div id="flow-list"></div>
+    </div>
+    <div class="sidebar-steps">
+      <div class="s-section-label">Steps</div>
+      <div id="step-content">
+        <div class="empty-state">Select a node or flow to see the full path.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Legend ── -->
+<div class="legend">
+  <div class="leg-item"><div class="leg-swatch" style="background:#E8971C"></div>Letta / Memory</div>
+  <div class="leg-item"><div class="leg-swatch" style="background:#4A90D9"></div>Web UI / Chat</div>
+  <div class="leg-item"><div class="leg-swatch" style="background:#5BA85A"></div>MCP Server / Tools</div>
+  <div class="leg-item"><div class="leg-swatch" style="background:#9B7FD4"></div>Config / Background</div>
+  <div class="leg-item"><div class="leg-swatch" style="background:#D95040"></div>Auth / Validation</div>
+  <div class="leg-item"><div class="leg-swatch" style="background:#48B8B0"></div>Synthesis / Embeddings</div>
+  <div class="leg-item"><div class="leg-swatch" style="background:#FFD966"></div>Anthropic API</div>
+  <div class="leg-item" style="gap:6px">
+    <svg width="30" height="10"><line x1="0" y1="5" x2="30" y2="5" stroke="#4a4038" stroke-width="1.5" marker-end="url(#arr)"/></svg>
+    Live call
+  </div>
+  <div class="leg-item" style="gap:6px">
+    <svg width="30" height="10"><line x1="0" y1="5" x2="30" y2="5" stroke="#4a4038" stroke-width="1.5" stroke-dasharray="4,3"/></svg>
+    Async / scheduled
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ── Flow definitions ──────────────────────────────────────────────────────────
+
+const FLOWS = [
+  {
+    id: 'chat-send',
+    label: 'Send a message (Chat UI)',
+    color: '#4A90D9',
+    nodes: ['browser','chat-html','chat-api','letta-client','letta-api','ren-agent','anthropic-api'],
+    steps: [
+      {title:'Browser loads Chat UI',desc:'GET / returns CHAT_HTML from chat_html.py. Token stored in localStorage, sent on every request.',ref:'chat_html.py · chat_api.py:chat_index'},
+      {title:'Login / token validation',desc:'POST /api/me → BearerAuthMiddleware checks Authorization header against TOKEN_REGISTRY (env vars USER_TOKEN_SCOTT etc.) → returns UserIdentity.',ref:'auth.py · config.py:_build_token_registry'},
+      {title:'User sends message',desc:'POST /api/send with {message, attachment?}. chat_api.api_send checks session length (WARN_AT=40, HARD_LIMIT_AT=80 entries).',ref:'chat_api.py:api_send'},
+      {title:'Capture to DB (async)',desc:'asyncio.create_task buffers user message. Every CAPTURE_EVERY_N=5 messages, db.write_messages_bulk flushes to chat_transcripts table. Never blocks chat.',ref:'chat_api.py:_capture_message · db.py:write_messages_bulk'},
+      {title:'Forward to Letta',desc:'letta_client.send_chat_message POST /v1/agents/{agent_id}/messages with user content and user_name. Follows Render redirect (http→https) with auth header preserved.',ref:'letta_client.py:send_chat_message · _letta'},
+      {title:'Ren processes message',desc:'Letta routes to the Ren memgpt_agent. Ren reads core memory, searches archival if needed, calls Anthropic claude-haiku-4-5 to generate response.',ref:'letta API · ren-agent'},
+      {title:'Response returned',desc:'chat_api captures Ren reply to DB (async), appends to _history cache, returns {response, session_reset, session_warning, capture_health}.',ref:'chat_api.py:api_send (post-await)'},
+    ]
+  },
+  {
+    id: 'mcp-tool-call',
+    label: 'MCP tool call (Claude client)',
+    color: '#5BA85A',
+    nodes: ['claude','auth-middleware','fastmcp','tool-memory','tool-signals','tool-phase','tool-brief','tool-portraits','validation','letta-client','letta-api'],
+    steps: [
+      {title:'Claude sends MCP request',desc:'Any Claude instance (Claude Code, Cursor, etc.) sends a JSON-RPC call to POST /mcp with Authorization: Bearer <token>.',ref:'server.py · MCP Streamable HTTP'},
+      {title:'BearerAuthMiddleware intercepts',desc:'Raw ASGI middleware (not BaseHTTPMiddleware — preserves SSE streaming). Validates token via lookup_token → TOKEN_REGISTRY. Sets _current_user ContextVar.',ref:'auth.py:BearerAuthMiddleware.__call__'},
+      {title:'FastMCP routes to tool',desc:'server.py has five registered tool groups: memory, signals, phase, brief, portraits. FastMCP dispatches to the matching @server.tool() handler.',ref:'server.py:memory.register … portraits.register'},
+      {title:'Validation gate',desc:'Tools that write call validation.assert_can_write_block or assert_can_write_signal. Owner-only blocks (user_registry, api_keys) are always blocked for non-owners.',ref:'validation.py · tools/memory.py · tools/signals.py'},
+      {title:'letta_client executes',desc:'Tool calls letta_client functions: read_core_block, write_core_block, insert_passage, search_passages, etc. Agent ID resolved once (DB → env → Letta lookup).',ref:'letta_client.py:ensure_ren_agent_id'},
+      {title:'Letta API call',desc:'letta._letta() fires authenticated httpx request to han-solo-letta.onrender.com. Handles Render\'s http redirect artifact by re-following with https.',ref:'letta_client.py:_letta'},
+      {title:'Result returned to Claude',desc:'Letta API responds, tool returns string/dict back through FastMCP JSON-RPC response. Claude sees the tool result.',ref:'FastMCP response serialization'},
+    ]
+  },
+  {
+    id: 'session-rollover',
+    label: 'Session rollover',
+    color: '#FFD966',
+    nodes: ['browser','chat-api','anthropic-api','letta-client','letta-api','db'],
+    steps: [
+      {title:'Hard limit triggered',desc:'On api_send, if len(_history) >= HARD_LIMIT_AT (80 entries), a rollover begins before delivering the user message.',ref:'chat_api.py:api_send (HARD_LIMIT_AT check)'},
+      {title:'Flush capture buffer',desc:'_flush_capture_buffer writes any buffered messages to chat_transcripts immediately — nothing lost before the context clear.',ref:'chat_api.py:_flush_capture_buffer'},
+      {title:'Inline synthesis',desc:'_synthesize_handoff takes the last 60 messages, calls Anthropic API (claude-sonnet-4-6) directly, returns a 4-6 bullet summary. Fails gracefully.',ref:'chat_api.py:_synthesize_handoff'},
+      {title:'Write to pending_thoughts',desc:'letta_client.reset_conversation writes the handoff summary (or a timestamp note) to pending_thoughts block via PATCH core-memory/blocks/pending_thoughts.',ref:'letta_client.py:reset_conversation'},
+      {title:'Clear message history',desc:'PATCH /v1/agents/{id}/reset-messages clears Letta conversation history. Core memory and archival memory untouched — Ren wakes up with full memory.',ref:'letta_client.py:reset_conversation (reset-messages call)'},
+      {title:'In-memory cache cleared',desc:'_history = [], _history_loaded = True. New session starts fresh in the UI. session_reset=True in JSON response triggers divider in browser.',ref:'chat_api.py (post-rollover)'},
+    ]
+  },
+  {
+    id: 'dream-flow',
+    label: 'Nightly dream (Ren reflection)',
+    color: '#9B7FD4',
+    nodes: ['dream','letta-api','ren-agent','anthropic-api'],
+    steps: [
+      {title:'Cron fires dream.py',desc:'launchd (Mac) runs scripts/dream.py nightly. Checks /api/jobs-status first — skips if jobs_paused=true.',ref:'scripts/dream.py:main'},
+      {title:'jobs-status check',desc:'GET {MCP_URL}/api/jobs-status (no auth). Returns {paused: bool}. If paused, exits cleanly.',ref:'dream.py:jobs_paused · server.py:api_jobs_status'},
+      {title:'Send DREAM_PROMPT to Ren',desc:'POST /v1/agents/{AGENT_ID}/messages with the structured dream prompt. Ren runs inside Letta: searches conversation history, searches archival memory.',ref:'dream.py:main · DREAM_PROMPT constant'},
+      {title:'Ren updates memory',desc:'Ren calls her own tools: writes pending_thoughts, adds portrait signals to scott_portrait_forming / ren_portrait_forming, checks for Letta updates.',ref:'Ren agent internal tool calls (Letta)'},
+      {title:'Confirmation returned',desc:'Ren returns a short confirmation. dream.py prints it. No explicit error recovery — if Letta is down, the cron fails and retries next night.',ref:'dream.py:main (response extraction)'},
+    ]
+  },
+  {
+    id: 'synthesize-flow',
+    label: 'Synthesis pipeline (T1→T2→T3)',
+    color: '#48B8B0',
+    nodes: ['synthesize','db','postgres','anthropic-api','chat-api','letta-api'],
+    steps: [
+      {title:'Cron fires synthesize.py',desc:'Render cron job (or launchd) runs synthesize.py. Creates asyncpg pool, checks jobs_paused in han_solo_config.',ref:'synthesize.py:run'},
+      {title:'Fetch unprocessed sessions',desc:'SELECT from chat_transcripts WHERE processed=FALSE, grouped by session_id. Ordered oldest-first.',ref:'synthesize.py:get_unprocessed_sessions'},
+      {title:'Call Anthropic for synthesis',desc:'format_transcript → SYNTHESIS_PROMPT → claude-sonnet-4-6 → returns JSON {pending_thoughts_addition, signals:[]}.',ref:'synthesize.py:synthesize_transcript · _anthropic_request'},
+      {title:'Write to Ren via MCP REST',desc:'POST /api/write-core-block to append SYNTHESIS[date session X]: block to pending_thoughts. POST /api/write-signal for each archival signal.',ref:'synthesize.py:write_to_letta · server.py:api_write_core_block · api_write_signal_rest'},
+      {title:'Mark processed',desc:'Only after all writes confirmed: UPDATE chat_transcripts SET processed=TRUE. Write-before-mark invariant — never loses data.',ref:'synthesize.py:mark_processed'},
+      {title:'T1→T2 promotion',desc:'promote_old_entries: SYNTHESIS entries >3 days old beyond the 2 most recent are written to archival memory as texture/ren signals, then trimmed from pending_thoughts.',ref:'synthesize.py:promote_old_entries'},
+      {title:'T2→T3 tagging',desc:'_tag_foundational: archival passages >90 days old get [tier:foundational] prepended. New tagged passage written, then old passage deleted (write-before-delete invariant).',ref:'synthesize.py:_tag_foundational'},
+      {title:'Purge & cleanup',desc:'DELETE processed transcripts older than 5 days. memory_transitions table audits every T1→T2 and T2→T3 attempt with status/error.',ref:'synthesize.py:purge_old · db.py:memory_transitions'},
+    ]
+  },
+  {
+    id: 'auth-flow',
+    label: 'Auth & identity resolution',
+    color: '#D95040',
+    nodes: ['browser','auth-middleware','config','validation'],
+    steps: [
+      {title:'Token lookup',desc:'Every request (except /health, /, /api/jobs-status) must carry Authorization: Bearer <token>. Raw ASGI middleware intercepts before Starlette routing.',ref:'auth.py:BearerAuthMiddleware · EXEMPT_PATHS'},
+      {title:'TOKEN_REGISTRY lookup',desc:'config._build_token_registry reads USER_TOKEN_SCOTT, USER_TOKEN_TED etc from env vars at startup, maps each to a UserIdentity(id, name, role, visibility_clearance).',ref:'config.py:_build_token_registry · TOKEN_REGISTRY'},
+      {title:'ContextVar injection',desc:'Resolved UserIdentity stored in _current_user ContextVar for request lifetime. Tools call get_current_user() to retrieve it — no global state, async-safe.',ref:'auth.py:_current_user · get_current_user'},
+      {title:'Role-based write enforcement',desc:'validation.assert_can_write_block: OWNER_ONLY_BLOCKS require Role.OWNER. assert_can_write_signal: portrait signals about people require owner-level. Collaborators (Ted) can write project/framework signals.',ref:'validation.py:assert_can_write_block · assert_can_write_signal'},
+      {title:'Visibility tier clearance',desc:'UserIdentity.visibility_clearance controls what content tiers a user can read. Scott: all tiers. Ted: shared + client_joint only.',ref:'config.py:VisibilityTier · UserIdentity.can_read'},
+    ]
+  },
+  {
+    id: 'memory-health',
+    label: 'Memory health check',
+    color: '#5BA85A',
+    nodes: ['tool-brief','db','postgres'],
+    steps: [
+      {title:'check_memory_health tool called',desc:'Ren calls this at every session start. Also available via GET /api/memory-health REST endpoint.',ref:'tools/brief.py:check_memory_health · server.py:api_memory_health'},
+      {title:'Query failed transitions',desc:'db.get_failed_transitions(hours=24) queries memory_transitions WHERE status=failed AND attempted_at > NOW()-24h.',ref:'db.py:get_failed_transitions'},
+      {title:'Capture health status',desc:'db.health_status() returns {db_connected, last_write_at, consecutive_failures}. Checks _pool, _last_write_at, _write_failure_count module-level vars.',ref:'db.py:health_status'},
+      {title:'Result returned',desc:'Combined dict: failed_transitions_24h (count), failed_transitions (list), capture (health dict). Ren flags any non-zero count to Scott immediately.',ref:'tools/brief.py:check_memory_health return'},
+    ]
+  },
+  {
+    id: 'agent-bootstrap',
+    label: 'Agent ID resolution on startup',
+    color: '#E8971C',
+    nodes: ['lifespan','letta-client','db','letta-api'],
+    steps: [
+      {title:'Lifespan context starts',desc:'server._lifespan() fires on ASGI app startup. Creates httpx.AsyncClient (60s timeout, no redirects) and sets it on letta_client module.',ref:'server.py:_lifespan · letta_client.set_client'},
+      {title:'Resolve Ren agent ID',desc:'If REN_AGENT_ID env var set, use it immediately. Otherwise call letta.get_or_create_ren_agent(REN_AGENT_NAME).',ref:'server.py:_lifespan · letta_client.ensure_ren_agent_id'},
+      {title:'Priority: DB over env var',desc:'ensure_ren_agent_id checks DB first (get_active_agent_id) — authoritative after any rollover. Then env var. Then Letta lookup. Avoids cold-start using stale env-pinned baseline.',ref:'letta_client.py:ensure_ren_agent_id'},
+      {title:'Letta agent lookup',desc:'GET /v1/agents, find exact name match → then most recent ren-v* agent → then create minimal agent with 3 memory blocks.',ref:'letta_client.py:get_or_create_ren_agent'},
+      {title:'DB pool initialised',desc:'db.init_pool() creates asyncpg pool (1-5 connections), runs CREATE TABLE IF NOT EXISTS for all tables.',ref:'db.py:init_pool · CREATE_TABLE_SQL'},
+      {title:'Session manager starts',desc:'FastMCP session manager task group starts inside the combined lifespan. DB pool closed on shutdown in finally block.',ref:'server.py:_lifespan (async with server.session_manager.run())'},
+    ]
+  },
+];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+
+let activeFlow = null;
+
+// ── Build flow list ────────────────────────────────────────────────────────────
+
+const flowList = document.getElementById('flow-list');
+
+FLOWS.forEach(f => {
+  const el = document.createElement('div');
+  el.className = 'flow-item';
+  el.dataset.id = f.id;
+  el.innerHTML = `<div class="flow-dot" style="background:${f.color}"></div>${f.label}`;
+  el.addEventListener('click', () => activateFlow(f.id));
+  flowList.appendChild(el);
+});
+
+// ── Activate flow ──────────────────────────────────────────────────────────────
+
+function clearHighlights() {
+  document.querySelectorAll('.node-group.highlighted').forEach(el => el.classList.remove('highlighted'));
+  document.querySelectorAll('.edge.highlighted').forEach(el => {
+    el.classList.remove('highlighted');
+    el.setAttribute('marker-end','url(#arr)');
+  });
+  document.querySelectorAll('.edge-label.highlighted').forEach(el => el.classList.remove('highlighted'));
+  document.querySelectorAll('.flow-item.active').forEach(el => el.classList.remove('active'));
+}
+
+function activateFlow(id) {
+  if (activeFlow === id) {
+    clearHighlights();
+    activeFlow = null;
+    renderSteps(null);
+    return;
+  }
+  clearHighlights();
+  activeFlow = id;
+
+  const flow = FLOWS.find(f => f.id === id);
+  if (!flow) return;
+
+  // Highlight flow item
+  document.querySelector(`.flow-item[data-id="${id}"]`).classList.add('active');
+
+  // Highlight nodes
+  flow.nodes.forEach(nid => {
+    const g = document.querySelector(`[data-node="${nid}"]`);
+    if (g) g.classList.add('highlighted');
+  });
+
+  // Highlight edges that connect flow nodes
+  const nodeSet = new Set(flow.nodes);
+  document.querySelectorAll('.edge').forEach(e => {
+    const raw = e.dataset.edges;
+    if (!raw) return;
+    try {
+      const [a, b] = JSON.parse(raw);
+      if (nodeSet.has(a) && nodeSet.has(b)) {
+        e.classList.add('highlighted');
+        e.setAttribute('marker-end','url(#arr-hi)');
+      }
+    } catch {}
+  });
+
+  renderSteps(flow);
+}
+
+function nodeClick(nid) {
+  // Find flows that include this node
+  const matching = FLOWS.filter(f => f.nodes.includes(nid));
+  if (matching.length === 0) return;
+  if (matching.length === 1) {
+    activateFlow(matching[0].id);
+    return;
+  }
+  // If current flow includes this node, cycle to next matching flow
+  if (activeFlow) {
+    const idx = matching.findIndex(f => f.id === activeFlow);
+    const next = matching[(idx + 1) % matching.length];
+    activateFlow(next.id);
+  } else {
+    activateFlow(matching[0].id);
+  }
+}
+
+function renderSteps(flow) {
+  const el = document.getElementById('step-content');
+  if (!flow) {
+    el.innerHTML = '<div class="empty-state">Select a node or flow to see the full path.</div>';
+    return;
+  }
+  let html = `<div class="step-list">`;
+  flow.steps.forEach((s, i) => {
+    html += `<div class="step">
+      <div class="step-num">${i+1}</div>
+      <div class="step-body">
+        <div class="step-title">${s.title}</div>
+        <div class="step-desc">${s.desc}</div>
+        <span class="step-ref">${s.ref}</span>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+// ── Pan & zoom ─────────────────────────────────────────────────────────────────
+
+const svg = document.getElementById('flowchart');
+let vx=0, vy=0, vw=1400, vh=920;
+let dragging=false, sx=0, sy=0;
+
+svg.addEventListener('mousedown', e => {
+  if (e.target.closest('.node-group')) return;
+  dragging=true; sx=e.clientX; sy=e.clientY;
+  e.preventDefault();
+});
+window.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  const dx = (e.clientX - sx) * (vw / svg.clientWidth);
+  const dy = (e.clientY - sy) * (vh / svg.clientHeight);
+  vx -= dx; vy -= dy;
+  sx = e.clientX; sy = e.clientY;
+  svg.setAttribute('viewBox', `${vx} ${vy} ${vw} ${vh}`);
+});
+window.addEventListener('mouseup', () => { dragging=false; });
+
+svg.addEventListener('wheel', e => {
+  e.preventDefault();
+  const factor = e.deltaY > 0 ? 1.1 : 0.9;
+  const rect = svg.getBoundingClientRect();
+  const mx = (e.clientX - rect.left) / rect.width * vw + vx;
+  const my = (e.clientY - rect.top) / rect.height * vh + vy;
+  vw *= factor; vh *= factor;
+  vx = mx - (e.clientX - rect.left) / rect.width * vw;
+  vy = my - (e.clientY - rect.top) / rect.height * vh;
+  svg.setAttribute('viewBox', `${vx} ${vy} ${vw} ${vh}`);
+}, {passive:false});
+</script>
+</body>
+</html>

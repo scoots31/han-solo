@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Release Notes — Solo Builder Framework</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: #0F1729;
+    color: #fff;
+    min-height: 100vh;
+    padding: 60px 24px;
+  }
+  .container { max-width: 680px; width: 100%; margin: 0 auto; }
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.35);
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    margin-bottom: 48px;
+    transition: color 0.2s;
+  }
+  .back:hover { color: rgba(255,255,255,0.6); }
+
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 800;
+    letter-spacing: -0.8px;
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+  h1 em { color: #60A5FA; font-style: normal; }
+  .subtitle {
+    font-size: 15px;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.6;
+    margin-bottom: 48px;
+    max-width: 500px;
+  }
+  .rule {
+    width: 48px;
+    height: 3px;
+    background: #2563EB;
+    border-radius: 2px;
+    margin-bottom: 56px;
+  }
+
+  .entry {
+    margin-bottom: 56px;
+  }
+  .entry-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .entry-date {
+    font-size: 13px;
+    font-weight: 700;
+    color: #60A5FA;
+    flex-shrink: 0;
+  }
+  .entry-title {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    color: #fff;
+  }
+
+  .entry-divider {
+    width: 100%;
+    height: 1px;
+    background: rgba(255,255,255,0.07);
+    margin-bottom: 20px;
+  }
+
+  .change-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .change-item {
+    display: flex;
+    gap: 16px;
+  }
+  .change-badge {
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 3px 7px;
+    border-radius: 4px;
+    height: fit-content;
+    white-space: nowrap;
+  }
+  .badge-new {
+    background: rgba(16,185,129,0.15);
+    color: #34D399;
+    border: 1px solid rgba(16,185,129,0.2);
+  }
+  .badge-improved {
+    background: rgba(96,165,250,0.12);
+    color: #93C5FD;
+    border: 1px solid rgba(96,165,250,0.18);
+  }
+  .badge-fixed {
+    background: rgba(251,191,36,0.1);
+    color: #FCD34D;
+    border: 1px solid rgba(251,191,36,0.16);
+  }
+  .change-body { flex: 1; min-width: 0; }
+  .change-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  .change-desc {
+    font-size: 13px;
+    color: rgba(255,255,255,0.45);
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← Back to docs</a>
+
+  <div class="eyebrow">Solo Builder Framework</div>
+  <h1>Release <em>Notes</em></h1>
+  <p class="subtitle">What changed in the framework, what was added, and why — in plain language.</p>
+  <div class="rule"></div>
+
+  <!-- ── MAY 7 (v2.6.1) ── -->
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">May 7</div>
+      <div class="entry-title">Session Re-Entry Is Now Lighter — Full Context Loads Only When You Need It</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+      <div class="change-item">
+        <div class="change-badge badge-improved">Improved</div>
+        <div class="change-body">
+          <div class="change-name">Faster re-entry — handoff reads only the two active sections on first load</div>
+          <div class="change-desc">When you resume a named project, the framework now reads only two sections from the handoff on initial load: "Open right now" and "Next session picks up at." That's enough to orient and get started. The rest of the handoff — earlier decisions, stack context, phase history — loads on demand, the moment the session actually needs it. If you ask about an earlier architectural decision or a stack question, that's when the full handoff loads, not before. If those two sections are absent or empty, the framework falls back to a full read as before. The result is less upfront token cost and faster orientation on every re-entry.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MAY 7 (v2.6.0) ── -->
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">May 7</div>
+      <div class="entry-title">Live Preview Verification — Browser Inspection Baked Into Design Review and Build</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Design review — Step 1.5: preview pass before specialist review runs</div>
+          <div class="change-desc">Before the three specialist lenses run their review, the framework now opens each design sprint HTML file in a real browser, takes desktop and mobile screenshots, and inspects key elements against the design identity tokens you set at sprint time. A raw hex value where a token name is expected is flagged as a design gap. Console errors and responsive failures are surfaced too. All of this feeds directly into the specialist review as design gap findings — so the review starts with a fuller picture. In Claude Code this fires automatically with no activation needed. Non-visual projects and rounds with no HTML design artifacts skip silently.</div>
+        </div>
+      </div>
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Solo-build — preview check inside self-verification, before commit</div>
+          <div class="change-desc">As part of the existing self-verification step — before the builder declares code-complete — the framework now starts the app server, navigates to the slice's review URL, takes a screenshot, checks console logs, checks for failed network requests, clicks through the main interactive elements, and tests the mobile viewport. Console errors or failed network requests directly caused by the slice are ✗ items in builder confirmation and must be fixed before commit. This runs within the existing self-verification flow, not as a separate step. Non-visual slices (review URL is None) skip silently. In Claude Code only — Cursor falls back to the existing self-verification behavior without the preview check.</div>
+        </div>
+      </div>
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Auto-created launch config — one-time setup, reused every session</div>
+          <div class="change-desc">Both preview steps check for a <code>.claude/launch.json</code> file before starting. If it doesn't exist, the framework creates it automatically: design review writes a static Python HTTP server config, and solo-build reads the run command and port from <code>docs/tech-context.md</code>. Once created, the file is reused on every subsequent session — no manual setup required.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MAY 5 (v2.4.0) ── -->
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">May 5</div>
+      <div class="entry-title">Every Design Sprint Now Starts With a Design Identity</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Design Identity step — library-matched direction before the first screen</div>
+          <div class="change-desc">Before any HTML is produced, the design sprint now opens with a Design Identity step. You describe what you're building in a few words, and the framework searches a local library of 500+ curated design styles — each one characterized by a north star phrase, named color tokens, typography, category, and tags. Three matching references are presented. You pick one, name a product to match, describe an aesthetic, or let the framework choose. The result is a <code>docs/design/design-identity.md</code> file: a north star phrase, a named color token table, a typography table, and 2–3 design principles derived from that identity. Every screen produced in the sprint is checked against it. Every design review round checks for north star drift — if a screen no longer feels like the established identity, it's flagged before slices are defined.</div>
+        </div>
+      </div>
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Design library — 1,322 curated styles with north star phrases</div>
+          <div class="change-desc">The library lives locally in the framework as a searchable JSON file. Each entry carries a north star phrase (an evocative sentence capturing the design identity — "Architectural blueprint on white marble"), named color tokens with usage guidance, typography roles, industry tags, and category. The library was seeded from Refero's API. Two maintenance tools ship alongside it: one re-pulls from the API to keep it current, the other visits any URL, extracts its design system via CSS parsing, and generates a north star phrase via Claude — so any product or reference site you admire can be added to the library in seconds.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MAY 5 (v2.5.0) ── -->
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">May 5</div>
+      <div class="entry-title">Solo Companion Now Has a Board View</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Board view — all active work in one kanban</div>
+          <div class="change-desc">The companion now has a Board tab alongside the existing project views. It shows all your active deliverables and slices arranged in columns by status — Ready, In Build, In Review, In Test. Done work doesn't appear. The default view shows everything across all active projects; a filter narrows it to a single project. A toggle switches between deliverable cards (one card per deliverable, column determined by its most-advanced slice) and slice cards (every active slice individually). Clicking any card opens the same detail overlay already used in the project view — no new UI to learn. Board ships in both the local companion and the cloud viewer.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MAY 5 (v2.3.1) ── -->
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">May 5</div>
+      <div class="entry-title">Cloud Deployments Can Now Authenticate to Claude Without a Static API Key</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Workload Identity Federation — cloud auth without a stored secret</div>
+          <div class="change-desc">When your project deploys to a cloud platform (Railway, Render, AWS, GCP, Azure, Fly.io, Cloudflare), there's now a better way to authenticate to the Claude API. Instead of storing a static <code>ANTHROPIC_API_KEY</code> in an env var or secret manager, the workload uses its existing cloud identity — an IAM role, service account, managed identity, or GitHub Actions OIDC token — to get a short-lived access token minted on demand. No static secret to store, rotate, or leak. Tech-context now records this as the preferred Claude API auth pattern for all cloud deployments. Local Mac projects are unaffected and continue using an API key in an env var. All other secrets (database passwords, third-party API keys) continue using env vars locally and platform secret stores in production. Workload Identity is configured at platform.claude.com → Settings → Workload identity, and the deploy step handles setup at deploy time.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MAY 5 (v2.3.0) ── -->
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">May 5</div>
+      <div class="entry-title">Every Project Now Gets a Security Classification — and It Follows Every Slice</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Security classification at tech-context — six classes beyond the baseline</div>
+          <div class="change-desc">Every project now receives a security classification during the tech-context phase — before design, before any code. The Standard baseline applies to all projects by default. Six additional classes layer on top: <strong>Personal</strong> (PII), <strong>Financial</strong> (transaction records), <strong>Authentication</strong> (managing others' credentials), <strong>Multi-tenant</strong> (shared infrastructure with isolated data), <strong>Confidential</strong> (proprietary business data), and <strong>Regulated</strong> (HIPAA, PCI-DSS, GDPR, COPPA). Multiple classes can apply to a single project. Regulated projects receive an acknowledgment gate at tech-context and a hard stop at deploy — production requires external compliance review documented in the handoff before any deployment proceeds.</div>
+        </div>
+      </div>
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Classification follows every slice — security checks expand from 5 to 20</div>
+          <div class="change-desc">The classification isn't just a label on the project — it travels through the entire build process. At design sprint, the process-mapper checks for security process gaps: missing deletion paths, tenant-scoping issues, and data collection without disclosure. At build, a pre-flight check confirms the quality contract addresses class-specific requirements before any branch opens — if it doesn't, the slice goes back to design review. At code review, Check 9 now reads <code>docs/tech-context.md</code> and expands from 5 baseline checks (9a–9e) to up to 20 total (9a–9t) depending on the project's classification. The baseline always runs. Class-specific checks layer on top only for projects that carry those classes.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MAY 4 (v2.2.0) ── -->
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">May 4</div>
+      <div class="entry-title">Every Slice Now Has an Architecture Type — and Core Ones Pause for Review</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Architecture type field — Leaf node or Core architecture, set at planning time</div>
+          <div class="change-desc">Every slice now carries an Architecture type: either <strong>Leaf node</strong> (self-contained — nothing else depends on it, tech debt doesn't spread) or <strong>Core architecture</strong> (touches the trunk — data models, shared logic, infrastructure, or anything other slices depend on). The distinction was always real; it's now explicit and enforced. Classification happens at planning time, when the cost of getting it wrong is lowest. An unclassified slice cannot reach Ready — it's a gate, not a suggestion.</div>
+        </div>
+      </div>
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Automatic PE review before any core architecture slice enters build</div>
+          <div class="change-desc">When a slice marked Core architecture moves to In Build, a principal engineer review fires automatically before the branch opens — no manual trigger, no option to skip. The reviewer reads the slice, assesses whether the approach is right, and the outcome lands in the slice's Notes field before any code is written. This isn't friction for its own sake: core architecture changes ripple. Finding a structural problem at review is cheap. Finding it three slices later is not.</div>
+        </div>
+      </div>
+      <div class="change-item">
+        <div class="change-badge badge-improved">Improved</div>
+        <div class="change-body">
+          <div class="change-name">Solo Companion — core architecture visibility across your project</div>
+          <div class="change-desc">The companion now surfaces architecture type in its project views. Slice rows carry a CORE badge with orange highlight when the type is Core architecture. A callout appears at the top of the project view whenever one or more core architecture slices are currently In Build. A filter lets you pull a core architecture only view across the full project — useful when you want to see everything touching the trunk at once.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MAY 3 (v2.1.0) ── -->
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">May 3</div>
+      <div class="entry-title">Four Skills Now Run Smarter — In Parallel Where It Matters</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+      <div class="change-item">
+        <div class="change-badge badge-improved">Improved</div>
+        <div class="change-body">
+          <div class="change-name">Design review — multi-agent orchestrator fires automatically in Claude Code</div>
+          <div class="change-desc">Previously you had to manually activate the multi-agent orchestrator. Now in Claude Code it fires automatically — the three specialist lenses (PM, Tech Lead, Data) run as separate agents and surface findings as a merged result. If you see four specialist findings in a design review pass instead of one sequential list, that's expected. Cursor users see no change — sequential review is the fallback.</div>
+        </div>
+      </div>
+      <div class="change-item">
+        <div class="change-badge badge-improved">Improved</div>
+        <div class="change-body">
+          <div class="change-name">Phase test — tester and regression checks now run in parallel</div>
+          <div class="change-desc">Stage 4 (tester) and Stage 5 (regression specialist) used to run back to back. In Claude Code they now run simultaneously — the tester walks every scenario while the regression check re-walks all In Test slices at the same time. The gate logic is unchanged; it just waits for both to finish before deciding. Cursor gets the same sequential behavior as before.</div>
+        </div>
+      </div>
+      <div class="change-item">
+        <div class="change-badge badge-improved">Improved</div>
+        <div class="change-body">
+          <div class="change-name">Design sprint — secondary screens fan out in parallel after hero approval</div>
+          <div class="change-desc">Once the hero screen is approved on structure and skin, all secondary screens now produce simultaneously in Claude Code rather than one at a time. The rule that gates them behind hero approval is unchanged — nothing fans out until both dimensions are warm. Result: the full screen set arrives faster, with a consistent design system applied across all of them. Cursor produces screens sequentially as before.</div>
+        </div>
+      </div>
+      <div class="change-item">
+        <div class="change-badge badge-improved">Improved</div>
+        <div class="change-body">
+          <div class="change-name">Code review — now runs as an isolated sub-agent with no build context</div>
+          <div class="change-desc">Code review used to run in the same context as the build pass — meaning the reviewer had access to all the reasoning and decisions made during implementation. Now it runs as a separate agent that sees only the code, the slice spec, and the quality contract. No build history, no implementation notes. This makes it meaningfully more likely to catch things the build pass rationalized away. If code review surfaces something the build pass didn't flag — that's the point.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MAY 3 ── -->
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">May 3</div>
+      <div class="entry-title">Doc Updates Are Automatic Now. And Framework State Persists Across Machines.</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Comms cascade sub-agent — automated doc updates on every version ship</div>
+          <div class="change-desc">When a version ships, the framework curator spawns a dedicated sub-agent whose only job is updating the documentation. It reads every comms doc, writes what's relevant, commits, pushes to GitHub, and deploys to Cloudflare — in one pass. The curator provides a structured brief (version, summary, skills affected, watchfor items, guide sections). No more manual doc pass after a build.</div>
+        </div>
+      </div>
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Cross-device memory — framework state persists across machines</div>
+          <div class="change-desc">The framework curator now has a private GitHub repo storing current framework state, pending work, and a curator-context summary layer. Every session starts with a fetch from that repo so context is accurate regardless of which machine is being used. A daily 8am health check sends a macOS notification with GREEN/YELLOW/RED staleness scores for key framework indicators.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MAY 2 (Solo Companion) ── -->
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">May 2</div>
+      <div class="entry-title">Solo Companion Can Now Search Your Memory — and Write to It</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Cross-source search — project records and MemPalace in one query</div>
+          <div class="change-desc">A single search box queries both your project records (slices, decisions, changes, open questions) and MemPalace simultaneously. Two-pass engine: natural language and keyword-only, run concurrently, merged by best score per source. Memory results show markdown-rendered content with source filename. Filter chips let you narrow to project records or memory only.</div>
+        </div>
+      </div>
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Capture — write directly to memory from the companion</div>
+          <div class="change-desc">A new Capture page lets you write into memory without opening an AI session. Type a title, tag a project, write freely — the note saves as a dated markdown file and mines into MemPalace in the background. Searchable within seconds. The use case: you're mid-build, something clicks — now you can save it immediately and the brainstorm skill can find it later.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MAY 2 ── -->
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">May 2</div>
+      <div class="entry-title">The Framework Now Knows If It's Working</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Automatic metrics collection — every build produces docs/metrics.json</div>
+          <div class="change-desc">No configuration required. The file initializes at first slice and accumulates as the build runs: rework cycles per slice, phase test outcome, refinement cycles if autopilot was used. Rework rate tells you if your gates are catching things before they ship. Refinement cycles tell you if discovery was thorough enough. Phase test outcome tells you if the product actually landed. Solo Companion reads it — cross-project aggregation coming.</div>
+        </div>
+      </div>
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Rework cycle detection — framework flags when a slice re-enters build after QA</div>
+          <div class="change-desc">When a slice re-enters build after failing QA, the rework counter increments automatically. Increment-only — a slice reworked twice was reworked twice, even if it passes clean on the third attempt. Rising rework rate across a build is a signal something upstream is broken.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">May 2</div>
+      <div class="entry-title">Automated Testing, CI/CD, and Seven Deployment Paths</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+      <div class="change-item">
+        <div class="change-label">New</div>
+        <div class="change-desc"><strong>Automated test generation.</strong> When a slice reaches code-complete and the project has GitHub Actions configured, the framework generates a pytest test file from the slice's done criteria. The full suite runs before every commit — a red suite blocks the commit until the regression is fixed. Tests accumulate across slices and become a regression floor that protects earlier work throughout the build.</div>
+      </div>
+      <div class="change-item">
+        <div class="change-label">New</div>
+        <div class="change-desc"><strong>CI/CD Setup — one-time, plain-language walkthrough.</strong> At first deploy, if GitHub Actions is declared in tech-context but not yet configured, the deploy skill generates the complete GitHub Actions workflow file and walks the solo through the only manual step: pasting a token or key into GitHub. The solo never writes or reviews YAML. Every push to the base branch runs tests automatically. Every merge to main deploys.</div>
+      </div>
+      <div class="change-item">
+        <div class="change-label">New</div>
+        <div class="change-desc"><strong>Seven named deployment paths.</strong> Tech-context now maps to one of seven fully-supported paths: Local Mac, Cloudflare Pages/Workers, Railway, Render, Fly.io, AWS App Runner, or No pipeline. The solo is never asked to choose from a list — the framework captures intent through plain-language questions and maps internally. Observability recommendation auto-maps to the selected path (CloudWatch for AWS App Runner; Datadog for Railway/Render/Fly.io; none for local).</div>
+      </div>
+      <div class="change-item">
+        <div class="change-label">Updated</div>
+        <div class="change-desc"><strong>Autopilot now includes test generation.</strong> The autonomous build loop generates and runs the test suite at each slice, the same as solo-build. Regressions are caught and logged before the simulator gate check. No behavior change for projects without CI/CD configured.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MAY 1 ── -->
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">May 1</div>
+      <div class="entry-title">The Retro Now Listens. And Talks to the Framework.</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Session-present listening — retrospective captures in the moment, not at phase end</div>
+          <div class="change-desc">The retrospective used to wait. It fired at phase end, read the notes, and wrote a report. By then, the moment was gone and the details were thin. Now it listens throughout every guided and piloted session. Three trigger types: <strong>framework-detected</strong> (stuck protocol fired, code review failed twice, builder self-corrected), <strong>solo-expressed</strong> (any signal that the output wasn't what was expected — "why did that happen", "that took way longer than it should have"), and <strong>explicit-flag</strong> (solo says "note this"). Mid-session acknowledgment is one line and the work continues. Nothing is lost to end-of-session recollection.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Cross-machine retro log — observations from all sessions reach the framework owner</div>
+          <div class="change-desc">Session observations now flow to a shared log in the engineering-playbook repo. At session end, the Stop hook pushes retro notes to <code>shared/retro-log.md</code> alongside session signals. The framework curator reads this log at session start in owner mode — the only consumer. Framework skills never read it. Same-day skip logic prevents surfacing the same observations twice in one day. This is how real usage patterns across all machines and all projects become visible to the framework — not through manual reporting, but through the session itself.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">May 1</div>
+      <div class="entry-title">Session Boundaries That Mean Something</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Mid-deliverable checkpoint — automatic handoff update at slice 4</div>
+          <div class="change-desc">When a deliverable has more than four slices and the fourth is complete, the framework updates the handoff automatically and continues building. No pause, no solo approval. This is a context hygiene measure: if the session is interrupted or context compresses, the handoff has a current record of where things stand. It fires once per deliverable. The solo doesn't have to do anything — it happens in the background.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-improved">Improved</div>
+        <div class="change-body">
+          <div class="change-name">Deliverable completion — framework recommends closing the session</div>
+          <div class="change-desc">When a deliverable is fully accepted, the framework names the boundary: the work is coherent, the handoff has something meaningful to record, and the next deliverable starts fresh without inheriting this session's context. The solo can close out or continue — it's an explicit choice. The point isn't to force stops, it's to surface the right moment when one exists. A deliverable boundary is a real seam in the work. The framework now says so.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">May 1</div>
+      <div class="entry-title">Structure Before Skin — Design Sprint Round One Gets a Rule</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Wireframe-first round one — no color, no typography until structure is confirmed</div>
+          <div class="change-desc">Round one of the design sprint now produces structure only: white background, dark text, gray borders, system fonts. No color decisions. No typography decisions. No skin of any kind. The constraint is absolute. The solo confirms the layout is right before any aesthetic direction begins. This prevents the common failure mode where a solo is reacting to the visual treatment before they've agreed on the underlying structure — and misses a layout problem that would have been obvious in a wireframe.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Element naming pass — builder names every interactive element before feedback begins</div>
+          <div class="change-desc">After producing the round one HTML, the builder walks every interactive element in the artifact in order: names the component type (dropdown, filter, search, toggle) and the expected behavior. The solo corrects anything misidentified before layout feedback starts. This is a one-time identification pass that prevents the builder from silently categorizing a filter as decorative or a search box as non-functional. The solo knows exactly what they're looking at before they say anything about it.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── MAY 1 ── -->
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">May 1</div>
+      <div class="entry-title">Autopilot — Build Without a Solo in the Loop</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Autopilot — autonomous build mode</div>
+          <div class="change-desc">A new alternative for the Build phase. The solo completes discovery (and optionally the design sprint), then hands off. The framework builds the full product autonomously — the solo-simulator plays every gate, every slice is anchored and committed, and the solo sees nothing until phase test. Phase test is the first human touch point. The solo reviews the finished product, not individual slices.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Pre-flight check — mandatory gate before autonomous build begins</div>
+          <div class="change-desc">Before a single slice is built, the simulator reads all discovery docs and surfaces judgment gaps — places where the spec doesn't decide and the simulator would have to guess. The solo answers each gap. The brief is locked only when no unresolved gaps remain. A discovery quality check also runs: if the to-be map is vague or missing edge cases, this is flagged before gap questions. The cost of removing solo gates from the build is paid upfront here, not spread across the product as post-hoc fixes.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Refinement cycles — delta iteration after phase test</div>
+          <div class="change-desc">After phase test, if the solo has changes, Refinement builds the delta — not the full product again. Each issue is classified first: implementation issues (behavior off, display wrong, data broken) go into Refinement. Structural issues (wrong screen, wrong flow at the process level) require a guided session. The exit ramp to guided mode is surfaced at every Refinement cycle completion. Refinement is autopilot-only — it doesn't exist in guided mode.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Two entry points — post-discover or post-design-review</div>
+          <div class="change-desc">Autopilot can start after discovery alone (faster to begin, more simulator judgment calls, higher Refinement likelihood) or after a full design sprint and design review (richer anchor, fewer judgment calls, tighter first-pass output). Entry Point 2 is recommended for products with significant UI or interaction complexity. The solo chooses based on how much design clarity they want to front-load.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── MAY 1 (continued) ── -->
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">May 1</div>
+      <div class="entry-title">Figma to the Letter, Rollback by Protocol</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Figma fidelity — interactive element classification required before build</div>
+          <div class="change-desc">Every interactive element in a Figma frame scope must now be classified before the slice reaches Ready: <strong>Functional</strong> (logic wired in this slice), <strong>Deferred</strong> (logic in a future slice — a companion slice is created in the backlog now), or <strong>Out of scope</strong> (appears in Figma but is not part of this product). There is no fourth option. The classification happens at design review, written into the slice's Notes field, before the builder sees the slice. A builder who encounters a filter, search box, or pagination control at build time cannot make that product decision silently — the decision was already made. This closes the failure mode where interactive elements were built as visual shells: working-looking components that accept input and do nothing.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Figma fidelity — node properties extracted before coding, not approximated</div>
+          <div class="change-desc">When the design source is a Figma file, the builder extracts exact node properties — spacing, color, typography — from Figma Dev Mode or MCP before writing any code. Visual estimates are not acceptable. This matters because the gap between "looks close" and "matches the spec" is where design intent erodes. A layout that approximates the spacing is not the same as one that implements it. The Figma file is the specification; reading it visually is not the same as reading it.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Code review Check 10 — design fidelity (Figma-sourced slices only)</div>
+          <div class="change-desc">A new Check 10 runs on every Figma-sourced slice after code-complete. Four sub-checks: the interactive element inventory must be present in the Notes field (missing inventory fails immediately — the slice returns to design review, not to build); every element listed in the inventory must exist in the implementation; Functional elements must have wired logic (a clickable filter with no filtering logic fails), and Deferred elements must be explicit non-interactive placeholders (a search input that accepts keystrokes but does nothing fails if the inventory says Deferred); and a representative sample of visual values must be traceable to Figma node properties — approximated values are a fail. Slices with non-Figma design sources skip Check 10 entirely, stated explicitly in the review report.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Rollback protocol — formal mechanism for undoing completed work</div>
+          <div class="change-desc">When a slice that has already passed QA needs to be rebuilt, the framework now has a protocol for it. The builder first assesses whether the scope is a <strong>targeted fix</strong> (the approach is sound, a specific behavior is wrong) or a <strong>full rebuild</strong> (the approach itself is structurally wrong — wrong design reading, wrong architecture, wrong assumptions at build start). The builder states which scope applies and why. The solo confirms before anything changes. On confirmation: a rollback log entry is written, the slice returns to In Build, the deliverable reverts from Accepted to Pending Acceptance (because the condition for Accepted is no longer met), and if the phase was Completed it reverts to In Progress. For a full rebuild, existing code is discarded and the spec and design file are re-read from scratch before any new code is written. Nothing happens before confirmation — no status changes, no code discarded.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-improved">Improved</div>
+        <div class="change-body">
+          <div class="change-name">Plain language — skill names removed from solo-facing output</div>
+          <div class="change-desc">The framework's Output Contract says skill names never appear in what the solo reads. A handful of quoted output examples and gate decision templates were violating this: qa-triage appearing in phase-test gate prompts, prd-to-plan named in a solo-build gate message, the process mapper named in a between-phase prompt, and a raw git command appearing in an update-available prompt that the solo was expected to run themselves. All twelve occurrences corrected. The framework's internal routing stays internal — the solo sees actions and outcomes, not the machinery producing them.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── MAY 1 ── -->
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">May 1</div>
+      <div class="entry-title">Built to Ship, Not Just to Pass</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Quality contract — four required categories on every slice</div>
+          <div class="change-desc">Every slice now requires a quality contract written during design review, before build starts. The contract is structured into four required categories: <strong>Failure states</strong> (what happens when an external call fails or times out), <strong>Edge cases</strong> (empty data, max values, concurrent actions), <strong>Input validation</strong> (what is rejected, when, with what feedback), and <strong>Security</strong> (user input sanitized, data scoped, auth server-side). Each category must be addressed or explicitly marked N/A with a reason — a blank category is not valid. This is not a suggestion layer on top of done criteria. It is the pre-written spec the builder is held to, and the contract the code review checks against line by line. A slice without a quality contract cannot reach Ready.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Code review Check 8 — adversarial quality contract verification</div>
+          <div class="change-desc">Code review now reads the quality contract before reading the code, then checks every contract line against the implementation with deliberate adversarial specificity. A try/catch that swallows the error silently does not satisfy "user sees an error message." A validation check on the wrong event does not satisfy "rejects empty string at submission." The contract is the spec. The code either satisfies it or it doesn't — there is no partial credit and no nearest-thing rationalization. Check 8 failures route back to build, same as the seven structural checks that preceded it. This is the mechanism that closes the gap between "it works in testing" and "it holds under real conditions."</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Code review Check 9 — independent security baseline</div>
+          <div class="change-desc">A fixed five-item security gate now runs on every slice, independent of what the quality contract says. The five sub-checks: input sanitization (no raw rendering of user-supplied content), data scoping (data returned scoped to the authenticated user), server-side auth (authorization logic lives on the server — a hidden UI element is not access control), injection prevention (user input not string-concatenated into queries or commands), and no secrets in client-visible code. Check 9 is independent by design: a quality contract might mark security N/A for a slice with no user input or external calls, but Check 9 still runs. It catches classes of vulnerability a per-slice contract writer might not surface. Any sub-check failure routes back to build.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-improved">Improved</div>
+        <div class="change-body">
+          <div class="change-name">Self-verification now walks observable contract items</div>
+          <div class="change-desc">Before declaring code-complete, the builder is now required to walk every observable quality contract item in the running app — not just the happy path. This means: simulating a failure and confirming the error state renders, submitting empty or invalid input and confirming validation fires at the right point, and for any security contract line, confirming user-supplied content is not rendered raw. The build plan also now includes explicit steps for these observations — so the builder is implementing contract requirements as discrete steps, not hoping they emerge from the feature work.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── APRIL 30 (continued) ── -->
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">April 30</div>
+      <div class="entry-title">Build Discipline, Session Hygiene, and Observability</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+
+      <div class="change-item">
+        <div class="change-badge badge-improved">Improved</div>
+        <div class="change-body">
+          <div class="change-name">Pre-build read gate — verbatim quote required</div>
+          <div class="change-desc">The pre-build read gate in solo-build has been tightened: the builder must now produce a verbatim quote from the design file — the exact string, word for word — before writing any code. A paraphrase no longer satisfies the gate. This closes the loophole where a builder could confirm the read from memory or a prior session rather than actually opening the file. The distinction matters: a design file that has changed since the last session, or one the builder recalls slightly wrong, produces implementation drift that compounds across slices. The verbatim quote makes the read verifiable.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Session signal system — passive telemetry across all machines</div>
+          <div class="change-desc">Four skills now append one-line signals to a temporary file when notable failure events occur during a build session: stuck protocol fired, slice rebuilt, priority deviation (solo-build); QA caught a missed self-verification (solo-qa); code review failed (code-review-and-quality); phase test on hold (phase-test). A Stop hook wired via onboard reads the file at session end, appends structured lines to a shared session log in the engineering-playbook repo, pushes, and clears the file. If push fails, signals are held in a pending file and included in the next successful push. The log accumulates across all machines and projects — a signal-level view of where build quality issues surface most.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Handoff staleness hook — automatic warning when backlog outpaces handoff</div>
+          <div class="change-desc">Onboard now wires a Stop hook into every project: at the end of each session, if the backlog has been modified more recently than the handoff document, a warning surfaces. The handoff is what the framework reads at session start to orient — if the backlog changed and the handoff didn't, the next session opens on stale context. The hook is silent when handoff is current. Existing projects can add it manually via the command in the onboard skill; new projects get it automatically.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Observability tool decision locked at tech-context</div>
+          <div class="change-desc">Tech context now explicitly asks whether runtime observability is required and which tool is in place — Datadog, CloudWatch, or none. The choice is mutually exclusive and locked at tech-context time. If a tool is declared, an observability setup infrastructure slice is required in the backlog before any feature slices start. This prevents the common pattern of shipping features without instrumentation and wiring it in after the fact. For projects with an established org standard, that standard is declared here — not inferred from prior context or assumed by the builder.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── APRIL 27 ── -->
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">April 30</div>
+      <div class="entry-title">Continuity, Collaboration, and the Cycle After Launch</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Onboard — companion compatibility pass</div>
+          <div class="change-desc">Onboarding an existing project now ends with a four-check compatibility pass that verifies the project will sync cleanly with the Solo Companion before exiting. The checks: project registered in the framework registry, backlog has the three required section headers, handoff contains an Open right now section, and every slice record has a Review URL field. A project that silently fails any of these shows up in the companion with empty dashboards and missing cards. The pass fills or flags each gap — so the first companion sync after onboarding just works.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Shared ideas backlog — framework collaboration with owner sign-off</div>
+          <div class="change-desc">The framework curator now supports a shared ideas backlog at <code>shared/ideas.md</code>. Any contributor can brainstorm with the curator and log proposed ideas — the curator handles the write, commit, and push. Ideas sit as Proposed until the framework owner reviews them. At the start of every owner session, the curator surfaces pending items for sign-off. Approved ideas can then move through the normal curator workflow to become real framework changes. Nothing proceeds to build without owner approval. Contributor installs redirect direct framework file edits to the ideas backlog automatically — preventing accidental changes outside the curator workflow.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Deployed project — new cycle routing in start</div>
+          <div class="change-desc">When a project is opened and all its phases are at Deployed status, the framework no longer tries to continue the old work. It detects the deployed state, orients on what was shipped, asks what new work is being added, and opens a new phase in the existing backlog. Completed phases stay exactly as they are — read-only history. The new phase inherits the full context of the project (decisions, process map, tech context, design artifacts) without requiring any of it to be recreated. The handoff updates to reflect the new cycle. One door in — the same entry point handles new projects, continuing projects, and returning to shipped ones.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── APRIL 27 ── -->
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">April 27</div>
+      <div class="entry-title">Canonical Records — The Backlog Gets a Specification</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Records specification — canonical format for all three record types</div>
+          <div class="change-desc">The backlog now has a single authoritative specification for what every record must contain. Every skill that reads or writes backlog records reads this document first. It defines the full field set for Slice (14 fields), Deliverable (13 fields), and Phase (14 fields) — including status structures, field rules, the skill ownership table, re-phasing protocol, and the decisions and change log format. No skill invents fields. No skill omits required fields. The spec is the contract.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Two descriptions required on every record — plain language and technical</div>
+          <div class="change-desc">Every slice, deliverable, and phase now carries two independent descriptions. The plain language description is written for the solo — what they will see, have, or be able to do when the work is complete. The technical description is written for the builder — implementation approach, constraints, edge cases. Neither copies from the other. Neither summarizes the level below it. A phase description is not a summary of its deliverables. A deliverable description is not a summary of its slices. Writing them fresh at every level forces the author to think about what each object actually delivers, independently.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Three-level verification — self-verification checklist, acceptance criteria, builder confirmation</div>
+          <div class="change-desc">Every record type now carries the same three verification fields. The self-verification checklist is what the builder runs before presenting to the solo. The acceptance criteria is the shared contract — the same list the builder checks and the solo reviews, independently. The builder confirmation is populated at presentation time with ✓/✗ results and observations, so the solo arrives at review with the builder's work already shown. Each level checks what only that level can see: slices verify individual elements, deliverables verify slices working together, phases verify deliverables working end-to-end.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">In Test — new slice status between solo QA sign-off and Done</div>
+          <div class="change-desc">Slices now move to In Test after solo-qa sign-off, not directly to Done. Done is reserved for phase-test completion — when the full phase has been verified end-to-end with real data. This resolves a genuine ambiguity: a slice that passed solo QA against mock data and a slice that has been confirmed working in the complete, integrated phase are meaningfully different things. In Test makes that visible in the backlog. The full chain: In Build → In QA → In Test → Done. Phase-test is what closes the final gap.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Integration — third deliverable type</div>
+          <div class="change-desc">Deliverables now have three types: Screen, Logic, and Integration. Integration connects real data to a Screen deliverable — it may contain both UI slices and data integration slices, always sequences after its Screen companion is Accepted, and can spawn new slices when real data reveals gaps. This makes the mock-to-real transition explicit in the plan rather than buried in individual slices. An Integration deliverable is Accepted only when every gap revealed by live data has been addressed — including any newly discovered slices.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Re-phasing protocol — formal process for moving work between phases</div>
+          <div class="change-desc">When a slice or deliverable needs to move to a different phase mid-build, a 7-step protocol now executes in full: solo confirms the move → decision logged → moved item updated → source phase "Explicitly out of scope" updated → destination phase deliverables list updated → source phase re-assessed (does it still answer its question?) → destination phase re-assessed (does the moved item fit?). All seven steps happen in the same action. The decision log entry and the record updates are never separated. No quiet edits.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Backlog Status Reference — standalone reference page</div>
+          <div class="change-desc">New page in the comms docs showing all three status grids side by side — Slice (8 statuses), Deliverable (4 statuses), Phase (4 statuses) — with flow chains, plain-language meanings, who sets each status, and the skill ownership table. Linked from the index under Framework Overview. When the backlog shows an unfamiliar status, this is the one-click answer.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-improved">Improved</div>
+        <div class="change-body">
+          <div class="change-name">Build, QA, and phase test guides aligned with the new record format</div>
+          <div class="change-desc">The build guide, QA guide, phase test guide, and skills reference all updated to reflect the new status chain and record format. Builder self-verification step added to the code-complete protocol. In Test introduced throughout the QA flow. Done definition table updated to show phase-test as the final step. Phase test readiness and handoff sections updated to match. Six skill cards in the skills reference updated for the new status names and deliverable fields.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── APRIL 25 ── -->
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">April 25</div>
+      <div class="entry-title">Delivery Rules — Commands and Review</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">AI runs terminal commands — never the solo</div>
+          <div class="change-desc">The framework never pastes a command for the solo to copy and run. If a command needs to execute, the AI runs it. If the action is significant or destructive, the AI asks permission first — then runs it. Applied as a load-bearing rule in the Output Contract, framework principles, solo-build skill, and both installed Cursor rules.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Review is always visual</div>
+          <div class="change-desc">When a build produces UI or HTML output and review is needed, the AI serves it as a viewable page before asking for feedback. The solo looks at the work, then responds. Asking for sign-off on a description of what was built is not review. Same six-file cascade as the terminal commands rule.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Release notes blog launched</div>
+          <div class="change-desc">This page. Framework improvements are now tracked in plain language — what changed, what was added, and why — rather than living only in git commit messages.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Deliverable — new framework concept</div>
+          <div class="change-desc">The framework now has a named layer between the plan and individual slices. A deliverable is the body of work a set of slices collectively produce. Two types: screen (reviewed visually in the browser) and logic (reviewed against evidence — test results, data state, or a simulated flow through affected screens). Three fields per deliverable: technical spec for the AI, solo description for the human, and acceptance criteria as the shared contract both parties build and review against. Documented across the framework doc, QA guide, Phase Test guide, skills reference, and getting-started.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Two review levels</div>
+          <div class="change-desc">Slice approval (did this unit of work complete correctly) and deliverable acceptance (is the full body of work done and does it match the agreed contract) are now distinct moments. The AI self-verifies against acceptance criteria before presenting a review to the solo. QA runs a deliverable-level check once all slices in a deliverable reach Done — screen deliverables get a visual pass, logic deliverables get an evidence pass. Phase Test walks each deliverable in the phase and confirms they hold together in integration.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">"show progress" and "show plan"</div>
+          <div class="change-desc">Two plain-language phrases available at any time during build. "show progress" returns the active deliverable — all slices, current status, acceptance criteria. "show plan" returns the full build — all deliverables, delivered / in progress / backlog. Surfaced automatically at key moments; also available on demand. Noted in the getting-started Build phase row so solos know the phrases from day one.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-improved">Improved</div>
+        <div class="change-body">
+          <div class="change-name">Session modes renamed: bare / piloted / guided</div>
+          <div class="change-desc">The three session modes were renamed from bare / assisted / auto-pilot. "Auto-pilot" created the wrong mental model — people assumed the AI worked independently while they stepped away. The new names reflect what each mode actually means: bare (you invoke, nothing pre-loads), piloted (you're at the controls, always-on instruments are live), guided (the framework leads the phase sequencing, you're in every decision). Cascaded across 18 files — framework doc, all always-on skill files, template, setup prompts, and every communications page.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Dedicated modes slide in the solo deck</div>
+          <div class="change-desc">New Slide 5 explains bare / piloted / guided with one paragraph per mode — clear enough that the mental model lands before the always-on slide references them. Includes an enhanced mode callout at the bottom explaining it as a separate capability layer (Claude Code only, multi-agent orchestration) that can combine with any session mode.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Data integration planning — data questions log + integration deliverables</div>
+          <div class="change-desc">The mock→real data swap is no longer treated as a checklist item at phase test. It's now explicitly planned from design review onward. Design review gets a named data behavior pass — required for every screen with external data — that asks scale and behavior questions upfront: will this list paginate, which fields can be null, what does the empty state look like? Every unanswered question goes into a data questions log that gates dependent UI slices from reaching Ready. Mock data is updated after questions resolve, so UI slices are built against realistic conditions from the start. In planning, every Screen deliverable with external data gets a companion Logic deliverable for data integration — always a separate deliverable, always sequencing after the Screen is accepted, scoped only once the data questions log is resolved. Standard done criteria for integration slices cover API shape, data-mapping.md confirmed, pagination and filtering, empty and error states, loading states, and auth. At integration deliverable acceptance, solo-qa runs a UX impact check: does live data produce anything a user would see that the design didn't account for? If yes, the affected UI slices reopen and design review runs before the deliverable is accepted. Early questions, separate deliverables, late confirmation.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">process-change — to-be map change management</div>
+          <div class="change-desc">New skill providing a consistent protocol for changes to the agreed to-be process map, regardless of cause or where in the build they surface. Stakeholder input, demo gaps, technical constraints, and solo realizations all receive the same seven-step response: capture trigger → document change → three-tier impact scan (scheduled, in-progress, and completed work — nothing assumed safe) → solo decides → execute → re-prioritize → solo confirms before resuming. Wired into solo-build (map-level conflict auto-detection), qa-triage (new map-level gap classification), and phase-test Stage 6 (process-level mismatch blocks the gate). The process is the contract. When it changes, it changes deliberately.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-improved">Improved</div>
+        <div class="change-body">
+          <div class="change-name">Phase test timing calibration — readiness table + framework-health nudge</div>
+          <div class="change-desc">The "When to Invoke" judgment call now has structure. A three-state readiness table (Ready / Not Yet / Overdue) gives new solos the calibration guidance the gate criteria alone couldn't provide. The Overdue state is new — it names the scope-creep failure mode where a solo keeps adding slices rather than pulling the gate trigger on a finished phase. framework-health gets a matching signal: when all current-phase slices hit Done with no open build qa-triage items, it fires a single nudge before stepping back. Hole #6 resolved.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-improved">Improved</div>
+        <div class="change-body">
+          <div class="change-name">Long-gap recovery — framework-health detection + product-continuity re-entry protocol</div>
+          <div class="change-desc">When a session resumes after 21 or more days, the framework now detects the gap and responds to it. framework-health parses the handoff date at mode activation — the same read it was already doing — and if the gap is 21+ days, surfaces a re-entry prompt before any work begins. product-continuity handles the re-entry as three sequential checks: codebase state (git log since last session, uncommitted changes, open branches), environment (does the app run, any dependency drift), and context validity (blocking questions that may have been answered, assumptions that may have gone stale, key context that may have shifted). A re-entry summary closes the check and hands back to normal session flow. Short gaps are silent. No new skill — detection wired into an existing signal, re-entry wired into existing context documents.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── APRIL 24 ── -->
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">April 24</div>
+      <div class="entry-title">Output Discipline &amp; Design Sprint Precision</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Output Contract — two new load-bearing principles</div>
+          <div class="change-desc">Explicit rules now govern what never appears in user-facing output: no skill names, no internal abbreviations, no phase announcements. Principle #10 (output discipline) and the "framework writes, solo responds" principle were added and propagated across all files. The contract is now the authoritative reference for output behavior across every mode.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-improved">Improved</div>
+        <div class="change-body">
+          <div class="change-name">Plain language audit — complete pass across all files</div>
+          <div class="change-desc">Every file was reviewed and scrubbed of internal abbreviations (SBF), skill names in user-facing text, and technical shorthand. The framework's external voice now matches the output contract fully.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-name">Named project resume</div>
+        <div class="change-desc">Saying "auto pilot on [project name]" now picks up any in-flight project without needing a saved prompt or prior setup. Context is restored automatically at session start.</div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Nivya — on-demand framework and project companion</div>
+          <div class="change-desc">New skill that recalls both framework mechanics and active project context on demand. Distinct from framework-health (always-on health monitor) and product-continuity (session state tracker). Nivya is invoked when you need to ask a question about how the framework works or where a project stands.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-improved">Improved</div>
+        <div class="change-body">
+          <div class="change-name">Design Sprint — pre-flight gate + Figma layer enumeration</div>
+          <div class="change-desc">A pre-flight gate now runs before any HTML is produced in Design Sprint on-ramp 2. Figma frame enumeration happens upfront — all frames and layers are captured before the sprint begins, not discovered mid-build. Fidelity standard tightened to require extracting exact Figma values (not approximations).</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-improved">Improved</div>
+        <div class="change-body">
+          <div class="change-name">framework-health — gate confirmations, milestone lines, fork format</div>
+          <div class="change-desc">Explicit gate confirmations and milestone lines added. Two-path fork format standardized. Anti-patterns for vague transitions documented. Framework-health now checks for upstream updates at mode activation.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── APRIL 23 ── -->
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">April 23</div>
+      <div class="entry-title">Workshop, Gates, and the Phase Guide Library</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Workshop framework — separate path for spike work</div>
+          <div class="change-desc">Spike and tool-shaped work now has its own entry, its own skills (scope-check, spike, land), and a clear boundary with the main build flow. Workshop work doesn't go through the phase chain — it enters, explores, and lands as a defined artifact or a decision to proceed.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Onboard skill — bring existing projects into the framework</div>
+          <div class="change-desc">Projects that predate the framework can now enter it without repeating discovery from scratch. Onboard maps prior work to framework anchors and picks up where the project actually is.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Phase gates throughout — explicit confirmations at every phase end</div>
+          <div class="change-desc">Every phase now ends with a named gate: actual output files listed, followed by a direct two-option prompt — start the next phase now, or close out here. Passive "good stopping point" language retired.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-improved">Improved</div>
+        <div class="change-body">
+          <div class="change-name">Process promoted to fourth anchor</div>
+          <div class="change-desc">The four required anchors are now: design, data, done, and process. No slice reaches Ready without all four. Process is no longer an implicit input — it's a named requirement.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Phase Guide Library — nine guides, one per phase</div>
+          <div class="change-desc">Full walkthroughs added for every phase: Brainstorm, Discover &amp; Tech Context, Design Sprint, Data &amp; Design Review, Plan, Build, QA &amp; Acceptance, Phase Test, and Deploy. Each guide covers what to expect, what gets produced, and what the gate looks like.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Getting Started + FAQ</div>
+          <div class="change-desc">Two new entry-level docs. Getting Started covers first sessions, entry points, session modes, and session hygiene. FAQ answers real questions from mid-discovery, mid-design, mid-build, QA, and out-of-order situations.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-improved">Improved</div>
+        <div class="change-body">
+          <div class="change-name">design-review — Tier 2 multi-agent orchestrator + stakeholder handoff</div>
+          <div class="change-desc">Tier 2 multi-agent review added for high-stakes design decisions. Stakeholder handoff package now produced at the end of both design-sprint and design-review — not just on request.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Session hygiene formalized</div>
+          <div class="change-desc">Close loop, resume prompt, and model guidance are now a defined framework pattern — not ad hoc. Sessions have a consistent shape: open with context restore, close with a handoff artifact.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-improved">Improved</div>
+        <div class="change-body">
+          <div class="change-name">Language audit — "visual contract" and "decision surface"</div>
+          <div class="change-desc">"Rosetta Stone" retired as a metaphor across all files. Replaced with "visual contract" (the design artifact as a binding reference) and "decision surface" (what the design review exposes for a decision). More precise, less metaphor-dependent.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── APRIL 22 ── -->
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">April 22</div>
+      <div class="entry-title">Governance Layer and Communications Launch</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Framework Curator — governance for framework changes</div>
+          <div class="change-desc">Any change to the framework now has a defined path: read the affected files, draft a cascade proposal, preview every change, wait for approval, execute, then validate integrity. Drift can no longer accumulate silently — every change is deliberate and documented.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Communications hub launched</div>
+          <div class="change-desc">Index page, landing structure, and robots.txt added — the comms docs now have a proper home rather than a flat directory of files.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-improved">Improved</div>
+        <div class="change-body">
+          <div class="change-name">Reference material separated from framework skills</div>
+          <div class="change-desc">Reference docs moved out of the skills directory. Clear boundary between what the framework does (skills) and what it documents (reference). Skills stay lean; reference grows without cluttering the skill set.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-improved">Improved</div>
+        <div class="change-body">
+          <div class="change-name">product-continuity — phase marker added</div>
+          <div class="change-desc"><code>current-phase.md</code> now tracks the active phase across sessions. Context restore at session start picks this up automatically.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── APRIL 21 ── -->
+  <div class="entry">
+    <div class="entry-header">
+      <div class="entry-date">April 21</div>
+      <div class="entry-title">Framework Ships</div>
+    </div>
+    <div class="entry-divider"></div>
+    <div class="change-list">
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Solo Builder Framework — complete skill set</div>
+          <div class="change-desc">The full framework shipped: all phase skills, always-on skills, support skills, and the complete phase chain from Brainstorm through Deploy. The foundation everything else is built on.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Deploy and Retrospective skills</div>
+          <div class="change-desc">Closed the back end of the phase chain. Deploy handles the production launch sequence. Retrospective captures what was learned at the end of every build cycle so it feeds the next one.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Process anchor — integrated from day one</div>
+          <div class="change-desc">Process sketch added as a moment in brainstorming. Process anchor wired into prd-to-plan. Process became a first-class input from the very start — not retrofitted later.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-improved">Improved</div>
+        <div class="change-body">
+          <div class="change-name">process-mapper integrated into design-review</div>
+          <div class="change-desc">The to-be process map now feeds directly into design review. Design decisions are grounded in the process they serve, not evaluated in isolation.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-new">New</div>
+        <div class="change-body">
+          <div class="change-name">Communications suite — shipped alongside the framework</div>
+          <div class="change-desc">Process map, Executive Deck, Solo Builder Deck, and Skills Reference all launched on day one. The framework shipped with a complete external story, not just internal tooling.</div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-badge badge-improved">Improved</div>
+        <div class="change-body">
+          <div class="change-name">Portable setup</div>
+          <div class="change-desc">README and Cursor user rules updated so the framework works on any machine without local path assumptions. Fresh-machine install works without manual fixes.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

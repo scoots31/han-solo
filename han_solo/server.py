@@ -18,7 +18,8 @@ from mcp.server.fastmcp import FastMCP
 from mcp.server.transport_security import TransportSecuritySettings
 from starlette.requests import Request
 from starlette.responses import JSONResponse
-from starlette.routing import Route
+from starlette.routing import Route, Mount
+from starlette.staticfiles import StaticFiles
 
 from .auth import BearerAuthMiddleware, get_current_user
 from .config import REN_AGENT_NAME, REN_AGENT_ID
@@ -246,7 +247,9 @@ async def api_memory_health(request: Request) -> JSONResponse:
     })
 
 
+_docs_dir = os.path.join(os.path.dirname(__file__), "..", "docs")
 _chat_routes = [
+    Mount("/docs", app=StaticFiles(directory=_docs_dir, html=True)),
     Route("/", chat_api.chat_index),
     Route("/chat", chat_api.chat_legacy),
     Route("/api/notecards", api_list_notecards),

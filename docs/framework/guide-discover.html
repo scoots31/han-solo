@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solo Builder Framework — Discover + Tech Context Phase Guide</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0F1729;
+    --navy-mid: #1E3A5F;
+    --blue: #2563EB;
+    --blue-light: #DBEAFE;
+    --teal: #0D9488;
+    --teal-light: #CCFBF1;
+    --purple: #bd8c7d;
+    --purple-light: rgba(189,140,125,0.12);
+    --gray-50: #F8FAFC;
+    --gray-100: #F1F5F9;
+    --gray-200: #E2E8F0;
+    --gray-300: #CBD5E1;
+    --gray-500: #64748B;
+    --gray-700: #334155;
+    --gray-900: #0F172A;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-900);
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background: var(--navy);
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    overflow-y: auto;
+    padding: 28px 0 40px;
+    z-index: 10;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+  .sidebar-header {
+    padding: 0 20px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 16px;
+  }
+  .sidebar-header .sh-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 6px;
+  }
+  .sidebar-header .sh-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.3;
+  }
+
+  .nav-group { margin-bottom: 6px; }
+  .nav-group-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    padding: 8px 20px 4px;
+    display: block;
+    color: rgba(255,255,255,0.3);
+  }
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .nav-link:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.06);
+  }
+  .nav-link.active {
+    color: #fff;
+    border-left-color: var(--teal);
+    background: rgba(13,148,136,0.12);
+  }
+  .nav-link.active-blue {
+    color: #fff;
+    border-left-color: var(--blue);
+    background: rgba(37,99,235,0.12);
+  }
+  .nav-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .nav-back {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 20px 16px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.3);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .nav-back:hover { color: rgba(255,255,255,0.6); }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: 240px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    background: var(--navy);
+    color: #fff;
+    padding: 48px 60px 40px;
+  }
+  .page-header .ph-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 12px;
+  }
+  .page-header h1 {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+    line-height: 1.1;
+  }
+  .page-header p {
+    font-size: 15px;
+    color: rgba(255,255,255,0.55);
+    max-width: 640px;
+    line-height: 1.6;
+  }
+  .header-stats {
+    display: flex;
+    gap: 32px;
+    margin-top: 28px;
+    padding-top: 28px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .header-stat .hs-num {
+    font-size: 28px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+  .header-stat .hs-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 2px;
+  }
+
+  /* ── CONTENT ── */
+  .content {
+    padding: 48px 60px 80px;
+    max-width: 960px;
+  }
+
+  /* ── SECTION HEADERS ── */
+  .section {
+    margin-bottom: 52px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--gray-200);
+  }
+  .section-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .section-icon.teal { background: var(--teal-light); }
+  .section-icon.blue { background: var(--blue-light); }
+  .section-icon.gray { background: var(--gray-100); }
+  .section-title {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+  }
+  .section-title.teal { color: var(--teal); }
+  .section-title.blue { color: var(--blue); }
+  .section-title.gray { color: var(--gray-700); }
+
+  /* ── CARDS ── */
+  .card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .card-title {
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    letter-spacing: -0.3px;
+    flex: 1;
+  }
+  .card-title.teal { color: var(--teal); }
+  .card-title.blue { color: var(--blue); }
+  .card-badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .card-badge.teal { background: var(--teal-light); color: var(--teal); }
+  .card-badge.blue { background: var(--blue-light); color: var(--blue); }
+  .card-badge.gold { background: #FEF3C7; color: #92400E; }
+  .card-desc {
+    padding: 16px 24px;
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.65;
+    border-bottom: 1px solid var(--gray-100);
+    background: var(--gray-50);
+  }
+  .card-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+  }
+  .card-section {
+    padding: 18px 22px;
+    border-right: 1px solid var(--gray-100);
+  }
+  .card-section:last-child { border-right: none; }
+  .card-section.full {
+    grid-column: 1 / -1;
+    border-right: none;
+  }
+  .card-section.half {
+    grid-column: span 2;
+  }
+  .card-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .card-section-label.teal { color: var(--teal); }
+  .card-section-label.blue { color: var(--blue); }
+  .card-section-label.gray { color: var(--gray-500); }
+  .card-section-label::before {
+    content: '';
+    width: 3px; height: 12px;
+    border-radius: 2px;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+  .card-section ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .card-section ul li {
+    font-size: 12.5px;
+    color: var(--gray-700);
+    line-height: 1.5;
+    padding-left: 12px;
+    position: relative;
+  }
+  .card-section ul li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--gray-300);
+    font-size: 14px;
+    line-height: 1.35;
+  }
+  .card-section ul li strong { color: var(--gray-900); font-weight: 600; }
+
+  .file-tag {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 600;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: var(--gray-100);
+    color: var(--gray-700);
+    margin: 2px 0;
+    line-height: 1.4;
+  }
+
+  /* ── OVERVIEW PROSE CARD ── */
+  .prose-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 20px;
+  }
+  .prose-card p {
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+  .prose-card p:last-child { margin-bottom: 0; }
+  .prose-card strong { color: var(--gray-900); font-weight: 600; }
+
+  /* ── PHASE FLOW ── */
+  .phase-flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .flow-step {
+    flex: 1;
+    padding: 18px 20px;
+    border-right: 1px solid var(--gray-100);
+    position: relative;
+  }
+  .flow-step:last-child { border-right: none; }
+  .flow-step-num {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--gray-500);
+    margin-bottom: 6px;
+  }
+  .flow-step-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 4px;
+  }
+  .flow-step-desc {
+    font-size: 11.5px;
+    color: var(--gray-500);
+    line-height: 1.5;
+  }
+  .flow-step.active-teal {
+    background: var(--teal-light);
+    border-right-color: rgba(13,148,136,0.2);
+  }
+  .flow-step.active-teal .flow-step-title { color: var(--teal); }
+  .flow-step.active-blue {
+    background: var(--blue-light);
+    border-right-color: rgba(37,99,235,0.2);
+  }
+  .flow-step.active-blue .flow-step-title { color: var(--blue); }
+  .flow-arrow {
+    width: 0; height: 0;
+    border-top: 24px solid transparent;
+    border-bottom: 24px solid transparent;
+    border-left: 14px solid var(--gray-100);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── STEP-BY-STEP ── */
+  .steps-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .step-row {
+    display: flex;
+    gap: 0;
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .step-num-col {
+    width: 56px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 20px 0 0;
+  }
+  .step-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .step-num.teal { background: var(--teal); }
+  .step-num.blue { background: var(--blue); }
+  .step-content {
+    flex: 1;
+    padding: 18px 22px 18px 0;
+  }
+  .step-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 6px;
+  }
+  .step-body {
+    font-size: 13px;
+    color: var(--gray-700);
+    line-height: 1.65;
+  }
+  .step-body p { margin-bottom: 8px; }
+  .step-body p:last-child { margin-bottom: 0; }
+  .step-body ul {
+    margin-top: 8px;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .step-body ul li {
+    padding-left: 14px;
+    position: relative;
+    font-size: 12.5px;
+    color: var(--gray-700);
+    line-height: 1.5;
+  }
+  .step-body ul li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--gray-300);
+    font-size: 14px;
+    line-height: 1.35;
+  }
+  .step-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+  }
+  .step-tag.teal { background: var(--teal-light); color: var(--teal); }
+  .step-tag.blue { background: var(--blue-light); color: var(--blue); }
+  .step-tag.gold { background: #FEF3C7; color: #92400E; }
+
+  /* ── ZONE CARDS ── */
+  .zones-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 14px;
+  }
+  .zone-card {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .zone-name {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--teal);
+    margin-bottom: 4px;
+  }
+  .zone-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 6px;
+  }
+  .zone-desc {
+    font-size: 12px;
+    color: var(--gray-500);
+    line-height: 1.5;
+  }
+  .zone-questions {
+    margin-top: 8px;
+    font-size: 11.5px;
+    color: var(--gray-700);
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  /* ── DOCUMENTS TABLE ── */
+  .docs-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .doc-row {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    overflow: hidden;
+  }
+  .doc-path-col {
+    width: 280px;
+    flex-shrink: 0;
+    padding: 16px 20px;
+    border-right: 1px solid var(--gray-100);
+    background: var(--gray-50);
+  }
+  .doc-path {
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    color: var(--gray-900);
+    margin-bottom: 4px;
+  }
+  .doc-skill-tag {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+  .doc-skill-tag.teal { background: var(--teal-light); color: var(--teal); }
+  .doc-skill-tag.blue { background: var(--blue-light); color: var(--blue); }
+  .doc-skill-tag.gold { background: #FEF3C7; color: #92400E; }
+  .doc-detail-col {
+    flex: 1;
+    padding: 16px 20px;
+  }
+  .doc-detail-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 4px;
+  }
+  .doc-detail-desc {
+    font-size: 12.5px;
+    color: var(--gray-700);
+    line-height: 1.55;
+  }
+  .doc-consumers {
+    margin-top: 8px;
+    font-size: 11.5px;
+    color: var(--gray-500);
+  }
+  .doc-consumers strong { color: var(--gray-700); font-weight: 600; }
+
+  /* ── GATES ── */
+  .gate-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .gate-header {
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .gate-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .gate-icon.teal { background: var(--teal-light); }
+  .gate-icon.blue { background: var(--blue-light); }
+  .gate-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gray-900);
+    flex: 1;
+  }
+  .gate-phase-tag {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 3px 10px;
+    border-radius: 12px;
+  }
+  .gate-phase-tag.teal { background: var(--teal-light); color: var(--teal); }
+  .gate-phase-tag.blue { background: var(--blue-light); color: var(--blue); }
+  .gate-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+  .gate-section {
+    padding: 16px 20px;
+    border-right: 1px solid var(--gray-100);
+  }
+  .gate-section:last-child { border-right: none; }
+  .gate-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    color: var(--gray-500);
+  }
+  .gate-checklist {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .gate-checklist li {
+    font-size: 12.5px;
+    color: var(--gray-700);
+    line-height: 1.5;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .check-box {
+    width: 14px; height: 14px;
+    border: 1.5px solid var(--gray-300);
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .gate-result {
+    padding: 12px 20px;
+    border-top: 1px solid var(--gray-100);
+    background: var(--gray-50);
+    font-size: 12.5px;
+    color: var(--gray-700);
+    line-height: 1.55;
+  }
+  .gate-result strong { color: var(--gray-900); font-weight: 600; }
+
+  /* ── HANDOFF CARD ── */
+  .handoff-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .handoff-header {
+    background: var(--navy);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .handoff-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .handoff-subtitle {
+    font-size: 12px;
+    color: rgba(255,255,255,0.45);
+    margin-top: 1px;
+  }
+  .handoff-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+  }
+  .handoff-section {
+    padding: 18px 20px;
+    border-right: 1px solid var(--gray-100);
+  }
+  .handoff-section:last-child { border-right: none; }
+  .handoff-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--gray-500);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .handoff-section-label .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .handoff-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .handoff-list li {
+    font-size: 12.5px;
+    color: var(--gray-700);
+    line-height: 1.5;
+    padding-left: 12px;
+    position: relative;
+  }
+  .handoff-list li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--gray-300);
+    font-size: 14px;
+    line-height: 1.35;
+  }
+  .handoff-blocker {
+    padding: 12px 20px;
+    background: #FFF5F5;
+    border-top: 1px solid #FED7D7;
+    font-size: 12.5px;
+    color: #C53030;
+    line-height: 1.55;
+  }
+  .handoff-blocker strong { font-weight: 700; }
+
+  /* ── WATCH-FOR TABLE ── */
+  .watch-table {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .watch-table-header {
+    display: grid;
+    grid-template-columns: 2fr 2fr 2fr;
+    background: var(--gray-50);
+    border-bottom: 2px solid var(--gray-200);
+  }
+  .watch-table-header div {
+    padding: 10px 16px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--gray-500);
+    border-right: 1px solid var(--gray-200);
+  }
+  .watch-table-header div:last-child { border-right: none; }
+  .watch-row {
+    display: grid;
+    grid-template-columns: 2fr 2fr 2fr;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .watch-row:last-child { border-bottom: none; }
+  .watch-cell {
+    padding: 14px 16px;
+    font-size: 12.5px;
+    color: var(--gray-700);
+    line-height: 1.55;
+    border-right: 1px solid var(--gray-100);
+    vertical-align: top;
+  }
+  .watch-cell:last-child { border-right: none; }
+  .watch-cell strong { color: var(--gray-900); font-weight: 600; display: block; margin-bottom: 3px; }
+  .watch-cell.problem { background: #FFFBEB; }
+  .watch-cell.fix { background: #F0FDF4; }
+
+  /* ── INLINE PILL ── */
+  .pill {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    padding: 1px 7px;
+    border-radius: 4px;
+    background: var(--gray-100);
+    color: var(--gray-700);
+    line-height: 1.5;
+  }
+  .pill.teal { background: var(--teal-light); color: var(--teal); }
+  .pill.blue { background: var(--blue-light); color: var(--blue); }
+
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .page-header { padding: 32px 40px; }
+    .content { padding: 32px 40px 60px; }
+    .card { break-inside: avoid; }
+    @page { size: A4; margin: 15mm; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <a href="index.html" class="nav-back">&#8592; All Guides</a>
+  <div class="sidebar-header">
+    <div class="sh-label">Phase Guide</div>
+    <div class="sh-title">Discover + Tech Context</div>
+  </div>
+
+  <div class="nav-group">
+    <span class="nav-group-label">On this page</span>
+    <a href="#what-this-phase-is" class="nav-link active"><span class="nav-dot" style="background:var(--teal)"></span>What this phase is</a>
+    <a href="#skills-in-this-phase" class="nav-link active"><span class="nav-dot" style="background:var(--teal)"></span>Skills in this phase</a>
+    <a href="#step-by-step" class="nav-link active"><span class="nav-dot" style="background:var(--teal)"></span>Step-by-step experience</a>
+    <a href="#documents-produced" class="nav-link active"><span class="nav-dot" style="background:var(--teal)"></span>Documents produced</a>
+    <a href="#gates" class="nav-link active"><span class="nav-dot" style="background:var(--teal)"></span>The gates</a>
+    <a href="#handoff" class="nav-link active"><span class="nav-dot" style="background:var(--teal)"></span>Handoff to Design Sprint</a>
+    <a href="#watch-for" class="nav-link active"><span class="nav-dot" style="background:var(--teal)"></span>What to watch for</a>
+  </div>
+
+  <div class="nav-group">
+    <span class="nav-group-label">Skills in this phase</span>
+    <a href="#skill-discover" class="nav-link" style="color:rgba(45,212,191,0.7); font-family:'SF Mono','Fira Code',monospace; font-size:11px;"><span class="nav-dot" style="background:var(--teal)"></span>discover</a>
+    <a href="#skill-tech-context" class="nav-link" style="color:rgba(96,165,250,0.7); font-family:'SF Mono','Fira Code',monospace; font-size:11px;"><span class="nav-dot" style="background:var(--blue)"></span>tech-context</a>
+    <a href="#skill-process-mapper" class="nav-link" style="color:rgba(253,230,138,0.7); font-family:'SF Mono','Fira Code',monospace; font-size:11px;"><span class="nav-dot" style="background:#92400E"></span>process-mapper</a>
+  </div>
+
+  <div class="nav-group">
+    <span class="nav-group-label">Framework flow</span>
+    <a href="#" class="nav-link" style="color:rgba(255,255,255,0.25); font-size:11px;"><span class="nav-dot" style="background:#475569"></span>Brainstorm (before)</a>
+    <a href="#" class="nav-link" style="color:rgba(45,212,191,0.8); font-size:11px; border-left: 2px solid var(--teal); background:rgba(13,148,136,0.1);"><span class="nav-dot" style="background:var(--teal)"></span>Discover + Tech Context ←</a>
+    <a href="#" class="nav-link" style="color:rgba(209,191,167,0.55); font-size:11px;"><span class="nav-dot" style="background:#bd8c7d"></span>Design Sprint (next)</a>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="ph-eyebrow">Solo Builder Framework — Phase Guide</div>
+    <h1>Discover + Tech Context</h1>
+    <p>The foundation everything else builds from. Discover surfaces the full story before any design decisions are made. Tech Context locks the stack before any screens are drawn. Together they prevent the most expensive mistakes in the framework.</p>
+    <div class="header-stats">
+      <div class="header-stat"><div class="hs-num">2</div><div class="hs-label">Core skills</div></div>
+      <div class="header-stat"><div class="hs-num">4</div><div class="hs-label">Documents produced</div></div>
+      <div class="header-stat"><div class="hs-num">2</div><div class="hs-label">Gates to pass</div></div>
+      <div class="header-stat"><div class="hs-num">1</div><div class="hs-label">Always-on activation</div></div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ── SECTION 1: WHAT THIS PHASE IS ── -->
+    <div class="section" id="what-this-phase-is">
+      <div class="section-header">
+        <div class="section-icon teal">🗺</div>
+        <div>
+          <div class="section-title teal">What this phase is</div>
+        </div>
+      </div>
+
+      <!-- Framework flow strip -->
+      <div class="phase-flow" style="margin-bottom:20px;">
+        <div class="flow-step" style="background:var(--gray-50);">
+          <div class="flow-step-num">Before</div>
+          <div class="flow-step-title" style="color:var(--gray-500);">Brainstorm</div>
+          <div class="flow-step-desc">If the idea isn't clear yet. Skip if you know what you're building.</div>
+        </div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step active-teal">
+          <div class="flow-step-num">Phase 1</div>
+          <div class="flow-step-title">Discover</div>
+          <div class="flow-step-desc">Full story: who, journey, value moment, out of scope.</div>
+        </div>
+        <div class="flow-arrow" style="border-left-color:rgba(13,148,136,0.2);"></div>
+        <div class="flow-step active-blue">
+          <div class="flow-step-num">Phase 1.5</div>
+          <div class="flow-step-title">Tech Context</div>
+          <div class="flow-step-desc">Stack established before a single screen is drawn.</div>
+        </div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step">
+          <div class="flow-step-num">Phase 2</div>
+          <div class="flow-step-title" style="color:var(--purple);">Design Sprint</div>
+          <div class="flow-step-desc">Visual artifact. Only begins when both gates above are passed.</div>
+        </div>
+      </div>
+
+      <div class="prose-card">
+        <p><strong>Discover is the day-one conversation.</strong> It is not requirements gathering and it is not a scoping session. It is the conversation a good engineer or UX person has before they touch a keyboard — the one where they listen, ask the right questions, and build a shared picture of what you're actually trying to create. By the end, everyone would tell the same story. That story feeds the design sprint, not an engineer's backlog.</p>
+        <p>The four zones of the Discover conversation — who, the journey, the moment it matters, and what done looks like — surface the full use case from beginning to end. Each zone is explored at a depth calibrated to the complexity of what you're building. A simple internal tool gets five questions. A greenfield product with multiple users and branching flows gets a multi-round conversation.</p>
+        <p><strong>Tech Context runs immediately after Discover, before Design Sprint begins.</strong> It establishes what you're building on and what constraints that creates — platform, stack, architecture rules, engineering principles. This matters because every downstream decision is technically constrained: the design can only show what the stack can produce, the data scaffold is tied to the data layer, the plan's done criteria are written in terms of the framework in use. A design sprint that runs without tech context produces screens that may be unbuilable on the actual platform.</p>
+        <p>Together these two phases are the foundation. If either is skipped or incomplete, every phase downstream either makes wrong decisions or has to backtrack. The gates exist precisely because of this — there is no way into Design Sprint without them both.</p>
+      </div>
+    </div>
+
+    <!-- ── SECTION 2: SKILLS IN THIS PHASE ── -->
+    <div class="section" id="skills-in-this-phase">
+      <div class="section-header">
+        <div class="section-icon teal">⚙️</div>
+        <div>
+          <div class="section-title teal">Skills in this phase</div>
+        </div>
+      </div>
+
+      <!-- discover skill card -->
+      <div class="card" id="skill-discover">
+        <div class="card-header">
+          <div class="card-title teal">discover</div>
+          <div class="card-badge teal">Phase Skill</div>
+        </div>
+        <div class="card-desc">
+          Conversational discovery that builds a shared understanding of what you're trying to create — beginning to end. Not requirements gathering. Not a spec. A story-based brief that feeds the design sprint. The core question: <em>"Do we understand this well enough to make something that shows what it could be?"</em>
+        </div>
+        <div class="card-body">
+          <div class="card-section">
+            <div class="card-section-label teal">What it does</div>
+            <ul>
+              <li>Receives your high-level overview without interruption</li>
+              <li>Confirms shared understanding with one or two clarity questions</li>
+              <li>Conducts the narrative conversation across four zones</li>
+              <li>Asks clarifying questions to complete the as-is picture for process-mapper</li>
+              <li>Presents and validates the as-is and to-be process maps</li>
+              <li>Produces the discovery brief as a short narrative document</li>
+              <li>Ends with the design on-ramp question to route what comes next</li>
+            </ul>
+          </div>
+          <div class="card-section">
+            <div class="card-section-label teal">The four zones</div>
+            <ul>
+              <li><strong>Zone 1 — Who</strong> — real picture of the person and their context when they use this</li>
+              <li><strong>Zone 2 — The Journey</strong> — walk through every step from open to close; no skipping ahead</li>
+              <li><strong>Zone 3 — The Moment It Matters</strong> — where this becomes genuinely useful; the payoff moment</li>
+              <li><strong>Zone 4 — What Done Looks Like</strong> — what they accomplished; what would make them come back</li>
+            </ul>
+          </div>
+          <div class="card-section">
+            <div class="card-section-label teal">Outputs</div>
+            <ul>
+              <li><span class="file-tag">docs/discovery-brief.md</span></li>
+              <li><span class="file-tag">docs/process/as-is-[name].md</span></li>
+              <li><span class="file-tag">docs/process/to-be-[name].md</span></li>
+              <li>Design on-ramp decision (Figma / reference / from scratch) documented at bottom of brief</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- tech-context skill card -->
+      <div class="card" id="skill-tech-context">
+        <div class="card-header">
+          <div class="card-title blue">tech-context</div>
+          <div class="card-badge blue">Phase Skill</div>
+        </div>
+        <div class="card-desc">
+          Establishes the technical stack, architecture constraints, and engineering principles before design review, planning, or build. Created once per project — never recreated, only updated when the stack changes. Referenced by every downstream skill for the life of the project.
+        </div>
+        <div class="card-body">
+          <div class="card-section">
+            <div class="card-section-label blue">Two routing paths</div>
+            <ul>
+              <li><strong>Known profile</strong> — organizational project with an established stack (e.g. Bayer Aurora). Two questions: org or solo? Which platform? Loads profile, confirms key constraints, produces the doc.</li>
+              <li><strong>General solo</strong> — no established profile. Asks questions one at a time: deployment target, frontend, backend/data, component library, API communication, auth, hosting, engineering principles.</li>
+              <li>Either path ends with a summary confirmation before writing the document</li>
+            </ul>
+          </div>
+          <div class="card-section">
+            <div class="card-section-label blue">What it captures</div>
+            <ul>
+              <li>Full stack table: frontend, component library, API comms, backend, auth, database, deployment, CI/CD, linting, testing</li>
+              <li>Architecture constraints — things design and build must account for beyond the stack</li>
+              <li>Engineering principles — standards and rules for this project</li>
+              <li>Branching and delivery model</li>
+              <li><strong>Infrastructure slices</strong> — prerequisites that must be Done before any feature slice starts; identified here, not in Design Review</li>
+              <li>Secrets and config management pattern</li>
+            </ul>
+          </div>
+          <div class="card-section">
+            <div class="card-section-label blue">Downstream impact</div>
+            <ul>
+              <li><strong>Design Sprint</strong> — architecture constraints shape what can be designed; Aurora module constraints mean no login screen</li>
+              <li><strong>Data Scaffold</strong> — stack determines mock data format and data layer pattern</li>
+              <li><strong>Plan</strong> — done criteria written with real technical specificity, not vague behavior descriptions</li>
+              <li><strong>Build</strong> — the build bible. Stack, principles, branching, secrets — all here</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- process-mapper always-on note -->
+      <div class="card" id="skill-process-mapper">
+        <div class="card-header">
+          <div class="card-title" style="color:#92400E;">process-mapper</div>
+          <div class="card-badge gold">Always-On (piloted / guided)</div>
+        </div>
+        <div class="card-desc">
+          Activates during Discover in piloted and guided modes. Documents the as-is process and produces the agreed to-be map. The to-be map is the process contract — its agreed structure does not change without an explicit decision.
+        </div>
+        <div class="card-body">
+          <div class="card-section half">
+            <div class="card-section-label gray">What it does in this phase</div>
+            <ul>
+              <li>Documents the as-is process exactly as described — including manual steps, workarounds, and exceptions outside any system</li>
+              <li>Presents as-is for validation before proceeding: <em>"Does this accurately reflect what happens today — including the exceptions and manual steps?"</em></li>
+              <li>Drafts the to-be map from the journey conversation — every step, every decision point, every outcome; annotated with which zone it came from</li>
+              <li>Presents to-be for agreement before Design Sprint begins: <em>"Does this map reflect what we're building? Are there decision points or branches we haven't covered?"</em></li>
+              <li>Produces both maps as markdown files in <span class="file-tag">docs/process/</span></li>
+            </ul>
+          </div>
+          <div class="card-section">
+            <div class="card-section-label gray">The process contract</div>
+            <ul>
+              <li>The to-be map agreed here is the contract that every downstream skill works against</li>
+              <li>Design Sprint cross-references screens against the to-be map — gaps flagged and decided</li>
+              <li>Design Review requires a process anchor on every slice before it reaches Ready</li>
+              <li>Phase Test validates that what was built matches the to-be map intent</li>
+              <li>The map is updated as screens and slices are added — but its agreed structure does not change without an explicit decision</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION 3: STEP-BY-STEP ── -->
+    <div class="section" id="step-by-step">
+      <div class="section-header">
+        <div class="section-icon teal">📋</div>
+        <div>
+          <div class="section-title teal">Step-by-step experience</div>
+        </div>
+      </div>
+
+      <div class="steps-container">
+
+        <div class="step-row">
+          <div class="step-num-col"><div class="step-num teal">1</div></div>
+          <div class="step-content">
+            <div class="step-tag teal">Discover</div>
+            <div class="step-title">You give the high-level overview</div>
+            <div class="step-body">
+              <p>Describe what you want to build at a high level. This is your opening — the discover skill does not interrupt it or redirect it. It lets you tell it your way. After you finish, it scans for who this is for, what problem or opportunity it addresses, and any existing context in the project (prior docs, blueprints, earlier briefs).</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-row">
+          <div class="step-num-col"><div class="step-num teal">2</div></div>
+          <div class="step-content">
+            <div class="step-tag teal">Discover</div>
+            <div class="step-title">Clarity check (one round, at most)</div>
+            <div class="step-body">
+              <p>One or two questions at most to confirm shared understanding before going deeper. The right kind: <em>"When you say [X], do you mean [A] or [B]?"</em> — not challenges, not premise questions, not ROI questions. If the overview was clear, this step is skipped and the conversation moves directly to the zones.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-row">
+          <div class="step-num-col"><div class="step-num teal">3</div></div>
+          <div class="step-content">
+            <div class="step-tag teal">Discover</div>
+            <div class="step-title">Narrative conversation — Zone 1: Who</div>
+            <div class="step-body">
+              <p>Not a demographic. A real picture of the person using this, their context when they arrive, what triggered them to come here, and what they already know versus what they don't. One or two questions per round — never a barrage. If an answer is vague, go one level deeper before moving on.</p>
+              <div class="zones-grid">
+                <div class="zone-card">
+                  <div class="zone-name">Zone 1 — Who</div>
+                  <div class="zone-title">The user in context</div>
+                  <div class="zone-questions">"Who is this person and what's their context when they use this?" — "What are they doing before they open this?"</div>
+                </div>
+                <div class="zone-card">
+                  <div class="zone-name">Zone 2 — The Journey</div>
+                  <div class="zone-title">Every step, in order</div>
+                  <div class="zone-questions">"Walk me through what someone does from the moment they open it." — "And then what happens?" Don't skip ahead.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-row">
+          <div class="step-num-col"><div class="step-num teal">4</div></div>
+          <div class="step-content">
+            <div class="step-tag teal">Discover</div>
+            <div class="step-title">Narrative conversation — Zones 3 & 4</div>
+            <div class="step-body">
+              <div class="zones-grid">
+                <div class="zone-card">
+                  <div class="zone-name">Zone 3 — The Moment It Matters</div>
+                  <div class="zone-title">The payoff</div>
+                  <div class="zone-questions">"Where does this actually become valuable to them?" — "What's the payoff moment — the thing they'd tell someone else about?" This often becomes the hero screen.</div>
+                </div>
+                <div class="zone-card">
+                  <div class="zone-name">Zone 4 — What Done Looks Like</div>
+                  <div class="zone-title">Outcomes, not features</div>
+                  <div class="zone-questions">"When they're done and it worked — what did they accomplish?" — "What would make them come back?" Grounds the design in real outcomes.</div>
+                </div>
+              </div>
+              <p style="margin-top:12px; font-size:12.5px; color:var(--gray-500);">Depth is calibrated: simple use case = 3–5 questions total; moderate complexity = 5–10; vague greenfield = multi-round conversation. If you say "that's enough" — the skill respects it, notes where clarity is thin, and proceeds.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-row">
+          <div class="step-num-col"><div class="step-num" style="background:#92400E;">5</div></div>
+          <div class="step-content">
+            <div class="step-tag gold">process-mapper</div>
+            <div class="step-title">As-is and to-be process maps</div>
+            <div class="step-body">
+              <p>Before writing the discovery brief, process-mapper activates. It asks any remaining clarifying questions to document how the process works today — including manual steps, workarounds, and exceptions that happen outside any system. The as-is may be entirely offline: emails, spreadsheets, phone calls, decisions in someone's head.</p>
+              <p>The as-is map is presented for validation. Once confirmed, the to-be map is drafted from the journey conversation and presented for explicit agreement. <strong>This agreement is the process contract.</strong> Both maps are saved to <span class="file-tag">docs/process/</span>.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-row">
+          <div class="step-num-col"><div class="step-num teal">6</div></div>
+          <div class="step-content">
+            <div class="step-tag teal">Discover</div>
+            <div class="step-title">Discovery brief written + design on-ramp decided</div>
+            <div class="step-body">
+              <p>A short narrative document — not a spec, not bullet-point requirements. The story, key moments in the journey, open threads that don't need resolving before design starts, and what's explicitly out of scope. Small on purpose: a good designer doesn't need 40 pages to start sketching.</p>
+              <p>The brief is saved to <span class="file-tag">docs/discovery-brief.md</span>. Then one final question: <em>"Do you have an existing Figma file, a product you'd like to reference for look and feel, or are we starting from scratch?"</em> The answer is documented at the bottom of the brief and routes the design sprint.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-row">
+          <div class="step-num-col"><div class="step-num blue">7</div></div>
+          <div class="step-content">
+            <div class="step-tag blue">tech-context</div>
+            <div class="step-title">Stack established via profile or questions</div>
+            <div class="step-body">
+              <p>Two paths. If this is an organizational project (e.g. Bayer Aurora), a profile is loaded and key constraints are confirmed. If it's a general solo project, questions are asked one at a time — deployment target, frontend, backend, component library, API communication, auth, hosting, engineering principles. Never asked all at once.</p>
+              <p>When enough is known, the stack is summarized for confirmation: <em>"Based on what you've shared: [summary]. Before I write this up — anything else that would constrain how we build?"</em></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-row">
+          <div class="step-num-col"><div class="step-num blue">8</div></div>
+          <div class="step-content">
+            <div class="step-tag blue">tech-context</div>
+            <div class="step-title">Infrastructure slices identified</div>
+            <div class="step-body">
+              <p>As part of writing <span class="file-tag">docs/tech-context.md</span>, infrastructure slices are called out — these are the prerequisite slices that must be Done before any feature slice can start. They are identified from the tech stack and platform constraints now, not later during Design Review. A project on Aurora that calls an existing API has infrastructure slices. A greenfield solo project starting with a mock data layer has infrastructure slices. These go directly into the backlog when Design Review begins.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── SECTION 4: DOCUMENTS PRODUCED ── -->
+    <div class="section" id="documents-produced">
+      <div class="section-header">
+        <div class="section-icon teal">📄</div>
+        <div>
+          <div class="section-title teal">Documents produced</div>
+        </div>
+      </div>
+
+      <div class="docs-grid">
+
+        <div class="doc-row">
+          <div class="doc-path-col">
+            <div class="doc-path">docs/discovery-brief.md</div>
+            <span class="doc-skill-tag teal">discover</span>
+          </div>
+          <div class="doc-detail-col">
+            <div class="doc-detail-title">Discovery Brief</div>
+            <div class="doc-detail-desc">The story in narrative form — not requirements, not a spec. Contains: the story (2–4 paragraphs), key moments in the journey, open threads that don't block design, what's explicitly out of scope, and the design on-ramp decision at the bottom. Written so that anyone who reads it can picture the product.</div>
+            <div class="doc-consumers"><strong>Read by:</strong> design-sprint (the story layer), phase-test (acceptance reviewer checks against this), product-continuity throughout</div>
+          </div>
+        </div>
+
+        <div class="doc-row">
+          <div class="doc-path-col">
+            <div class="doc-path">docs/process/as-is-[name].md</div>
+            <span class="doc-skill-tag gold">process-mapper</span>
+          </div>
+          <div class="doc-detail-col">
+            <div class="doc-detail-title">As-Is Process Map</div>
+            <div class="doc-detail-desc">How the process works today, exactly as described — including manual steps, workarounds, offline decisions, and steps that happen outside any system. The as-is may not involve any software at all. Validated with you before finalization. <code>[name]</code> is the process name (e.g. <span class="pill">as-is-onboarding.md</span>, <span class="pill">as-is-order-review.md</span>).</div>
+            <div class="doc-consumers"><strong>Read by:</strong> process-mapper (cross-reference during design review and phase test)</div>
+          </div>
+        </div>
+
+        <div class="doc-row">
+          <div class="doc-path-col">
+            <div class="doc-path">docs/process/to-be-[name].md</div>
+            <span class="doc-skill-tag gold">process-mapper</span>
+          </div>
+          <div class="doc-detail-col">
+            <div class="doc-detail-title">To-Be Process Map</div>
+            <div class="doc-detail-desc">The agreed target process — how this will work when the product is built. Every step from the journey conversation, every decision point, every outcome. Annotated with which zone each step came from. <strong>Explicitly agreed before Design Sprint begins.</strong> This is the process contract: its structure does not change without an explicit decision. Updated as screens and slices are added, annotated with screen references during Design Sprint.</div>
+            <div class="doc-consumers"><strong>Read by:</strong> design-sprint (gaps flagged), design-review (process anchor required per slice), phase-test (acceptance coverage)</div>
+          </div>
+        </div>
+
+        <div class="doc-row">
+          <div class="doc-path-col">
+            <div class="doc-path">docs/tech-context.md</div>
+            <span class="doc-skill-tag blue">tech-context</span>
+          </div>
+          <div class="doc-detail-col">
+            <div class="doc-detail-title">Tech Context</div>
+            <div class="doc-detail-desc">Created once per project. Contains: what's being built (one paragraph), full stack table, architecture constraints, engineering principles, branching and delivery model, infrastructure slices required, secrets and config pattern, and profile reference. Never recreated — only updated when the stack changes.</div>
+            <div class="doc-consumers"><strong>Read by:</strong> design-sprint (architecture constraints), data-scaffold (stack determines data layer pattern), plan (done criteria specificity), solo-build (build bible), deploy (deploy method entirely determined by stack)</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── SECTION 5: GATES ── -->
+    <div class="section" id="gates">
+      <div class="section-header">
+        <div class="section-icon gray">🔒</div>
+        <div>
+          <div class="section-title gray">The gates</div>
+        </div>
+      </div>
+
+      <p style="font-size:14px; color:var(--gray-700); line-height:1.65; margin-bottom:20px;">Two gates stand between this phase and Design Sprint. Both must be passed. There is no partial credit — skipping or soft-passing either gate causes downstream phases to make wrong decisions or forces backtracking.</p>
+
+      <!-- Gate 1 -->
+      <div class="gate-card">
+        <div class="gate-header">
+          <div class="gate-icon teal">🗺</div>
+          <div>
+            <div class="gate-title">Gate 1 — Discover complete</div>
+          </div>
+          <span class="gate-phase-tag teal">After Discover</span>
+        </div>
+        <div class="gate-body">
+          <div class="gate-section">
+            <div class="gate-section-label">Required artifacts</div>
+            <ul class="gate-checklist">
+              <li><div class="check-box"></div><span><span class="pill teal">docs/discovery-brief.md</span> exists and contains: story, key moments, open threads, out of scope, design on-ramp decision</span></li>
+              <li><div class="check-box"></div><span><span class="pill">docs/process/as-is-[name].md</span> exists and was validated with you</span></li>
+              <li><div class="check-box"></div><span><span class="pill">docs/process/to-be-[name].md</span> exists and was explicitly agreed — not just drafted</span></li>
+            </ul>
+          </div>
+          <div class="gate-section">
+            <div class="gate-section-label">Quality check</div>
+            <ul class="gate-checklist">
+              <li><div class="check-box"></div><span>The story is specific enough that a designer could picture the product and identify a hero screen candidate</span></li>
+              <li><div class="check-box"></div><span>The to-be map covers all steps and decision branches that were described in the journey conversation</span></li>
+              <li><div class="check-box"></div><span>Out of scope items are explicitly listed — not just implied</span></li>
+              <li><div class="check-box"></div><span>The design on-ramp is documented (Figma / reference / from scratch)</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="gate-result"><strong>Not met:</strong> Return to the discover conversation. The most common issue is a to-be map that was drafted but not actually validated — revisit the agreement step with the process-mapper output visible.</div>
+      </div>
+
+      <!-- Gate 2 -->
+      <div class="gate-card">
+        <div class="gate-header">
+          <div class="gate-icon blue">⚙️</div>
+          <div>
+            <div class="gate-title">Gate 2 — Tech Context complete</div>
+          </div>
+          <span class="gate-phase-tag blue">After Tech Context</span>
+        </div>
+        <div class="gate-body">
+          <div class="gate-section">
+            <div class="gate-section-label">Required artifact</div>
+            <ul class="gate-checklist">
+              <li><div class="check-box"></div><span><span class="pill blue">docs/tech-context.md</span> exists in the project</span></li>
+              <li><div class="check-box"></div><span>Stack table is complete — no empty rows for layers that apply to this project</span></li>
+              <li><div class="check-box"></div><span>Architecture constraints section populated — even if minimal</span></li>
+              <li><div class="check-box"></div><span>Infrastructure slices table populated (or explicitly noted as "none required")</span></li>
+            </ul>
+          </div>
+          <div class="gate-section">
+            <div class="gate-section-label">What passes this gate</div>
+            <ul class="gate-checklist">
+              <li><div class="check-box"></div><span>A known profile was loaded, key constraints confirmed</span></li>
+              <li><div class="check-box"></div><span>Or: questions were answered and the summary was confirmed before the document was written</span></li>
+              <li><div class="check-box"></div><span>Engineering principles documented — even if they are "TBD, to be established in first build slice"</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="gate-result"><strong>Not met:</strong> Run <span class="pill blue">tech-context</span> before opening the design sprint. The design sprint skill checks for this file — if it does not exist, downstream skills cannot route correctly.</div>
+      </div>
+
+    </div>
+
+    <!-- ── SECTION 6: HANDOFF TO DESIGN SPRINT ── -->
+    <div class="section" id="handoff">
+      <div class="section-header">
+        <div class="section-icon gray">→</div>
+        <div>
+          <div class="section-title gray">Handoff to Design Sprint</div>
+        </div>
+      </div>
+
+      <div class="handoff-card">
+        <div class="handoff-header">
+          <div>
+            <div class="handoff-title">What Design Sprint reads from this phase</div>
+            <div class="handoff-subtitle">Three documents. Three distinct purposes. All required.</div>
+          </div>
+        </div>
+        <div class="handoff-body">
+          <div class="handoff-section">
+            <div class="handoff-section-label"><span class="dot" style="background:var(--teal)"></span>The story</div>
+            <ul class="handoff-list">
+              <li>Reads <span class="pill teal">docs/discovery-brief.md</span> as the narrative foundation</li>
+              <li>The story gives the design sprint context for every decision: what screen matters most, what the payoff moment looks like, what's out of scope</li>
+              <li>Zone 3 (the moment it matters) is the hero screen candidate — the design sprint opens here</li>
+              <li>The design on-ramp at the bottom of the brief determines the starting point: from scratch, Figma import, or reference-based</li>
+            </ul>
+          </div>
+          <div class="handoff-section">
+            <div class="handoff-section-label"><span class="dot" style="background:#92400E"></span>What to build against</div>
+            <ul class="handoff-list">
+              <li>Reads <span class="pill">docs/process/to-be-[name].md</span> as the build target</li>
+              <li>process-mapper cross-references every screen in the sprint against the to-be map — steps not covered by any screen are surfaced as gaps for you to decide on</li>
+              <li>Annotates the to-be map with screen references as screens are approved</li>
+              <li>The to-be map is the process contract — no step is designed around without a decision</li>
+            </ul>
+          </div>
+          <div class="handoff-section">
+            <div class="handoff-section-label"><span class="dot" style="background:var(--blue)"></span>Aesthetic + stack constraints</div>
+            <ul class="handoff-list">
+              <li>Reads <span class="pill blue">docs/tech-context.md</span> for what can and cannot be designed</li>
+              <li>Aurora module constraint = no login screen, no global nav in the designs</li>
+              <li>Component library = design uses those components, not custom ones</li>
+              <li>Mobile target = layout decisions are made for that form factor from frame one</li>
+              <li>No-backend constraint = no screens that imply server-side logic that isn't there</li>
+            </ul>
+          </div>
+        </div>
+        <div class="handoff-blocker"><strong>Design Sprint stops if either gate is missing.</strong> The discovery brief is how the sprint knows what to design. The tech context is how it knows what it can design. Without both, the artifact produced may be a complete mismatch with what you can actually build.</div>
+      </div>
+    </div>
+
+    <!-- ── SECTION 7: WHAT TO WATCH FOR ── -->
+    <div class="section" id="watch-for">
+      <div class="section-header">
+        <div class="section-icon gray">⚠️</div>
+        <div>
+          <div class="section-title gray">What to watch for</div>
+        </div>
+      </div>
+
+      <div class="watch-table">
+        <div class="watch-table-header">
+          <div>Issue</div>
+          <div>Why it matters</div>
+          <div>What to do instead</div>
+        </div>
+
+        <div class="watch-row">
+          <div class="watch-cell">
+            <strong>To-be map agreed too quickly</strong>
+            The map was drafted and you said "looks fine" without real scrutiny of whether it covers all the decision branches you described in the journey.
+          </div>
+          <div class="watch-cell problem">
+            This is the process contract. Every downstream decision — screen design, slice definition, done criteria, phase test — is anchored to it. A vague or incomplete to-be map produces slice boundaries that don't match the real process, which surfaces as confusion in Design Review and rework in Build.
+          </div>
+          <div class="watch-cell fix">
+            Go back to Zone 2 of the conversation. Walk the journey again step by step. Confirm that every step you described is represented in the to-be map. Check: are there branches? Edge cases you mentioned? Multiple user types doing different things? The map must cover them.
+          </div>
+        </div>
+
+        <div class="watch-row">
+          <div class="watch-cell">
+            <strong>Tech Context skipped or deferred</strong>
+            "We'll figure out the stack later" or "let's just get into design first."
+          </div>
+          <div class="watch-cell problem">
+            Downstream skills cannot route correctly. The design sprint may produce screens for a mobile app when you're building a web module. The data scaffold defaults to the wrong data layer. Plan done criteria are written in the abstract. Infrastructure slices are never identified — and feature work begins with no foundation underneath it.
+          </div>
+          <div class="watch-cell fix">
+            Run <span class="pill blue">tech-context</span> before opening <span class="pill" style="background:var(--purple-light);color:var(--purple);">design-sprint</span>. It takes 5–10 minutes for a solo project and less for a known organizational profile. This is not optional overhead — it is the routing mechanism for everything that follows.
+          </div>
+        </div>
+
+        <div class="watch-row">
+          <div class="watch-cell">
+            <strong>Discovery brief too vague to produce a hero screen</strong>
+            The story section is abstract — describes a type of product without a clear picture of who uses it and what they do.
+          </div>
+          <div class="watch-cell problem">
+            Zone 3 (the moment it matters) is supposed to surface the hero screen candidate. If the brief doesn't have a specific payoff moment, the design sprint opens without a starting target. The warmer/colder loop becomes untethered. Screens get designed that nobody can evaluate against the brief.
+          </div>
+          <div class="watch-cell fix">
+            Before writing the brief, check: can you name the specific moment in the journey where this becomes genuinely useful? If not, go deeper in Zone 3. Ask: "What's the thing they'd tell someone else about?" If you still can't name it, the Zone 2 journey may not be specific enough — go back and sharpen it first.
+          </div>
+        </div>
+
+        <div class="watch-row">
+          <div class="watch-cell">
+            <strong>As-is process skipped because "there is no current process"</strong>
+            Assuming the process doesn't exist because there's no system today.
+          </div>
+          <div class="watch-cell problem">
+            There is always an as-is process. It may be entirely manual — an email chain, a spreadsheet, a phone call, a decision someone makes in their head. Skipping it means the to-be map is designed without accounting for the manual workarounds and exception-handling steps that the new product must replace or improve on.
+          </div>
+          <div class="watch-cell fix">
+            Ask specifically: "How does this happen today — even if there's no system?" and "What's the most common place this goes wrong today?" Then document exactly what was described. Even "someone sends an email and waits" is a valid as-is step.
+          </div>
+        </div>
+
+        <div class="watch-row">
+          <div class="watch-cell">
+            <strong>Infrastructure slices not identified during Tech Context</strong>
+            Tech Context is completed but the infrastructure slices table is left empty or marked TBD.
+          </div>
+          <div class="watch-cell problem">
+            Infrastructure slices are the prerequisites before any feature slice can start — authentication setup, API client wiring, database schema, environment configuration. If they're not identified here, feature slices go into the backlog without a foundation to build on. The first feature build stalls waiting for infrastructure work that wasn't planned.
+          </div>
+          <div class="watch-cell fix">
+            When producing <span class="pill blue">docs/tech-context.md</span>, ask: "What must exist before a single feature slice can start?" For a React app: Can the project boot? Is the component library installed? Is auth wired? For an Aurora module: Is the shell integration established? These become infrastructure slices in the backlog.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+
+</body>
+</html>

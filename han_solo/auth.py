@@ -43,7 +43,7 @@ class BearerAuthMiddleware:
             return
 
         path = scope.get("path", "")
-        if path in EXEMPT_PATHS:
+        if path in EXEMPT_PATHS or path.startswith("/docs/"):
             await self.app(scope, receive, send)
             return
 

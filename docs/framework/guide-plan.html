@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solo Builder Framework — Plan Phase Guide</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0F1729;
+    --navy-mid: #1E3A5F;
+    --orange: #EA580C;
+    --orange-light: #FFEDD5;
+    --orange-border: #FED7AA;
+    --gray-50: #F8FAFC;
+    --gray-100: #F1F5F9;
+    --gray-200: #E2E8F0;
+    --gray-300: #CBD5E1;
+    --gray-500: #64748B;
+    --gray-700: #334155;
+    --gray-900: #0F172A;
+    --green: #15803D;
+    --green-light: #DCFCE7;
+    --red: #DC2626;
+    --red-light: #FEE2E2;
+    --yellow: #B45309;
+    --yellow-light: #FEF3C7;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-900);
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background: var(--navy);
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    overflow-y: auto;
+    padding: 28px 0 40px;
+    z-index: 10;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+  .sidebar-header {
+    padding: 0 20px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 16px;
+  }
+  .sidebar-header .sh-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 6px;
+  }
+  .sidebar-header .sh-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.3;
+  }
+
+  .nav-group { margin-bottom: 6px; }
+  .nav-group-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    padding: 8px 20px 4px;
+    display: block;
+  }
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .nav-link:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.06);
+  }
+  .nav-link.active {
+    color: #fff;
+    border-left-color: var(--orange);
+    background: rgba(255,255,255,0.06);
+  }
+  .nav-link.skill-link {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .nav-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: 240px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .page-header {
+    background: var(--navy);
+    color: #fff;
+    padding: 48px 60px 40px;
+  }
+  .page-header .ph-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 12px;
+  }
+  .page-header .ph-phase-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--orange);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+  }
+  .page-header h1 {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+    line-height: 1.1;
+  }
+  .page-header p {
+    font-size: 15px;
+    color: rgba(255,255,255,0.55);
+    max-width: 600px;
+    line-height: 1.6;
+  }
+  .header-stats {
+    display: flex;
+    gap: 32px;
+    margin-top: 28px;
+    padding-top: 28px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .header-stat .hs-num {
+    font-size: 28px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+  .header-stat .hs-num.orange { color: var(--orange); }
+  .header-stat .hs-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 2px;
+  }
+
+  /* ── CONTENT ── */
+  .content {
+    padding: 48px 60px 80px;
+    max-width: 960px;
+  }
+
+  /* ── SECTION HEADERS ── */
+  .section {
+    margin-bottom: 52px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--gray-200);
+  }
+  .section-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+    background: var(--orange-light);
+  }
+  .section-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--gray-900);
+    letter-spacing: -0.3px;
+  }
+  .section-subtitle {
+    font-size: 13px;
+    color: var(--gray-500);
+    margin-top: 2px;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .card-inner {
+    padding: 24px 28px;
+  }
+  .card p {
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+  .card p:last-child { margin-bottom: 0; }
+
+  /* ── SKILL CARDS ── */
+  .skill-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    scroll-margin-top: 24px;
+  }
+  .skill-card-header {
+    padding: 18px 24px 14px;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .skill-name {
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    letter-spacing: -0.3px;
+    color: var(--orange);
+    flex: 1;
+  }
+  .skill-badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 2px;
+    background: var(--orange-light);
+    color: var(--orange);
+  }
+  .skill-badge.on-demand {
+    background: var(--gray-100);
+    color: var(--gray-500);
+  }
+  .skill-description {
+    padding: 14px 24px;
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.65;
+    border-bottom: 1px solid var(--gray-100);
+    background: var(--gray-50);
+  }
+  .skill-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+  }
+  .skill-section {
+    padding: 16px 20px;
+    border-right: 1px solid var(--gray-100);
+  }
+  .skill-section:last-child { border-right: none; }
+  .skill-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--orange);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .skill-section-label::before {
+    content: '';
+    width: 3px; height: 12px;
+    border-radius: 2px;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+  .skill-section ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .skill-section ul li {
+    font-size: 12.5px;
+    color: var(--gray-700);
+    line-height: 1.5;
+    padding-left: 12px;
+    position: relative;
+  }
+  .skill-section ul li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--gray-300);
+    font-size: 14px;
+    line-height: 1.35;
+  }
+  .skill-section ul li strong { color: var(--gray-900); font-weight: 600; }
+
+  /* ── STEP LIST ── */
+  .step-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .step-item {
+    display: flex;
+    gap: 20px;
+    position: relative;
+  }
+  .step-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 36px;
+    bottom: 0;
+    width: 2px;
+    background: var(--gray-200);
+  }
+  .step-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--orange);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    z-index: 1;
+  }
+  .step-content {
+    padding-bottom: 28px;
+    flex: 1;
+  }
+  .step-content h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 6px;
+    padding-top: 4px;
+  }
+  .step-content p {
+    font-size: 13.5px;
+    color: var(--gray-700);
+    line-height: 1.65;
+  }
+  .step-content .step-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--orange);
+    background: var(--orange-light);
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+
+  /* ── TWO-COL GRID ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .col-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 20px 22px;
+  }
+  .col-card h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .col-card ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .col-card ul li {
+    font-size: 13px;
+    color: var(--gray-700);
+    line-height: 1.5;
+    padding-left: 14px;
+    position: relative;
+  }
+  .col-card ul li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--gray-300);
+    font-size: 14px;
+    line-height: 1.35;
+  }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin-bottom: 16px;
+    display: flex;
+    gap: 14px;
+  }
+  .callout-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    line-height: 1.4;
+  }
+  .callout-body h4 {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 5px;
+  }
+  .callout-body p {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .callout.warning {
+    background: var(--yellow-light);
+    border: 1px solid #FDE68A;
+  }
+  .callout.warning .callout-body h4 { color: var(--yellow); }
+  .callout.warning .callout-body p { color: #78350F; }
+  .callout.success {
+    background: var(--green-light);
+    border: 1px solid #BBF7D0;
+  }
+  .callout.success .callout-body h4 { color: var(--green); }
+  .callout.success .callout-body p { color: #14532D; }
+  .callout.danger {
+    background: var(--red-light);
+    border: 1px solid #FECACA;
+  }
+  .callout.danger .callout-body h4 { color: var(--red); }
+  .callout.danger .callout-body p { color: #7F1D1D; }
+  .callout.info {
+    background: var(--orange-light);
+    border: 1px solid var(--orange-border);
+  }
+  .callout.info .callout-body h4 { color: var(--orange); }
+  .callout.info .callout-body p { color: #7C2D12; }
+
+  /* ── ARTIFACT TABLE ── */
+  .artifact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .artifact-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 20px 22px;
+    border-top: 3px solid var(--orange);
+  }
+  .artifact-card h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 8px;
+  }
+  .artifact-card p {
+    font-size: 13px;
+    color: var(--gray-700);
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+  .artifact-card .artifact-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: var(--gray-100);
+    color: var(--gray-700);
+    margin-right: 4px;
+    margin-bottom: 4px;
+  }
+
+  /* ── GATE BLOCK ── */
+  .gate-block {
+    background: var(--navy);
+    border-radius: 12px;
+    padding: 28px 32px;
+    color: #fff;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .gate-icon {
+    font-size: 28px;
+    flex-shrink: 0;
+    line-height: 1;
+    margin-top: 2px;
+  }
+  .gate-body h3 {
+    font-size: 17px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 8px;
+    letter-spacing: -0.2px;
+  }
+  .gate-body p {
+    font-size: 14px;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.65;
+    margin-bottom: 16px;
+  }
+  .gate-criteria {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .gate-criterion {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13.5px;
+    color: rgba(255,255,255,0.85);
+    line-height: 1.5;
+  }
+  .gate-criterion .gc-check {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--orange);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 10px;
+    color: #fff;
+    margin-top: 1px;
+  }
+
+  /* ── HANDOFF BLOCK ── */
+  .handoff-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+  .handoff-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .handoff-card .hc-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--orange);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .handoff-card .hc-label::before {
+    content: '';
+    width: 3px; height: 10px;
+    border-radius: 2px;
+    background: var(--orange);
+  }
+  .handoff-card h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 6px;
+  }
+  .handoff-card p {
+    font-size: 12.5px;
+    color: var(--gray-700);
+    line-height: 1.6;
+  }
+  .handoff-card .hc-file {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: var(--gray-100);
+    color: var(--gray-700);
+    margin-top: 8px;
+  }
+
+  /* ── ANTI-PATTERN TABLE ── */
+  .anti-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .anti-table th {
+    background: var(--gray-50);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--gray-500);
+    padding: 12px 18px;
+    text-align: left;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .anti-table td {
+    padding: 14px 18px;
+    font-size: 13px;
+    color: var(--gray-700);
+    border-bottom: 1px solid var(--gray-100);
+    vertical-align: top;
+    line-height: 1.55;
+  }
+  .anti-table tr:last-child td { border-bottom: none; }
+  .anti-table td:first-child {
+    font-weight: 600;
+    color: var(--red);
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+  .anti-table td strong { color: var(--gray-900); font-weight: 600; }
+
+  /* ── RISK LADDER ── */
+  .risk-ladder {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .risk-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 14px 18px;
+  }
+  .risk-row.high .risk-level { background: var(--red-light); color: var(--red); }
+  .risk-row.medium .risk-level { background: var(--yellow-light); color: var(--yellow); }
+  .risk-row.low .risk-level { background: var(--green-light); color: var(--green); }
+  .risk-level {
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .risk-content h5 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 3px;
+  }
+  .risk-content p {
+    font-size: 12.5px;
+    color: var(--gray-500);
+    line-height: 1.5;
+  }
+
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .page-header { padding: 32px 40px; }
+    .content { padding: 32px 40px 60px; }
+    .skill-card { break-inside: avoid; }
+    @page { size: A4; margin: 15mm; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="sh-label">Phase Guide</div>
+    <div class="sh-title">Plan</div>
+  </div>
+
+  <div class="nav-group">
+    <span class="nav-group-label" style="color:rgba(251,146,60,0.6)">On This Page</span>
+    <a href="#what-this-phase-is" class="nav-link">
+      <span class="nav-dot" style="background:var(--orange)"></span>What this phase is
+    </a>
+    <a href="#skills" class="nav-link">
+      <span class="nav-dot" style="background:var(--orange)"></span>Skills in this phase
+    </a>
+    <a href="#sequencing" class="nav-link">
+      <span class="nav-dot" style="background:var(--orange)"></span>Sequencing by risk
+    </a>
+    <a href="#step-by-step" class="nav-link">
+      <span class="nav-dot" style="background:var(--orange)"></span>Step-by-step experience
+    </a>
+    <a href="#grill-me" class="nav-link">
+      <span class="nav-dot" style="background:var(--orange)"></span>What grill-me does here
+    </a>
+    <a href="#artifacts" class="nav-link">
+      <span class="nav-dot" style="background:var(--orange)"></span>Artifacts produced
+    </a>
+    <a href="#gate" class="nav-link">
+      <span class="nav-dot" style="background:var(--orange)"></span>The gate
+    </a>
+    <a href="#handoff" class="nav-link">
+      <span class="nav-dot" style="background:var(--orange)"></span>Handoff to Build
+    </a>
+    <a href="#watch-for" class="nav-link">
+      <span class="nav-dot" style="background:var(--orange)"></span>What to watch for
+    </a>
+  </div>
+
+  <div class="nav-group" style="margin-top: 16px;">
+    <span class="nav-group-label" style="color:rgba(251,146,60,0.6)">Skills</span>
+    <a href="#skill-prd-to-plan" class="nav-link skill-link">
+      <span class="nav-dot" style="background:var(--orange)"></span>prd-to-plan
+    </a>
+    <a href="#skill-grill-me" class="nav-link skill-link">
+      <span class="nav-dot" style="background:#94A3B8"></span>grill-me
+    </a>
+    <a href="#skill-to-issues" class="nav-link skill-link">
+      <span class="nav-dot" style="background:var(--orange)"></span>to-issues
+    </a>
+    <a href="#skill-to-prd" class="nav-link skill-link">
+      <span class="nav-dot" style="background:#94A3B8"></span>to-prd
+    </a>
+  </div>
+
+  <div class="nav-group" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.08);">
+    <span class="nav-group-label" style="color:rgba(255,255,255,0.25)">Framework</span>
+    <a href="skills-reference.html" class="nav-link" style="color:rgba(255,255,255,0.3)">
+      <span class="nav-dot" style="background:#475569"></span>All skills
+    </a>
+    <a href="process-map.html" class="nav-link" style="color:rgba(255,255,255,0.3)">
+      <span class="nav-dot" style="background:#475569"></span>Process map
+    </a>
+    <a href="index.html" class="nav-link" style="color:rgba(255,255,255,0.3)">
+      <span class="nav-dot" style="background:#475569"></span>Home
+    </a>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="ph-eyebrow">Solo Builder Framework — Phase Guide</div>
+    <div class="ph-phase-tag">Planning Phase</div>
+    <h1>Plan</h1>
+    <p>Convert the Ready backlog into a sequenced phase plan and executable GitHub issues. This phase is where risk gets confronted — not deferred. The output is a set of GitHub issues that Build works from, not a document that gets filed away.</p>
+    <div class="header-stats">
+      <div class="header-stat">
+        <div class="hs-num orange">2</div>
+        <div class="hs-label">Phase skills</div>
+      </div>
+      <div class="header-stat">
+        <div class="hs-num orange">2</div>
+        <div class="hs-label">On-demand skills</div>
+      </div>
+      <div class="header-stat">
+        <div class="hs-num orange">1</div>
+        <div class="hs-label">Gate criterion</div>
+      </div>
+      <div class="header-stat">
+        <div class="hs-num">Risk first</div>
+        <div class="hs-label">Sequencing principle</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── SECTION 1: WHAT THIS PHASE IS ── -->
+    <div class="section" id="what-this-phase-is">
+      <div class="section-header">
+        <div class="section-icon">&#x1F5FA;</div>
+        <div>
+          <div class="section-title">What this phase is</div>
+          <div class="section-subtitle">Where the Ready backlog becomes a build plan</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-inner">
+          <p>Planning converts the Ready backlog — slices that survived Design Review — into a sequenced, multi-phase implementation plan, then into executable GitHub issues. It's the bridge between "we know what to build" and "we know what to do today."</p>
+          <p>The defining principle of this phase: <strong>sequence by risk, not by comfort.</strong> The hardest, most uncertain work goes first. Not because it's the most exciting, but because it's the work that could invalidate everything else if it fails. If an assumption buried in Phase 3 turns out to be wrong, you've built two phases on a broken foundation. Planning forces that reckoning early.</p>
+          <p>The input is the Ready backlog plus the deferred decisions log from the Design Sprint. The deferred decisions log is critical — it contains both visible scope decisions (what was explicitly put out of Phase 1) and implied infrastructure decisions (backend work that must exist before certain screens can function). Both feed into sequencing.</p>
+          <p><code style="font-size:13px;background:var(--gray-100);padding:2px 6px;border-radius:4px;font-family:'SF Mono','Fira Code',monospace">grill-me</code> can run before planning to stress-test the approach. It's optional but valuable when the plan involves significant assumptions. <code style="font-size:13px;background:var(--gray-100);padding:2px 6px;border-radius:4px;font-family:'SF Mono','Fira Code',monospace">to-issues</code> runs after the plan is approved to convert it into GitHub issues in dependency order. Build cannot start without those issues.</p>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <div class="callout-icon">&#x26A1;</div>
+        <div class="callout-body">
+          <h4>Why the to-be process map is a prerequisite</h4>
+          <p><code>prd-to-plan</code> requires the to-be process map to exist before it starts. Without it, slices get sequenced by what's comfortable to build rather than by the process they implement. The process map is the anchor that connects slice order to user flow order — and it surfaces uncovered steps that would otherwise be discovered mid-build.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION 2: SKILLS ── -->
+    <div class="section" id="skills">
+      <div class="section-header">
+        <div class="section-icon">&#x2699;</div>
+        <div>
+          <div class="section-title">Skills in this phase</div>
+          <div class="section-subtitle">Two phase skills, two on-demand skills</div>
+        </div>
+      </div>
+
+      <!-- prd-to-plan -->
+      <div class="skill-card" id="skill-prd-to-plan">
+        <div class="skill-card-header">
+          <div class="skill-name">/prd-to-plan</div>
+          <span class="skill-badge">Phase Skill</span>
+        </div>
+        <div class="skill-description">
+          Turns the Ready backlog and deferred decisions log into a sequenced, multi-phase implementation plan. Maps each slice to a step in the to-be process map, identifies integration seams, designs tracer-bullet vertical slices, and sequences by risk order — with explicit conflict resolution when risk order and process order diverge.
+        </div>
+        <div class="skill-body">
+          <div class="skill-section">
+            <div class="skill-section-label">Reads</div>
+            <ul>
+              <li><strong>docs/backlog.md</strong> — Ready slices + dependencies</li>
+              <li><strong>docs/process/to-be-*.md</strong> — agreed process maps</li>
+              <li><strong>docs/design/deferred-decisions.md</strong> — scope + infrastructure decisions</li>
+              <li><strong>docs/tech-context.md</strong> — stack + infrastructure slices</li>
+            </ul>
+          </div>
+          <div class="skill-section">
+            <div class="skill-section-label">Produces</div>
+            <ul>
+              <li>Multi-phase implementation plan with slice-to-process-step mapping</li>
+              <li>Process anchors on every Ready slice in the backlog</li>
+              <li>Flagged uncovered process steps requiring resolution</li>
+              <li>Open questions list for pre-build decisions</li>
+            </ul>
+          </div>
+          <div class="skill-section">
+            <div class="skill-section-label">Each slice gets</div>
+            <ul>
+              <li><strong>Design anchor</strong> — screen + element from design sprint</li>
+              <li><strong>Data anchor</strong> — mock data fields it reads</li>
+              <li><strong>Done anchor</strong> — 2–3 verifiable criteria</li>
+              <li><strong>Process anchor</strong> — which to-be step it implements</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- grill-me -->
+      <div class="skill-card" id="skill-grill-me">
+        <div class="skill-card-header">
+          <div class="skill-name">/grill-me</div>
+          <span class="skill-badge on-demand">On-Demand</span>
+        </div>
+        <div class="skill-description">
+          Stress-tests a plan by relentlessly interviewing the solo through every branch of the design tree, one question at a time. Can run before <code style="font-size:12px;background:var(--gray-100);padding:1px 5px;border-radius:3px;font-family:'SF Mono','Fira Code',monospace">prd-to-plan</code> to validate the approach before committing to it, or during planning when assumptions surface. Each question comes with Claude's recommended answer.
+        </div>
+        <div class="skill-body">
+          <div class="skill-section">
+            <div class="skill-section-label">When to use</div>
+            <ul>
+              <li>Before planning when the approach has significant unknowns</li>
+              <li>When the deferred decisions log has a lot of open questions</li>
+              <li>When Phase 1 touches an integration seam you haven't built through before</li>
+              <li>Any time you feel uncertain but can't name exactly why</li>
+            </ul>
+          </div>
+          <div class="skill-section">
+            <div class="skill-section-label">What it surfaces</div>
+            <ul>
+              <li>Assumptions that are load-bearing but haven't been stated</li>
+              <li>Decision dependencies — question B can't be answered until question A is resolved</li>
+              <li>Scope drift — things that feel small but imply larger work</li>
+              <li>Sequencing risks — work that appears parallel but actually isn't</li>
+            </ul>
+          </div>
+          <div class="skill-section">
+            <div class="skill-section-label">How it runs</div>
+            <ul>
+              <li>One question at a time — no batching</li>
+              <li>Explores codebase if a question can be answered empirically</li>
+              <li>Provides recommended answer with each question</li>
+              <li>Walks the full decision tree before stopping</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- to-issues -->
+      <div class="skill-card" id="skill-to-issues">
+        <div class="skill-card-header">
+          <div class="skill-name">/to-issues</div>
+          <span class="skill-badge">Phase Skill</span>
+        </div>
+        <div class="skill-description">
+          Converts the approved phase plan into self-contained GitHub issues in dependency order — blockers first. Each issue contains everything a builder needs to start the slice: design reference, process anchor, data anchor, done criteria, and dependency links. Creates labels by phase and status. Does not modify the plan — it converts, not designs.
+        </div>
+        <div class="skill-body">
+          <div class="skill-section">
+            <div class="skill-section-label">Prerequisites</div>
+            <ul>
+              <li>Plan explicitly approved (not still under discussion)</li>
+              <li>GitHub repo exists + <code style="font-size:11px;background:var(--gray-100);padding:1px 4px;border-radius:3px;font-family:'SF Mono','Fira Code',monospace">gh</code> CLI authenticated</li>
+              <li>Backlog has process anchors on every Ready slice</li>
+            </ul>
+          </div>
+          <div class="skill-section">
+            <div class="skill-section-label">Issue structure</div>
+            <ul>
+              <li><strong>Title:</strong> [SL-XXX] Slice Name</li>
+              <li><strong>What this builds</strong> — one sentence from backlog</li>
+              <li><strong>Design reference</strong> — screen + specific element</li>
+              <li><strong>Process anchor</strong> — to-be map step</li>
+              <li><strong>Data anchor</strong> — mock data fields</li>
+              <li><strong>Done looks like</strong> — acceptance criteria</li>
+              <li><strong>Depends on</strong> — issue number link</li>
+            </ul>
+          </div>
+          <div class="skill-section">
+            <div class="skill-section-label">Does NOT do</div>
+            <ul>
+              <li>Create issues for Deferred slices</li>
+              <li>Modify or redesign the plan</li>
+              <li>Set assignees or milestones</li>
+              <li>Create infrastructure slices not already in the backlog</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- to-prd -->
+      <div class="skill-card" id="skill-to-prd">
+        <div class="skill-card-header">
+          <div class="skill-name">/to-prd</div>
+          <span class="skill-badge on-demand">On-Demand</span>
+        </div>
+        <div class="skill-description">
+          Synthesizes the current conversation context — discovery notes, design sprint output, research findings — into a structured PRD and submits it as a GitHub issue. Use this when the context exists in conversation but hasn't been formalized into a document that <code style="font-size:12px;background:var(--gray-100);padding:1px 5px;border-radius:3px;font-family:'SF Mono','Fira Code',monospace">prd-to-plan</code> can read. Most Plan sessions won't need this — it's for cases where you're entering planning with context that never got written down.
+        </div>
+        <div class="skill-body">
+          <div class="skill-section">
+            <div class="skill-section-label">When to use</div>
+            <ul>
+              <li>Prior work exists in conversations, not documents</li>
+              <li>You want a formal PRD before planning starts</li>
+              <li>Project was onboarded and context is scattered</li>
+            </ul>
+          </div>
+          <div class="skill-section">
+            <div class="skill-section-label">Output</div>
+            <ul>
+              <li>Structured PRD as a GitHub issue</li>
+              <li>Synthesized from conversation context, not generated from scratch</li>
+            </ul>
+          </div>
+          <div class="skill-section">
+            <div class="skill-section-label">Sequence</div>
+            <ul>
+              <li>Run before <code style="font-size:11px;background:var(--gray-100);padding:1px 4px;border-radius:3px;font-family:'SF Mono','Fira Code',monospace">prd-to-plan</code> if needed</li>
+              <li>Not required if backlog + process map already exist</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION 3: SEQUENCING BY RISK ── -->
+    <div class="section" id="sequencing">
+      <div class="section-header">
+        <div class="section-icon">&#x26A0;</div>
+        <div>
+          <div class="section-title">Sequencing by risk, not comfort</div>
+          <div class="section-subtitle">The core discipline of this phase</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-inner">
+          <p>The natural instinct when sequencing work is to start with what you know how to build. There's a familiar UI pattern, a clear data model, an established pattern from the last project. That slice goes first because it feels tractable. Confidence is mistaken for priority.</p>
+          <p>The framework inverts this. <strong>Risk order wins for infrastructure and foundation slices.</strong> The first slice should prove the riskiest assumption — the thing that, if it turns out to be wrong, makes other work irrelevant or forces a rebuild. Comfortable work can wait. Uncertain work cannot.</p>
+        </div>
+      </div>
+
+      <p style="font-size:13px;color:var(--gray-500);margin-bottom:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">What counts as risk</p>
+      <div class="risk-ladder">
+        <div class="risk-row high">
+          <span class="risk-level">High</span>
+          <div class="risk-content">
+            <h5>Technical unknowns at integration seams</h5>
+            <p>API boundaries, auth, external services, data model changes — places where assumptions made early are painful to undo later. A screen that looks simple may require a data pipeline that doesn't exist yet.</p>
+          </div>
+        </div>
+        <div class="risk-row high">
+          <span class="risk-level">High</span>
+          <div class="risk-content">
+            <h5>External dependencies</h5>
+            <p>Third-party APIs with unknown rate limits, data contracts with other teams, infrastructure that hasn't been stood up yet. These can't be parallel-worked around — they block everything downstream.</p>
+          </div>
+        </div>
+        <div class="risk-row medium">
+          <span class="risk-level">Medium</span>
+          <div class="risk-content">
+            <h5>Work that validates other work</h5>
+            <p>Slices whose outcome determines whether subsequent slices are even the right thing to build. Getting the data model wrong in Phase 1 means retrofitting every slice that reads it.</p>
+          </div>
+        </div>
+        <div class="risk-row low">
+          <span class="risk-level">Lower</span>
+          <div class="risk-content">
+            <h5>UI and presentation work</h5>
+            <p>Once the data layer and core logic are proven, UI work is comparatively low risk. It can be wrong and corrected without structural consequences.</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 24px;">
+        <p style="font-size:13px;color:var(--gray-500);margin-bottom:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">The tracer bullet</p>
+        <div class="card">
+          <div class="card-inner">
+            <p>The first slice of Phase 1 is the <strong>tracer bullet</strong> — the thinnest complete path through the full system. It touches every integration layer: data, business logic, API, UI. It delivers something demoable. And it goes first not because it's the easiest, but because it proves that the core loop actually works end to end.</p>
+            <p>If the tracer bullet reveals a problem — a data model that won't support the use case, an API that doesn't behave as expected, an infrastructure gap — it reveals it before you've built anything on top of those assumptions. That's the point. The tracer bullet is an early warning system, not a warmup exercise.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout warning" style="margin-top: 16px;">
+        <div class="callout-icon">&#x26A0;</div>
+        <div class="callout-body">
+          <h4>When risk order and process order conflict</h4>
+          <p><code>prd-to-plan</code> resolves this conflict explicitly. Risk order wins for infrastructure and foundation slices. Process order wins for feature slices once infrastructure is in place. The skill names the conflict when it occurs rather than silently resolving it — so the sequencing decision is visible and intentional.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION 4: STEP BY STEP ── -->
+    <div class="section" id="step-by-step">
+      <div class="section-header">
+        <div class="section-icon">&#x1F4CB;</div>
+        <div>
+          <div class="section-title">Step-by-step experience</div>
+          <div class="section-subtitle">How planning actually runs from start to GitHub issues</div>
+        </div>
+      </div>
+
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>Read the backlog and deferred decisions log</h4>
+            <p><code style="font-size:12px;background:var(--gray-100);padding:1px 5px;border-radius:3px;font-family:'SF Mono','Fira Code',monospace">prd-to-plan</code> reads <code style="font-size:12px;background:var(--gray-100);padding:1px 5px;border-radius:3px;font-family:'SF Mono','Fira Code',monospace">docs/backlog.md</code>, the to-be process map, <code style="font-size:12px;background:var(--gray-100);padding:1px 5px;border-radius:3px;font-family:'SF Mono','Fira Code',monospace">docs/design/deferred-decisions.md</code>, and <code style="font-size:12px;background:var(--gray-100);padding:1px 5px;border-radius:3px;font-family:'SF Mono','Fira Code',monospace">docs/tech-context.md</code>. If the to-be process map doesn't exist, it stops and asks — that document is the sequencing foundation. If this is not a greenfield project, it also explores the codebase to understand existing integration seams.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>Map every Ready slice to a process step</h4>
+            <p>Each slice gets a process anchor: which step in the to-be map it implements, and its position in the flow (main path, branch, or exception). Uncovered steps — process steps with no slice assigned — are surfaced explicitly before sequencing continues. These either need a new slice, are intentionally deferred, or are handled in background logic.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>Identify integration seams and flag high-risk ones</h4>
+            <p>Every layer the slices cut through is listed: data model, business logic, API endpoints, UI, external integrations, infrastructure. High-risk seams — places where early assumptions are painful to undo — are flagged explicitly.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h4>Optionally run grill-me</h4>
+            <p>If the plan has significant assumptions, or if this is the first time building through a particular integration seam, <code style="font-size:12px;background:var(--gray-100);padding:1px 5px;border-radius:3px;font-family:'SF Mono','Fira Code',monospace">grill-me</code> runs here. It stress-tests the approach before the plan is committed. Not required — but valuable when the stakes of a wrong sequence are high.</p>
+            <span class="step-note">Optional — but strongly recommended when Phase 1 has unknowns</span>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">5</div>
+          <div class="step-content">
+            <h4>Sequence phases, design tracer-bullet slices</h4>
+            <p><code style="font-size:12px;background:var(--gray-100);padding:1px 5px;border-radius:3px;font-family:'SF Mono','Fira Code',monospace">prd-to-plan</code> produces a multi-phase plan. Each phase shows its slices with process anchors, what process steps it completes, what it proves or de-risks, what blocks it, and its definition of done. The first slice in Phase 1 is the tracer bullet. Open questions that must be resolved before build starts are listed.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">6</div>
+          <div class="step-content">
+            <h4>Present, discuss, and get explicit approval</h4>
+            <p>The full plan is shown. Questions asked: Does the phase sequencing respect both risk and process order? Are there slices to merge, split, or reorder? Are uncovered steps accounted for? Are open questions blockers or stated assumptions? The plan iterates until explicitly approved. Process anchors are written to the backlog before proceeding.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">7</div>
+          <div class="step-content">
+            <h4>Run to-issues to create GitHub issues in dependency order</h4>
+            <p><code style="font-size:12px;background:var(--gray-100);padding:1px 5px;border-radius:3px;font-family:'SF Mono','Fira Code',monospace">to-issues</code> converts the approved plan into GitHub issues — blockers first, so dependent issue numbers can be referenced in subsequent issues. Labels are applied: Phase 1/2/etc., Ready, Infrastructure, Blocked. Build starts from these issues, not from the plan document.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION 5: WHAT GRILL-ME DOES ── -->
+    <div class="section" id="grill-me">
+      <div class="section-header">
+        <div class="section-icon">&#x1F50D;</div>
+        <div>
+          <div class="section-title">What grill-me does here</div>
+          <div class="section-subtitle">The skeptical PM role before you commit</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-inner">
+          <p>In a real product team, before engineering commits to a plan, a PM or product lead asks hard questions. Not to be difficult — to catch the things that look obvious until someone interrogates them. <code style="font-size:13px;background:var(--gray-100);padding:2px 6px;border-radius:4px;font-family:'SF Mono','Fira Code',monospace">grill-me</code> is that role. It's the skeptical PM who hasn't been steeped in the context you have and is seeing the plan somewhat fresh.</p>
+          <p>The questions aren't procedural. They go after the load-bearing assumptions — the things you've been taking for granted because you've been close to the problem. "Is this solving the right problem?" "What are we assuming about how users will behave here?" "If the API doesn't support this use case, what's Plan B?" "What could cause Phase 1 to fail in a way that invalidates Phase 2?"</p>
+        </div>
+      </div>
+
+      <div class="two-col" style="margin-top: 16px;">
+        <div class="col-card">
+          <h4>Questions it asks in the Plan context</h4>
+          <ul>
+            <li>Is this solving the right problem — or is the PRD scope drifted from the original need?</li>
+            <li>What assumptions are baked into Phase 1 sequencing?</li>
+            <li>What could fail in Phase 1 that would require rearchitecting Phase 2?</li>
+            <li>Which integration seam is least understood, and is it Phase 1 or Phase 2?</li>
+            <li>What deferred decisions, if reversed, would invalidate the plan structure?</li>
+            <li>Are there slices that look thin but imply substantial backend work not yet captured?</li>
+          </ul>
+        </div>
+        <div class="col-card">
+          <h4>When to skip it</h4>
+          <ul>
+            <li>You've built this exact stack before and there are no new integration seams</li>
+            <li>The plan has zero open questions and no external dependencies</li>
+            <li>This is a small, contained feature with no architectural implications</li>
+          </ul>
+          <h4 style="margin-top: 16px;">When it's essential</h4>
+          <ul>
+            <li>Phase 1 touches an external API or service for the first time</li>
+            <li>The deferred decisions log has more than a few open items</li>
+            <li>The plan feels right but you can't fully explain why</li>
+            <li>Multiple plausible Phase 1 sequences exist and you're not sure which is right</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION 6: ARTIFACTS ── -->
+    <div class="section" id="artifacts">
+      <div class="section-header">
+        <div class="section-icon">&#x1F4C4;</div>
+        <div>
+          <div class="section-title">Documents and artifacts produced</div>
+          <div class="section-subtitle">What this phase leaves behind</div>
+        </div>
+      </div>
+
+      <div class="artifact-grid">
+        <div class="artifact-card">
+          <h4>GitHub Issues — Phase 1 Ready Slices</h4>
+          <p>One issue per Ready slice in Phase 1, created in dependency order. Each issue is fully self-contained: a builder can start the slice from the issue alone without reading any other document. All issues are labeled by phase and status.</p>
+          <span class="artifact-tag">gh issue create</span>
+          <span class="artifact-tag">Label: Phase 1</span>
+          <span class="artifact-tag">Label: Ready</span>
+        </div>
+        <div class="artifact-card">
+          <h4>GitHub Issues — Future Phase Slices</h4>
+          <p>Issues also created for Phase 2+ slices — labeled accordingly and marked Blocked where appropriate. Visible in the repo so the full scope is trackable, but not in the active work queue until Phase 1 is complete.</p>
+          <span class="artifact-tag">Label: Phase 2</span>
+          <span class="artifact-tag">Label: Blocked</span>
+        </div>
+        <div class="artifact-card">
+          <h4>Updated Backlog — Process Anchors</h4>
+          <p>The backlog is updated with process anchors on every Ready slice before build starts. The process anchor maps each slice to the specific to-be process step it implements, connecting the issue queue to the agreed user flow.</p>
+          <span class="artifact-tag">docs/backlog.md</span>
+        </div>
+        <div class="artifact-card">
+          <h4>Sequenced Phase Plan</h4>
+          <p>The full multi-phase plan produced by <code style="font-size:12px;background:var(--gray-100);padding:1px 5px;border-radius:3px;font-family:'SF Mono','Fira Code',monospace">prd-to-plan</code>, showing phase names, slice-to-process-step mapping, what each phase proves, and its definition of done. May live in product-continuity or as a PR description, depending on team preference.</p>
+          <span class="artifact-tag">product-continuity</span>
+          <span class="artifact-tag">PR description</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION 7: THE GATE ── -->
+    <div class="section" id="gate">
+      <div class="section-header">
+        <div class="section-icon">&#x1F6A7;</div>
+        <div>
+          <div class="section-title">The gate</div>
+          <div class="section-subtitle">What must be true before Build starts</div>
+        </div>
+      </div>
+
+      <div class="gate-block">
+        <div class="gate-icon">&#x1F511;</div>
+        <div class="gate-body">
+          <h3>GitHub issues created for Phase 1 Ready slices</h3>
+          <p>Build cannot start without issues to work from. The gate is not "the plan is approved" — approved plans can sit in documents indefinitely. The gate is the moment the plan becomes a tracked set of issues in GitHub: concrete, assigned to a phase, labeled, and self-contained enough for Build to start.</p>
+          <div class="gate-criteria">
+            <div class="gate-criterion">
+              <div class="gc-check">&#x2713;</div>
+              <span>Phase 1 slices have GitHub issues created in dependency order</span>
+            </div>
+            <div class="gate-criterion">
+              <div class="gc-check">&#x2713;</div>
+              <span>Each issue contains a design reference to the relevant screen and element</span>
+            </div>
+            <div class="gate-criterion">
+              <div class="gc-check">&#x2713;</div>
+              <span>Each issue contains the process anchor — which to-be step it implements</span>
+            </div>
+            <div class="gate-criterion">
+              <div class="gc-check">&#x2713;</div>
+              <span>Each issue has verifiable done criteria (not descriptions of effort)</span>
+            </div>
+            <div class="gate-criterion">
+              <div class="gc-check">&#x2713;</div>
+              <span>Process anchors are written to the backlog on every Ready slice</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION 8: HANDOFF TO BUILD ── -->
+    <div class="section" id="handoff">
+      <div class="section-header">
+        <div class="section-icon">&#x27A1;</div>
+        <div>
+          <div class="section-title">Handoff to Build</div>
+          <div class="section-subtitle">What Build reads and where it comes from</div>
+        </div>
+      </div>
+
+      <div class="handoff-grid">
+        <div class="handoff-card">
+          <div class="hc-label">What to build</div>
+          <h4>GitHub issues</h4>
+          <p>The Phase 1 issues are the build queue. <code style="font-size:11px;background:var(--gray-100);padding:1px 4px;border-radius:3px;font-family:'SF Mono','Fira Code',monospace">solo-build</code> selects the next slice from the open Phase 1 issues, reads the issue, and starts. No other document is required to begin a slice — the issue is self-contained.</p>
+          <span class="hc-file">gh issue list --label "Phase 1"</span>
+        </div>
+        <div class="handoff-card">
+          <div class="hc-label">What it looks like</div>
+          <h4>Design screens</h4>
+          <p>Each issue references a specific screen and element in the design sprint artifact. Build reads the design reference to understand the visual target. The HTML artifact is the source of truth — not a translation of it.</p>
+          <span class="hc-file">docs/design/sprint-v1.html</span>
+        </div>
+        <div class="handoff-card">
+          <div class="hc-label">Status tracking</div>
+          <h4>Backlog</h4>
+          <p>The backlog tracks slice status across phases. As Phase 1 issues close, slice status updates. The backlog shows overall progress and what's in queue for Phase 2. Build doesn't read it for instructions — it reads it for context.</p>
+          <span class="hc-file">docs/backlog.md</span>
+        </div>
+      </div>
+
+      <div class="callout success" style="margin-top: 20px;">
+        <div class="callout-icon">&#x2705;</div>
+        <div class="callout-body">
+          <h4>The build start prompt</h4>
+          <p>When Build starts, the solo runs <code>/solo-build</code>. The skill reads the Phase 1 issue queue, selects the next issue (usually the tracer bullet first), reads the design reference and process anchor from the issue, and begins implementation. The issues created in this phase are the exact input that skill expects.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION 9: WHAT TO WATCH FOR ── -->
+    <div class="section" id="watch-for">
+      <div class="section-header">
+        <div class="section-icon">&#x1F441;</div>
+        <div>
+          <div class="section-title">What to watch for</div>
+          <div class="section-subtitle">Common failure modes in this phase</div>
+        </div>
+      </div>
+
+      <table class="anti-table">
+        <thead>
+          <tr>
+            <th>Pattern</th>
+            <th>Why it happens</th>
+            <th>The consequence</th>
+            <th>Correction</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Comfort-first sequencing</td>
+            <td>The familiar slice feels tractable; the uncertain slice feels big. Starting with what you know is psychologically easier.</td>
+            <td>Phase 1 completes successfully but Phase 2 hits a fundamental problem that retroactively invalidates Phase 1 work.</td>
+            <td><strong>Name the riskiest assumption explicitly.</strong> If the first slice doesn't test it, ask why not. <code>prd-to-plan</code> is designed to flag this — don't override it without a stated reason.</td>
+          </tr>
+          <tr>
+            <td>Issues without design references</td>
+            <td>The slice seems obvious — everyone knows what it should look like. The design reference step feels redundant.</td>
+            <td>Build interprets the issue differently than Design Sprint intended. Scope creep, revisit cycles, and inconsistent visual language across slices.</td>
+            <td><strong>Every issue must reference a specific screen and element</strong> from the design sprint artifact. "Obvious" slices are where design drift is most common — precisely because no one double-checks them.</td>
+          </tr>
+          <tr>
+            <td>Skipping grill-me on assumption-heavy plans</td>
+            <td>Planning took effort to produce. Subjecting it to scrutiny feels like backtracking. The plan looks good on paper.</td>
+            <td>Assumptions that look reasonable in the plan turn out to be wrong in the build. Discovered late, after other work has built on top of them.</td>
+            <td><strong>Count the assumptions in the plan.</strong> If the deferred decisions log has more than a handful of open items, or if Phase 1 touches an integration seam you haven't proven, run <code>grill-me</code> first.</td>
+          </tr>
+          <tr>
+            <td>Plan approved but process anchors not written to backlog</td>
+            <td>The plan was discussed and approved in conversation. Writing it back to the backlog feels like admin work.</td>
+            <td><code>solo-build</code> reads process anchors from the backlog before starting a slice. If they're missing, the connection between the issue and the agreed process is lost mid-build.</td>
+            <td><strong><code>prd-to-plan</code> explicitly requires this.</strong> Process anchors must be in the backlog before Build starts — not just in the plan document.</td>
+          </tr>
+          <tr>
+            <td>Infrastructure slices sequenced after feature slices</td>
+            <td>Infrastructure work is invisible in the UI. It's easy to delay in favor of screens that demonstrate visible progress.</td>
+            <td>Feature slices start building on unproven infrastructure. When infrastructure work surfaces problems, feature work built on top has to be retrofitted or rewritten.</td>
+            <td><strong>Infrastructure slices always sequence before feature slices</strong>, regardless of process order. This is a hard rule in <code>prd-to-plan</code> — read <code>docs/tech-context.md</code> infrastructure slices first and place them at the front of the queue.</td>
+          </tr>
+          <tr>
+            <td>Slices approved without an Architecture type</td>
+            <td>The field is new. It's easy to treat it as optional — especially on slices that feel obviously self-contained.</td>
+            <td>An unclassified slice cannot reach Ready. If the plan is approved and slices land in the backlog without a type, build will stall the first time one of them tries to open a branch.</td>
+            <td><strong>Architecture type is required for every slice before the plan is approved.</strong> The quality scan in planning blocks approval if any slice is missing it. Two values only: Leaf node (nothing else depends on it) or Core architecture (touches data models, shared logic, or infrastructure). If you're unsure, err toward Core architecture — the PE review is low-cost and catches structural problems before they compound.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div><!-- /content -->
+</main>
+
+</body>
+</html>

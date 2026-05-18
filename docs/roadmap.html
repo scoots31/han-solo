@@ -105,7 +105,7 @@
       <span class="roadmap-tag roadmap-tag--considering">Considering</span>
       <h3>Local model option (Ollama)</h3>
     </div>
-    <p>Letta supports local models via Ollama. Running a local model would eliminate the Anthropic API cost for Ren entirely — useful for high-volume knowledge dump sessions where you don't need frontier model quality, just continuity and memory. </p>
+    <p>Letta supports local models via Ollama. Running a local model would eliminate the Anthropic API cost for Ren entirely — useful for high-volume knowledge dump sessions where you don't need frontier model quality, just continuity and memory.</p>
     <p>The tradeoff is real: local models (even good ones like Llama 3.3 70B) are meaningfully less capable than Haiku or Sonnet for reasoning and nuanced discussion. Worth having as an option for specific session types, not as a default.</p>
     <p>This requires Ollama on a machine that's always on, or a cheap cloud host running it. Mac Mini or an always-on Mac would work.</p>
   </div>
@@ -159,69 +159,5 @@
   </table>
 
 </div>
-
-<style>
-.roadmap-item {
-  margin: 2rem 0;
-  padding: 1.4rem 1.6rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-}
-
-.roadmap-item h3 {
-  margin: 0;
-  color: var(--text);
-}
-
-.roadmap-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: .8rem;
-}
-
-.roadmap-tag {
-  font-size: .68rem;
-  font-weight: 700;
-  letter-spacing: .10em;
-  text-transform: uppercase;
-  padding: 3px 8px;
-  border-radius: 4px;
-  white-space: nowrap;
-}
-
-.roadmap-tag--next {
-  background: rgba(232,151,28,.15);
-  color: var(--gold);
-  border: 1px solid var(--gold-border);
-}
-
-.roadmap-tag--planned {
-  background: rgba(100,160,255,.08);
-  color: #7EB3F5;
-  border: 1px solid rgba(100,160,255,.20);
-}
-
-.roadmap-tag--considering {
-  background: rgba(150,150,150,.08);
-  color: #8A8480;
-  border: 1px solid rgba(150,150,150,.20);
-}
-
-.roadmap-item p { margin-bottom: .7rem; }
-.roadmap-item p:last-child { margin-bottom: 0; }
-
-.workflow-steps {
-  padding-left: 1.5rem;
-  margin-bottom: 1.4rem;
-}
-
-.workflow-steps li {
-  margin-bottom: 1rem;
-  line-height: 1.65;
-}
-</style>
-
 </body>
 </html>

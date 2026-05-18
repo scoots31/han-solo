@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solo Builder Framework — Brainstorm Phase Guide</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0F1729;
+    --navy-mid: #1E3A5F;
+    --blue: #2563EB;
+    --blue-light: #DBEAFE;
+    --teal: #0D9488;
+    --teal-light: #CCFBF1;
+    --gray-50: #F8FAFC;
+    --gray-100: #F1F5F9;
+    --gray-200: #E2E8F0;
+    --gray-300: #CBD5E1;
+    --gray-500: #64748B;
+    --gray-700: #334155;
+    --gray-900: #0F172A;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-900);
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background: var(--navy);
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    overflow-y: auto;
+    padding: 28px 0 40px;
+    z-index: 10;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+  .sidebar-header {
+    padding: 0 20px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 16px;
+  }
+  .sidebar-header .sh-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 6px;
+  }
+  .sidebar-header .sh-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.3;
+  }
+
+  .nav-group { margin-bottom: 6px; }
+  .nav-group-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    padding: 8px 20px 4px;
+    display: block;
+  }
+  .nav-skill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .nav-skill:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.06);
+  }
+  .nav-skill.active {
+    color: #fff;
+    border-left-color: var(--teal);
+    background: rgba(255,255,255,0.06);
+  }
+  .nav-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: 240px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .page-header {
+    background: var(--navy);
+    color: #fff;
+    padding: 48px 60px 40px;
+  }
+  .page-header .ph-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 12px;
+  }
+  .page-header h1 {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+    line-height: 1.1;
+  }
+  .page-header p {
+    font-size: 15px;
+    color: rgba(255,255,255,0.55);
+    max-width: 620px;
+    line-height: 1.6;
+  }
+  .header-stats {
+    display: flex;
+    gap: 32px;
+    margin-top: 28px;
+    padding-top: 28px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .header-stat .hs-num {
+    font-size: 28px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+  .header-stat .hs-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 2px;
+  }
+
+  /* ── CONTENT ── */
+  .content {
+    padding: 48px 60px 80px;
+    max-width: 960px;
+  }
+
+  /* ── SECTION HEADERS ── */
+  .section {
+    margin-bottom: 52px;
+    scroll-margin-top: 24px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--gray-200);
+  }
+  .section-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: var(--teal-light);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--teal);
+    letter-spacing: -0.3px;
+  }
+  .section-subtitle {
+    font-size: 13px;
+    color: var(--gray-500);
+    margin-top: 2px;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  /* ── PROSE ── */
+  .prose {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 28px 32px;
+    font-size: 15px;
+    color: var(--gray-700);
+    line-height: 1.75;
+  }
+  .prose p + p { margin-top: 16px; }
+  .prose strong { color: var(--gray-900); font-weight: 600; }
+
+  /* ── SKILL CARD ── */
+  .skill-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .skill-card-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .skill-name {
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    color: var(--teal);
+    letter-spacing: -0.3px;
+    flex: 1;
+  }
+  .skill-badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    background: var(--teal-light);
+    color: var(--teal);
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .skill-description {
+    padding: 16px 24px;
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.65;
+    border-bottom: 1px solid var(--gray-100);
+    background: var(--gray-50);
+  }
+  .skill-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+  }
+  .skill-section {
+    padding: 18px 22px;
+    border-right: 1px solid var(--gray-100);
+  }
+  .skill-section:last-child { border-right: none; }
+  .skill-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--teal);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .skill-section-label::before {
+    content: '';
+    width: 3px; height: 12px;
+    border-radius: 2px;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+  .skill-section ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .skill-section ul li {
+    font-size: 12.5px;
+    color: var(--gray-700);
+    line-height: 1.5;
+    padding-left: 12px;
+    position: relative;
+  }
+  .skill-section ul li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--gray-300);
+    font-size: 14px;
+    line-height: 1.35;
+  }
+  .skill-section ul li strong { color: var(--gray-900); font-weight: 600; }
+
+  .output-tag {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 600;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: var(--gray-100);
+    color: var(--gray-700);
+    margin: 2px 0;
+    line-height: 1.4;
+  }
+
+  /* ── STEP LIST ── */
+  .step-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .step {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 12px;
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  .step-num {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--teal-light);
+    color: var(--teal);
+    font-size: 16px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .step-content h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 8px;
+    letter-spacing: -0.2px;
+  }
+  .step-content p {
+    font-size: 13.5px;
+    color: var(--gray-700);
+    line-height: 1.65;
+  }
+  .step-content p + p { margin-top: 10px; }
+
+  /* ── EXAMPLE CARDS ── */
+  .example-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .example-header {
+    background: var(--teal-light);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .example-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .example-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--teal);
+    flex: 1;
+  }
+  .example-opening {
+    font-size: 12px;
+    color: var(--teal);
+    font-style: italic;
+    opacity: 0.8;
+    margin-top: 2px;
+  }
+  .example-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+  }
+  .example-col {
+    padding: 18px 22px;
+    border-right: 1px solid var(--gray-100);
+  }
+  .example-col:last-child { border-right: none; }
+  .example-col-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--teal);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .example-col-label::before {
+    content: '';
+    width: 3px; height: 12px;
+    border-radius: 2px;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+  .example-col p {
+    font-size: 13px;
+    color: var(--gray-700);
+    line-height: 1.6;
+  }
+  .example-col .sketch-note {
+    font-size: 12px;
+    color: var(--gray-500);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  /* ── OUTPUT BOX ── */
+  .output-box {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .output-box-header {
+    background: var(--teal-light);
+    padding: 14px 24px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--teal);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .output-items {
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .output-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .output-item-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--teal-light);
+    color: var(--teal);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .output-item-text h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 4px;
+  }
+  .output-item-text p {
+    font-size: 13px;
+    color: var(--gray-700);
+    line-height: 1.55;
+  }
+
+  /* ── GATE BOX ── */
+  .gate-box {
+    background: #fff;
+    border: 2px solid var(--teal);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .gate-box-header {
+    background: var(--teal);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .gate-box-header span {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .gate-body {
+    padding: 24px 28px;
+  }
+  .gate-body p {
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.65;
+    margin-bottom: 20px;
+  }
+  .gate-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .gate-option {
+    padding: 16px 18px;
+    border-radius: 8px;
+    border: 1px solid var(--gray-200);
+  }
+  .gate-option.pass {
+    background: var(--teal-light);
+    border-color: var(--teal);
+  }
+  .gate-option.hold {
+    background: var(--gray-50);
+    border-color: var(--gray-300);
+  }
+  .gate-option h4 {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .gate-option.pass h4 { color: var(--teal); }
+  .gate-option.hold h4 { color: var(--gray-700); }
+  .gate-option p {
+    font-size: 12.5px;
+    color: var(--gray-700);
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  /* ── ROUTING TABLE ── */
+  .routing-table {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .routing-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .routing-table th {
+    background: var(--gray-100);
+    padding: 12px 20px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--gray-500);
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .routing-table td {
+    padding: 14px 20px;
+    font-size: 13px;
+    color: var(--gray-700);
+    line-height: 1.5;
+    border-bottom: 1px solid var(--gray-100);
+    vertical-align: top;
+  }
+  .routing-table tr:last-child td { border-bottom: none; }
+  .routing-table td:first-child {
+    font-weight: 600;
+    color: var(--gray-900);
+    width: 25%;
+  }
+  .routing-table td code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 11px;
+    background: var(--gray-100);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--teal);
+  }
+
+  /* ── HANDOFF BOX ── */
+  .handoff-box {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .handoff-items {
+    padding: 0;
+  }
+  .handoff-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .handoff-item:last-child { border-bottom: none; }
+  .handoff-item-num {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    background: var(--teal-light);
+    color: var(--teal);
+    font-size: 13px;
+    font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .handoff-item-text h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 5px;
+  }
+  .handoff-item-text p {
+    font-size: 13px;
+    color: var(--gray-700);
+    line-height: 1.6;
+  }
+
+  /* ── SKIP BOX ── */
+  .skip-box {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 28px 32px;
+  }
+  .skip-box p {
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+  .skip-box p:last-child { margin-bottom: 0; }
+  .skip-box strong { color: var(--gray-900); font-weight: 600; }
+  .skip-signal {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 14px 18px;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    margin-top: 4px;
+    margin-bottom: 12px;
+  }
+  .skip-signal-marker {
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .skip-signal p {
+    font-size: 13px;
+    margin: 0;
+    color: var(--gray-700);
+  }
+
+  /* ── PHASE FLOW BAR ── */
+  .phase-flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 16px 24px;
+    margin-bottom: 32px;
+    overflow-x: auto;
+  }
+  .phase-pip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-500);
+    white-space: nowrap;
+    padding: 6px 10px;
+    border-radius: 6px;
+  }
+  .phase-pip.current {
+    background: var(--teal-light);
+    color: var(--teal);
+    font-weight: 700;
+  }
+  .phase-pip-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+  .phase-arrow {
+    color: var(--gray-300);
+    font-size: 16px;
+    padding: 0 4px;
+    flex-shrink: 0;
+  }
+
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .page-header { padding: 32px 40px; }
+    .content { padding: 32px 40px 60px; }
+    .card, .skill-card, .example-card { break-inside: avoid; }
+    @page { size: A4; margin: 15mm; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="sh-label">Phase Guide</div>
+    <div class="sh-title">Brainstorm</div>
+  </div>
+
+  <div class="nav-group">
+    <span class="nav-group-label" style="color:rgba(45,212,191,0.6)">On This Page</span>
+    <a href="#what-it-is" class="nav-skill" style="color:rgba(45,212,191,0.7)"><span class="nav-dot" style="background:#0D9488"></span>What this phase is</a>
+    <a href="#skill" class="nav-skill" style="color:rgba(45,212,191,0.7)"><span class="nav-dot" style="background:#0D9488"></span>The skill</a>
+    <a href="#experience" class="nav-skill" style="color:rgba(45,212,191,0.7)"><span class="nav-dot" style="background:#0D9488"></span>Step-by-step experience</a>
+    <a href="#examples" class="nav-skill" style="color:rgba(45,212,191,0.7)"><span class="nav-dot" style="background:#0D9488"></span>What can you brainstorm?</a>
+    <a href="#output" class="nav-skill" style="color:rgba(45,212,191,0.7)"><span class="nav-dot" style="background:#0D9488"></span>What gets produced</a>
+    <a href="#gate" class="nav-skill" style="color:rgba(45,212,191,0.7)"><span class="nav-dot" style="background:#0D9488"></span>The gate</a>
+    <a href="#handoff" class="nav-skill" style="color:rgba(45,212,191,0.7)"><span class="nav-dot" style="background:#0D9488"></span>Handoff to Discover</a>
+    <a href="#skip" class="nav-skill" style="color:rgba(45,212,191,0.7)"><span class="nav-dot" style="background:#0D9488"></span>When to skip</a>
+  </div>
+
+  <div class="nav-group" style="margin-top: 16px;">
+    <span class="nav-group-label" style="color:rgba(148,163,184,0.5)">Framework</span>
+    <a href="skills-reference.html" class="nav-skill" style="color:rgba(148,163,184,0.6)"><span class="nav-dot" style="background:#475569"></span>Skills Reference</a>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+  <div class="page-header">
+    <div class="ph-eyebrow">Solo Builder Framework — Phase Guide</div>
+    <h1>Brainstorm</h1>
+    <p>The optional front door for ideas that aren't fully formed yet. A genuine collaborative conversation — not a checklist — that ends with enough clarity to make Discovery productive.</p>
+    <div class="header-stats">
+      <div class="header-stat"><div class="hs-num">Optional</div><div class="hs-label">Phase status</div></div>
+      <div class="header-stat"><div class="hs-num">1</div><div class="hs-label">Skill</div></div>
+      <div class="header-stat"><div class="hs-num">Judgment</div><div class="hs-label">Gate type</div></div>
+      <div class="header-stat"><div class="hs-num">Discover</div><div class="hs-label">Hands off to</div></div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- Phase flow bar -->
+    <div class="phase-flow">
+      <div class="phase-pip current">
+        <span class="phase-pip-dot"></span>Brainstorm
+      </div>
+      <span class="phase-arrow">›</span>
+      <div class="phase-pip">
+        <span class="phase-pip-dot"></span>Discover
+      </div>
+      <span class="phase-arrow">›</span>
+      <div class="phase-pip">
+        <span class="phase-pip-dot"></span>Tech Context
+      </div>
+      <span class="phase-arrow">›</span>
+      <div class="phase-pip">
+        <span class="phase-pip-dot"></span>Design Sprint
+      </div>
+      <span class="phase-arrow">›</span>
+      <div class="phase-pip">
+        <span class="phase-pip-dot"></span>Design Review
+      </div>
+      <span class="phase-arrow">›</span>
+      <div class="phase-pip">
+        <span class="phase-pip-dot"></span>Plan
+      </div>
+      <span class="phase-arrow">›</span>
+      <div class="phase-pip">
+        <span class="phase-pip-dot"></span>Build
+      </div>
+      <span class="phase-arrow">›</span>
+      <div class="phase-pip">
+        <span class="phase-pip-dot"></span>QA
+      </div>
+      <span class="phase-arrow">›</span>
+      <div class="phase-pip">
+        <span class="phase-pip-dot"></span>Deploy
+      </div>
+    </div>
+
+    <!-- SECTION 1: What this phase is -->
+    <div class="section" id="what-it-is">
+      <div class="section-header">
+        <div class="section-icon">&#128161;</div>
+        <div>
+          <div class="section-title">What this phase is</div>
+          <div class="section-subtitle">The thinking space before Discovery</div>
+        </div>
+      </div>
+
+      <div class="prose">
+        <p>Brainstorm is the optional first phase of the Solo Builder Framework — the right entry point when you have something rattling around in your head but can't yet articulate it clearly enough for Discovery to be productive. It's a conversation, not a ceremony. There's no form to fill in, no requirements to gather, no architecture to consider. The core question is simple: do we understand this idea well enough to tell its story?</p>
+        <p>What makes the brainstorm in SBF different from a freeform chat is that it has structure underneath — a backbone that ensures nothing important gets missed while staying invisible in the actual conversation. The brainstorm moves through the idea itself, who it's for, where the value moment lives, and what the product actually does. Those threads don't run in a fixed order; the conversation goes where it needs to go, and the structure makes sure it doesn't miss anything.</p>
+        <p>Midway through the session — once the idea has enough shape — a rough visual sketch appears. <strong>This is not the design sprint output.</strong> It's a thinking tool: a single low-fidelity HTML screen showing approximately what the moment of value looks like. It gives the conversation something to react to. Almost always, the sketch surfaces things that weren't said — a field that implies a data source, a flow with a gap, a capability that looks simple but isn't. The sketch doesn't have to be right; it has to be react-able. Before the visual sketch, a preliminary process sketch captures the rough as-is and to-be process — how something works today and what it would look like if the idea succeeded. Both sketches are thinking tools that make the conversation sharper without turning it into a design session.</p>
+        <p>The brainstorm also does routing. Not everything that surfaces in the conversation is ready to move forward. Feasibility unknowns get flagged and sent to Research rather than pursued mid-session. Ideas that turn out to be multiple independent things get identified for decomposition. The brainstorm ends when the core idea is clear enough to hand off to Discovery — or when it's clear more time is needed before the conversation can be productive.</p>
+      </div>
+    </div>
+
+    <!-- SECTION 2: The skill -->
+    <div class="section" id="skill">
+      <div class="section-header">
+        <div class="section-icon">&#9881;&#65039;</div>
+        <div>
+          <div class="section-title">Skill in this phase</div>
+          <div class="section-subtitle">What activates and what it does</div>
+        </div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-card-header">
+          <div class="skill-name">brainstorming</div>
+          <div class="skill-badge">Optional phase skill</div>
+        </div>
+        <div class="skill-description">
+          Product exploration for ideas that aren't fully formed yet. A genuine collaborative conversation — not a checklist, not a spec session. Explores what you're trying to do and why, surfaces what needs research before it can be designed, and ends with enough clarity to feed Discover. Includes a rough sketch mid-session when the idea benefits from something visual to react to.
+        </div>
+        <div class="skill-body">
+          <div class="skill-section">
+            <div class="skill-section-label">What it does</div>
+            <ul>
+              <li>Explores the idea, who it's for, and where the value moment lives</li>
+              <li>Produces a preliminary process sketch — rough as-is and to-be</li>
+              <li>Generates a rough visual sketch mid-session as a thinking tool</li>
+              <li>Routes feasibility unknowns to Research rather than pursuing them</li>
+              <li>Flags if the idea needs decomposition before proceeding</li>
+              <li>Asks one good question per round — never runs through a checklist</li>
+            </ul>
+          </div>
+          <div class="skill-section">
+            <div class="skill-section-label">When it activates</div>
+            <ul>
+              <li><strong>You have an idea but the solution isn't clear yet</strong></li>
+              <li>You're exploring a direction before committing to it</li>
+              <li>You want a thought partner before articulating the idea formally</li>
+              <li>The <code style="font-family: 'SF Mono', monospace; font-size: 11px; background: var(--gray-100); padding: 2px 5px; border-radius: 3px;">start</code> skill routes you here based on what you bring</li>
+              <li>Skip if the idea is already well-defined — go straight to Discover</li>
+            </ul>
+          </div>
+          <div class="skill-section">
+            <div class="skill-section-label">What it produces</div>
+            <ul>
+              <li><span class="output-tag">brainstorm-[date]-[topic].md</span> — summary of what was understood</li>
+              <li>Directional clarity: who it's for, what they do, where the value is</li>
+              <li>Preliminary process sketch (as-is + to-be) — formalized in Discover</li>
+              <li>Rough visual sketch — lives in the conversation, not a deliverable</li>
+              <li>Research items: named questions that need validation before design</li>
+              <li>Product-continuity seeds: decisions, assumptions, open questions</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: Step-by-step experience -->
+    <div class="section" id="experience">
+      <div class="section-header">
+        <div class="section-icon">&#128203;</div>
+        <div>
+          <div class="section-title">Step-by-step experience</div>
+          <div class="section-subtitle">What actually happens in a brainstorm session</div>
+        </div>
+      </div>
+
+      <div class="step-list">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <h3>You bring the idea in your own words</h3>
+            <p>There's no format required. You describe what's on your mind — a problem you've noticed, something frustrating that shouldn't be that hard, a capability you think should exist. The skill listens first, doesn't redirect, doesn't start refining. It asks one good question to go deeper, following your thread rather than jumping to the next item on a list.</p>
+            <p>This is intentional. The way you describe the idea in your own words often contains the most important clue — what you're actually frustrated by, who the real person in the story is, where the value moment really lives. Redirecting too early loses that signal.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <h3>The conversation develops the idea across four threads</h3>
+            <p>The backbone of the brainstorm is four threads: the idea itself (what's underneath, not the features), who it's for (a real person in a real situation, not a user type), the value moment (when does this actually become useful to them?), and what's in the idea (the capabilities — held lightly, not locked down). The conversation moves between these naturally, going where it needs to go, using the backbone only to check nothing important has been missed.</p>
+            <p>The skill volunteers thoughts when it has them — patterns that work or don't work, something in the idea that doesn't add up, a direction worth questioning. It pushes back when something is unclear. If you said X earlier and now it sounds like Y, it says so directly. This is not a passive interview.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <h3>Feasibility unknowns get flagged, not pursued</h3>
+            <p>When something in the conversation raises a "can this actually work" question — an AI component, a data integration, a real-time requirement — it gets captured explicitly rather than explored mid-session. The skill names the research question precisely: not "we should look into that" but "before we can design this component, we need to know X — that's the research question."</p>
+            <p>These items don't kill the idea. They get parked in a Research queue and the brainstorm continues. Research validates them and brings back enough to inform the design. The brainstorm doesn't try to answer feasibility questions — it surfaces them cleanly so they can be answered in the right place.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <h3>The preliminary process sketch surfaces early</h3>
+            <p>Before the visual sketch, when the conversation starts describing how something works — "currently someone has to manually do X and then email Y" — the process sketch activates. It captures the rough as-is (how the process works today, even if it's manual and informal) and the beginning of a to-be (what it would look like if this idea succeeded). This isn't the formal process map that comes out of Discover; it's a thinking tool that makes the brainstorm sharper. It surfaces steps that require data sources nobody mentioned, decision points that imply logic, manual handoffs the product could eliminate. The formal maps get built in Discovery — this is just enough to see the shape of the thing.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-content">
+            <h3>A rough sketch appears mid-session</h3>
+            <p>When the conversation has enough shape — there's a clear sense of who this is for and what the value moment looks like — a single rough HTML screen appears. Intentionally low fidelity: structure and content only, no polish. It's not a design sprint artifact. It's the equivalent of someone walking to the whiteboard mid-conversation and drawing something. The point is to give the conversation something to react to.</p>
+            <p>After the sketch, the question is "warmer or colder?" One or two rounds of reaction is enough. This is not the design sprint — if it starts feeling like one, the brainstorm pulls back. The sketch is a thinking tool. The real design comes after Discover. The sketch is referenced when building the process sketch — the screen should reflect a step in the to-be process, grounding both artifacts in the same idea.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">6</div>
+          <div class="step-content">
+            <h3>The session ends with explicit routing</h3>
+            <p>The brainstorm doesn't fade out — it ends with a clear statement of what's going where and why. Core idea ready? Hand off to Discover. Feasibility questions still open? Name the research items and route them to Research before Discovery begins. Idea turned out to be multiple independent things? Name the pieces, establish how they relate, and brainstorm the first piece separately.</p>
+            <p>The output is a brief document — not a spec — written as a story: who the idea is for, what they do, where the value moment is. Good enough that a designer could start sketching from it. This feeds into Discovery as the starting context for the narrative conversation.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: What can you brainstorm? -->
+    <div class="section" id="examples">
+      <div class="section-header">
+        <div class="section-icon">&#128270;</div>
+        <div>
+          <div class="section-title">What can you brainstorm?</div>
+          <div class="section-subtitle">Five concrete examples — how the framework engages with each</div>
+        </div>
+      </div>
+
+      <!-- Example 1 -->
+      <div class="example-card">
+        <div class="example-header">
+          <div class="example-icon">&#128196;</div>
+          <div>
+            <div class="example-title">Freelancer invoicing tool</div>
+            <div class="example-opening">"I hate chasing clients for payment — could there be a smarter way?"</div>
+          </div>
+        </div>
+        <div class="example-body">
+          <div class="example-col">
+            <div class="example-col-label">What the brainstorm surfaces</div>
+            <p>The frustration isn't sending invoices — it's the follow-up: the awkward reminder email, the client who goes quiet, the uncertainty about whether they even received it. The conversation surfaces that the real problem is <em>visibility and leverage</em> after the invoice is sent, not the invoice itself. Who it's for becomes specific: a solo consultant with 5–10 active clients, not an agency billing hundreds.</p>
+          </div>
+          <div class="example-col">
+            <div class="example-col-label">What becomes clearer</div>
+            <p>The value moment isn't the invoice creation — it's the moment a client is 5 days past due and the freelancer knows exactly what to say and has a one-click way to send it. Automated reminders get flagged but also a research question: what reminder cadence actually improves collection without burning the relationship? That's a research item, not a design decision.</p>
+          </div>
+          <div class="example-col">
+            <div class="example-col-label">What the rough sketch shows</div>
+            <div class="sketch-note">Invoice status list: client name · amount · days outstanding · status tag (Sent / Viewed / Overdue). One-click "send nudge" per row. No graph, no settings, no navigation. Just the follow-up dashboard — the thing they'd look at every Monday morning.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Example 2 -->
+      <div class="example-card">
+        <div class="example-header">
+          <div class="example-icon">&#127807;</div>
+          <div>
+            <div class="example-title">Neighborhood group buy coordinator</div>
+            <div class="example-opening">"What if neighbors could pool orders from local farms?"</div>
+          </div>
+        </div>
+        <div class="example-body">
+          <div class="example-col">
+            <div class="example-col-label">What the brainstorm surfaces</div>
+            <p>The conversation quickly finds the coordination problem underneath: someone has to organize the order, collect the money, and distribute the goods — and that person is doing a lot of unpaid work. The idea is really about making that organizer role sustainable so it doesn't burn out whoever took it on. The recipient isn't just "neighbors" — it's specifically the one person willing to run the thing.</p>
+          </div>
+          <div class="example-col">
+            <div class="example-col-label">What becomes clearer</div>
+            <p>The process sketch surfaces the coordination loop: farm posts availability → organizer shares it → neighbors commit → organizer aggregates → order placed → distribution coordinated. Each handoff is currently manual. The to-be isn't eliminating the organizer — it's giving them a single place where all of that happens without copy-paste and group texts. Payment collection is a research item: Stripe Connect, Venmo, honor system — that needs a decision before design.</p>
+          </div>
+          <div class="example-col">
+            <div class="example-col-label">What the rough sketch shows</div>
+            <div class="sketch-note">Active order view: farm name · pickup date · what's available. Neighbor commitment list: name · items · confirmed/pending. Running total with minimum order indicator. "Close order + notify" button. The organizer's control panel, not the shopper experience.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Example 3 -->
+      <div class="example-card">
+        <div class="example-header">
+          <div class="example-icon">&#127947;</div>
+          <div>
+            <div class="example-title">Gym class scheduling for small studios</div>
+            <div class="example-opening">"Boutique gyms can't afford Mindbody — there has to be a simpler version."</div>
+          </div>
+        </div>
+        <div class="example-body">
+          <div class="example-col">
+            <div class="example-col-label">What the brainstorm surfaces</div>
+            <p>The frustration with Mindbody is specific: it's designed for the gym's business operations — memberships, payroll, POS — and the class scheduling is just one feature inside a system that costs $200+/month. A small studio running 10 classes a week with 15 spots each doesn't need any of that. They need: post a schedule, let people sign up, send a reminder, manage a waitlist. That's the whole job. Who it's for is the studio owner — specifically the person running the Instagram account and also teaching three classes a week.</p>
+          </div>
+          <div class="example-col">
+            <div class="example-col-label">What becomes clearer</div>
+            <p>The value moment is Saturday morning when the owner is about to teach a class and knows whether it's full, who's on the waitlist, and who got auto-promoted. Everything else is secondary. The brainstorm flags a decomposition: member management (recurring memberships, payments) is a separate idea that could come later — it shouldn't be in Phase 1. Keeping Phase 1 to scheduling-only is a key directional decision made here.</p>
+          </div>
+          <div class="example-col">
+            <div class="example-col-label">What the rough sketch shows</div>
+            <div class="sketch-note">Week view: Mon–Sun, each day has class slots. Each slot: time · instructor · enrolled count / capacity · waitlist count. Tap a slot: see who's signed up, promote from waitlist, cancel. No billing, no profiles, no settings. The thing the owner checks from their phone before teaching.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Example 4 -->
+      <div class="example-card">
+        <div class="example-header">
+          <div class="example-icon">&#128218;</div>
+          <div>
+            <div class="example-title">Personal reading tracker with recommendations</div>
+            <div class="example-opening">"Goodreads but without the social noise — just my books and what to read next."</div>
+          </div>
+        </div>
+        <div class="example-body">
+          <div class="example-col">
+            <div class="example-col-label">What the brainstorm surfaces</div>
+            <p>The anti-Goodreads framing is useful signal: the person doesn't want to see what their friends are reading, doesn't want to post reviews, doesn't want a feed. They want a private record of what they've read and something that helps them decide what to read next without having to scroll through 500 recommendations from strangers. The value is personal, not social. The recommendation problem gets probed: what makes a good recommendation for this person? The answer is usually pattern-based — authors they love, themes that recur, pacing preferences.</p>
+          </div>
+          <div class="example-col">
+            <div class="example-col-label">What becomes clearer</div>
+            <p>The recommendation component gets flagged immediately as a research item: the quality of the recommendation is everything, and whether that comes from an AI model, a curated dataset, or simple tag-matching needs to be validated before it can be designed. The brainstorm keeps this as a future capability and focuses the core on the reading log — which is a complete and useful product even before recommendations exist. This is a clean decomposition decision.</p>
+          </div>
+          <div class="example-col">
+            <div class="example-col-label">What the rough sketch shows</div>
+            <div class="sketch-note">Book shelf: cover · title · author · read date · personal rating (1–5, no stars — just a slider). Add book: search by title. No social features, no public profile, no feed. The reading log as a private artifact — the thing you'd want to have existed five years ago.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Example 5 -->
+      <div class="example-card">
+        <div class="example-header">
+          <div class="example-icon">&#127859;</div>
+          <div>
+            <div class="example-title">Shift handoff tool for small restaurant teams</div>
+            <div class="example-opening">"The paper log never gets read — people just ask the previous shift anyway."</div>
+          </div>
+        </div>
+        <div class="example-body">
+          <div class="example-col">
+            <div class="example-col-label">What the brainstorm surfaces</div>
+            <p>The paper log fails for two reasons: it's not consulted at the right moment (nobody reads it before their shift, they read it mid-shift when something goes wrong), and it doesn't surface what's actually urgent vs. what's background noise. The conversation surfaces that what people actually need is a 60-second brief when they clock in — the three things that matter today. Who it's for is the incoming shift lead, not management. Management's visibility is a secondary use case.</p>
+          </div>
+          <div class="example-col">
+            <div class="example-col-label">What becomes clearer</div>
+            <p>The process sketch makes the handoff loop visible: outgoing shift records notes → incoming shift sees brief at clock-in → during shift, items get resolved or escalated → manager sees summary at close. The current as-is skips step 2 entirely — the brief never reaches anyone. The to-be is specifically about that gap: making the brief impossible to miss at exactly the right moment. The clock-in trigger surfaces a question: integration with the POS/time-tracking system, or standalone? Flagged as a research item.</p>
+          </div>
+          <div class="example-col">
+            <div class="example-col-label">What the rough sketch shows</div>
+            <div class="sketch-note">Clock-in brief: three items, each with a category tag (Equipment · Inventory · Guest issue · Staff note) and a priority indicator. Mark resolved inline. Below: "Add to tonight's handoff" input — one tap to log something for the next shift. The brief that actually gets read because it appears at the right moment.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 5: What gets produced -->
+    <div class="section" id="output">
+      <div class="section-header">
+        <div class="section-icon">&#128230;</div>
+        <div>
+          <div class="section-title">What gets produced</div>
+          <div class="section-subtitle">The outputs of a brainstorm session</div>
+        </div>
+      </div>
+
+      <div class="output-box">
+        <div class="output-box-header">
+          &#9654; Brainstorm outputs
+        </div>
+        <div class="output-items">
+          <div class="output-item">
+            <div class="output-item-icon">&#128221;</div>
+            <div class="output-item-text">
+              <h4>Directional clarity — written as a story</h4>
+              <p>A brief document in <span style="font-family: 'SF Mono', monospace; font-size: 11.5px; background: var(--gray-100); padding: 2px 6px; border-radius: 3px; color: var(--teal);">docs/brainstorm-[date]-[topic].md</span> describing who the idea is for, what they do, and where the value moment lives. Written in plain language — 2–3 paragraphs, not bullet points. Good enough that a designer could start sketching from it. This is the primary input to Discover.</p>
+            </div>
+          </div>
+          <div class="output-item">
+            <div class="output-item-icon">&#128257;</div>
+            <div class="output-item-text">
+              <h4>Preliminary process sketch</h4>
+              <p>A rough as-is description of how the process works today (even if manual, informal, or fragmented) and a to-be sketch of what it would look like if the idea succeeded. Not a formal map — that comes out of Discover where process-mapper formalizes it. This is a thinking artifact that makes the brainstorm sharper and gets carried into Discovery as starting context.</p>
+            </div>
+          </div>
+          <div class="output-item">
+            <div class="output-item-icon">&#128444;&#65039;</div>
+            <div class="output-item-text">
+              <h4>Rough visual sketch — lives in the conversation</h4>
+              <p>A single low-fidelity HTML screen showing approximately what the moment of value looks like. Not a deliverable — it doesn't get saved as a design artifact. Its job is to give the brainstorm conversation something concrete to react to, surfacing things that wouldn't have come up in a text-only discussion. The real design artifact comes after Discover, in the Design Sprint.</p>
+            </div>
+          </div>
+          <div class="output-item">
+            <div class="output-item-icon">&#128269;</div>
+            <div class="output-item-text">
+              <h4>Research items — named precisely</h4>
+              <p>Each feasibility unknown gets a specific research question — not "we should look into AI" but "before we can design the recommendation component, we need to know whether pattern-matching on reading history produces recommendations the user would actually follow — or whether this requires a model." These get carried into a Research phase before Discovery begins, if they're blocking. If they're not blocking the core idea, they get held for later.</p>
+            </div>
+          </div>
+          <div class="output-item">
+            <div class="output-item-icon">&#128191;</div>
+            <div class="output-item-text">
+              <h4>Product-continuity seeds</h4>
+              <p>Key decisions made during the brainstorm (anything that shaped the direction of the idea), assumptions being treated as true without verification, and open questions that Discovery needs to answer. These seed the continuity documents before the project formally begins, so the first Discovery session has institutional memory of what was already considered and decided.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 6: The gate -->
+    <div class="section" id="gate">
+      <div class="section-header">
+        <div class="section-icon">&#127947;</div>
+        <div>
+          <div class="section-title">The gate</div>
+          <div class="section-subtitle">How you know the brainstorm is done</div>
+        </div>
+      </div>
+
+      <div class="gate-box">
+        <div class="gate-box-header">
+          <span>Gate: Brainstorm → Discover</span>
+        </div>
+        <div class="gate-body">
+          <p>The gate from Brainstorm to Discover is a judgment call, not a checklist. There's no formal artifact that has to exist before you can move forward. The question is: <strong>is the idea clear enough for a productive Discovery conversation?</strong> That means you understand who it's for, roughly what they do, and where the value moment is. It doesn't mean the idea is fully resolved — Discovery is where it gets fully articulated. It means there's enough to start the narrative.</p>
+          <p>The brainstorm ends explicitly. The skill makes a routing call and states it plainly: "The core idea is clear enough for Discovery — here's what we understand and what remains open." Or: "There's still a feasibility question that should get answered before Discovery — here's the research item." The session doesn't just trail off.</p>
+          <div class="gate-options">
+            <div class="gate-option pass">
+              <h4>Pass — proceed to Discover</h4>
+              <p>The core idea is clear. You understand who it's for, what they do, and where the value moment is. Any research items are captured. The preliminary process sketch exists. Hand off to Discover.</p>
+            </div>
+            <div class="gate-option hold">
+              <h4>Not yet — keep going or pause</h4>
+              <p>The value moment hasn't surfaced. The idea is still too vague to picture. The brainstorm keeps going — or names what's still unclear and suggests sitting with it before coming back. No shame in pausing.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 7: Handoff to Discover -->
+    <div class="section" id="handoff">
+      <div class="section-header">
+        <div class="section-icon">&#10145;&#65039;</div>
+        <div>
+          <div class="section-title">Handoff to Discover</div>
+          <div class="section-subtitle">What you bring into the Discovery conversation</div>
+        </div>
+      </div>
+
+      <div class="handoff-box">
+        <div class="handoff-items">
+          <div class="handoff-item">
+            <div class="handoff-item-num">1</div>
+            <div class="handoff-item-text">
+              <h4>The idea direction</h4>
+              <p>The story of who this is for, what they do, and where the value moment lives — written in plain language, not bullet points. This becomes the opening context for the Discovery conversation so it doesn't start from scratch. Discovery builds on this rather than re-deriving it.</p>
+            </div>
+          </div>
+          <div class="handoff-item">
+            <div class="handoff-item-num">2</div>
+            <div class="handoff-item-text">
+              <h4>The preliminary process sketch</h4>
+              <p>The rough as-is and to-be from the brainstorm session. Discovery hands this to process-mapper to formalize into the actual as-is and to-be process maps. Having a starting sketch means the process conversation in Discovery is refinement, not derivation from zero.</p>
+            </div>
+          </div>
+          <div class="handoff-item">
+            <div class="handoff-item-num">3</div>
+            <div class="handoff-item-text">
+              <h4>Decisions already made</h4>
+              <p>Anything that shaped the direction of the idea during the brainstorm — decomposition decisions (what's in Phase 1 vs. later), scope boundaries, framing choices. These don't get re-litigated in Discovery. They're treated as agreed and carried forward. Product-continuity holds them.</p>
+            </div>
+          </div>
+          <div class="handoff-item">
+            <div class="handoff-item-num">4</div>
+            <div class="handoff-item-text">
+              <h4>Open questions Discovery needs to answer</h4>
+              <p>The things the brainstorm surfaced but deliberately didn't resolve — questions that belong in the Discovery narrative conversation rather than the brainstorm. These get handed to Discovery explicitly so they don't get dropped. Examples: the full use case from beginning to end, the edge cases that matter, the definition of done for the first version.</p>
+            </div>
+          </div>
+          <div class="handoff-item">
+            <div class="handoff-item-num">5</div>
+            <div class="handoff-item-text">
+              <h4>Research items, if any</h4>
+              <p>Feasibility unknowns that need answers before the design can proceed. If these are blocking — if you can't make meaningful design decisions without knowing whether something is possible — Research comes before Discovery. If they're non-blocking (the core idea can be designed without them), they get held and addressed before the relevant design decisions are made.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 8: When to skip -->
+    <div class="section" id="skip">
+      <div class="section-header">
+        <div class="section-icon">&#9654;&#65039;</div>
+        <div>
+          <div class="section-title">When to skip Brainstorm</div>
+          <div class="section-subtitle">Go straight to Discover if the idea is already clear</div>
+        </div>
+      </div>
+
+      <div class="skip-box">
+        <p>Brainstorm is for fuzzy ideas. If you already know what you want to build — you can describe who it's for, what they do, and where the value moment is — skip this and go straight to Discover. Brainstorming a fully-formed idea wastes time and can actually muddy clarity you already have.</p>
+        <p>The <code style="font-family: 'SF Mono', monospace; font-size: 12px; background: var(--gray-100); padding: 2px 7px; border-radius: 4px; color: var(--teal);">start</code> skill makes this routing decision for you. It reads what you bring and routes to Brainstorm if the idea needs exploration, or directly to Discover if it's ready. You don't have to decide — just describe what you want to work on and start handles the rest.</p>
+        <p>The clearest signals that you should skip Brainstorm:</p>
+
+        <div class="skip-signal">
+          <div class="skip-signal-marker">&#9654;</div>
+          <p>You can describe in one sentence who the product is for and what the moment of value looks like for them.</p>
+        </div>
+        <div class="skip-signal">
+          <div class="skip-signal-marker">&#9654;</div>
+          <p>You've already built something like this before and you know the shape of it — you're just starting a new instance.</p>
+        </div>
+        <div class="skip-signal">
+          <div class="skip-signal-marker">&#9654;</div>
+          <p>You have prior work — notes, a PRD, a design, a working prototype — that defines the idea. Use <code style="font-family: 'SF Mono', monospace; font-size: 12px; background: var(--gray-100); padding: 2px 7px; border-radius: 4px; color: var(--teal);">onboard</code> to bring that into the framework instead.</p>
+        </div>
+        <div class="skip-signal">
+          <div class="skip-signal-marker">&#9654;</div>
+          <p>You feel resistance at the idea of spending time exploring — you want to build, not think. That's valid signal. Go to Discover and let the narrative conversation surface what's unclear.</p>
+        </div>
+
+        <p style="margin-top: 16px;">The framework is agile, not waterfall. Brainstorm isn't a phase you have to complete before you're allowed to proceed. It's a tool for a specific situation. Use it when it helps. Skip it when it doesn't.</p>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+
+</body>
+</html>

@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solo Builder Framework — Design Sprint Phase Guide</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0F1729;
+    --navy-mid: #1E3A5F;
+    --purple: #bd8c7d;
+    --purple-light: rgba(189,140,125,0.12);
+    --teal: #0D9488;
+    --teal-light: #CCFBF1;
+    --gray-50: #F8FAFC;
+    --gray-100: #F1F5F9;
+    --gray-200: #E2E8F0;
+    --gray-300: #CBD5E1;
+    --gray-500: #64748B;
+    --gray-700: #334155;
+    --gray-900: #0F172A;
+    --green: #15803D;
+    --green-light: #DCFCE7;
+    --amber: #B45309;
+    --amber-light: #FEF3C7;
+    --rose: #BE123C;
+    --rose-light: #FFE4E6;
+    --orange: #EA580C;
+    --orange-light: #FFEDD5;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-900);
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background: var(--navy);
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    overflow-y: auto;
+    padding: 28px 0 40px;
+    z-index: 10;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+  .sidebar-header {
+    padding: 0 20px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 16px;
+  }
+  .sidebar-header .sh-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 6px;
+  }
+  .sidebar-header .sh-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.3;
+  }
+
+  .nav-group { margin-bottom: 6px; }
+  .nav-group-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    padding: 8px 20px 4px;
+    color: rgba(255,255,255,0.25);
+    display: block;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+    cursor: pointer;
+  }
+  .nav-item:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.06);
+  }
+  .nav-item.active {
+    color: #fff;
+    border-left-color: var(--purple);
+    background: rgba(189,140,125,0.12);
+  }
+  .nav-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--purple);
+  }
+  .nav-dot-gray {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.2);
+  }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: 240px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .page-header {
+    background: var(--navy);
+    color: #fff;
+    padding: 48px 60px 40px;
+  }
+  .page-header .ph-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 12px;
+  }
+  .page-header h1 {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+    line-height: 1.1;
+  }
+  .page-header p {
+    font-size: 15px;
+    color: rgba(255,255,255,0.55);
+    max-width: 620px;
+    line-height: 1.6;
+  }
+  .header-stats {
+    display: flex;
+    gap: 32px;
+    margin-top: 28px;
+    padding-top: 28px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .header-stat .hs-num {
+    font-size: 28px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+  .header-stat .hs-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 2px;
+  }
+
+  /* ── CONTENT ── */
+  .content {
+    padding: 48px 60px 80px;
+    max-width: 960px;
+  }
+
+  .section {
+    margin-bottom: 56px;
+    scroll-margin-top: 24px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--gray-200);
+  }
+  .section-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    background: var(--purple-light);
+  }
+  .section-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--gray-900);
+    letter-spacing: -0.3px;
+  }
+  .section-desc {
+    font-size: 13px;
+    color: var(--gray-500);
+    margin-top: 2px;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--purple);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    letter-spacing: -0.3px;
+    flex: 1;
+  }
+  .card-title-plain {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--gray-900);
+    letter-spacing: -0.3px;
+    flex: 1;
+  }
+  .card-badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .badge-phase { background: var(--purple-light); color: var(--purple); }
+  .badge-support { background: var(--teal-light); color: var(--teal); }
+  .badge-alwayson { background: var(--amber-light); color: var(--amber); }
+  .badge-optional { background: var(--gray-100); color: var(--gray-500); }
+  .badge-gate { background: var(--green-light); color: var(--green); }
+  .badge-warning { background: var(--rose-light); color: var(--rose); }
+  .badge-onramp { background: var(--orange-light); color: var(--orange); }
+
+  .card-desc {
+    padding: 16px 24px;
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.65;
+    border-bottom: 1px solid var(--gray-100);
+    background: var(--gray-50);
+  }
+  .card-body {
+    padding: 20px 24px;
+  }
+  .card-body p {
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.65;
+    margin-bottom: 12px;
+  }
+  .card-body p:last-child { margin-bottom: 0; }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+    border-top: 1px solid var(--gray-100);
+  }
+  .card-col {
+    padding: 18px 22px;
+    border-right: 1px solid var(--gray-100);
+  }
+  .card-col:last-child { border-right: none; }
+  .card-col-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--purple);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .card-col-label::before {
+    content: '';
+    width: 3px; height: 12px;
+    border-radius: 2px;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+  .card-col ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .card-col ul li {
+    font-size: 12.5px;
+    color: var(--gray-700);
+    line-height: 1.5;
+    padding-left: 12px;
+    position: relative;
+  }
+  .card-col ul li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--gray-300);
+    font-size: 14px;
+    line-height: 1.35;
+  }
+  .card-col ul li strong { color: var(--gray-900); font-weight: 600; }
+
+  /* ── STEP LIST ── */
+  .step-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .step-item {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .step-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px 24px;
+    cursor: pointer;
+  }
+  .step-num {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--purple-light);
+    color: var(--purple);
+    font-size: 14px;
+    font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .step-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gray-900);
+    letter-spacing: -0.2px;
+    margin-bottom: 3px;
+  }
+  .step-subtitle {
+    font-size: 13px;
+    color: var(--gray-500);
+    line-height: 1.4;
+  }
+  .step-body {
+    padding: 0 24px 20px 72px;
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.65;
+  }
+  .step-body p { margin-bottom: 10px; }
+  .step-body p:last-child { margin-bottom: 0; }
+  .step-body ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .step-body ul li {
+    padding-left: 14px;
+    position: relative;
+    font-size: 13.5px;
+  }
+  .step-body ul li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--gray-300);
+    font-size: 14px;
+    line-height: 1.35;
+  }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+  .callout-purple {
+    background: var(--purple-light);
+    border-left: 3px solid var(--purple);
+    color: var(--gray-900);
+  }
+  .callout-teal {
+    background: var(--teal-light);
+    border-left: 3px solid var(--teal);
+    color: var(--gray-900);
+  }
+  .callout-amber {
+    background: var(--amber-light);
+    border-left: 3px solid var(--amber);
+    color: var(--gray-900);
+  }
+  .callout-rose {
+    background: var(--rose-light);
+    border-left: 3px solid var(--rose);
+    color: var(--gray-900);
+  }
+  .callout-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    color: var(--gray-500);
+  }
+  .callout blockquote {
+    font-style: italic;
+    color: var(--gray-700);
+    font-size: 13.5px;
+    line-height: 1.6;
+    border: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* ── ON-RAMP CARDS ── */
+  .onramp-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .onramp-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .onramp-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--orange);
+    margin-bottom: 8px;
+  }
+  .onramp-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 10px;
+  }
+  .onramp-desc {
+    font-size: 13px;
+    color: var(--gray-700);
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+  .onramp-when {
+    font-size: 11.5px;
+    color: var(--gray-500);
+    font-style: italic;
+    padding-top: 10px;
+    border-top: 1px solid var(--gray-100);
+  }
+
+  /* ── TABLE ── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    margin-bottom: 20px;
+  }
+  .data-table th {
+    background: var(--gray-100);
+    color: var(--gray-700);
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 10px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .data-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--gray-100);
+    color: var(--gray-700);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--gray-50); }
+  .data-table td code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    background: var(--gray-100);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--purple);
+  }
+  .table-wrapper {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  /* ── ANTI-PATTERN TABLE ── */
+  .anti-row td:first-child {
+    font-weight: 600;
+    color: var(--rose);
+  }
+
+  /* ── GATE BOX ── */
+  .gate-box {
+    background: #fff;
+    border: 2px solid var(--purple);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+  }
+  .gate-box-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--purple);
+    margin-bottom: 12px;
+  }
+  .gate-items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .gate-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .gate-check {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--purple-light);
+    color: var(--purple);
+    font-size: 11px;
+    font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .gate-text {
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.5;
+  }
+  .gate-text strong {
+    color: var(--gray-900);
+    font-weight: 700;
+  }
+
+  /* ── FLOW BOX ── */
+  .flow-box {
+    background: var(--navy);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    color: rgba(255,255,255,0.7);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .flow-box-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 14px;
+  }
+  .flow-items {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .flow-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 4px 0;
+  }
+  .flow-arrow {
+    color: var(--purple);
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .flow-connector {
+    color: rgba(255,255,255,0.2);
+    font-size: 14px;
+    padding-left: 3px;
+    font-weight: 700;
+  }
+  .flow-text { color: rgba(255,255,255,0.8); }
+  .flow-text strong { color: #fff; }
+
+  /* ── FILE PATH ── */
+  .filepath {
+    display: inline-block;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    background: var(--gray-100);
+    padding: 3px 8px;
+    border-radius: 4px;
+    color: var(--purple);
+  }
+
+  /* ── WARMER COLDER BOX ── */
+  .wc-box {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .wc-header {
+    background: var(--purple-light);
+    padding: 12px 20px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--purple);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .wc-body {
+    padding: 16px 20px;
+    font-size: 13.5px;
+    color: var(--gray-700);
+    line-height: 1.6;
+  }
+
+  /* ── INLINE CODE ── */
+  code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    background: var(--gray-100);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--purple);
+  }
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <div class="sh-label">Solo Builder Framework</div>
+    <div class="sh-title">Design Sprint<br>Phase Guide</div>
+  </div>
+
+  <div class="nav-group">
+    <span class="nav-group-label">On this page</span>
+    <a class="nav-item active" href="#what-this-is">
+      <span class="nav-dot"></span> What this phase is
+    </a>
+    <a class="nav-item" href="#skills">
+      <span class="nav-dot"></span> Skills in this phase
+    </a>
+    <a class="nav-item" href="#onramps">
+      <span class="nav-dot"></span> Three on-ramps
+    </a>
+    <a class="nav-item" href="#steps">
+      <span class="nav-dot"></span> Step-by-step experience
+    </a>
+    <a class="nav-item" href="#handoff">
+      <span class="nav-dot"></span> Stakeholder handoff
+    </a>
+    <a class="nav-item" href="#documents">
+      <span class="nav-dot"></span> Documents produced
+    </a>
+    <a class="nav-item" href="#gate">
+      <span class="nav-dot"></span> The gate
+    </a>
+    <a class="nav-item" href="#next">
+      <span class="nav-dot"></span> Handoff to next phase
+    </a>
+    <a class="nav-item" href="#watchfor">
+      <span class="nav-dot"></span> What to watch for
+    </a>
+  </div>
+
+  <div class="nav-group">
+    <span class="nav-group-label">Framework phases</span>
+    <a class="nav-item" href="#">
+      <span class="nav-dot-gray"></span> Brainstorm
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-dot-gray"></span> Discover
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-dot-gray"></span> Tech Context
+    </a>
+    <a class="nav-item active" href="#">
+      <span class="nav-dot"></span> Design Sprint
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-dot-gray"></span> Design Review
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-dot-gray"></span> Plan
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-dot-gray"></span> Build
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-dot-gray"></span> QA
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-dot-gray"></span> Deploy
+    </a>
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<div class="main">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="ph-eyebrow">Solo Builder Framework — Phase 2</div>
+    <h1>Design Sprint</h1>
+    <p>The visual contract and decision surface. Runs after discovery, before planning. Produces a shared HTML artifact everyone can point at and agree on — and the conversation that surfaces every real build/defer decision.</p>
+    <div class="header-stats">
+      <div class="header-stat">
+        <div class="hs-num">9</div>
+        <div class="hs-label">Steps in the arc</div>
+      </div>
+      <div class="header-stat">
+        <div class="hs-num">3</div>
+        <div class="hs-label">On-ramps</div>
+      </div>
+      <div class="header-stat">
+        <div class="hs-num">3</div>
+        <div class="hs-label">Skills in play</div>
+      </div>
+      <div class="header-stat">
+        <div class="hs-num">2</div>
+        <div class="hs-label">Gate artifacts required</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── SECTION 1: What this phase is ── -->
+    <div class="section" id="what-this-is">
+      <div class="section-header">
+        <div class="section-icon">🗺</div>
+        <div>
+          <div class="section-title">What this phase is</div>
+          <div class="section-desc">The visual contract and decision surface — not a design deliverable</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <p>The design sprint is not a design deliverable. It is not a Figma translation exercise. It is a short, timeboxed collaborative session that produces an HTML artifact good enough to point at — and a conversation that surfaces what's actually in scope for Phase 1 versus what gets deferred.</p>
+          <p>This is the <strong>visual contract</strong> — the first thing everyone can point at and agree on — and a <strong>decision surface</strong>. Before this phase, your project exists as text: a discovery brief, process maps, intentions. After this phase, it exists as something everyone can see and react to. Engineers, stakeholders, PMs, and data people all respond differently to a real screen than they do to a list of requirements. Requirements get clarified because someone looks at a mockup and asks "where does this number come from?" Scope gets real because the question isn't "what are we building?" — it's "is this button Phase 1 or not?"</p>
+          <p>The sprint surfaces <strong>two categories of work</strong> that couldn't be seen before:</p>
+        </div>
+        <div class="card-grid">
+          <div class="card-col">
+            <div class="card-col-label">Visible scope</div>
+            <ul>
+              <li>Every element on screen becomes a <strong>build/defer question</strong></li>
+              <li>Buttons, filters, toggles, tabs — all become decision gates in the walk-through</li>
+              <li>Cannot be asked against wireframes or words — only against something people can see</li>
+              <li>Decisions organized by screen so they're traceable in planning</li>
+            </ul>
+          </div>
+          <div class="card-col">
+            <div class="card-col-label">Implied infrastructure</div>
+            <ul>
+              <li>Backend logic, data models, APIs that must exist before the UI connects to anything real</li>
+              <li>A simple-looking toggle may imply a <strong>historical data pipeline</strong></li>
+              <li>A filter chip may imply a query that doesn't exist yet</li>
+              <li>The design doesn't show these — but it's what <strong>surfaces the question</strong></li>
+            </ul>
+          </div>
+          <div class="card-col">
+            <div class="card-col-label">The HTML artifact</div>
+            <ul>
+              <li>Not a Figma to be translated into code later</li>
+              <li>The HTML artifact <strong>becomes</strong> the first frontend output</li>
+              <li>Collapses two steps into one — design and first code are the same thing</li>
+              <li>Serves as shared language for every phase that follows</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-purple">
+        <div class="callout-label">Core principle</div>
+        The deferred decisions log is the real deliverable. The screens are the tool that makes the conversation possible. And <code>prd-to-plan</code> cannot sequence phases correctly without it — because phases are built around what's approved and what's implied, not around what's technically comfortable to build first.
+      </div>
+    </div>
+
+    <!-- ── SECTION 2: Skills ── -->
+    <div class="section" id="skills">
+      <div class="section-header">
+        <div class="section-icon">⚡</div>
+        <div>
+          <div class="section-title">Skills in this phase</div>
+          <div class="section-desc">One phase skill, two supporting skills, one always-on cross-reference</div>
+        </div>
+      </div>
+
+      <!-- design-sprint -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">design-sprint</div>
+          <span class="card-badge badge-phase">Phase skill</span>
+        </div>
+        <div class="card-desc">
+          Produces a visual HTML artifact for every screen before any code is written. Bridges the discovery brief to the build phase by creating something everyone can point at and make real decisions from. Runs as a collaborative warmer/colder loop — not a one-shot deliverable.
+        </div>
+        <div class="card-grid">
+          <div class="card-col">
+            <div class="card-col-label">What it does</div>
+            <ul>
+              <li>Reads discovery brief and to-be process maps before producing anything</li>
+              <li>Asks one aesthetic question to route skin direction before any HTML is written</li>
+              <li>Identifies the hero screen — the screen where the moment of value is most visible</li>
+              <li>Runs the warmer/colder loop on structure first, skin second</li>
+              <li>Extends from hero to all screens once hero is approved</li>
+            </ul>
+          </div>
+          <div class="card-col">
+            <div class="card-col-label">Key disciplines</div>
+            <ul>
+              <li><strong>Three on-ramps:</strong> scratch, Figma import, reference-based</li>
+              <li><strong>Warmer/colder loop:</strong> structure approved before skin touched</li>
+              <li><strong>Deferred decisions log:</strong> both visible and implied infrastructure</li>
+              <li><strong>Walk-through conversation:</strong> mandatory — it's the decision surface</li>
+              <li>Max three rounds per screen once structure is warm</li>
+            </ul>
+          </div>
+          <div class="card-col">
+            <div class="card-col-label">Outputs</div>
+            <ul>
+              <li><code>docs/design/sprint-[id].html</code> — one per screen</li>
+              <li><code>docs/design/deferred-decisions.md</code> — the gate artifact</li>
+              <li>To-be map annotated with screen references</li>
+              <li>Optional: stakeholder handoff package in <code>docs/design/handoff/</code></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- frontend-design -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">frontend-design</div>
+          <span class="card-badge badge-support">Supporting skill</span>
+        </div>
+        <div class="card-desc">
+          Aesthetic guidance for HTML artifact production. Not a phase skill — it is activated by <code>design-sprint</code> when the situation calls for it, particularly when skin direction is unclear or when the solo wants a strong aesthetic starting point rather than a utilitarian one.
+        </div>
+        <div class="card-grid">
+          <div class="card-col">
+            <div class="card-col-label">When it activates</div>
+            <ul>
+              <li>Solo asks for a specific aesthetic direction during skin pass</li>
+              <li>After three cold rounds on skin — indicates design system needs replacement, not incremental adjustment</li>
+              <li>When the build calls for distinctive visual quality beyond functional layout</li>
+            </ul>
+          </div>
+          <div class="card-col">
+            <div class="card-col-label">What it provides</div>
+            <ul>
+              <li>Production-grade aesthetic decisions — typography, spacing, color systems</li>
+              <li>Component patterns that can carry through all sprint screens</li>
+              <li>Design system consistency so secondary screens don't drift from the hero</li>
+            </ul>
+          </div>
+          <div class="card-col">
+            <div class="card-col-label">Important</div>
+            <ul>
+              <li>Does not replace the warmer/colder loop — it informs the skin pass</li>
+              <li>Design system established on the hero screen, inherited everywhere else</li>
+              <li>The solo's "warmer or colder" judgment is still the final word</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- awesome-design-md -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">awesome-design-md</div>
+          <span class="card-badge badge-support">Supporting skill</span>
+        </div>
+        <div class="card-desc">
+          Reference-based aesthetic extraction. The skill behind On-ramp 3 — when the solo says "make it feel like ESPN" or shares a screenshot, this skill extracts the right design tokens and aesthetic constraints to drive the HTML production in that direction.
+        </div>
+        <div class="card-grid">
+          <div class="card-col">
+            <div class="card-col-label">When it's used</div>
+            <ul>
+              <li>On-ramp 3 — reference exists (product, app, screenshot, URL)</li>
+              <li>After the aesthetic question in Step 2 produces a named reference</li>
+              <li>When "make a call" isn't enough and a specific direction was given</li>
+            </ul>
+          </div>
+          <div class="card-col">
+            <div class="card-col-label">What it extracts</div>
+            <ul>
+              <li>Color palette and usage patterns from the reference</li>
+              <li>Typography choices — weights, sizing, hierarchy</li>
+              <li>Spacing and density signals — compact vs airy</li>
+              <li>Interaction and component patterns to carry forward</li>
+            </ul>
+          </div>
+          <div class="card-col">
+            <div class="card-col-label">Output</div>
+            <ul>
+              <li>Aesthetic constraints that feed directly into the HTML first pass</li>
+              <li>A DESIGN.md reference grounding subsequent iterations</li>
+              <li>Reduces warmer/colder rounds by starting closer to the right direction</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- process-mapper -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-plain">process-mapper</div>
+          <span class="card-badge badge-alwayson">Always-on</span>
+        </div>
+        <div class="card-desc">
+          The always-on background skill that maintains process maps throughout the framework. During the design sprint, it cross-references every screen produced against the agreed to-be process map — and flags any gaps where a process step has no corresponding screen.
+        </div>
+        <div class="card-body">
+          <p>You don't invoke <code>process-mapper</code>. It runs continuously in guided and piloted modes. Its role during the design sprint is coverage enforcement: as each screen gets approved, it annotates the to-be map with the screen reference. Steps with no screen yet get surfaced as decisions.</p>
+          <div class="callout callout-teal">
+            <div class="callout-label">Example gap surfacing</div>
+            <blockquote>"Step 4 in the to-be map — 'system validates eligibility' — doesn't have a screen yet. Is this a background step the user never sees, or does it need an error/confirmation state on screen?"</blockquote>
+          </div>
+          <p>These gaps are documented in the deferred decisions log, not silently assumed. Every to-be step either has a screen reference or a documented decision about why it doesn't need one.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION 3: On-ramps ── -->
+    <div class="section" id="onramps">
+      <div class="section-header">
+        <div class="section-icon">🛣</div>
+        <div>
+          <div class="section-title">The three on-ramps</div>
+          <div class="section-desc">All three end in the same place — HTML screens, walk-through, deferred decisions log</div>
+        </div>
+      </div>
+
+      <div class="callout callout-amber">
+        <div class="callout-label">Routing question</div>
+        At the end of the discover phase, one question determines the on-ramp: <strong>"Do you have a Figma, a reference, or are we starting from scratch?"</strong> The on-ramp decision is recorded in the discovery brief under design on-ramp.
+      </div>
+
+      <div class="onramp-grid">
+        <div class="onramp-card">
+          <div class="onramp-label">On-ramp 1</div>
+          <div class="onramp-title">From scratch</div>
+          <div class="onramp-desc">No visual exists. The design sprint opens with the discovery brief and produces an HTML artifact through a warmer/colder loop. The aesthetic question comes first — the solo either names a direction or the AI makes a call they'll react to.</div>
+          <p style="font-size:12.5px;color:var(--gray-700);margin-bottom:10px;line-height:1.5;"><strong>Path:</strong> Aesthetic question → hero screen first pass → structure warm → skin direction question → skin pass → approved hero → extend to all screens.</p>
+          <div class="onramp-when">This is the hardest path and the most common one. Expect more warmer/colder rounds when starting from a rough idea rather than a detailed brief.</div>
+        </div>
+        <div class="onramp-card">
+          <div class="onramp-label">On-ramp 2</div>
+          <div class="onramp-title">Figma exists</div>
+          <div class="onramp-desc">Import via Figma MCP. The design sprint uses the Figma as the visual source of truth. The discovery brief provides the story layer — the "why" behind each screen. The warmer/colder loop confirms the Figma reflects the story correctly.</div>
+          <p style="font-size:12.5px;color:var(--gray-700);margin-bottom:10px;line-height:1.5;"><strong>Path:</strong> Figma read via MCP → map screens to to-be map → confirm story alignment → convert to HTML → walk-through conversation.</p>
+          <div class="onramp-when">Moves faster because skin direction is already established. Sprint rounds focus on story alignment and scope decisions, not aesthetic choices.</div>
+        </div>
+        <div class="onramp-card">
+          <div class="onramp-label">On-ramp 3</div>
+          <div class="onramp-title">Reference exists</div>
+          <div class="onramp-desc">"Make it feel like ESPN" or "reference this screenshot." The <code>awesome-design-md</code> skill extracts the aesthetic constraints and the sprint produces HTML in that direction. Reference becomes the design system foundation.</div>
+          <p style="font-size:12.5px;color:var(--gray-700);margin-bottom:10px;line-height:1.5;"><strong>Path:</strong> awesome-design-md extracts tokens → hero screen built from constraints → warmer/colder confirms alignment with reference → extend to all screens.</p>
+          <div class="onramp-when">Reduces early warmer/colder rounds significantly — starting closer to the right aesthetic direction means fewer "rebuild the design system" moments.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <p>All three on-ramps converge at the same execution flow once aesthetic direction is confirmed: hero screen first → warmer/colder until structure and skin are both warm → extend to all screens → walk-through conversation → deferred decisions log. The on-ramp affects how the first pass is generated, not the discipline applied to the loop that follows.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION 4: Step-by-step ── -->
+    <div class="section" id="steps">
+      <div class="section-header">
+        <div class="section-icon">📋</div>
+        <div>
+          <div class="section-title">Step-by-step experience</div>
+          <div class="section-desc">The full sprint arc — from reading the brief to locking the deferred decisions log</div>
+        </div>
+      </div>
+
+      <div class="step-list">
+
+        <div class="step-item">
+          <div class="step-header">
+            <div class="step-num">1</div>
+            <div>
+              <div class="step-title">Read the discovery brief and process maps</div>
+              <div class="step-subtitle">Required gate — nothing is produced until these are read</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <p>Before any HTML is written, two documents are required: <span class="filepath">docs/discovery-brief.md</span> and <span class="filepath">docs/process/to-be-[name].md</span>. If either is missing, the sprint stops and the appropriate upstream phase runs first.</p>
+            <p>The brief establishes the story — key moments, moment of value, personas, what's explicitly out of scope. The to-be map establishes the process — what the user does, in what order, across what steps. Both are active references throughout the sprint, not one-time reads.</p>
+            <p><code>process-mapper</code> begins cross-referencing from this step forward. As each screen is produced, it annotates the to-be map with the screen reference. Steps with no screen get surfaced as decisions rather than silently assumed.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-header">
+            <div class="step-num">2</div>
+            <div>
+              <div class="step-title">Ask the aesthetic question</div>
+              <div class="step-subtitle">On-ramp 1 and 3 only — routes skin direction before any HTML is written</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <p>Before writing any HTML, one question is asked:</p>
+            <div class="callout callout-purple">
+              <blockquote>"Is there a product, app, or aesthetic direction you want this to feel like — or should I make a call and you react to it?"</blockquote>
+            </div>
+            <ul>
+              <li>If they name something (ESPN, Linear, a screenshot): note it. That's the aesthetic constraint. Route to <code>awesome-design-md</code> if extraction is needed.</li>
+              <li>If they say "make a call": produce a reasonable starting point and state what direction was chosen. They'll correct it in the warmer/colder loop.</li>
+              <li>If they say "Figma exists": route to on-ramp 2 — no aesthetic question needed.</li>
+            </ul>
+            <p>Do not skip this question. Establishing skin direction before the first pass saves multiple full rebuild rounds downstream.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-header">
+            <div class="step-num">3</div>
+            <div>
+              <div class="step-title">Identify the hero screen</div>
+              <div class="step-subtitle">The screen where the system's core value is most visible</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <p>From the key moments in the discovery brief, one screen is identified: the moment of value from Zone 3 of the discovery conversation. This is the screen where the system's purpose is clearest — where a user sees the thing they came for.</p>
+            <p>The choice is stated explicitly: <em>"The hero screen is [X] because [one sentence on why it shows the moment of value]."</em></p>
+            <p>Everything extends from this screen. Getting the hero right — structure and skin — before moving to secondary screens keeps the sprint focused and prevents aesthetic drift. Secondary screens inherit the design system the hero establishes. If the hero's design system is wrong, every other screen is also wrong.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-header">
+            <div class="step-num">4</div>
+            <div>
+              <div class="step-title">Build the first pass — structure only, no skin</div>
+              <div class="step-subtitle">Wireframe-first: monochrome, system fonts, layout only — no color or typography decisions until structure is confirmed warm</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <p>Round one is structure only. The constraint is absolute: <strong>white background, dark text, gray borders, system fonts</strong>. No color decisions. No typography decisions. No skin of any kind. This is not "skin intentionally light" — it is no skin at all until the solo confirms structure is correct.</p>
+            <p>This rule applies to on-ramp 1 and on-ramp 3 only. On-ramp 2 (Figma source) has a defined visual system — skin discipline applies but the wireframe-first constraint does not.</p>
+            <ul>
+              <li>White background, dark text, gray borders — no palette decisions</li>
+              <li>System fonts only — no typography decisions</li>
+              <li>Intentionally rough is fine. The question is: does this layout correctly represent what the person does here?</li>
+              <li>Use placeholder data that feels real — real-looking names, realistic numbers, plausible states</li>
+              <li>Include all interactive elements that are visible — every button, filter, toggle, tab becomes a gate question in the walk-through</li>
+              <li>Save to <span class="filepath">docs/design/sprint-[screen-id].html</span> and serve so it opens in a browser</li>
+            </ul>
+            <p><strong>Element naming pass — runs immediately after producing the HTML:</strong> walk every interactive element in order and name the component type and expected behavior. Example: "Filter bar — clicking a chip applies it as an active filter. Search input — typing triggers results on submit, not keystroke. Export button — downloads the current view as CSV." The solo corrects anything misidentified before layout feedback begins. This pass prevents silent misclassification of interactive elements as decorative.</p>
+            <p>After the naming pass: <em>"Here's the first pass. I built it this direction: [one sentence on structure decisions]. Warmer or colder on the layout before we touch the skin?"</em></p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-header">
+            <div class="step-num">5</div>
+            <div>
+              <div class="step-title">The warmer / colder loop</div>
+              <div class="step-subtitle">Structure and skin are separate questions — never mix them in the same round</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <p>The warmer/colder loop is the core discipline of the sprint. It is not feedback gathering — it is a series of rounds that converge on something good enough to make real decisions from. The solo's judgment is the most important input.</p>
+
+            <div class="wc-box">
+              <div class="wc-header">
+                <span>Round discipline</span>
+                <span style="font-size:11px;font-weight:500;color:var(--purple);opacity:0.7">Max 3 rounds once structure is warm</span>
+              </div>
+              <div class="wc-body">
+                <strong>Each round:</strong> (1) Solo gives warmer/colder on what's in front of them. (2) AI adjusts and states what changed and why. (3) Repeat.
+                <br><br>
+                <strong>Structure and skin are two separate passes.</strong> Structure warm → then skin direction question → then skin pass. Never adjust both in the same round.
+              </div>
+            </div>
+
+            <p><strong>Expected rounds by starting condition:</strong></p>
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Starting condition</th>
+                    <th>Expected rounds on hero screen</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Detailed discovery brief + wireframes</td>
+                    <td>2–3 rounds</td>
+                  </tr>
+                  <tr>
+                    <td>Strong discovery brief, no wireframes</td>
+                    <td>3–5 rounds</td>
+                  </tr>
+                  <tr>
+                    <td>Rough idea, early discovery</td>
+                    <td>5+ rounds — may need to pause and deepen discovery first</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p><strong>Special cases in the loop:</strong></p>
+            <ul>
+              <li><strong>Same element cold twice:</strong> Surface the underlying question — "You've been cold on the delta chart twice — is it the format, the data shown, or something else?"</li>
+              <li><strong>Warmer on structure, cold on skin:</strong> Do a full skin pass. Ask one question before rebuilding: "What should this feel like?" Then rebuild the full design system — do not incrementally adjust colors.</li>
+              <li><strong>Structure not warm after 3 rounds:</strong> Stop the design sprint. Go back to <code>discover</code> and deepen Zone 2 (the journey) — structure is unclear because the story isn't clear yet.</li>
+              <li><strong>"Good enough, move on":</strong> Respect it. Note what's thin and move to the next screen.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-header">
+            <div class="step-num">6</div>
+            <div>
+              <div class="step-title">Extend to all screens</div>
+              <div class="step-subtitle">Hero approved first — everything inherits from it</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <p>Once the hero screen is approved on both structure and skin, extend to remaining screens in this order:</p>
+            <ul>
+              <li>The screens immediately before and after the hero in the user journey</li>
+              <li>Any screen explicitly called out in the discovery brief key moments</li>
+              <li>Remaining screens in navigation order</li>
+            </ul>
+            <p>Each screen inherits the design system established in the hero. The skin does not change screen to screen — only content and layout patterns. Secondary screens should move significantly faster than the hero because design language is already settled.</p>
+            <p>For each screen: produce it, state what decisions were made, ask for warmer/colder. Move at pace. The goal is something good enough to point at and make decisions from — not pixel-perfect fidelity on every screen.</p>
+            <p>Every screen is saved to <span class="filepath">docs/design/sprint-[screen-id].html</span>. <code>process-mapper</code> updates the to-be map annotation as each screen is approved.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-header">
+            <div class="step-num">7</div>
+            <div>
+              <div class="step-title">The walk-through conversation</div>
+              <div class="step-subtitle">The decision-surface conversation — not a review, a series of real build/defer decisions</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <p>Once all screens are at acceptable fidelity, the walk-through runs. This is the most important conversation in the sprint. The goal is explicit build/defer decisions screen by screen, and surfacing the behind-the-scenes work the design implies but doesn't show.</p>
+            <p>For each screen, two questions:</p>
+            <div class="callout callout-purple">
+              <blockquote>"Is everything visible on this screen in scope for Phase 1, or are we deferring anything?"</blockquote>
+            </div>
+            <div class="callout callout-purple">
+              <blockquote>"What has to exist behind this screen before it can work — data, APIs, logic — and is any of that a Phase 1 dependency or something we're not building yet?"</blockquote>
+            </div>
+            <p><strong>The AI proactively flags both categories:</strong></p>
+            <ul>
+              <li>Visible elements that imply multiple data sources or complex queries</li>
+              <li>UI controls that look simple but have significant backend implications</li>
+              <li>Features that require infrastructure not currently in scope</li>
+              <li>Anything in the "What We're Not Building Yet" section of the discovery brief</li>
+            </ul>
+            <p>A good example of surfacing implied infrastructure: <em>"The temporal lens chips — 2Y, 1Y, Season, L6, L3, Playoffs — are all visible here. Two questions: first, are all six in scope for Phase 1? Second, behind each lens is a historical aggregation query — do we have that data, and is building that query Phase 1 or later?"</em></p>
+            <p>Every decision — visible and implied — gets documented. The walk-through is mandatory. Skipping it means planning inherits scope that was never decided.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-header">
+            <div class="step-num">8</div>
+            <div>
+              <div class="step-title">Produce the deferred decisions log</div>
+              <div class="step-subtitle">The gate artifact — feeds directly into prd-to-plan</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <p>After the walk-through, the deferred decisions log is written to <span class="filepath">docs/design/deferred-decisions.md</span>. This is one of two required gate artifacts. <code>prd-to-plan</code> reads this log to sequence phases around what's approved and what's implied — not around what's technically comfortable to build first.</p>
+            <p><strong>Structure of the log:</strong></p>
+            <ul>
+              <li>Organized by screen — every visible element gets a decision: Phase 1 or deferred</li>
+              <li>Deferred items include a trigger to revisit (what condition moves them back in)</li>
+              <li>Implied infrastructure documented alongside visible scope — same format, same screen grouping</li>
+              <li>Open questions section for anything that came up but couldn't be decided — with what each blocks</li>
+            </ul>
+            <p>Treating this log as optional is the most common planning failure in the framework. Without it, phases get bloated with deferred scope that wasn't explicitly decided.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-header">
+            <div class="step-num">9</div>
+            <div>
+              <div class="step-title">Ask about stakeholder handoff</div>
+              <div class="step-subtitle">One question — if no, skip. If yes, produce the package.</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <p>Before closing the sprint, one question: <em>"Does this need to go to anyone outside the build — a stakeholder, client, approver — before design review begins?"</em></p>
+            <p>If no: skip. The sprint is complete. Gate artifacts exist. Design review can begin.</p>
+            <p>If yes: produce the stakeholder handoff package. See the Stakeholder Handoff section below for full details on what's produced.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── SECTION 5: Stakeholder Handoff ── -->
+    <div class="section" id="handoff">
+      <div class="section-header">
+        <div class="section-icon">📤</div>
+        <div>
+          <div class="section-title">Stakeholder handoff (optional)</div>
+          <div class="section-desc">Step 9 output — only produced when external review is needed before design review begins</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <p>When the sprint work needs to go to someone outside the build — a client, stakeholder, or approver — before design review begins, a handoff package is produced at <span class="filepath">docs/design/handoff/&lt;YYYY-MM-DD&gt;/</span>.</p>
+        </div>
+        <div class="card-grid">
+          <div class="card-col">
+            <div class="card-col-label">artifact.html</div>
+            <ul>
+              <li>Standalone — all screens inlined into one file</li>
+              <li>Opens without a server — shareable as a single file</li>
+              <li>Every screen produced in the sprint included</li>
+              <li>No dependencies — no CDN, no external assets</li>
+            </ul>
+          </div>
+          <div class="card-col">
+            <div class="card-col-label">artifact.pdf</div>
+            <ul>
+              <li>PDF render of the HTML — for stakeholders who prefer PDF over a link</li>
+              <li>Generated via headless Chrome or equivalent</li>
+              <li>Useful for formal approval workflows or email-based review</li>
+            </ul>
+          </div>
+          <div class="card-col">
+            <div class="card-col-label">feedback-template.md</div>
+            <ul>
+              <li>Structured markdown the stakeholder fills in</li>
+              <li>Per-screen comment slots + overall reaction</li>
+              <li>Concerns/blockers section + approval status checkboxes</li>
+              <li>Returned as <code>docs/stakeholder-feedback/&lt;date&gt;-&lt;topic&gt;.md</code></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-teal">
+        <div class="callout-label">How feedback flows back</div>
+        The solo shares whichever format the stakeholder prefers. Completed feedback returns as a file in <span class="filepath">docs/stakeholder-feedback/</span>. The <code>design-review</code> skill reads any file in that directory as first-class input on the next round — per-screen comments become findings, and blockers gate the Ready status.
+      </div>
+    </div>
+
+    <!-- ── SECTION 6: Documents produced ── -->
+    <div class="section" id="documents">
+      <div class="section-header">
+        <div class="section-icon">📁</div>
+        <div>
+          <div class="section-title">Documents produced</div>
+          <div class="section-desc">Specific file paths — where each artifact lives and what it contains</div>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Artifact</th>
+              <th>Location</th>
+              <th>Contents</th>
+              <th>Required</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Hero screen</strong></td>
+              <td><code>docs/design/sprint-[id].html</code></td>
+              <td>First approved screen. Design system established here — all other screens inherit from it.</td>
+              <td><span class="card-badge badge-gate">Gate</span></td>
+            </tr>
+            <tr>
+              <td><strong>All screens</strong></td>
+              <td><code>docs/design/sprint-[id].html</code></td>
+              <td>One file per screen, named by screen ID or wireframe reference. Each saves separately.</td>
+              <td><span class="card-badge badge-gate">Gate</span></td>
+            </tr>
+            <tr>
+              <td><strong>Deferred decisions log</strong></td>
+              <td><code>docs/design/deferred-decisions.md</code></td>
+              <td>Phase 1 scope vs deferred, organized by screen. Visible scope and implied infrastructure both covered. Open questions with what they block.</td>
+              <td><span class="card-badge badge-gate">Gate</span></td>
+            </tr>
+            <tr>
+              <td><strong>Annotated to-be map</strong></td>
+              <td><code>docs/process/to-be-[name].md</code></td>
+              <td>Existing to-be map updated by <code>process-mapper</code> with screen references. Each step annotated with which sprint file covers it, or a documented decision for why no screen exists.</td>
+              <td><span class="card-badge badge-gate">Gate</span></td>
+            </tr>
+            <tr>
+              <td><strong>Handoff HTML</strong></td>
+              <td><code>docs/design/handoff/&lt;date&gt;/artifact.html</code></td>
+              <td>All screens inlined into one standalone file for stakeholder sharing. Opens without a server.</td>
+              <td><span class="card-badge badge-optional">Optional</span></td>
+            </tr>
+            <tr>
+              <td><strong>Handoff PDF</strong></td>
+              <td><code>docs/design/handoff/&lt;date&gt;/artifact.pdf</code></td>
+              <td>PDF render of the HTML artifact for stakeholders who prefer PDF over a link.</td>
+              <td><span class="card-badge badge-optional">Optional</span></td>
+            </tr>
+            <tr>
+              <td><strong>Feedback template</strong></td>
+              <td><code>docs/design/handoff/&lt;date&gt;/feedback-template.md</code></td>
+              <td>Structured template for stakeholder feedback. Per-screen comment slots, concerns section, approval status.</td>
+              <td><span class="card-badge badge-optional">Optional</span></td>
+            </tr>
+            <tr>
+              <td><strong>Stakeholder feedback</strong></td>
+              <td><code>docs/stakeholder-feedback/&lt;date&gt;-&lt;topic&gt;.md</code></td>
+              <td>Completed feedback returned from stakeholder review. <code>design-review</code> reads this directory as first-class input.</td>
+              <td><span class="card-badge badge-optional">Optional</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── SECTION 7: The gate ── -->
+    <div class="section" id="gate">
+      <div class="section-header">
+        <div class="section-icon">🔒</div>
+        <div>
+          <div class="section-title">The gate</div>
+          <div class="section-desc">Design review cannot start without both artifacts — structural, not ceremonial</div>
+        </div>
+      </div>
+
+      <div class="gate-box">
+        <div class="gate-box-label">Gate: Design Sprint → Design Review</div>
+        <div class="gate-items">
+          <div class="gate-item">
+            <div class="gate-check">✓</div>
+            <div class="gate-text"><strong>sprint-[id].html exists</strong> — at least the hero screen is approved and saved. All other screens expected, but the gate checks for existence, not perfection.</div>
+          </div>
+          <div class="gate-item">
+            <div class="gate-check">✓</div>
+            <div class="gate-text"><strong>deferred-decisions.md exists</strong> — the walk-through ran and every visible element on every screen has a Phase 1 or deferred decision. Implied infrastructure is documented. Open questions are logged.</div>
+          </div>
+          <div class="gate-item">
+            <div class="gate-check">✓</div>
+            <div class="gate-text"><strong>to-be map is annotated</strong> — every step in the to-be map either has a screen reference or a documented decision for why no screen covers it. No silent assumptions.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-rose">
+        <div class="callout-label">Gate enforcement</div>
+        <code>framework-health</code> checks for gate artifact existence on each session start. If <code>deferred-decisions.md</code> is missing and the project state suggests the sprint has run, it surfaces one recovery path: complete the walk-through and produce the log before continuing to design review.
+      </div>
+    </div>
+
+    <!-- ── SECTION 8: Handoff to next phase ── -->
+    <div class="section" id="next">
+      <div class="section-header">
+        <div class="section-icon">→</div>
+        <div>
+          <div class="section-title">Handoff to Data &amp; Design Review</div>
+          <div class="section-desc">What the next phases read — and what they do with it</div>
+        </div>
+      </div>
+
+      <div class="flow-box">
+        <div class="flow-box-label">What comes next</div>
+        <div class="flow-items">
+          <div class="flow-item">
+            <div class="flow-arrow">→</div>
+            <div class="flow-text"><strong>Data Scaffold (2.5)</strong> — reads the sprint HTML screens to identify all data entities shown in the UI. Generates realistic fake data in <code>data/mock/</code> and produces a data-mapping doc as a proto-API contract. Runs before or alongside design review.</div>
+          </div>
+          <div class="flow-item">
+            <div class="flow-connector">|</div>
+          </div>
+          <div class="flow-item">
+            <div class="flow-arrow">→</div>
+            <div class="flow-text"><strong>Design Review (2.6)</strong> — reads all sprint HTML screens, the deferred decisions log, the annotated to-be map, and any files in <code>docs/stakeholder-feedback/</code>. Defines slices, manages the backlog, and signals when enough Ready slices exist to start building.</div>
+          </div>
+          <div class="flow-item">
+            <div class="flow-connector">|</div>
+          </div>
+          <div class="flow-item">
+            <div class="flow-arrow">→</div>
+            <div class="flow-text"><strong>Plan (3)</strong> — <code>prd-to-plan</code> reads the deferred decisions log directly. Phases are sequenced around what was approved for Phase 1 — visible scope and implied infrastructure both — not around what's technically comfortable to build first.</div>
+          </div>
+          <div class="flow-item">
+            <div class="flow-connector">|</div>
+          </div>
+          <div class="flow-item">
+            <div class="flow-arrow">→</div>
+            <div class="flow-text"><strong>Build (4)</strong> — the sprint HTML files become the starting point for the frontend. They are not translated into code — they <strong>become</strong> the first frontend code. Each slice in the build phase references its design anchor: the specific sprint file and element it implements.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <p><strong>Design Review reads the sprint output in two modes:</strong></p>
+          <p>Round 1 is a full first pass across all screens — it defines the initial set of slices, identifies which slices can go straight to Ready and which need spikes first, and sets the review log. The deferred decisions log from the sprint is the primary input for determining what belongs in Phase 1 scope vs later.</p>
+          <p>Round N (subsequent rounds) refines slices, promotes them to Ready status, and updates the backlog. Design review continues in parallel with build for remaining slices — it does not have to complete before the first build work begins.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION 9: What to watch for ── -->
+    <div class="section" id="watchfor">
+      <div class="section-header">
+        <div class="section-icon">⚠️</div>
+        <div>
+          <div class="section-title">What to watch for</div>
+          <div class="section-desc">The most common ways this phase goes sideways — and why each one matters</div>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Anti-pattern</th>
+              <th>Why it happens</th>
+              <th>The actual problem</th>
+              <th>Instead</th>
+            </tr>
+          </thead>
+          <tbody class="anti-rows">
+            <tr>
+              <td style="color:var(--rose);font-weight:600;">Jumping to skin before structure is warm</td>
+              <td>Structure looks close enough — the impulse is to make it look good</td>
+              <td>Structure and skin require separate warmer/colder questions. If skin is addressed while structure is cold, you're rebuilding both at the same time with neither converging.</td>
+              <td>Always ask structure-only first. Get an explicit "warmer on layout" before asking about skin direction.</td>
+            </tr>
+            <tr>
+              <td style="color:var(--rose);font-weight:600;">Building all screens before hero is approved</td>
+              <td>Moving fast feels productive — ship all screens at once</td>
+              <td>Every secondary screen inherits from the hero. If the hero's design system is wrong, all screens have to be rebuilt. The drift compounds on every screen.</td>
+              <td>Hero screen approved on both structure and skin before the first secondary screen is produced. No exceptions.</td>
+            </tr>
+            <tr>
+              <td style="color:var(--rose);font-weight:600;">Skipping the walk-through</td>
+              <td>Screens look good, there's momentum — the walk-through feels like a slowdown</td>
+              <td>Without the walk-through, no build/defer decisions are made. Planning inherits the entire visible scope as Phase 1 — plus implied infrastructure that was never surfaced. Phases get bloated.</td>
+              <td>The walk-through is mandatory. It is the gate, not a nice-to-have. Screens are the tool that makes the conversation possible.</td>
+            </tr>
+            <tr>
+              <td style="color:var(--rose);font-weight:600;">Treating the deferred log as optional</td>
+              <td>"We talked through scope in the walk-through, that's enough"</td>
+              <td><code>prd-to-plan</code> reads the log to sequence phases. Without it, the planner has no structured input — phases default to technical convenience rather than product risk. The deferred items drift back into scope.</td>
+              <td>Every visible element gets a decision in the log: Phase 1 or deferred. Every implied infrastructure item gets the same. No silent assumptions.</td>
+            </tr>
+            <tr>
+              <td style="color:var(--rose);font-weight:600;">Incrementally adjusting colors when skin is cold</td>
+              <td>One more tweak feels like the faster path</td>
+              <td>Incremental color adjustments produce neither version correctly. You end up with a hybrid that doesn't commit to any direction. After two cold rounds on skin, the design system needs to be replaced, not tweaked.</td>
+              <td>When skin is cold, ask one question: "What should this feel like?" Then rebuild from that direction. Change the design system, don't adjust it.</td>
+            </tr>
+            <tr>
+              <td style="color:var(--rose);font-weight:600;">Aiming for pixel-perfect fidelity on every screen</td>
+              <td>Perfectionism — wanting every screen to be presentable before moving on</td>
+              <td>Wrong level of investment. The goal is something good enough to point at and make decisions from. Secondary screens don't need the same fidelity as the hero. Sprint time is better spent on the walk-through and deferred log than on visual polish.</td>
+              <td>Good enough to point at and make real decisions from — not perfect. "Good enough, move on" is an acceptable signal. Note what's thin and continue.</td>
+            </tr>
+            <tr>
+              <td style="color:var(--rose);font-weight:600;">Continuing a stuck sprint instead of going back to discover</td>
+              <td>Sunk cost — the sprint has started, stopping feels like going backward</td>
+              <td>If structure is still cold after 3 rounds, the story isn't clear enough. The design sprint cannot produce a good artifact from an unclear brief. More rounds won't fix it.</td>
+              <td>After 3 cold rounds on structure: stop. Surface what's unclear. Go back to <code>discover</code> and deepen Zone 2 (the journey). Return to the sprint when the story is clearer.</td>
+            </tr>
+            <tr>
+              <td style="color:var(--rose);font-weight:600;">Treating parallel secondary screens as a race condition</td>
+              <td>In Claude Code, secondary screens fan out simultaneously after hero approval — multiple screens appear at once instead of one at a time</td>
+              <td>This is intentional behavior, not a problem. The design system established on the hero applies to all screens in the same pass. Trying to intervene or sequence them manually defeats the parallelism and can produce inconsistent results if the design system hasn't fully propagated.</td>
+              <td>Let the fan-out complete. Review all screens together as a set. If something looks wrong, address it in the next warmer/colder round on the affected screen — not mid-production.</td>
+            </tr>
+            <tr>
+              <td style="color:var(--rose);font-weight:600;">Expecting a prompt before the preview pass runs in design review</td>
+              <td>Step 1.5 is automatic in Claude Code — it fires between the state read and the specialist review without any activation.</td>
+              <td>If you wait for a confirmation prompt before the preview runs, you'll miss findings that were already surfaced. The preview pass outputs its findings and flows directly into the specialist synthesis — it is not a separate step that requires a go signal.</td>
+              <td>In Claude Code, let Step 1.5 run. If a project is non-visual or no HTML design artifacts exist, it skips silently — no intervention needed either way. In Cursor, the preview pass does not fire; the specialist review starts immediately.</td>
+            </tr>
+            <tr>
+              <td style="color:var(--rose);font-weight:600;">Missing security process gaps in the process-mapper cross-reference</td>
+              <td>The process-mapper reads the to-be map and annotates screens — but security gaps require reading the Security Classification from tech-context.md first. If that step is skipped or tech-context.md has no Security Classification section, the check runs as Standard and class-specific gaps go undetected.</td>
+              <td>Security process gaps are process design failures, not code failures. A Personal-class project missing a data deletion path won't fail code review — it will ship without one. The design sprint is the only moment where these gaps can be caught before screens are approved and slices are written.</td>
+              <td>In Step 1, confirm the Security Classification section exists in docs/tech-context.md before the process-mapper cross-reference runs. If it's missing and the project handles personal data, financial records, user credentials, or multi-tenant data — stop and add it first. The class takes two minutes to declare and changes what the mapper looks for.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+  // Smooth scroll for sidebar links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        this.classList.add('active');
+      }
+    });
+  });
+
+  // Update active nav item on scroll
+  const sections = document.querySelectorAll('.section[id]');
+  const navItems = document.querySelectorAll('.nav-item[href^="#"]');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.getAttribute('id');
+        navItems.forEach(item => {
+          item.classList.toggle('active', item.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(section => observer.observe(section));
+</script>
+
+</body>
+</html>

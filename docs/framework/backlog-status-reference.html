@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solo Builder Framework — Backlog Status Reference</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0F1729;
+    --navy-mid: #1E3A5F;
+    --blue: #2563EB;
+    --blue-light: #DBEAFE;
+    --teal: #0D9488;
+    --teal-light: #CCFBF1;
+    --purple: #bd8c7d;
+    --purple-light: rgba(189,140,125,0.12);
+    --indigo: #4338CA;
+    --indigo-light: #E0E7FF;
+    --orange: #EA580C;
+    --orange-light: #FFEDD5;
+    --green: #15803D;
+    --green-light: #DCFCE7;
+    --rose: #BE123C;
+    --rose-light: #FFE4E6;
+    --amber: #B45309;
+    --amber-light: #FEF3C7;
+    --gray-50: #F8FAFC;
+    --gray-100: #F1F5F9;
+    --gray-200: #E2E8F0;
+    --gray-300: #CBD5E1;
+    --gray-400: #94A3B8;
+    --gray-500: #64748B;
+    --gray-700: #334155;
+    --gray-900: #0F172A;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-900);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .page-header {
+    background: var(--navy);
+    padding: 48px 56px 40px;
+  }
+  .ph-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 12px;
+  }
+  .page-header h1 {
+    font-size: clamp(24px, 4vw, 36px);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #fff;
+    margin-bottom: 12px;
+  }
+  .page-header h1 em { color: #60A5FA; font-style: normal; }
+  .page-header p {
+    font-size: 15px;
+    color: rgba(255,255,255,0.5);
+    max-width: 600px;
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+  .header-nav {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .header-nav a {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.5);
+    text-decoration: none;
+    padding: 4px 10px;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 4px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .header-nav a:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+  .header-nav a.current { color: #60A5FA; border-color: rgba(96,165,250,0.4); }
+
+  /* ── MAIN CONTENT ── */
+  .content {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 48px 40px 80px;
+  }
+
+  /* ── INTRO CALLOUT ── */
+  .intro-callout {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-left: 4px solid var(--blue);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 48px;
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.6;
+  }
+  .intro-callout strong { color: var(--gray-900); }
+
+  /* ── OBJECT SECTIONS ── */
+  .object-section {
+    margin-bottom: 56px;
+  }
+  .object-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+  .object-title {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+  }
+  .object-count {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+  .object-desc {
+    font-size: 14px;
+    color: var(--gray-500);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  /* Slice colors */
+  .slice .object-title { color: var(--green); }
+  .slice .object-count { background: var(--green-light); color: var(--green); }
+  .slice .flow-arrow { color: var(--green); }
+  .slice .status-card.active-status { border-color: var(--green); }
+  .slice .status-badge { background: var(--green-light); color: var(--green); }
+
+  /* Deliverable colors */
+  .deliverable .object-title { color: var(--purple); }
+  .deliverable .object-count { background: var(--purple-light); color: var(--purple); }
+  .deliverable .flow-arrow { color: var(--purple); }
+  .deliverable .status-card.active-status { border-color: var(--purple); }
+  .deliverable .status-badge { background: var(--purple-light); color: var(--purple); }
+
+  /* Phase colors */
+  .phase .object-title { color: var(--amber); }
+  .phase .object-count { background: var(--amber-light); color: var(--amber); }
+  .phase .flow-arrow { color: var(--amber); }
+  .phase .status-card.active-status { border-color: var(--amber); }
+  .phase .status-badge { background: var(--amber-light); color: var(--amber); }
+
+  /* ── STATUS GRID ── */
+  .status-grid {
+    display: grid;
+    gap: 12px;
+  }
+  .status-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .status-grid.cols-2-3 { grid-template-columns: repeat(3, 1fr); }
+
+  .status-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .status-card.active-status {
+    border-width: 2px;
+  }
+  .status-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    letter-spacing: 0.02em;
+  }
+  .status-who {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--gray-400);
+    margin-bottom: 6px;
+  }
+  .status-meaning {
+    font-size: 13px;
+    color: var(--gray-700);
+    line-height: 1.5;
+  }
+
+  /* ── FLOW CHAIN ── */
+  .flow-chain {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 20px;
+    font-size: 12px;
+  }
+  .flow-status {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .flow-arrow {
+    font-size: 14px;
+    font-weight: 700;
+    opacity: 0.5;
+  }
+  .flow-branch {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--gray-400);
+    font-style: italic;
+  }
+
+  /* ── DIVIDER ── */
+  .section-divider {
+    height: 1px;
+    background: var(--gray-200);
+    margin: 56px 0;
+  }
+
+  /* ── BACK LINK ── */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-500);
+    text-decoration: none;
+    margin-bottom: 48px;
+  }
+  .back-link:hover { color: var(--gray-900); }
+
+  /* ── THREE COLUMN RULE TABLE ── */
+  .rule-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 16px;
+  }
+  .rule-table th {
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--gray-400);
+    padding: 6px 12px 6px 0;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .rule-table td {
+    padding: 10px 12px 10px 0;
+    border-bottom: 1px solid var(--gray-100);
+    vertical-align: top;
+    color: var(--gray-700);
+    line-height: 1.5;
+  }
+  .rule-table td:first-child { font-weight: 600; color: var(--gray-900); width: 28%; }
+  .rule-table tr:last-child td { border-bottom: none; }
+
+  @media (max-width: 700px) {
+    .content { padding: 32px 20px 60px; }
+    .page-header { padding: 32px 24px 28px; }
+    .status-grid.cols-4 { grid-template-columns: repeat(2, 1fr); }
+    .status-grid.cols-2-3 { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="ph-eyebrow">Solo Builder Framework</div>
+  <h1>Backlog <em>Status Reference</em></h1>
+  <p>Every status for every object in the backlog — what it means, who sets it, and how it flows. Three objects, three status chains, one lifecycle.</p>
+  <nav class="header-nav">
+    <a href="index.html">← All docs</a>
+    <a href="skills-reference.html">Skills Reference</a>
+    <a href="guide-build.html">Build Guide</a>
+    <a href="guide-qa.html">QA Guide</a>
+    <a href="guide-phase-test.html">Phase Test Guide</a>
+    <a class="current" href="backlog-status-reference.html">Status Reference</a>
+  </nav>
+</div>
+
+<div class="content">
+
+  <div class="intro-callout">
+    The backlog tracks three types of objects: <strong>Slices</strong> (individual units of work), <strong>Deliverables</strong> (groups of slices that produce one complete output), and <strong>Phases</strong> (groups of deliverables that prove one meaningful capability). Each has its own status chain. A status on one object does not imply a status on another — they are verified and advanced independently.
+  </div>
+
+  <!-- ══════════════ SLICE ══════════════ -->
+  <div class="object-section slice">
+    <div class="object-header">
+      <div class="object-title">Slice</div>
+      <div class="object-count">8 statuses</div>
+    </div>
+    <div class="object-desc">The atomic unit of build work. Each slice is one specific element or behavior — fully defined with four anchors before build starts. Slices are verified individually by solo-qa before contributing to a deliverable.</div>
+
+    <div class="flow-chain">
+      <span class="flow-status" style="background:#F0FDF4;color:#15803D">In Review</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-status" style="background:#F0FDF4;color:#15803D">Ready</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-status" style="background:#F0FDF4;color:#15803D">In Build</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-status" style="background:#F0FDF4;color:#15803D">In QA</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-status" style="background:#F0FDF4;color:#15803D">In Test</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-status" style="background:#15803D;color:#fff">Done</span>
+      <span class="flow-branch">· branches: Blocked · Deferred</span>
+    </div>
+
+    <div class="status-grid" style="grid-template-columns: repeat(4, 1fr); gap: 12px;">
+
+      <div class="status-card">
+        <div class="status-badge" style="background:#F0FDF4;color:#15803D">In Review</div>
+        <div class="status-who">Set by: design-review</div>
+        <div class="status-meaning">Identified but not fully defined yet. Needs more work before it can be built — a missing anchor, an open question, or a dependency that hasn't resolved.</div>
+      </div>
+
+      <div class="status-card" style="border-color:#D1D5DB;background:#F9FAFB">
+        <div class="status-badge" style="background:#F1F5F9;color:#64748B">Blocked</div>
+        <div class="status-who">Set by: solo-build</div>
+        <div class="status-meaning">Waiting on a named dependency. Always named explicitly — not "backend" but a specific slice ID, deliverable, or external dependency.</div>
+      </div>
+
+      <div class="status-card" style="border-color:#D1D5DB;background:#F9FAFB">
+        <div class="status-badge" style="background:#F1F5F9;color:#64748B">Deferred</div>
+        <div class="status-who">Set by: solo-build / curator</div>
+        <div class="status-meaning">Explicitly set aside with a trigger condition noted. Not abandoned — it has a named condition that would bring it back into scope.</div>
+      </div>
+
+      <div class="status-card active-status">
+        <div class="status-badge">Ready</div>
+        <div class="status-who">Set by: design-review</div>
+        <div class="status-meaning">Fully defined. All four anchors set, done criteria written, self-verification checklist defined, dependencies resolved. Build can start immediately.</div>
+      </div>
+
+      <div class="status-card active-status">
+        <div class="status-badge">In Build</div>
+        <div class="status-who">Set by: solo-build</div>
+        <div class="status-meaning">Work is active on this slice. The builder is implementing it now. Only one slice should be In Build at a time per active thread.</div>
+      </div>
+
+      <div class="status-card active-status">
+        <div class="status-badge">In QA</div>
+        <div class="status-who">Set by: solo-build at code-complete</div>
+        <div class="status-meaning">Code complete. solo-qa is running — AI verification against done criteria and design fidelity, then solo sign-off in the browser. Not done until both pass.</div>
+      </div>
+
+      <div class="status-card active-status">
+        <div class="status-badge">In Test</div>
+        <div class="status-who">Set by: solo-qa after solo sign-off</div>
+        <div class="status-meaning">QA passed. The slice is built correctly and the solo has confirmed it in the browser. Waiting on phase-test to verify it as part of the complete phase.</div>
+      </div>
+
+      <div class="status-card" style="border: 2px solid var(--green); background: var(--green-light);">
+        <div class="status-badge" style="background:#15803D;color:#fff">Done</div>
+        <div class="status-who">Set by: phase-test at gate-open</div>
+        <div class="status-meaning">Built, QA verified, and phase-tested end-to-end. This is the terminal state. Done is permanent unless a later slice reveals a regression.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- ══════════════ DELIVERABLE ══════════════ -->
+  <div class="object-section deliverable">
+    <div class="object-header">
+      <div class="object-title">Deliverable</div>
+      <div class="object-count">4 statuses</div>
+    </div>
+    <div class="object-desc">A group of slices that together produce one complete output — a screen, a piece of logic, or a data integration. Deliverables are accepted by the solo after all their slices are In Test and the full flow is verified together. A deliverable is not accepted by the sum of its slice approvals — it requires its own verification pass.</div>
+
+    <div class="flow-chain">
+      <span class="flow-status" style="background:rgba(189,140,125,0.12);color:#bd8c7d">Defined</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-status" style="background:rgba(189,140,125,0.12);color:#bd8c7d">Active</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-status" style="background:rgba(189,140,125,0.12);color:#bd8c7d">Pending Acceptance</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-status" style="background:#bd8c7d;color:#fff">Accepted</span>
+    </div>
+
+    <div class="status-grid cols-4">
+
+      <div class="status-card active-status">
+        <div class="status-badge">Defined</div>
+        <div class="status-who">Set by: prd-to-plan</div>
+        <div class="status-meaning">Record created with all fields complete. Plan approved. Build has not started yet — no slices in this deliverable are In Build.</div>
+      </div>
+
+      <div class="status-card active-status">
+        <div class="status-badge">Active</div>
+        <div class="status-who">Set by: solo-build</div>
+        <div class="status-meaning">At least one slice in this deliverable is In Build. Work is underway. Other slices may still be Ready or In QA.</div>
+      </div>
+
+      <div class="status-card active-status">
+        <div class="status-badge">Pending Acceptance</div>
+        <div class="status-who">Set by: solo-qa</div>
+        <div class="status-meaning">All slices are In Test. solo-qa has verified the complete flow and is presenting the deliverable to the solo for acceptance sign-off.</div>
+      </div>
+
+      <div class="status-card" style="border: 2px solid var(--purple); background: var(--purple-light);">
+        <div class="status-badge" style="background:#bd8c7d;color:#fff">Accepted</div>
+        <div class="status-who">Set by: solo sign-off (via solo-qa)</div>
+        <div class="status-meaning">Solo signed off on the complete deliverable experience — not just individual slices. This is the terminal state for deliverables.</div>
+      </div>
+
+    </div>
+
+    <table class="rule-table" style="margin-top:24px">
+      <tr>
+        <th>Type</th>
+        <th>What it produces</th>
+        <th>How it's verified</th>
+      </tr>
+      <tr>
+        <td>Screen</td>
+        <td>Visible UI built against mock data</td>
+        <td>Visually in the browser — does it look and behave correctly?</td>
+      </tr>
+      <tr>
+        <td>Logic</td>
+        <td>Invisible background behavior</td>
+        <td>Evidence: test results, data state, simulated flows through affected screens</td>
+      </tr>
+      <tr>
+        <td>Integration</td>
+        <td>Real data connected to a Screen deliverable</td>
+        <td>Both visual (does it look right with live data?) and evidence (are fields coming from the real source?). Always sequences after its Screen companion is Accepted.</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- ══════════════ PHASE ══════════════ -->
+  <div class="object-section phase">
+    <div class="object-header">
+      <div class="object-title">Phase</div>
+      <div class="object-count">4 statuses</div>
+    </div>
+    <div class="object-desc">A group of deliverables that together prove one meaningful capability. A phase is not a time box, a sprint, or a feature list. Every phase answers exactly one question — if that question can't be stated in one sentence, the phase boundary is wrong.</div>
+
+    <div class="flow-chain">
+      <span class="flow-status" style="background:#FEF3C7;color:#B45309">Planning</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-status" style="background:#FEF3C7;color:#B45309">Ready for Build</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-status" style="background:#FEF3C7;color:#B45309">In Progress</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-status" style="background:#B45309;color:#fff">Completed</span>
+    </div>
+
+    <div class="status-grid cols-4">
+
+      <div class="status-card active-status">
+        <div class="status-badge">Planning</div>
+        <div class="status-who">Set by: prd-to-plan</div>
+        <div class="status-meaning">Phase is being defined. Deliverables and slices are being sequenced. This phase has not been approved yet — it is still taking shape.</div>
+      </div>
+
+      <div class="status-card active-status">
+        <div class="status-badge">Ready for Build</div>
+        <div class="status-who">Set by: prd-to-plan on approval</div>
+        <div class="status-meaning">Plan approved by the solo. All deliverables are Defined. All slices are Ready. Build can start on the first deliverable.</div>
+      </div>
+
+      <div class="status-card active-status">
+        <div class="status-badge">In Progress</div>
+        <div class="status-who">Set by: solo-build</div>
+        <div class="status-meaning">At least one deliverable is Active. Work is underway in this phase. Other deliverables may be Defined and waiting.</div>
+      </div>
+
+      <div class="status-card" style="border: 2px solid var(--amber); background: var(--amber-light);">
+        <div class="status-badge" style="background:#B45309;color:#fff">Completed</div>
+        <div class="status-who">Set by: phase-test at gate-open</div>
+        <div class="status-meaning">All deliverables Accepted. Phase test gate open. All slices marked Done. The capability this phase was built to prove has been confirmed end-to-end.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- ══════════════ STATUS CHAIN SUMMARY ══════════════ -->
+  <div style="background:#fff; border:1px solid var(--gray-200); border-radius:12px; padding:28px 32px;">
+    <div style="font-size:15px;font-weight:800;color:var(--gray-900);margin-bottom:4px;">Who sets what — and when</div>
+    <div style="font-size:13px;color:var(--gray-500);margin-bottom:20px;">Each skill owns specific status transitions. No skill advances a status it doesn't own.</div>
+    <table class="rule-table">
+      <tr>
+        <th>Skill</th>
+        <th>Status transitions it owns</th>
+      </tr>
+      <tr>
+        <td>design-review</td>
+        <td>Births slices at In Review · advances to Ready when all anchors are set</td>
+      </tr>
+      <tr>
+        <td>prd-to-plan</td>
+        <td>Sets all deliverables to Defined · sets all phases to Planning → Ready for Build on approval</td>
+      </tr>
+      <tr>
+        <td>solo-build</td>
+        <td>Slice: Ready → In Build → In QA · Deliverable: Defined → Active · Phase: Ready for Build → In Progress · also sets Blocked and Deferred</td>
+      </tr>
+      <tr>
+        <td>solo-qa</td>
+        <td>Slice: In QA → In Test · Deliverable: Active → Pending Acceptance → Accepted</td>
+      </tr>
+      <tr>
+        <td>phase-test</td>
+        <td>Slice: In Test → Done (all slices in phase) · Phase: In Progress → Completed</td>
+      </tr>
+    </table>
+  </div>
+
+</div><!-- /content -->
+</body>
+</html>

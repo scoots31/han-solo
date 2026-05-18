@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solo Builder Framework — Communications</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: #0F1729;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+  }
+  .container { max-width: 680px; width: 100%; }
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 800;
+    letter-spacing: -0.8px;
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+  h1 em { color: #60A5FA; font-style: normal; }
+  .subtitle {
+    font-size: 15px;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.6;
+    margin-bottom: 48px;
+    max-width: 500px;
+  }
+  .rule {
+    width: 48px;
+    height: 3px;
+    background: #2563EB;
+    border-radius: 2px;
+    margin-bottom: 48px;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.25);
+    margin-bottom: 12px;
+    padding-left: 4px;
+  }
+
+  .doc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 36px;
+  }
+
+  .doc-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 18px 22px;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .doc-card:hover {
+    background: rgba(255,255,255,0.09);
+    border-color: rgba(255,255,255,0.16);
+    transform: translateY(-1px);
+  }
+  .doc-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    flex-shrink: 0;
+  }
+  .doc-info { flex: 1; min-width: 0; }
+  .doc-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 3px;
+  }
+  .doc-desc {
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    line-height: 1.4;
+  }
+  .doc-arrow {
+    font-size: 18px;
+    color: rgba(255,255,255,0.2);
+    flex-shrink: 0;
+  }
+
+  .phase-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 36px;
+  }
+  .phase-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 14px 16px;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .phase-card:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.14);
+    transform: translateY(-1px);
+  }
+  .phase-num {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.25);
+    flex-shrink: 0;
+    width: 20px;
+  }
+  .phase-info { flex: 1; min-width: 0; }
+  .phase-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 2px;
+  }
+  .phase-skills {
+    font-size: 11px;
+    color: rgba(255,255,255,0.35);
+    line-height: 1.3;
+  }
+  .phase-arrow {
+    font-size: 15px;
+    color: rgba(255,255,255,0.18);
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="eyebrow">AI Build Mindset</div>
+  <h1>Solo Builder <em>Framework</em></h1>
+  <p class="subtitle">Communications materials — decks, reference docs, quick-start guides, and in-depth phase walkthroughs.</p>
+  <div class="rule"></div>
+
+  <!-- ── FRAMEWORK OVERVIEW ── -->
+  <div class="section-label">Framework Overview</div>
+  <div class="doc-list">
+
+    <a class="doc-card" href="deck-business.html">
+      <div class="doc-icon" style="background:rgba(37,99,235,0.15)">📊</div>
+      <div class="doc-info">
+        <div class="doc-name">Executive Deck</div>
+        <div class="doc-desc">From How We Work Today to How We Build Tomorrow — 11 slides</div>
+      </div>
+      <div class="doc-arrow">›</div>
+    </a>
+
+    <a class="doc-card" href="deck-solo.html">
+      <div class="doc-icon" style="background:rgba(189,140,125,0.15)">⚡</div>
+      <div class="doc-info">
+        <div class="doc-name">Solo Builder Deck</div>
+        <div class="doc-desc">Framework mechanics — session modes, anchors, QA chain, phase test, always-on — 12 slides</div>
+      </div>
+      <div class="doc-arrow">›</div>
+    </a>
+
+    <a class="doc-card" href="process-map.html">
+      <div class="doc-icon" style="background:rgba(13,148,136,0.15)">🗺️</div>
+      <div class="doc-info">
+        <div class="doc-name">Framework Process Map</div>
+        <div class="doc-desc">Full swimlane — all phases, all lanes, every output and gate</div>
+      </div>
+      <div class="doc-arrow">›</div>
+    </a>
+
+    <a class="doc-card" href="skills-reference.html">
+      <div class="doc-icon" style="background:rgba(245,158,11,0.15)">📖</div>
+      <div class="doc-info">
+        <div class="doc-name">Skills Reference</div>
+        <div class="doc-desc">35 skills + Workshop + Support + 3 session modes — description, key elements, when it runs, output</div>
+      </div>
+      <div class="doc-arrow">›</div>
+    </a>
+
+    <a class="doc-card" href="backlog-status-reference.html">
+      <div class="doc-icon" style="background:rgba(21,128,61,0.15)">📋</div>
+      <div class="doc-info">
+        <div class="doc-name">Backlog Status Reference</div>
+        <div class="doc-desc">Every status for Slice, Deliverable, and Phase — what it means, who sets it, and how it flows</div>
+      </div>
+      <div class="doc-arrow">›</div>
+    </a>
+
+    <a class="doc-card" href="framework-architecture.html">
+      <div class="doc-icon" style="background:rgba(189,140,125,0.15)">⚡</div>
+      <div class="doc-info">
+        <div class="doc-name">Framework Architecture</div>
+        <div class="doc-desc">Interactive flowchart — full phase chain, gates, always-on skills, session modes, on-demand skills, and artifact flows</div>
+      </div>
+      <div class="doc-arrow">›</div>
+    </a>
+
+  </div>
+
+  <!-- ── START HERE ── -->
+  <div class="section-label">Start Here</div>
+  <div class="doc-list">
+
+    <a class="doc-card" href="getting-started.html">
+      <div class="doc-icon" style="background:rgba(20,184,166,0.15)">🚀</div>
+      <div class="doc-info">
+        <div class="doc-name">Getting Started</div>
+        <div class="doc-desc">First session walkthrough — entry points, session modes, phase sequence, session hygiene</div>
+      </div>
+      <div class="doc-arrow">›</div>
+    </a>
+
+    <a class="doc-card" href="faq.html">
+      <div class="doc-icon" style="background:rgba(239,68,68,0.15)">❓</div>
+      <div class="doc-info">
+        <div class="doc-name">FAQ & Troubleshooting</div>
+        <div class="doc-desc">Real questions from mid-discovery, mid-design, mid-build, QA, and out-of-order situations</div>
+      </div>
+      <div class="doc-arrow">›</div>
+    </a>
+
+  </div>
+
+  <!-- ── WHAT'S NEW ── -->
+  <div class="section-label">What's New</div>
+  <div class="doc-list">
+
+    <a class="doc-card" href="blog.html">
+      <div class="doc-icon" style="background:rgba(16,185,129,0.15)">📝</div>
+      <div class="doc-info">
+        <div class="doc-name">Release Notes</div>
+        <div class="doc-desc">Framework improvements — what changed, what was added, and why</div>
+      </div>
+      <div class="doc-arrow">›</div>
+    </a>
+
+  </div>
+
+  <!-- ── PHASE GUIDES ── -->
+  <div class="section-label">Phase Guides</div>
+  <div class="phase-grid">
+
+    <a class="phase-card" href="guide-brainstorm.html">
+      <div class="phase-num">0</div>
+      <div class="phase-info">
+        <div class="phase-name">Brainstorm</div>
+        <div class="phase-skills">brainstorming</div>
+      </div>
+      <div class="phase-arrow">›</div>
+    </a>
+
+    <a class="phase-card" href="guide-discover.html">
+      <div class="phase-num">1</div>
+      <div class="phase-info">
+        <div class="phase-name">Discover & Tech Context</div>
+        <div class="phase-skills">discover · tech-context · process-mapper</div>
+      </div>
+      <div class="phase-arrow">›</div>
+    </a>
+
+    <a class="phase-card" href="guide-design-sprint.html">
+      <div class="phase-num">2</div>
+      <div class="phase-info">
+        <div class="phase-name">Design Sprint</div>
+        <div class="phase-skills">design-sprint · frontend-design · awesome-design-md</div>
+      </div>
+      <div class="phase-arrow">›</div>
+    </a>
+
+    <a class="phase-card" href="guide-data-review.html">
+      <div class="phase-num">2.5</div>
+      <div class="phase-info">
+        <div class="phase-name">Data & Design Review</div>
+        <div class="phase-skills">data-scaffold · design-review · research-spike</div>
+      </div>
+      <div class="phase-arrow">›</div>
+    </a>
+
+    <a class="phase-card" href="guide-plan.html">
+      <div class="phase-num">3</div>
+      <div class="phase-info">
+        <div class="phase-name">Plan</div>
+        <div class="phase-skills">prd-to-plan · grill-me · to-issues</div>
+      </div>
+      <div class="phase-arrow">›</div>
+    </a>
+
+    <a class="phase-card" href="guide-build.html">
+      <div class="phase-num">4</div>
+      <div class="phase-info">
+        <div class="phase-name">Build</div>
+        <div class="phase-skills">solo-build · tdd · principal-engineer</div>
+      </div>
+      <div class="phase-arrow">›</div>
+    </a>
+
+    <a class="phase-card" href="guide-qa.html">
+      <div class="phase-num">5</div>
+      <div class="phase-info">
+        <div class="phase-name">QA & Acceptance</div>
+        <div class="phase-skills">code-review-and-quality · solo-qa · qa-triage</div>
+      </div>
+      <div class="phase-arrow">›</div>
+    </a>
+
+    <a class="phase-card" href="guide-phase-test.html">
+      <div class="phase-num">5.5</div>
+      <div class="phase-info">
+        <div class="phase-name">Phase Test</div>
+        <div class="phase-skills">phase-test</div>
+      </div>
+      <div class="phase-arrow">›</div>
+    </a>
+
+    <a class="phase-card" href="guide-deploy.html">
+      <div class="phase-num">6</div>
+      <div class="phase-info">
+        <div class="phase-name">Deploy</div>
+        <div class="phase-skills">deploy</div>
+      </div>
+      <div class="phase-arrow">›</div>
+    </a>
+
+  </div>
+
+</div>
+</body>
+</html>

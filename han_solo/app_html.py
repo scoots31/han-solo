@@ -355,6 +355,32 @@ APP_HTML = """<!DOCTYPE html>
     .nc-picker-item-meta { font-size: 10.5px; color: var(--text-meta); margin-top: 2px; }
     .nc-picker-empty { padding: 20px 14px; font-size: 12.5px; color: var(--text-meta); }
 
+    /* ── SOLO BUILDER SCREEN ── */
+    .sbf-section { display: flex; flex-direction: column; gap: 12px; }
+    .sbf-section-label {
+      font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--text-meta); padding-bottom: 2px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .sbf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+    .sbf-card {
+      display: flex; align-items: flex-start; gap: 10px;
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 8px; padding: 14px; text-decoration: none;
+      color: var(--text-primary); transition: border-color .15s, background .15s;
+    }
+    .sbf-card:hover { border-color: var(--accent); background: var(--accent-light); }
+    .sbf-card-icon { font-size: 18px; flex-shrink: 0; line-height: 1; margin-top: 1px; }
+    .sbf-card-title { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.3; }
+    .sbf-card-sub { font-size: 11.5px; color: var(--text-meta); margin-top: 3px; line-height: 1.4; }
+    .sbf-card-phase { align-items: center; }
+    .sbf-phase-badge {
+      flex-shrink: 0; width: 28px; height: 28px; border-radius: 6px;
+      background: var(--accent-light); border: 1px solid var(--accent);
+      color: var(--accent); font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+
     /* ── PLACEHOLDER ── */
     .placeholder-body {
       flex: 1; display: flex; flex-direction: column;
@@ -499,10 +525,9 @@ APP_HTML = """<!DOCTYPE html>
 
       <div class="nav-section" style="margin-top:8px">
         <div class="nav-section-label">Frameworks</div>
-        <div class="nav-item disabled">
+        <div class="nav-item" onclick="showScreen('solo-framework')">
           <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.3"/><rect x="8.5" y="1.5" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.3"/><rect x="1.5" y="8.5" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.3"/><rect x="8.5" y="8.5" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.3"/></svg></div>
           <span class="nav-label">Solo Builder</span>
-          <span class="nav-soon">SOON</span>
         </div>
       </div>
     </nav>
@@ -677,14 +702,191 @@ APP_HTML = """<!DOCTYPE html>
       </div>
     </div>
 
-    <!-- SOLO BUILDER placeholder -->
+    <!-- SOLO BUILDER -->
     <div class="screen hidden" id="screen-solo-framework">
-      <div class="screen-header"><div><div class="screen-title">Solo Builder</div><div class="screen-sub">The Framework · v1.0</div></div></div>
-      <div class="placeholder-body">
-        <div class="placeholder-icon">⊞</div>
-        <div class="placeholder-title">Framework hub coming soon</div>
-        <div class="placeholder-sub">Dashboard stats, active slices, and the full documentation library for Solo Builder.</div>
-        <div class="placeholder-badge">In design</div>
+      <div class="screen-header">
+        <div><div class="screen-title">Solo Builder</div><div class="screen-sub">The Framework · Documentation Library</div></div>
+      </div>
+      <div class="screen-body" style="overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:28px;">
+
+        <!-- Overview -->
+        <div class="sbf-section">
+          <div class="sbf-section-label">Overview</div>
+          <div class="sbf-grid">
+            <a class="sbf-card" href="/docs/framework/index.html" target="_blank">
+              <div class="sbf-card-icon">📋</div>
+              <div class="sbf-card-title">Reference Index</div>
+              <div class="sbf-card-sub">Full nav — all pages in one place</div>
+            </a>
+            <a class="sbf-card" href="/docs/framework/process-map.html" target="_blank">
+              <div class="sbf-card-icon">🗺️</div>
+              <div class="sbf-card-title">Process Map</div>
+              <div class="sbf-card-sub">Full swimlane — phases, gates, flows</div>
+            </a>
+            <a class="sbf-card" href="/docs/framework/framework-architecture.html" target="_blank">
+              <div class="sbf-card-icon">⚡</div>
+              <div class="sbf-card-title">Architecture</div>
+              <div class="sbf-card-sub">Interactive flowchart of the full system</div>
+            </a>
+            <a class="sbf-card" href="/docs/framework/skills-reference.html" target="_blank">
+              <div class="sbf-card-icon">📖</div>
+              <div class="sbf-card-title">Skills Reference</div>
+              <div class="sbf-card-sub">35 skills, modes, and supporting tools</div>
+            </a>
+            <a class="sbf-card" href="/docs/framework/backlog-status-reference.html" target="_blank">
+              <div class="sbf-card-icon">📊</div>
+              <div class="sbf-card-title">Backlog Status</div>
+              <div class="sbf-card-sub">Slice, deliverable, and phase statuses</div>
+            </a>
+            <a class="sbf-card" href="/docs/framework/blog.html" target="_blank">
+              <div class="sbf-card-icon">📝</div>
+              <div class="sbf-card-title">Release Notes</div>
+              <div class="sbf-card-sub">What changed and when</div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Start Here -->
+        <div class="sbf-section">
+          <div class="sbf-section-label">Start Here</div>
+          <div class="sbf-grid">
+            <a class="sbf-card" href="/docs/framework/getting-started.html" target="_blank">
+              <div class="sbf-card-icon">🚀</div>
+              <div class="sbf-card-title">Getting Started</div>
+              <div class="sbf-card-sub">First session walkthrough, entry points</div>
+            </a>
+            <a class="sbf-card" href="/docs/framework/faq.html" target="_blank">
+              <div class="sbf-card-icon">❓</div>
+              <div class="sbf-card-title">FAQ</div>
+              <div class="sbf-card-sub">Troubleshooting by project stage</div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Phase Guides -->
+        <div class="sbf-section">
+          <div class="sbf-section-label">Phase Guides</div>
+          <div class="sbf-grid">
+            <a class="sbf-card sbf-card-phase" href="/docs/framework/guide-brainstorm.html" target="_blank">
+              <div class="sbf-phase-badge">0</div>
+              <div>
+                <div class="sbf-card-title">Brainstorm</div>
+                <div class="sbf-card-sub">Idea shaping before committing</div>
+              </div>
+            </a>
+            <a class="sbf-card sbf-card-phase" href="/docs/framework/guide-discover.html" target="_blank">
+              <div class="sbf-phase-badge">1</div>
+              <div>
+                <div class="sbf-card-title">Discover + Tech Context</div>
+                <div class="sbf-card-sub">User research and stack decisions</div>
+              </div>
+            </a>
+            <a class="sbf-card sbf-card-phase" href="/docs/framework/guide-design-sprint.html" target="_blank">
+              <div class="sbf-phase-badge">2</div>
+              <div>
+                <div class="sbf-card-title">Design Sprint</div>
+                <div class="sbf-card-sub">UX and interaction design</div>
+              </div>
+            </a>
+            <a class="sbf-card sbf-card-phase" href="/docs/framework/guide-data-review.html" target="_blank">
+              <div class="sbf-phase-badge">2.5</div>
+              <div>
+                <div class="sbf-card-title">Data + Design Review</div>
+                <div class="sbf-card-sub">Schema, data scaffold, review gate</div>
+              </div>
+            </a>
+            <a class="sbf-card sbf-card-phase" href="/docs/framework/guide-plan.html" target="_blank">
+              <div class="sbf-phase-badge">3</div>
+              <div>
+                <div class="sbf-card-title">Plan</div>
+                <div class="sbf-card-sub">Backlog, slices, sequencing</div>
+              </div>
+            </a>
+            <a class="sbf-card sbf-card-phase" href="/docs/framework/guide-build.html" target="_blank">
+              <div class="sbf-phase-badge">4</div>
+              <div>
+                <div class="sbf-card-title">Build</div>
+                <div class="sbf-card-sub">Slice execution, commits, handoff</div>
+              </div>
+            </a>
+            <a class="sbf-card sbf-card-phase" href="/docs/framework/guide-qa.html" target="_blank">
+              <div class="sbf-phase-badge">5</div>
+              <div>
+                <div class="sbf-card-title">QA + Acceptance</div>
+                <div class="sbf-card-sub">Testing, triage, sign-off</div>
+              </div>
+            </a>
+            <a class="sbf-card sbf-card-phase" href="/docs/framework/guide-phase-test.html" target="_blank">
+              <div class="sbf-phase-badge">5.5</div>
+              <div>
+                <div class="sbf-card-title">Phase Test</div>
+                <div class="sbf-card-sub">Autonomous framework simulation</div>
+              </div>
+            </a>
+            <a class="sbf-card sbf-card-phase" href="/docs/framework/guide-deploy.html" target="_blank">
+              <div class="sbf-phase-badge">6</div>
+              <div>
+                <div class="sbf-card-title">Deploy</div>
+                <div class="sbf-card-sub">Ship checklist and post-deploy</div>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Decks -->
+        <div class="sbf-section">
+          <div class="sbf-section-label">Decks</div>
+          <div class="sbf-grid">
+            <a class="sbf-card" href="/docs/framework/deck-solo.html" target="_blank">
+              <div class="sbf-card-icon">🎞️</div>
+              <div class="sbf-card-title">Framework Mechanics</div>
+              <div class="sbf-card-sub">Session modes, anchors, QA chain · 12 slides</div>
+            </a>
+            <a class="sbf-card" href="/docs/framework/deck-business.html" target="_blank">
+              <div class="sbf-card-icon">💼</div>
+              <div class="sbf-card-title">Business Overview</div>
+              <div class="sbf-card-sub">How we work today → how we build tomorrow · 11 slides</div>
+            </a>
+            <a class="sbf-card" href="/docs/framework/deck-bayer.html" target="_blank">
+              <div class="sbf-card-icon">🏢</div>
+              <div class="sbf-card-title">Bayer Deck</div>
+              <div class="sbf-card-sub">Building with AI without losing control</div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Han Solo Docs -->
+        <div class="sbf-section">
+          <div class="sbf-section-label">Han Solo</div>
+          <div class="sbf-grid">
+            <a class="sbf-card" href="/docs/index.html" target="_blank">
+              <div class="sbf-card-icon">🧠</div>
+              <div class="sbf-card-title">Reference</div>
+              <div class="sbf-card-sub">Stack, tools, memory model overview</div>
+            </a>
+            <a class="sbf-card" href="/docs/how-it-works.html" target="_blank">
+              <div class="sbf-card-icon">⚙️</div>
+              <div class="sbf-card-title">How it Works</div>
+              <div class="sbf-card-sub">Architecture and session flow</div>
+            </a>
+            <a class="sbf-card" href="/docs/architecture.html" target="_blank">
+              <div class="sbf-card-icon">🏗️</div>
+              <div class="sbf-card-title">Architecture + Flows</div>
+              <div class="sbf-card-sub">Technical diagrams and data flows</div>
+            </a>
+            <a class="sbf-card" href="/docs/roadmap.html" target="_blank">
+              <div class="sbf-card-icon">📍</div>
+              <div class="sbf-card-title">Roadmap</div>
+              <div class="sbf-card-sub">What's built, what's next</div>
+            </a>
+            <a class="sbf-card" href="/docs/working-with-ren.html" target="_blank">
+              <div class="sbf-card-icon">✦</div>
+              <div class="sbf-card-title">Working with Ren</div>
+              <div class="sbf-card-sub">Partnership, memory, session patterns</div>
+            </a>
+          </div>
+        </div>
+
       </div>
     </div>
 
