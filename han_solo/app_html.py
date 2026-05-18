@@ -271,6 +271,90 @@ APP_HTML = """<!DOCTYPE html>
     .jobs-toggle:hover { border-color: var(--accent); color: var(--accent); }
     .jobs-toggle:disabled { opacity: .5; cursor: not-allowed; }
 
+    /* ── NOTECARDS SCREEN ── */
+    .nc-filter-bar {
+      display: flex; gap: 6px; padding: 12px 22px;
+      border-bottom: 1px solid var(--divider); flex-shrink: 0;
+    }
+    .nc-filter-btn {
+      font-family: inherit; font-size: 11.5px; font-weight: 500;
+      padding: 4px 12px; border-radius: 20px;
+      border: 1px solid var(--card-border); background: var(--card-bg);
+      color: var(--text-secondary); cursor: pointer; transition: all .12s;
+    }
+    .nc-filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .nc-filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .nc-filter-btn.active.archived { background: var(--silver); border-color: var(--silver); }
+
+    .nc-list { flex: 1; overflow-y: auto; padding: 12px 22px; display: flex; flex-direction: column; gap: 8px; }
+    .nc-empty { padding: 48px 0; text-align: center; color: var(--text-meta); font-size: 13px; }
+
+    .nc-card {
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 8px; padding: 13px 15px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .nc-card-top { display: flex; align-items: flex-start; gap: 10px; }
+    .nc-creator {
+      width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 700; margin-top: 1px;
+    }
+    .nc-creator.scott { background: var(--onyx); color: #fff; }
+    .nc-creator.ren   { background: var(--accent); color: #fff; }
+    .nc-creator.ted   { background: var(--silver); color: #fff; }
+    .nc-text { font-size: 13px; line-height: 1.6; color: var(--text-primary); flex: 1; }
+    .nc-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .nc-status {
+      font-size: 10px; font-weight: 700; letter-spacing: .06em;
+      text-transform: uppercase; padding: 2px 7px; border-radius: 3px;
+    }
+    .nc-status.active    { background: rgba(189,140,125,.15); color: var(--accent); }
+    .nc-status.completed { background: rgba(73,73,75,.1);     color: var(--onyx); }
+    .nc-status.archived  { background: rgba(142,142,144,.12); color: var(--silver); }
+
+    .nc-card-footer { display: flex; align-items: center; justify-content: space-between; }
+    .nc-date { font-size: 11px; color: var(--text-meta); }
+    .nc-actions { display: flex; gap: 6px; }
+    .nc-action-btn {
+      font-family: inherit; font-size: 11px; font-weight: 500;
+      padding: 3px 10px; border-radius: 4px;
+      border: 1px solid var(--card-border); background: var(--bg);
+      color: var(--text-secondary); cursor: pointer; transition: all .12s;
+    }
+    .nc-action-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── NOTECARD PICKER (mid-chat) ── */
+    .nc-picker-wrap { position: relative; flex-shrink: 0; }
+    .nc-picker-btn {
+      background: none; border: none; color: var(--text-meta);
+      cursor: pointer; padding: 4px 6px; font-size: 15px; line-height: 1;
+      display: flex; align-items: center;
+    }
+    .nc-picker-btn:hover { color: var(--accent); }
+    .nc-picker {
+      display: none; position: absolute; bottom: calc(100% + 8px); left: 0;
+      width: 320px; max-height: 280px; overflow-y: auto;
+      background: var(--bg); border: 1px solid var(--card-border);
+      border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,.10);
+      z-index: 50;
+    }
+    .nc-picker.open { display: block; }
+    .nc-picker-header {
+      padding: 10px 14px 8px; font-size: 10px; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase; color: var(--text-meta);
+      border-bottom: 1px solid var(--divider);
+    }
+    .nc-picker-item {
+      padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--divider);
+      transition: background .1s;
+    }
+    .nc-picker-item:last-child { border-bottom: none; }
+    .nc-picker-item:hover { background: var(--accent-light); }
+    .nc-picker-item-text { font-size: 12.5px; color: var(--text-primary); line-height: 1.5; }
+    .nc-picker-item-meta { font-size: 10.5px; color: var(--text-meta); margin-top: 2px; }
+    .nc-picker-empty { padding: 20px 14px; font-size: 12.5px; color: var(--text-meta); }
+
     /* ── PLACEHOLDER ── */
     .placeholder-body {
       flex: 1; display: flex; flex-direction: column;
@@ -466,6 +550,13 @@ APP_HTML = """<!DOCTYPE html>
         <div class="input-wrap">
           <textarea id="msgInput" placeholder="Message Ren…" rows="1"></textarea>
         </div>
+        <div class="nc-picker-wrap">
+          <button class="nc-picker-btn" id="ncPickerBtn" title="Pull in a notecard" onclick="toggleNcPicker()">📌</button>
+          <div class="nc-picker" id="ncPicker">
+            <div class="nc-picker-header">Pull a notecard into chat</div>
+            <div id="ncPickerList"></div>
+          </div>
+        </div>
         <button class="attach-btn" id="attachBtn" title="Attach a file">📎</button>
         <input type="file" id="fileInput" accept=".txt,.md,.py,.js,.ts,.jsx,.tsx,.json,.yaml,.yml,.html,.css,.sql,.sh,.csv,.toml,.env" style="display:none">
         <button class="send-btn" id="sendBtn">Send</button>
@@ -521,14 +612,25 @@ APP_HTML = """<!DOCTYPE html>
       </div>
     </div>
 
-    <!-- NOTECARDS placeholder -->
+    <!-- NOTECARDS -->
     <div class="screen hidden" id="screen-notecards">
-      <div class="screen-header"><div><div class="screen-title">Notecards</div><div class="screen-sub">Low-ceremony captures from Scott and Ren</div></div></div>
-      <div class="placeholder-body">
-        <div class="placeholder-icon">◻</div>
-        <div class="placeholder-title">Notecards coming soon</div>
-        <div class="placeholder-sub">A new object type — not a task, not a thread. Schema design session needed first.</div>
-        <div class="placeholder-badge">Needs backend design</div>
+      <div class="screen-header">
+        <div>
+          <div class="screen-title">Notecards</div>
+          <div class="screen-sub" id="nc-screen-sub">Low-ceremony captures</div>
+        </div>
+        <div class="screen-actions">
+          <button class="btn-secondary" onclick="openNewNotecard()">+ New</button>
+        </div>
+      </div>
+      <div class="nc-filter-bar">
+        <button class="nc-filter-btn active" onclick="ncSetFilter(this,'')">Active + Done</button>
+        <button class="nc-filter-btn" onclick="ncSetFilter(this,'active')">Active</button>
+        <button class="nc-filter-btn" onclick="ncSetFilter(this,'completed')">Completed</button>
+        <button class="nc-filter-btn archived" onclick="ncSetFilter(this,'archived')">Archived</button>
+      </div>
+      <div class="nc-list" id="nc-list">
+        <div class="nc-empty">Loading notecards…</div>
       </div>
     </div>
 
@@ -952,6 +1054,137 @@ async function toggleJobs() {
 }
 
 $('refreshMemoryBtn').addEventListener('click', () => { _memLoaded = false; loadMemory(); });
+
+// ── Notecards screen ───────────────────────────────────────────────────────
+let _ncFilter = '';
+let _ncLoaded = false;
+
+function ncSetFilter(btn, filter) {
+  document.querySelectorAll('.nc-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  _ncFilter = filter;
+  _ncLoaded = false;
+  loadNotecards();
+}
+
+async function loadNotecards() {
+  if (_ncLoaded) return;
+  $('nc-list').innerHTML = '<div class="nc-empty">Loading…</div>';
+  try {
+    const qs = _ncFilter ? '?status=' + _ncFilter : '';
+    const resp = await apiFetch('/api/notecards' + qs);
+    if (!resp.ok) { $('nc-list').innerHTML = '<div class="nc-empty">Error loading notecards.</div>'; return; }
+    const cards = await resp.json();
+    renderNotecards(cards);
+    const sub = cards.length + ' notecard' + (cards.length !== 1 ? 's' : '');
+    $('nc-screen-sub').textContent = sub;
+    _ncLoaded = true;
+  } catch { $('nc-list').innerHTML = '<div class="nc-empty">Error loading notecards.</div>'; }
+}
+
+function renderNotecards(cards) {
+  const list = $('nc-list');
+  if (!cards.length) { list.innerHTML = '<div class="nc-empty">No notecards here.</div>'; return; }
+  list.innerHTML = '';
+  cards.forEach(c => {
+    const card = document.createElement('div');
+    card.className = 'nc-card';
+    const creatorInitial = c.creator.charAt(0).toUpperCase();
+    const dateStr = c.created_at ? new Date(c.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : '—';
+    const actions = ncActions(c);
+    card.innerHTML =
+      '<div class="nc-card-top">' +
+        '<div class="nc-creator ' + c.creator + '">' + creatorInitial + '</div>' +
+        '<div class="nc-text">' + escNc(c.text) + '</div>' +
+        '<div class="nc-meta"><span class="nc-status ' + c.status + '">' + c.status + '</span></div>' +
+      '</div>' +
+      '<div class="nc-card-footer">' +
+        '<span class="nc-date">' + c.creator.charAt(0).toUpperCase() + c.creator.slice(1) + ' · ' + dateStr + ' · ' + c.source + '</span>' +
+        '<div class="nc-actions">' + actions + '</div>' +
+      '</div>';
+    list.appendChild(card);
+    card.querySelectorAll('.nc-action-btn').forEach(btn => {
+      btn.addEventListener('click', () => updateNcStatus(c.id, btn.dataset.status, card));
+    });
+  });
+}
+
+function ncActions(c) {
+  if (c.status === 'active')    return '<button class="nc-action-btn" data-status="completed">Complete</button><button class="nc-action-btn" data-status="archived">Archive</button>';
+  if (c.status === 'completed') return '<button class="nc-action-btn" data-status="active">Reopen</button><button class="nc-action-btn" data-status="archived">Archive</button>';
+  if (c.status === 'archived')  return '<button class="nc-action-btn" data-status="active">Restore</button>';
+  return '';
+}
+
+function escNc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+async function updateNcStatus(id, status, cardEl) {
+  try {
+    const resp = await apiFetch('/api/notecards/' + id, { method: 'PATCH', body: JSON.stringify({ status }) });
+    if (resp.ok) { _ncLoaded = false; loadNotecards(); }
+  } catch {}
+}
+
+async function openNewNotecard() {
+  const text = prompt('Notecard text:');
+  if (!text || !text.trim()) return;
+  try {
+    const resp = await apiFetch('/api/notecards', { method: 'POST', body: JSON.stringify({ text: text.trim(), source: 'manual' }) });
+    if (resp.ok) { _ncLoaded = false; loadNotecards(); }
+  } catch {}
+}
+
+// ── Notecard picker (mid-chat) ─────────────────────────────────────────────
+let _pickerOpen = false;
+
+async function toggleNcPicker() {
+  _pickerOpen = !_pickerOpen;
+  $('ncPicker').classList.toggle('open', _pickerOpen);
+  if (_pickerOpen) await loadNcPicker();
+}
+
+async function loadNcPicker() {
+  const list = $('ncPickerList');
+  list.innerHTML = '<div class="nc-picker-empty">Loading…</div>';
+  try {
+    const resp = await apiFetch('/api/notecards?status=active');
+    if (!resp.ok) { list.innerHTML = '<div class="nc-picker-empty">Error loading.</div>'; return; }
+    const cards = await resp.json();
+    if (!cards.length) { list.innerHTML = '<div class="nc-picker-empty">No active notecards.</div>'; return; }
+    list.innerHTML = '';
+    cards.forEach(c => {
+      const item = document.createElement('div');
+      item.className = 'nc-picker-item';
+      const dateStr = c.created_at ? new Date(c.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric' }) : '';
+      item.innerHTML =
+        '<div class="nc-picker-item-text">' + escNc(c.text) + '</div>' +
+        '<div class="nc-picker-item-meta">' + c.creator + ' · ' + dateStr + '</div>';
+      item.addEventListener('click', () => injectNotecard(c.text));
+      list.appendChild(item);
+    });
+  } catch { list.innerHTML = '<div class="nc-picker-empty">Error loading.</div>'; }
+}
+
+function injectNotecard(text) {
+  const input = $('msgInput');
+  const prefix = '📌 ' + text;
+  input.value = input.value ? input.value + '\\n\\n' + prefix : prefix;
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 140) + 'px';
+  _pickerOpen = false;
+  $('ncPicker').classList.remove('open');
+  input.focus();
+}
+
+// Close picker when clicking outside
+document.addEventListener('click', e => {
+  if (_pickerOpen && !e.target.closest('.nc-picker-wrap')) {
+    _pickerOpen = false;
+    $('ncPicker').classList.remove('open');
+  }
+});
 
 // ── Boot ───────────────────────────────────────────────────────────────────
 (async function init() {

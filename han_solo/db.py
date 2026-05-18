@@ -21,6 +21,18 @@ DATABASE_URL = os.environ.get("DATABASE_URL", "")
 _pool: Optional[asyncpg.Pool] = None
 
 CREATE_TABLE_SQL = """
+CREATE TABLE IF NOT EXISTS notecards (
+    id          SERIAL PRIMARY KEY,
+    text        TEXT        NOT NULL,
+    creator     TEXT        NOT NULL,
+    status      TEXT        NOT NULL DEFAULT 'active',
+    source      TEXT        NOT NULL DEFAULT 'manual',
+    session_id  TEXT,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_notecards_status
+    ON notecards(status, created_at DESC);
 CREATE TABLE IF NOT EXISTS chat_transcripts (
     id          SERIAL PRIMARY KEY,
     session_id  TEXT        NOT NULL,
@@ -349,6 +361,84 @@ async def set_jobs_paused(paused: bool) -> bool:
         return True
     except Exception as e:
         logger.error("Failed to set jobs_paused: %s", e)
+        return False
+
+
+async def create_notecard(
+    text: str, creator: str, source: str = "manual", session_id: str | None = None
+) -> dict:
+    """Insert a notecard. Returns the new row as a dict."""
+    if not _pool:
+        return {}
+    try:
+        async with _pool.acquire() as conn:
+            row = await conn.fetchrow(
+                """
+                INSERT INTO notecards (text, creator, source, session_id)
+                VALUES ($1, $2, $3, $4)
+                RETURNING id, text, creator, status, source, session_id, created_at
+                """,
+                text, creator, source, session_id,
+            )
+        return dict(row)
+    except Exception as e:
+        logger.error("Failed to create notecard: %s", e)
+        return {}
+
+
+async def list_notecards(status: str | None = None) -> list[dict]:
+    """
+    List notecards ordered newest first.
+    status=None returns active + completed.
+    status='archived' returns only archived.
+    status='active'|'completed' returns that single status.
+    """
+    if not _pool:
+        return []
+    try:
+        async with _pool.acquire() as conn:
+            if status is None:
+                rows = await conn.fetch(
+                    """
+                    SELECT id, text, creator, status, source, session_id, created_at
+                    FROM notecards
+                    WHERE status IN ('active', 'completed')
+                    ORDER BY created_at DESC
+                    """
+                )
+            else:
+                rows = await conn.fetch(
+                    """
+                    SELECT id, text, creator, status, source, session_id, created_at
+                    FROM notecards
+                    WHERE status = $1
+                    ORDER BY created_at DESC
+                    """,
+                    status,
+                )
+        return [dict(r) for r in rows]
+    except Exception as e:
+        logger.error("Failed to list notecards: %s", e)
+        return []
+
+
+async def update_notecard_status(notecard_id: int, status: str) -> bool:
+    """Update a notecard's status. Returns True on success."""
+    if not _pool:
+        return False
+    try:
+        async with _pool.acquire() as conn:
+            result = await conn.execute(
+                """
+                UPDATE notecards
+                SET status = $1, updated_at = NOW()
+                WHERE id = $2
+                """,
+                status, notecard_id,
+            )
+        return result == "UPDATE 1"
+    except Exception as e:
+        logger.error("Failed to update notecard %d: %s", notecard_id, e)
         return False
 
 

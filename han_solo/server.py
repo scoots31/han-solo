@@ -24,7 +24,7 @@ from .auth import BearerAuthMiddleware
 from .config import REN_AGENT_NAME, REN_AGENT_ID
 from . import letta_client as letta
 from . import db
-from .tools import memory, signals, phase, brief, portraits
+from .tools import memory, signals, phase, brief, portraits, notecards
 from . import chat_api
 
 logging.basicConfig(level=logging.INFO)
@@ -45,6 +45,7 @@ signals.register(server)
 phase.register(server)
 brief.register(server)
 portraits.register(server)
+notecards.register(server)
 
 
 # ---------------------------------------------------------------------------
@@ -166,6 +167,65 @@ async def api_delete_archival_passage(request: Request) -> JSONResponse:
         return JSONResponse({"error": str(exc)}, status_code=502)
 
 
+async def api_list_notecards(request: Request) -> JSONResponse:
+    """GET /api/notecards?status=active|completed|archived (default: active+completed)"""
+    get_current_user()
+    status = request.query_params.get("status", "")
+    cards = await db.list_notecards(status=status or None)
+    return JSONResponse([
+        {
+            "id": c["id"],
+            "text": c["text"],
+            "creator": c["creator"],
+            "status": c["status"],
+            "source": c["source"],
+            "session_id": c.get("session_id"),
+            "created_at": c["created_at"].isoformat() if c.get("created_at") else None,
+        }
+        for c in cards
+    ])
+
+
+async def api_create_notecard(request: Request) -> JSONResponse:
+    """POST /api/notecards — body: {text, source?}"""
+    from . import letta_client as letta_mod
+    user = get_current_user()
+    body = await request.json()
+    text = body.get("text", "").strip()
+    source = body.get("source", "manual")
+    if not text:
+        return JSONResponse({"error": "text required"}, status_code=400)
+    session_id = await letta_mod.ensure_ren_agent_id()
+    result = await db.create_notecard(text=text, creator=user.id, source=source, session_id=session_id)
+    if not result:
+        return JSONResponse({"error": "DB write failed"}, status_code=500)
+    return JSONResponse({
+        "id": result["id"],
+        "text": result["text"],
+        "creator": result["creator"],
+        "status": result["status"],
+        "source": result["source"],
+        "created_at": result["created_at"].isoformat() if result.get("created_at") else None,
+    }, status_code=201)
+
+
+async def api_update_notecard(request: Request) -> JSONResponse:
+    """PATCH /api/notecards/{id} — body: {status: active|completed|archived}"""
+    get_current_user()
+    try:
+        notecard_id = int(request.path_params["notecard_id"])
+    except (KeyError, ValueError):
+        return JSONResponse({"error": "invalid id"}, status_code=400)
+    body = await request.json()
+    status = body.get("status", "").strip()
+    if status not in {"active", "completed", "archived"}:
+        return JSONResponse({"error": "status must be active, completed, or archived"}, status_code=400)
+    ok = await db.update_notecard_status(notecard_id, status)
+    if not ok:
+        return JSONResponse({"error": "not found or DB write failed"}, status_code=404)
+    return JSONResponse({"id": notecard_id, "status": status})
+
+
 async def api_memory_health(request: Request) -> JSONResponse:
     """Return memory system health: failed transitions + capture stats."""
     failed = await db.get_failed_transitions(hours=24)
@@ -189,6 +249,9 @@ async def api_memory_health(request: Request) -> JSONResponse:
 _chat_routes = [
     Route("/", chat_api.chat_index),
     Route("/chat", chat_api.chat_legacy),
+    Route("/api/notecards", api_list_notecards),
+    Route("/api/notecards", api_create_notecard, methods=["POST"]),
+    Route("/api/notecards/{notecard_id}", api_update_notecard, methods=["PATCH"]),
     Route("/health", health),
     Route("/api/me", chat_api.api_me),
     Route("/api/history", chat_api.api_history),

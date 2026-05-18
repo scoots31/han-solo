@@ -1,0 +1,66 @@
+"""
+Notecard tools — low-ceremony captures created by Scott, Ren, or Ted mid-session.
+
+A notecard is not a task and not a thread. No state machine, no assignee.
+Just text + who wrote it + when + where it came from.
+
+Statuses: active | completed | archived
+"""
+from mcp.server.fastmcp import FastMCP
+
+from ..auth import get_current_user
+from .. import db
+from .. import letta_client as letta
+
+VALID_STATUSES = {"active", "completed", "archived"}
+
+
+def register(server: FastMCP) -> None:
+
+    @server.tool()
+    async def create_notecard(text: str, source: str = "chat") -> str:
+        """
+        Create a notecard. Use this when something comes up mid-session that's
+        worth capturing — a follow-up, a reminder, a thing to revisit. Not a task.
+
+        text: the notecard content
+        source: 'chat' (mid-session) | 'manual' (created outside of chat)
+        """
+        user = get_current_user()
+        session_id = await letta.ensure_ren_agent_id()
+        result = await db.create_notecard(
+            text=text,
+            creator=user.id,
+            source=source,
+            session_id=session_id,
+        )
+        if not result:
+            return "Error: failed to create notecard"
+        return f"Notecard created — id={result['id']}, creator={user.name}"
+
+    @server.tool()
+    async def list_notecards(status: str = "") -> list[dict]:
+        """
+        List notecards.
+
+        status: 'active' | 'completed' | 'archived' | '' (returns active + completed)
+
+        Returns id, text, creator, status, source, session_id, created_at for each.
+        """
+        get_current_user()
+        valid = {"active", "completed", "archived", ""}
+        if status not in valid:
+            return [{"error": f"status must be one of {sorted(valid)}"}]
+        cards = await db.list_notecards(status=status or None)
+        return [
+            {
+                "id": c["id"],
+                "text": c["text"],
+                "creator": c["creator"],
+                "status": c["status"],
+                "source": c["source"],
+                "session_id": c.get("session_id"),
+                "created_at": c["created_at"].isoformat() if c.get("created_at") else None,
+            }
+            for c in cards
+        ]
