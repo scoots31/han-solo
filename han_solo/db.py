@@ -64,6 +64,19 @@ CREATE TABLE IF NOT EXISTS memory_transitions (
 );
 CREATE INDEX IF NOT EXISTS idx_transitions_status
     ON memory_transitions(status, attempted_at);
+CREATE TABLE IF NOT EXISTS t4_entries (
+    id           SERIAL PRIMARY KEY,
+    project_slug TEXT        NOT NULL,
+    entry_type   TEXT        NOT NULL,
+    entry_id     TEXT        NOT NULL,
+    parent_id    TEXT,
+    content      TEXT        NOT NULL,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(project_slug, entry_type, entry_id)
+);
+CREATE INDEX IF NOT EXISTS idx_t4_project
+    ON t4_entries(project_slug, entry_type);
 """
 
 # Health tracking — last successful write timestamp
@@ -341,6 +354,144 @@ async def get_jobs_paused() -> bool:
     except Exception as e:
         logger.error("Failed to read jobs_paused: %s", e)
         return False
+
+
+async def write_t4_entry(
+    project_slug: str,
+    entry_type: str,
+    entry_id: str,
+    content: str,
+    parent_id: str | None,
+    behavior: str,  # "write_once" | "upsert" | "append"
+) -> dict:
+    """Write a T4 entry. Behavior is derived by the tool layer before calling here."""
+    if not _pool:
+        return {"error": "DB not connected"}
+    try:
+        async with _pool.acquire() as conn:
+            if behavior == "write_once":
+                existing = await conn.fetchrow(
+                    "SELECT id FROM t4_entries WHERE project_slug=$1 AND entry_type=$2 AND entry_id=$3",
+                    project_slug, entry_type, entry_id,
+                )
+                if existing:
+                    return {"error": f"Entry {entry_type}/{entry_id} already exists for {project_slug} — write_once rejects overwrites"}
+                row = await conn.fetchrow(
+                    """
+                    INSERT INTO t4_entries (project_slug, entry_type, entry_id, parent_id, content)
+                    VALUES ($1, $2, $3, $4, $5)
+                    RETURNING id, project_slug, entry_type, entry_id, created_at
+                    """,
+                    project_slug, entry_type, entry_id, parent_id, content,
+                )
+            elif behavior == "upsert":
+                row = await conn.fetchrow(
+                    """
+                    INSERT INTO t4_entries (project_slug, entry_type, entry_id, parent_id, content)
+                    VALUES ($1, $2, $3, $4, $5)
+                    ON CONFLICT (project_slug, entry_type, entry_id)
+                    DO UPDATE SET content=$5, parent_id=$4, updated_at=NOW()
+                    RETURNING id, project_slug, entry_type, entry_id, updated_at
+                    """,
+                    project_slug, entry_type, entry_id, parent_id, content,
+                )
+            elif behavior == "append":
+                existing = await conn.fetchrow(
+                    "SELECT id, content FROM t4_entries WHERE project_slug=$1 AND entry_type=$2 AND entry_id=$3",
+                    project_slug, entry_type, entry_id,
+                )
+                if existing:
+                    merged = existing["content"] + "\n\n---\n\n" + content
+                    row = await conn.fetchrow(
+                        """
+                        UPDATE t4_entries SET content=$4, updated_at=NOW()
+                        WHERE project_slug=$1 AND entry_type=$2 AND entry_id=$3
+                        RETURNING id, project_slug, entry_type, entry_id, updated_at
+                        """,
+                        project_slug, entry_type, entry_id, merged,
+                    )
+                else:
+                    row = await conn.fetchrow(
+                        """
+                        INSERT INTO t4_entries (project_slug, entry_type, entry_id, parent_id, content)
+                        VALUES ($1, $2, $3, $4, $5)
+                        RETURNING id, project_slug, entry_type, entry_id, created_at
+                        """,
+                        project_slug, entry_type, entry_id, parent_id, content,
+                    )
+            else:
+                return {"error": f"Unknown behavior: {behavior}"}
+        return dict(row) if row else {"error": "No row returned"}
+    except Exception as e:
+        logger.error("Failed to write T4 entry: %s", e)
+        return {"error": str(e)}
+
+
+async def get_t4_entry(
+    project_slug: str,
+    entry_type: str,
+    entry_id: str,
+) -> dict | None:
+    """Fetch a single T4 entry by project + type + id. Returns None if not found."""
+    if not _pool:
+        return None
+    try:
+        async with _pool.acquire() as conn:
+            row = await conn.fetchrow(
+                """
+                SELECT id, project_slug, entry_type, entry_id, parent_id,
+                       content, created_at, updated_at
+                FROM t4_entries
+                WHERE project_slug=$1 AND entry_type=$2 AND entry_id=$3
+                """,
+                project_slug, entry_type, entry_id,
+            )
+        return dict(row) if row else None
+    except Exception as e:
+        logger.error("Failed to get T4 entry: %s", e)
+        return None
+
+
+async def search_t4(
+    project_slug: str,
+    query: str,
+    entry_type: str | None = None,
+    limit: int = 10,
+) -> list[dict]:
+    """Full-text search across T4 entries for a project."""
+    if not _pool:
+        return []
+    try:
+        async with _pool.acquire() as conn:
+            if entry_type:
+                rows = await conn.fetch(
+                    """
+                    SELECT id, project_slug, entry_type, entry_id, parent_id,
+                           content, updated_at
+                    FROM t4_entries
+                    WHERE project_slug=$1 AND entry_type=$2
+                      AND content ILIKE $3
+                    ORDER BY updated_at DESC
+                    LIMIT $4
+                    """,
+                    project_slug, entry_type, f"%{query}%", limit,
+                )
+            else:
+                rows = await conn.fetch(
+                    """
+                    SELECT id, project_slug, entry_type, entry_id, parent_id,
+                           content, updated_at
+                    FROM t4_entries
+                    WHERE project_slug=$1 AND content ILIKE $2
+                    ORDER BY updated_at DESC
+                    LIMIT $3
+                    """,
+                    project_slug, f"%{query}%", limit,
+                )
+        return [dict(r) for r in rows]
+    except Exception as e:
+        logger.error("Failed to search T4: %s", e)
+        return []
 
 
 async def set_jobs_paused(paused: bool) -> bool:
