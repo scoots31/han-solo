@@ -8,24 +8,24 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --navy: #0F1729;
-    --navy-mid: #1E3A5F;
-    --rose: #BE123C;
-    --rose-light: #FFE4E6;
-    --rose-mid: #F43F5E;
-    --gray-50: #F8FAFC;
-    --gray-100: #F1F5F9;
-    --gray-200: #E2E8F0;
-    --gray-300: #CBD5E1;
-    --gray-500: #64748B;
-    --gray-700: #334155;
-    --gray-900: #0F172A;
-    --green: #15803D;
-    --green-light: #DCFCE7;
-    --amber: #B45309;
-    --amber-light: #FEF3C7;
-    --red: #DC2626;
-    --red-light: #FEE2E2;
+    --navy: #1a1a1a;
+    --navy-mid: #2a2a2a;
+    --rose: #bd8c7d;
+    --rose-light: rgba(189,140,125,0.12);
+    --rose-mid: #bd8c7d;
+    --gray-50: #faf8f5;
+    --gray-100: #e8ddd4;
+    --gray-200: #e8ddd4;
+    --gray-300: #DDD6CC;
+    --gray-500: #8e8e90;
+    --gray-700: #49494b;
+    --gray-900: #1a1a1a;
+    --green: #8e8e90;
+    --green-light: rgba(142,142,144,0.12);
+    --amber: #d1bfa7;
+    --amber-light: rgba(209,191,167,0.15);
+    --red: #bd8c7d;
+    --red-light: rgba(189,140,125,0.12);
   }
 
   body {
@@ -712,7 +712,7 @@
   </div>
 
   <div class="nav-group">
-    <span class="nav-group-label" style="color:rgba(251,113,133,0.6)">On this page</span>
+    <span class="nav-group-label" style="color:rgba(189,140,125,0.6)">On this page</span>
     <a href="#what-this-phase-is" class="nav-item"><span class="nav-dot"></span>What this phase is</a>
     <a href="#skills" class="nav-item"><span class="nav-dot"></span>Skills in this phase</a>
     <a href="#auto-chain" class="nav-item"><span class="nav-dot"></span>The auto-chain</a>
@@ -725,17 +725,17 @@
   </div>
 
   <div class="nav-group">
-    <span class="nav-group-label" style="color:rgba(251,113,133,0.6)">Skills</span>
-    <a href="#skill-code-review" class="nav-item skill-link" style="color:rgba(251,113,133,0.7)"><span class="nav-dot"></span>code-review-and-quality</a>
-    <a href="#skill-solo-qa" class="nav-item skill-link" style="color:rgba(251,113,133,0.7)"><span class="nav-dot"></span>solo-qa</a>
-    <a href="#skill-qa-triage" class="nav-item skill-link" style="color:rgba(251,113,133,0.7)"><span class="nav-dot"></span>qa-triage</a>
+    <span class="nav-group-label" style="color:rgba(189,140,125,0.6)">Skills</span>
+    <a href="#skill-code-review" class="nav-item skill-link" style="color:rgba(189,140,125,0.7)"><span class="nav-dot"></span>code-review-and-quality</a>
+    <a href="#skill-solo-qa" class="nav-item skill-link" style="color:rgba(189,140,125,0.7)"><span class="nav-dot"></span>solo-qa</a>
+    <a href="#skill-qa-triage" class="nav-item skill-link" style="color:rgba(189,140,125,0.7)"><span class="nav-dot"></span>qa-triage</a>
   </div>
 
   <div class="nav-group">
-    <span class="nav-group-label" style="color:rgba(148,163,184,0.5)">Other guides</span>
-    <a href="guide-build.html" class="nav-item" style="color:rgba(148,163,184,0.55)">Build phase</a>
-    <a href="skills-reference.html" class="nav-item" style="color:rgba(148,163,184,0.55)">Skills reference</a>
-    <a href="index.html" class="nav-item" style="color:rgba(148,163,184,0.55)">Framework home</a>
+    <span class="nav-group-label" style="color:rgba(142,142,144,0.5)">Other guides</span>
+    <a href="guide-build.html" class="nav-item" style="color:rgba(142,142,144,0.55)">Build phase</a>
+    <a href="skills-reference.html" class="nav-item" style="color:rgba(142,142,144,0.55)">Skills reference</a>
+    <a href="index.html" class="nav-item" style="color:rgba(142,142,144,0.55)">Framework home</a>
   </div>
 </aside>
 
@@ -932,7 +932,7 @@
           <div class="flow-chevron">›</div>
           <div class="flow-node">solo-qa Part 2 (solo)</div>
           <div class="flow-chevron">›</div>
-          <div class="flow-node" style="background:#F0FDF4;color:#15803D;border:1px solid #86EFAC">In Test</div>
+          <div class="flow-node" style="background:#faf8f5;color:#8e8e90;border:1px solid #DDD6CC">In Test</div>
           <div class="flow-chevron">›</div>
           <div class="flow-node done-node">Done (via phase-test)</div>
         </div>
@@ -968,7 +968,7 @@
               </div>
             </div>
             <div class="chain-step">
-              <div class="chain-node" style="background:#F0FDF4;color:#15803D;border:2px solid #86EFAC;font-size:10px;font-weight:800">5</div>
+              <div class="chain-node" style="background:#faf8f5;color:#8e8e90;border:2px solid #DDD6CC;font-size:10px;font-weight:800">5</div>
               <div class="chain-content">
                 <div class="chain-label plain">In Test logged in backlog</div>
                 <div class="chain-desc">Backlog updated: status → In Test. QA pass summary logged with code review, AI verification, and solo sign-off recorded. Dependent slices checked for unblocking. Version control action taken per branching model. The slice reaches Done when phase-test gate opens.</div>

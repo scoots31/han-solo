@@ -8,33 +8,33 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --navy: #0F1729;
-    --navy-mid: #1E3A5F;
+    --navy: #1a1a1a;
+    --navy-mid: #2a2a2a;
     --blue: #bd8c7d;
-    --blue-light: #DBEAFE;
+    --blue-light: rgba(142,142,144,0.15);
     --teal: #8e8e90;
-    --teal-light: #CCFBF1;
+    --teal-light: rgba(142,142,144,0.15);
     --purple: #bd8c7d;
     --purple-light: rgba(189,140,125,0.12);
-    --indigo: #4338CA;
-    --indigo-light: #E0E7FF;
-    --orange: #EA580C;
-    --orange-light: #FFEDD5;
-    --green: #15803D;
-    --green-light: #DCFCE7;
-    --rose: #BE123C;
-    --rose-light: #FFE4E6;
-    --amber: #B45309;
-    --amber-light: #FEF3C7;
-    --gold: #92400E;
-    --gold-light: #FEF9C3;
-    --gray-50: #F8FAFC;
-    --gray-100: #F1F5F9;
-    --gray-200: #E2E8F0;
-    --gray-300: #CBD5E1;
-    --gray-500: #64748B;
-    --gray-700: #334155;
-    --gray-900: #0F172A;
+    --indigo: #49494b;
+    --indigo-light: rgba(73,73,75,0.12);
+    --orange: #bd8c7d;
+    --orange-light: rgba(189,140,125,0.12);
+    --green: #8e8e90;
+    --green-light: rgba(142,142,144,0.12);
+    --rose: #bd8c7d;
+    --rose-light: rgba(189,140,125,0.12);
+    --amber: #d1bfa7;
+    --amber-light: rgba(209,191,167,0.15);
+    --gold: #d1bfa7;
+    --gold-light: rgba(209,191,167,0.15);
+    --gray-50: #faf8f5;
+    --gray-100: #e8ddd4;
+    --gray-200: #e8ddd4;
+    --gray-300: #DDD6CC;
+    --gray-500: #8e8e90;
+    --gray-700: #49494b;
+    --gray-900: #1a1a1a;
   }
 
   body {
@@ -615,8 +615,8 @@
     line-height: 1.7;
     padding: 2px 0;
   }
-  .cr-line .cr-key { color: #7DD3FC; }
-  .cr-line .cr-val { color: #86EFAC; }
+  .cr-line .cr-key { color: #8e8e90; }
+  .cr-line .cr-val { color: #DDD6CC; }
   .cr-line .cr-sym { color: rgba(255,255,255,0.3); }
 
   /* ── NOT THIS / NOT THAT ── */
@@ -681,11 +681,11 @@
   }
   .callout.info {
     background: var(--green-light);
-    border: 1px solid #86EFAC;
+    border: 1px solid #DDD6CC;
   }
   .callout.warn {
     background: var(--amber-light);
-    border: 1px solid #FCD34D;
+    border: 1px solid rgba(209,191,167,0.5);
   }
   .callout-icon {
     font-size: 16px;
@@ -738,7 +738,7 @@
     letter-spacing: 0.8px;
     padding: 4px 12px;
     border-radius: 20px;
-    border: 1px solid #86EFAC;
+    border: 1px solid #DDD6CC;
   }
   .gate-pill .gate-dot {
     width: 7px; height: 7px;
@@ -795,32 +795,32 @@
   </div>
 
   <div class="nav-group">
-    <span class="nav-group-label" style="color:rgba(74,222,128,0.6)">On this page</span>
-    <a href="#what-this-phase-is" class="nav-link" style="color:rgba(74,222,128,0.7)"><span class="nav-dot" style="background:#15803D"></span>What this phase is</a>
-    <a href="#skill" class="nav-link" style="color:rgba(74,222,128,0.7)"><span class="nav-dot" style="background:#15803D"></span>Skill in this phase</a>
-    <a href="#deploy-methods" class="nav-link" style="color:rgba(74,222,128,0.7)"><span class="nav-dot" style="background:#15803D"></span>Deploy methods</a>
-    <a href="#pre-deploy-checklist" class="nav-link" style="color:rgba(74,222,128,0.7)"><span class="nav-dot" style="background:#15803D"></span>Pre-deploy checklist</a>
-    <a href="#verification" class="nav-link" style="color:rgba(74,222,128,0.7)"><span class="nav-dot" style="background:#15803D"></span>Verification</a>
-    <a href="#completion-record" class="nav-link" style="color:rgba(74,222,128,0.7)"><span class="nav-dot" style="background:#15803D"></span>Phase completion record</a>
-    <a href="#what-deploy-does-not-do" class="nav-link" style="color:rgba(74,222,128,0.7)"><span class="nav-dot" style="background:#15803D"></span>What deploy does not do</a>
-    <a href="#watch-for" class="nav-link" style="color:rgba(74,222,128,0.7)"><span class="nav-dot" style="background:#15803D"></span>What to watch for</a>
+    <span class="nav-group-label" style="color:rgba(142,142,144,0.6)">On this page</span>
+    <a href="#what-this-phase-is" class="nav-link" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>What this phase is</a>
+    <a href="#skill" class="nav-link" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>Skill in this phase</a>
+    <a href="#deploy-methods" class="nav-link" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>Deploy methods</a>
+    <a href="#pre-deploy-checklist" class="nav-link" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>Pre-deploy checklist</a>
+    <a href="#verification" class="nav-link" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>Verification</a>
+    <a href="#completion-record" class="nav-link" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>Phase completion record</a>
+    <a href="#what-deploy-does-not-do" class="nav-link" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>What deploy does not do</a>
+    <a href="#watch-for" class="nav-link" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>What to watch for</a>
   </div>
 
   <div class="nav-group" style="margin-top:20px">
     <span class="nav-group-label" style="color:rgba(255,255,255,0.3)">Phase sequence</span>
-    <a href="#" class="nav-link" style="color:rgba(255,255,255,0.3); font-size:11px"><span class="nav-dot" style="background:#475569"></span>1 · Discover</a>
-    <a href="#" class="nav-link" style="color:rgba(255,255,255,0.3); font-size:11px"><span class="nav-dot" style="background:#475569"></span>2 · Design Sprint</a>
-    <a href="#" class="nav-link" style="color:rgba(255,255,255,0.3); font-size:11px"><span class="nav-dot" style="background:#475569"></span>3 · Plan</a>
-    <a href="#" class="nav-link" style="color:rgba(255,255,255,0.3); font-size:11px"><span class="nav-dot" style="background:#475569"></span>4 · Build</a>
-    <a href="#" class="nav-link" style="color:rgba(255,255,255,0.3); font-size:11px"><span class="nav-dot" style="background:#475569"></span>5 · QA</a>
-    <a href="#" class="nav-link" style="color:rgba(255,255,255,0.3); font-size:11px"><span class="nav-dot" style="background:#475569"></span>5.5 · Phase Test</a>
-    <a href="#" class="nav-link active" style="font-size:11px"><span class="nav-dot" style="background:#15803D"></span>6 · Deploy</a>
+    <a href="#" class="nav-link" style="color:rgba(255,255,255,0.3); font-size:11px"><span class="nav-dot" style="background:#8e8e90"></span>1 · Discover</a>
+    <a href="#" class="nav-link" style="color:rgba(255,255,255,0.3); font-size:11px"><span class="nav-dot" style="background:#8e8e90"></span>2 · Design Sprint</a>
+    <a href="#" class="nav-link" style="color:rgba(255,255,255,0.3); font-size:11px"><span class="nav-dot" style="background:#8e8e90"></span>3 · Plan</a>
+    <a href="#" class="nav-link" style="color:rgba(255,255,255,0.3); font-size:11px"><span class="nav-dot" style="background:#8e8e90"></span>4 · Build</a>
+    <a href="#" class="nav-link" style="color:rgba(255,255,255,0.3); font-size:11px"><span class="nav-dot" style="background:#8e8e90"></span>5 · QA</a>
+    <a href="#" class="nav-link" style="color:rgba(255,255,255,0.3); font-size:11px"><span class="nav-dot" style="background:#8e8e90"></span>5.5 · Phase Test</a>
+    <a href="#" class="nav-link active" style="font-size:11px"><span class="nav-dot" style="background:#8e8e90"></span>6 · Deploy</a>
   </div>
 
   <div class="nav-group" style="margin-top:20px">
     <span class="nav-group-label" style="color:rgba(255,255,255,0.3)">Related</span>
-    <a href="skills-reference.html#phase-test" class="nav-link" style="color:rgba(252,211,77,0.5); font-size:11px"><span class="nav-dot" style="background:#B45309"></span>phase-test guide</a>
-    <a href="skills-reference.html#deploy" class="nav-link" style="color:rgba(74,222,128,0.5); font-size:11px"><span class="nav-dot" style="background:#15803D"></span>deploy skill ref</a>
+    <a href="skills-reference.html#phase-test" class="nav-link" style="color:rgba(209,191,167,0.5); font-size:11px"><span class="nav-dot" style="background:#d1bfa7"></span>phase-test guide</a>
+    <a href="skills-reference.html#deploy" class="nav-link" style="color:rgba(142,142,144,0.5); font-size:11px"><span class="nav-dot" style="background:#8e8e90"></span>deploy skill ref</a>
   </div>
 </aside>
 
@@ -966,18 +966,18 @@
       </div>
 
       <!-- CI/CD Setup -->
-      <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:20px 24px;margin-bottom:28px">
-        <div style="font-size:13px;font-weight:700;color:#15803D;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">CI/CD Setup — one-time, fires at first deploy when GitHub Actions is selected</div>
-        <p style="font-size:13px;color:#166534;margin:0 0 12px">When tech-context records <code>CI/CD: GitHub Actions</code> but no <code>.github/workflows/ci.yml</code> exists, the deploy skill sets it up before routing to Method A. The framework generates the workflow file entirely — the solo never writes or reviews YAML. The only solo action is a one-time token or key paste in GitHub and the platform dashboard — walked through step by step in plain language.</p>
-        <div style="font-size:13px;font-weight:600;color:#15803D;margin-bottom:8px">What the solo does (one time only):</div>
-        <ul style="margin:0;padding-left:18px;font-size:13px;color:#166534">
+      <div style="background:#faf8f5;border:1px solid #DDD6CC;border-radius:10px;padding:20px 24px;margin-bottom:28px">
+        <div style="font-size:13px;font-weight:700;color:#8e8e90;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">CI/CD Setup — one-time, fires at first deploy when GitHub Actions is selected</div>
+        <p style="font-size:13px;color:#49494b;margin:0 0 12px">When tech-context records <code>CI/CD: GitHub Actions</code> but no <code>.github/workflows/ci.yml</code> exists, the deploy skill sets it up before routing to Method A. The framework generates the workflow file entirely — the solo never writes or reviews YAML. The only solo action is a one-time token or key paste in GitHub and the platform dashboard — walked through step by step in plain language.</p>
+        <div style="font-size:13px;font-weight:600;color:#8e8e90;margin-bottom:8px">What the solo does (one time only):</div>
+        <ul style="margin:0;padding-left:18px;font-size:13px;color:#49494b">
           <li><strong>Railway</strong> — copy a token from the Railway dashboard, paste it as a GitHub secret named <code>RAILWAY_TOKEN</code></li>
           <li><strong>Render</strong> — copy a deploy hook URL from Render, paste as <code>RENDER_DEPLOY_HOOK</code></li>
           <li><strong>Cloudflare</strong> — create an API token, paste as <code>CLOUDFLARE_API_TOKEN</code></li>
           <li><strong>Fly.io</strong> — run one terminal command to get a token, paste as <code>FLY_API_TOKEN</code></li>
           <li><strong>AWS App Runner</strong> — create IAM credentials + copy service ARN, paste four secrets (~15 min, most setup of any path)</li>
         </ul>
-        <p style="font-size:13px;color:#166534;margin:12px 0 0">After setup: every push to the base branch runs the full test suite automatically. Every merge to main deploys. Nothing else to configure.</p>
+        <p style="font-size:13px;color:#49494b;margin:12px 0 0">After setup: every push to the base branch runs the full test suite automatically. Every merge to main deploys. Nothing else to configure.</p>
       </div>
 
       <div class="method-grid">
@@ -1066,7 +1066,7 @@
               <li><span class="step-num">4</span><span>Ask: "How do you verify the deploy succeeded?"</span></li>
               <li><span class="step-num">5</span><span>Write the answers into the Deployment section of <code>docs/tech-context.md</code>, then proceed via the appropriate method above</span></li>
             </ol>
-            <div class="method-verify" style="background:var(--amber-light);border-color:#FCD34D"><strong>Note:</strong> Once defined, the deploy section in tech-context serves all future deploys — Method D should only run once per project.</div>
+            <div class="method-verify" style="background:var(--amber-light);border-color:rgba(209,191,167,0.5)"><strong>Note:</strong> Once defined, the deploy section in tech-context serves all future deploys — Method D should only run once per project.</div>
           </div>
         </div>
 
@@ -1093,7 +1093,7 @@
 
             <li>
               <div class="check-icon stop">
-                <svg viewBox="0 0 12 12" fill="none" stroke="#BE123C" stroke-width="2">
+                <svg viewBox="0 0 12 12" fill="none" stroke="#bd8c7d" stroke-width="2">
                   <line x1="2" y1="6" x2="10" y2="6"/>
                 </svg>
               </div>
@@ -1105,7 +1105,7 @@
 
             <li>
               <div class="check-icon">
-                <svg viewBox="0 0 12 12" fill="none" stroke="#15803D" stroke-width="2">
+                <svg viewBox="0 0 12 12" fill="none" stroke="#8e8e90" stroke-width="2">
                   <polyline points="2,6 5,9 10,3"/>
                 </svg>
               </div>
@@ -1117,7 +1117,7 @@
 
             <li>
               <div class="check-icon">
-                <svg viewBox="0 0 12 12" fill="none" stroke="#15803D" stroke-width="2">
+                <svg viewBox="0 0 12 12" fill="none" stroke="#8e8e90" stroke-width="2">
                   <polyline points="2,6 5,9 10,3"/>
                 </svg>
               </div>
@@ -1129,7 +1129,7 @@
 
             <li>
               <div class="check-icon">
-                <svg viewBox="0 0 12 12" fill="none" stroke="#15803D" stroke-width="2">
+                <svg viewBox="0 0 12 12" fill="none" stroke="#8e8e90" stroke-width="2">
                   <polyline points="2,6 5,9 10,3"/>
                 </svg>
               </div>

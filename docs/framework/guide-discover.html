@@ -8,21 +8,21 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --navy: #0F1729;
-    --navy-mid: #1E3A5F;
+    --navy: #1a1a1a;
+    --navy-mid: #2a2a2a;
     --blue: #bd8c7d;
-    --blue-light: #DBEAFE;
+    --blue-light: rgba(142,142,144,0.15);
     --teal: #8e8e90;
-    --teal-light: #CCFBF1;
+    --teal-light: rgba(142,142,144,0.15);
     --purple: #bd8c7d;
     --purple-light: rgba(189,140,125,0.12);
-    --gray-50: #F8FAFC;
-    --gray-100: #F1F5F9;
-    --gray-200: #E2E8F0;
-    --gray-300: #CBD5E1;
-    --gray-500: #64748B;
-    --gray-700: #334155;
-    --gray-900: #0F172A;
+    --gray-50: #faf8f5;
+    --gray-100: #e8ddd4;
+    --gray-200: #e8ddd4;
+    --gray-300: #DDD6CC;
+    --gray-500: #8e8e90;
+    --gray-700: #49494b;
+    --gray-900: #1a1a1a;
   }
 
   body {
@@ -249,7 +249,7 @@
   }
   .card-badge.teal { background: var(--teal-light); color: var(--teal); }
   .card-badge.blue { background: var(--blue-light); color: var(--blue); }
-  .card-badge.gold { background: #FEF3C7; color: #92400E; }
+  .card-badge.gold { background: rgba(209,191,167,0.15); color: #d1bfa7; }
   .card-desc {
     padding: 16px 24px;
     font-size: 14px;
@@ -490,7 +490,7 @@
   }
   .step-tag.teal { background: var(--teal-light); color: var(--teal); }
   .step-tag.blue { background: var(--blue-light); color: var(--blue); }
-  .step-tag.gold { background: #FEF3C7; color: #92400E; }
+  .step-tag.gold { background: rgba(209,191,167,0.15); color: #d1bfa7; }
 
   /* ── ZONE CARDS ── */
   .zones-grid {
@@ -571,7 +571,7 @@
   }
   .doc-skill-tag.teal { background: var(--teal-light); color: var(--teal); }
   .doc-skill-tag.blue { background: var(--blue-light); color: var(--blue); }
-  .doc-skill-tag.gold { background: #FEF3C7; color: #92400E; }
+  .doc-skill-tag.gold { background: rgba(209,191,167,0.15); color: #d1bfa7; }
   .doc-detail-col {
     flex: 1;
     padding: 16px 20px;
@@ -756,10 +756,10 @@
   }
   .handoff-blocker {
     padding: 12px 20px;
-    background: #FFF5F5;
-    border-top: 1px solid #FED7D7;
+    background: rgba(189,140,125,0.06);
+    border-top: 1px solid rgba(189,140,125,0.22);
     font-size: 12.5px;
-    color: #C53030;
+    color: #bd8c7d;
     line-height: 1.55;
   }
   .handoff-blocker strong { font-weight: 700; }
@@ -803,8 +803,8 @@
   }
   .watch-cell:last-child { border-right: none; }
   .watch-cell strong { color: var(--gray-900); font-weight: 600; display: block; margin-bottom: 3px; }
-  .watch-cell.problem { background: #FFFBEB; }
-  .watch-cell.fix { background: #F0FDF4; }
+  .watch-cell.problem { background: rgba(209,191,167,0.08); }
+  .watch-cell.fix { background: #faf8f5; }
 
   /* ── INLINE PILL ── */
   .pill {
@@ -854,14 +854,14 @@
 
   <div class="nav-group">
     <span class="nav-group-label">Skills in this phase</span>
-    <a href="#skill-discover" class="nav-link" style="color:rgba(45,212,191,0.7); font-family:'SF Mono','Fira Code',monospace; font-size:11px;"><span class="nav-dot" style="background:var(--teal)"></span>discover</a>
+    <a href="#skill-discover" class="nav-link" style="color:rgba(142,142,144,0.7); font-family:'SF Mono','Fira Code',monospace; font-size:11px;"><span class="nav-dot" style="background:var(--teal)"></span>discover</a>
     <a href="#skill-tech-context" class="nav-link" style="color:rgba(209,191,167,0.7); font-family:'SF Mono','Fira Code',monospace; font-size:11px;"><span class="nav-dot" style="background:var(--blue)"></span>tech-context</a>
-    <a href="#skill-process-mapper" class="nav-link" style="color:rgba(253,230,138,0.7); font-family:'SF Mono','Fira Code',monospace; font-size:11px;"><span class="nav-dot" style="background:#92400E"></span>process-mapper</a>
+    <a href="#skill-process-mapper" class="nav-link" style="color:rgba(209,191,167,0.7); font-family:'SF Mono','Fira Code',monospace; font-size:11px;"><span class="nav-dot" style="background:#d1bfa7"></span>process-mapper</a>
   </div>
 
   <div class="nav-group">
     <span class="nav-group-label">Framework flow</span>
-    <a href="#" class="nav-link" style="color:rgba(255,255,255,0.25); font-size:11px;"><span class="nav-dot" style="background:#475569"></span>Brainstorm (before)</a>
+    <a href="#" class="nav-link" style="color:rgba(255,255,255,0.25); font-size:11px;"><span class="nav-dot" style="background:#8e8e90"></span>Brainstorm (before)</a>
     <a href="#" class="nav-link" style="color:rgba(45,212,191,0.8); font-size:11px; border-left: 2px solid var(--teal); background:rgba(142,142,144,0.1);"><span class="nav-dot" style="background:var(--teal)"></span>Discover + Tech Context ←</a>
     <a href="#" class="nav-link" style="color:rgba(209,191,167,0.55); font-size:11px;"><span class="nav-dot" style="background:#bd8c7d"></span>Design Sprint (next)</a>
   </div>
@@ -1026,7 +1026,7 @@
       <!-- process-mapper always-on note -->
       <div class="card" id="skill-process-mapper">
         <div class="card-header">
-          <div class="card-title" style="color:#92400E;">process-mapper</div>
+          <div class="card-title" style="color:#d1bfa7;">process-mapper</div>
           <div class="card-badge gold">Always-On (piloted / guided)</div>
         </div>
         <div class="card-desc">
@@ -1137,7 +1137,7 @@
         </div>
 
         <div class="step-row">
-          <div class="step-num-col"><div class="step-num" style="background:#92400E;">5</div></div>
+          <div class="step-num-col"><div class="step-num" style="background:#d1bfa7;">5</div></div>
           <div class="step-content">
             <div class="step-tag gold">process-mapper</div>
             <div class="step-title">As-is and to-be process maps</div>
@@ -1350,7 +1350,7 @@
             </ul>
           </div>
           <div class="handoff-section">
-            <div class="handoff-section-label"><span class="dot" style="background:#92400E"></span>What to build against</div>
+            <div class="handoff-section-label"><span class="dot" style="background:#d1bfa7"></span>What to build against</div>
             <ul class="handoff-list">
               <li>Reads <span class="pill">docs/process/to-be-[name].md</span> as the build target</li>
               <li>process-mapper cross-references every screen in the sprint against the to-be map — steps not covered by any screen are surfaced as gaps for you to decide on</li>

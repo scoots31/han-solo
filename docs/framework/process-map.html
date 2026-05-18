@@ -9,8 +9,8 @@
 
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    background: #F0F2F5;
-    color: #1A1A2E;
+    background: #faf8f5;
+    color: #1a1a1a;
     padding: 32px 24px 48px;
   }
 
@@ -20,12 +20,12 @@
   .page-header h1 {
     font-size: 22px;
     font-weight: 700;
-    color: #1A1A2E;
+    color: #1a1a1a;
     letter-spacing: -0.3px;
   }
   .page-header p {
     font-size: 13px;
-    color: #6B7280;
+    color: #8e8e90;
     margin-top: 4px;
   }
 
@@ -40,7 +40,7 @@
     align-items: center;
     gap: 7px;
     font-size: 12px;
-    color: #4B5563;
+    color: #49494b;
     font-weight: 500;
   }
   .legend-dot {
@@ -53,7 +53,7 @@
   .map-wrapper {
     overflow-x: auto;
     border-radius: 12px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
   }
 
   .map {
@@ -67,7 +67,7 @@
 
   /* Phase header row */
   .phase-corner {
-    background: #1A1A2E;
+    background: #1a1a1a;
     padding: 14px 12px;
     display: flex;
     align-items: center;
@@ -82,7 +82,7 @@
   }
 
   .phase-header {
-    background: #1A1A2E;
+    background: #1a1a1a;
     padding: 14px 14px 12px;
     border-left: 1px solid rgba(255,255,255,0.08);
   }
@@ -108,8 +108,8 @@
     border-radius: 10px;
     font-weight: 600;
   }
-  .tag-optional { background: rgba(251,191,36,0.2); color: #FBB724; }
-  .tag-auto { background: rgba(99,202,183,0.2); color: #63CAB7; }
+  .tag-optional { background: rgba(209,191,167,0.2); color: #d1bfa7; }
+  .tag-auto { background: rgba(142,142,144,0.15); color: #8e8e90; }
   .tag-explicit { background: rgba(209,191,167,0.2); color: #d1bfa7; }
 
   /* Lane label column */
@@ -118,7 +118,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    border-top: 1px solid #E5E7EB;
+    border-top: 1px solid #e8ddd4;
   }
   .lane-label .label-title {
     font-size: 11px;
@@ -136,33 +136,33 @@
 
   /* Lane colors */
   .lane-solo .lane-label { background: #EBF4FF; border-right: 3px solid #bd8c7d; }
-  .lane-solo .lane-label .label-title { color: #a87b6c; }
-  .lane-solo .lane-label .label-sub { color: #a87b6c; }
+  .lane-solo .lane-label .label-title { color: #bd8c7d; }
+  .lane-solo .lane-label .label-sub { color: #bd8c7d; }
 
   .lane-skills .lane-label { background: #E6F4F1; border-right: 3px solid #8e8e90; }
-  .lane-skills .lane-label .label-title { color: #7a6a60; }
-  .lane-skills .lane-label .label-sub { color: #7a6a60; }
+  .lane-skills .lane-label .label-title { color: #8e8e90; }
+  .lane-skills .lane-label .label-sub { color: #8e8e90; }
 
-  .lane-always .lane-label { background: #FFF7ED; border-right: 3px solid #F59E0B; }
-  .lane-always .lane-label .label-title { color: #B45309; }
-  .lane-always .lane-label .label-sub { color: #B45309; }
+  .lane-always .lane-label { background: rgba(209,191,167,0.10); border-right: 3px solid #d1bfa7; }
+  .lane-always .lane-label .label-title { color: #d1bfa7; }
+  .lane-always .lane-label .label-sub { color: #d1bfa7; }
 
-  .lane-output .lane-label { background: #F5F5F5; border-right: 3px solid #6B7280; }
-  .lane-output .lane-label .label-title { color: #374151; }
-  .lane-output .lane-label .label-sub { color: #374151; }
+  .lane-output .lane-label { background: #faf8f5; border-right: 3px solid #8e8e90; }
+  .lane-output .lane-label .label-title { color: #49494b; }
+  .lane-output .lane-label .label-sub { color: #49494b; }
 
   /* Cells */
   .cell {
     padding: 14px 14px 14px;
-    border-left: 1px solid #E5E7EB;
-    border-top: 1px solid #E5E7EB;
+    border-left: 1px solid #e8ddd4;
+    border-top: 1px solid #e8ddd4;
     vertical-align: top;
   }
 
-  .lane-solo .cell { background: #F8FBFF; }
-  .lane-skills .cell { background: #F4FBFA; }
-  .lane-always .cell { background: #FFFCF5; }
-  .lane-output .cell { background: #FAFAFA; }
+  .lane-solo .cell { background: #faf8f5; }
+  .lane-skills .cell { background: #faf8f5; }
+  .lane-always .cell { background: rgba(209,191,167,0.06); }
+  .lane-output .cell { background: #faf8f5; }
 
   .cell ul {
     list-style: none;
@@ -171,7 +171,7 @@
   }
   .cell ul li {
     font-size: 11.5px;
-    color: #374151;
+    color: #49494b;
     line-height: 1.45;
     padding: 3px 0 3px 14px;
     position: relative;
@@ -182,7 +182,7 @@
     content: '›';
     position: absolute;
     left: 2px;
-    color: #9CA3AF;
+    color: #8e8e90;
     font-size: 13px;
     line-height: 1.35;
   }
@@ -196,9 +196,9 @@
     margin-bottom: 7px;
     font-family: 'SF Mono', 'Fira Code', monospace;
   }
-  .lane-skills .skill-tag { background: #CCFBF1; color: #7a6a60; }
-  .lane-always .skill-tag { background: #FEF3C7; color: #92400E; }
-  .lane-output .skill-tag { background: #E5E7EB; color: #374151; font-family: 'SF Mono', 'Fira Code', monospace; }
+  .lane-skills .skill-tag { background: #CCFBF1; color: #8e8e90; }
+  .lane-always .skill-tag { background: rgba(209,191,167,0.15); color: #d1bfa7; }
+  .lane-output .skill-tag { background: #e8ddd4; color: #49494b; font-family: 'SF Mono', 'Fira Code', monospace; }
 
   .cell .gate-badge {
     display: inline-flex;
@@ -212,24 +212,24 @@
     text-transform: uppercase;
     letter-spacing: 0.4px;
   }
-  .gate-required { background: #FEE2E2; color: #B91C1C; }
-  .gate-auto { background: #DCFCE7; color: #166534; }
+  .gate-required { background: rgba(189,140,125,0.12); color: #bd8c7d; }
+  .gate-auto { background: rgba(142,142,144,0.12); color: #8e8e90; }
 
   .cell-empty {
     opacity: 0.3;
     font-size: 11px;
-    color: #9CA3AF;
+    color: #8e8e90;
     padding: 14px;
-    border-left: 1px solid #E5E7EB;
-    border-top: 1px solid #E5E7EB;
+    border-left: 1px solid #e8ddd4;
+    border-top: 1px solid #e8ddd4;
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  .lane-solo .cell-empty { background: #F8FBFF; }
-  .lane-skills .cell-empty { background: #F4FBFA; }
-  .lane-always .cell-empty { background: #FFFCF5; }
-  .lane-output .cell-empty { background: #FAFAFA; }
+  .lane-solo .cell-empty { background: #faf8f5; }
+  .lane-skills .cell-empty { background: #faf8f5; }
+  .lane-always .cell-empty { background: rgba(209,191,167,0.06); }
+  .lane-output .cell-empty { background: #faf8f5; }
 
   /* Row grouping via display:contents */
   .row { display: contents; }
@@ -237,10 +237,10 @@
   .footnote {
     margin-top: 20px;
     font-size: 11.5px;
-    color: #6B7280;
+    color: #8e8e90;
     line-height: 1.6;
   }
-  .footnote strong { color: #374151; }
+  .footnote strong { color: #49494b; }
 
   @media print {
     body { background: white; padding: 16px; }
@@ -260,11 +260,11 @@
 <div class="legend">
   <div class="legend-item"><div class="legend-dot" style="background:#bd8c7d"></div> The Builder (Solo)</div>
   <div class="legend-item"><div class="legend-dot" style="background:#8e8e90"></div> Framework — Active Skills</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div> Always-On Skills</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#6B7280"></div> Outputs &amp; Handoffs</div>
-  <div class="legend-item" style="margin-left:12px"><span style="background:#FEE2E2;color:#B91C1C;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;">GATE</span> &nbsp;Required before advancing</div>
-  <div class="legend-item"><span style="background:#DCFCE7;color:#166534;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;">AUTO</span> &nbsp;Framework-triggered, no user action</div>
-  <div class="legend-item"><span style="background:#1E293B;color:#94A3B8;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;border:1px solid #334155">MODE</span> &nbsp;<strong>Bare</strong> (default, silent, lowest tokens) · <strong>Assisted</strong> (always-on fires, moderate) · <strong>Auto-Pilot</strong> (full chain + always-on, highest)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#d1bfa7"></div> Always-On Skills</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#8e8e90"></div> Outputs &amp; Handoffs</div>
+  <div class="legend-item" style="margin-left:12px"><span style="background:rgba(189,140,125,0.12);color:#bd8c7d;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;">GATE</span> &nbsp;Required before advancing</div>
+  <div class="legend-item"><span style="background:rgba(142,142,144,0.12);color:#8e8e90;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;">AUTO</span> &nbsp;Framework-triggered, no user action</div>
+  <div class="legend-item"><span style="background:#2a2a2a;color:#8e8e90;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;border:1px solid #49494b">MODE</span> &nbsp;<strong>Bare</strong> (default, silent, lowest tokens) · <strong>Assisted</strong> (always-on fires, moderate) · <strong>Auto-Pilot</strong> (full chain + always-on, highest)</div>
 </div>
 
 <div class="map-wrapper">

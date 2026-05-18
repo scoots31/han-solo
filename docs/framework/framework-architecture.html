@@ -13,28 +13,28 @@
     --surface2: #1c1f23;
     --surface3: #242830;
     --border: #2a2d35;
-    --text: #e8eaed;
-    --text-muted: #8b91a0;
-    --text-dim: #555c6b;
-    --gold: #f0a732;
-    --gold-dim: rgba(240,167,50,0.12);
-    --gold-highlight: rgba(240,167,50,0.25);
-    --blue: #4d9cff;
-    --blue-dim: rgba(77,156,255,0.12);
-    --green: #4caf7d;
-    --green-dim: rgba(76,175,125,0.12);
-    --purple: #9b6dff;
-    --purple-dim: rgba(155,109,255,0.12);
-    --teal: #3fcbcb;
-    --teal-dim: rgba(63,203,203,0.12);
-    --orange: #ff7c3c;
-    --orange-dim: rgba(255,124,60,0.12);
-    --red: #ff5a5a;
-    --red-dim: rgba(255,90,90,0.12);
-    --pink: #e879a0;
-    --pink-dim: rgba(232,121,160,0.12);
-    --active-highlight: rgba(240,167,50,0.18);
-    --active-border: #f0a732;
+    --text: #faf8f5;
+    --text-muted: #8e8e90;
+    --text-dim: #8e8e90;
+    --gold: #d1bfa7;
+    --gold-dim: rgba(209,191,167,0.12);
+    --gold-highlight: rgba(209,191,167,0.25);
+    --blue: #8e8e90;
+    --blue-dim: rgba(142,142,144,0.12);
+    --green: #8e8e90;
+    --green-dim: rgba(142,142,144,0.12);
+    --purple: #49494b;
+    --purple-dim: rgba(73,73,75,0.12);
+    --teal: #8e8e90;
+    --teal-dim: rgba(142,142,144,0.12);
+    --orange: #bd8c7d;
+    --orange-dim: rgba(189,140,125,0.12);
+    --red: #bd8c7d;
+    --red-dim: rgba(189,140,125,0.12);
+    --pink: #bd8c7d;
+    --pink-dim: rgba(189,140,125,0.12);
+    --active-highlight: rgba(209,191,167,0.18);
+    --active-border: #d1bfa7;
   }
 
   body {
@@ -273,7 +273,7 @@
   .node { cursor: pointer; }
   .node rect, .node ellipse, .node polygon { transition: filter 0.15s; }
   .node:hover rect, .node:hover ellipse, .node:hover polygon { filter: brightness(1.25); }
-  .node.active rect, .node.active ellipse, .node.active polygon { filter: brightness(1.4) drop-shadow(0 0 6px rgba(240,167,50,0.6)); }
+  .node.active rect, .node.active ellipse, .node.active polygon { filter: brightness(1.4) drop-shadow(0 0 6px rgba(209,191,167,0.6)); }
   .edge { pointer-events: none; }
   .edge.active line, .edge.active path { stroke: var(--gold) !important; stroke-width: 2.5px !important; opacity: 1 !important; }
   .edge path, .edge line { transition: stroke 0.15s, stroke-width 0.15s; }
@@ -294,19 +294,19 @@
           <path d="M0,0 L8,3 L0,6 Z" fill="#3a3f4a"/>
         </marker>
         <marker id="arr-gold" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
-          <path d="M0,0 L8,3 L0,6 Z" fill="#f0a732"/>
+          <path d="M0,0 L8,3 L0,6 Z" fill="#d1bfa7"/>
         </marker>
         <marker id="arr-blue" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
-          <path d="M0,0 L8,3 L0,6 Z" fill="#4d9cff"/>
+          <path d="M0,0 L8,3 L0,6 Z" fill="#8e8e90"/>
         </marker>
         <marker id="arr-purple" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
-          <path d="M0,0 L8,3 L0,6 Z" fill="#9b6dff"/>
+          <path d="M0,0 L8,3 L0,6 Z" fill="#49494b"/>
         </marker>
         <marker id="arr-teal" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
-          <path d="M0,0 L8,3 L0,6 Z" fill="#3fcbcb"/>
+          <path d="M0,0 L8,3 L0,6 Z" fill="#8e8e90"/>
         </marker>
         <marker id="arr-green" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
-          <path d="M0,0 L8,3 L0,6 Z" fill="#4caf7d"/>
+          <path d="M0,0 L8,3 L0,6 Z" fill="#8e8e90"/>
         </marker>
 
         <!-- Glow filter -->
@@ -321,21 +321,21 @@
       ═══════════════════════════════════════════════ -->
 
       <!-- Session Modes label -->
-      <text x="14" y="42" font-size="9" fill="#555c6b" font-weight="700" letter-spacing="0.1em" text-transform="uppercase">SESSION MODES</text>
+      <text x="14" y="42" font-size="9" fill="#8e8e90" font-weight="700" letter-spacing="0.1em" text-transform="uppercase">SESSION MODES</text>
       <rect x="14" y="50" width="182" height="62" rx="8" fill="#141618" stroke="#2a2d35" stroke-width="1"/>
 
       <!-- Always-On banner -->
-      <rect x="14" y="134" width="832" height="68" rx="8" fill="rgba(155,109,255,0.06)" stroke="#9b6dff" stroke-width="1" stroke-dasharray="4,3"/>
-      <text x="22" y="150" font-size="9" fill="#9b6dff" font-weight="700" letter-spacing="0.1em">ALWAYS-ON SKILLS (guided/piloted mode)</text>
+      <rect x="14" y="134" width="832" height="68" rx="8" fill="rgba(73,73,75,0.06)" stroke="#49494b" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="22" y="150" font-size="9" fill="#49494b" font-weight="700" letter-spacing="0.1em">ALWAYS-ON SKILLS (guided/piloted mode)</text>
 
       <!-- Phase chain label -->
-      <text x="14" y="234" font-size="9" fill="#555c6b" font-weight="700" letter-spacing="0.1em">PHASE CHAIN</text>
+      <text x="14" y="234" font-size="9" fill="#8e8e90" font-weight="700" letter-spacing="0.1em">PHASE CHAIN</text>
 
       <!-- Workshop label -->
-      <text x="688" y="234" font-size="9" fill="#555c6b" font-weight="700" letter-spacing="0.1em">WORKSHOP</text>
+      <text x="688" y="234" font-size="9" fill="#8e8e90" font-weight="700" letter-spacing="0.1em">WORKSHOP</text>
 
       <!-- Supporting skills label -->
-      <text x="690" y="440" font-size="9" fill="#555c6b" font-weight="700" letter-spacing="0.1em">ON-DEMAND</text>
+      <text x="690" y="440" font-size="9" fill="#8e8e90" font-weight="700" letter-spacing="0.1em">ON-DEMAND</text>
 
       <!-- ═══════════════════════════════════════════════
            SESSION MODE NODES
@@ -343,21 +343,21 @@
 
       <!-- Guided mode -->
       <g class="node" data-id="mode-guided" data-flow="session-modes">
-        <rect x="20" y="56" width="78" height="28" rx="5" fill="#1c1f23" stroke="#9b6dff" stroke-width="1.5"/>
-        <text x="59" y="74" font-size="10.5" fill="#9b6dff" text-anchor="middle" font-weight="600">Guided</text>
+        <rect x="20" y="56" width="78" height="28" rx="5" fill="#1c1f23" stroke="#49494b" stroke-width="1.5"/>
+        <text x="59" y="74" font-size="10.5" fill="#49494b" text-anchor="middle" font-weight="600">Guided</text>
       </g>
       <!-- Piloted mode -->
       <g class="node" data-id="mode-piloted" data-flow="session-modes">
-        <rect x="106" y="56" width="78" height="28" rx="5" fill="#1c1f23" stroke="#9b6dff" stroke-width="1.5"/>
-        <text x="145" y="74" font-size="10.5" fill="#9b6dff" text-anchor="middle" font-weight="600">Piloted</text>
+        <rect x="106" y="56" width="78" height="28" rx="5" fill="#1c1f23" stroke="#49494b" stroke-width="1.5"/>
+        <text x="145" y="74" font-size="10.5" fill="#49494b" text-anchor="middle" font-weight="600">Piloted</text>
       </g>
       <!-- Bare mode -->
       <g class="node" data-id="mode-bare" data-flow="session-modes">
-        <rect x="106" y="90" width="78" height="28" rx="5" fill="#1c1f23" stroke="#555c6b" stroke-width="1.5"/>
-        <text x="145" y="108" font-size="10.5" fill="#8b91a0" text-anchor="middle" font-weight="600">Bare</text>
+        <rect x="106" y="90" width="78" height="28" rx="5" fill="#1c1f23" stroke="#8e8e90" stroke-width="1.5"/>
+        <text x="145" y="108" font-size="10.5" fill="#8e8e90" text-anchor="middle" font-weight="600">Bare</text>
       </g>
       <!-- Default note -->
-      <text x="32" y="107" font-size="9" fill="#555c6b">default →</text>
+      <text x="32" y="107" font-size="9" fill="#8e8e90">default →</text>
 
       <!-- ═══════════════════════════════════════════════
            ALWAYS-ON SKILLS (horizontal strip)
@@ -365,30 +365,30 @@
 
       <!-- Process Mapper -->
       <g class="node" data-id="always-process-mapper" data-flow="always-on">
-        <rect x="22" y="154" width="148" height="34" rx="6" fill="rgba(155,109,255,0.15)" stroke="#9b6dff" stroke-width="1.5"/>
-        <text x="96" y="168" font-size="10.5" fill="#c9b0ff" text-anchor="middle" font-weight="600">Process Mapper</text>
-        <text x="96" y="181" font-size="9.5" fill="#9b6dff" text-anchor="middle">as-is &amp; to-be maps</text>
+        <rect x="22" y="154" width="148" height="34" rx="6" fill="rgba(73,73,75,0.15)" stroke="#49494b" stroke-width="1.5"/>
+        <text x="96" y="168" font-size="10.5" fill="#d1bfa7" text-anchor="middle" font-weight="600">Process Mapper</text>
+        <text x="96" y="181" font-size="9.5" fill="#49494b" text-anchor="middle">as-is &amp; to-be maps</text>
       </g>
 
       <!-- Product Continuity -->
       <g class="node" data-id="always-product-continuity" data-flow="always-on">
-        <rect x="182" y="154" width="148" height="34" rx="6" fill="rgba(155,109,255,0.15)" stroke="#9b6dff" stroke-width="1.5"/>
-        <text x="256" y="168" font-size="10.5" fill="#c9b0ff" text-anchor="middle" font-weight="600">Product Continuity</text>
-        <text x="256" y="181" font-size="9.5" fill="#9b6dff" text-anchor="middle">decisions · handoff · memory</text>
+        <rect x="182" y="154" width="148" height="34" rx="6" fill="rgba(73,73,75,0.15)" stroke="#49494b" stroke-width="1.5"/>
+        <text x="256" y="168" font-size="10.5" fill="#d1bfa7" text-anchor="middle" font-weight="600">Product Continuity</text>
+        <text x="256" y="181" font-size="9.5" fill="#49494b" text-anchor="middle">decisions · handoff · memory</text>
       </g>
 
       <!-- Framework Health -->
       <g class="node" data-id="always-framework-health" data-flow="always-on">
-        <rect x="342" y="154" width="148" height="34" rx="6" fill="rgba(155,109,255,0.15)" stroke="#9b6dff" stroke-width="1.5"/>
-        <text x="416" y="168" font-size="10.5" fill="#c9b0ff" text-anchor="middle" font-weight="600">Framework Health</text>
-        <text x="416" y="181" font-size="9.5" fill="#9b6dff" text-anchor="middle">gates · drift · long-gap</text>
+        <rect x="342" y="154" width="148" height="34" rx="6" fill="rgba(73,73,75,0.15)" stroke="#49494b" stroke-width="1.5"/>
+        <text x="416" y="168" font-size="10.5" fill="#d1bfa7" text-anchor="middle" font-weight="600">Framework Health</text>
+        <text x="416" y="181" font-size="9.5" fill="#49494b" text-anchor="middle">gates · drift · long-gap</text>
       </g>
 
       <!-- Retrospective -->
       <g class="node" data-id="always-retrospective" data-flow="always-on">
-        <rect x="502" y="154" width="148" height="34" rx="6" fill="rgba(155,109,255,0.15)" stroke="#9b6dff" stroke-width="1.5"/>
-        <text x="576" y="168" font-size="10.5" fill="#c9b0ff" text-anchor="middle" font-weight="600">Retrospective</text>
-        <text x="576" y="181" font-size="9.5" fill="#9b6dff" text-anchor="middle">capture · improve · learn</text>
+        <rect x="502" y="154" width="148" height="34" rx="6" fill="rgba(73,73,75,0.15)" stroke="#49494b" stroke-width="1.5"/>
+        <text x="576" y="168" font-size="10.5" fill="#d1bfa7" text-anchor="middle" font-weight="600">Retrospective</text>
+        <text x="576" y="181" font-size="9.5" fill="#49494b" text-anchor="middle">capture · improve · learn</text>
       </g>
 
       <!-- ═══════════════════════════════════════════════
@@ -397,31 +397,31 @@
 
       <!-- START -->
       <g class="node" data-id="start" data-flow="main-chain">
-        <ellipse cx="120" cy="255" rx="90" ry="22" fill="#1c1f23" stroke="#f0a732" stroke-width="2"/>
-        <text x="120" y="250" font-size="11" fill="#f0a732" text-anchor="middle" font-weight="700">START</text>
-        <text x="120" y="264" font-size="9.5" fill="#c8960f" text-anchor="middle">routes · resumes · detects</text>
+        <ellipse cx="120" cy="255" rx="90" ry="22" fill="#1c1f23" stroke="#d1bfa7" stroke-width="2"/>
+        <text x="120" y="250" font-size="11" fill="#d1bfa7" text-anchor="middle" font-weight="700">START</text>
+        <text x="120" y="264" font-size="9.5" fill="#d1bfa7" text-anchor="middle">routes · resumes · detects</text>
       </g>
 
       <!-- Arrow: start → brainstorm -->
       <line class="edge" data-edges="start,brainstorm" x1="120" y1="277" x2="120" y2="305" stroke="#3a3f4a" stroke-width="1.5" marker-end="url(#arr-default)"/>
       <!-- Arrow: start → discover (direct) -->
       <path class="edge" data-edges="start,discover" d="M195,255 Q250,255 250,305" stroke="#3a3f4a" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#arr-default)" fill="none"/>
-      <text x="218" y="276" font-size="8.5" fill="#555c6b" font-style="italic">clear idea</text>
+      <text x="218" y="276" font-size="8.5" fill="#8e8e90" font-style="italic">clear idea</text>
 
       <!-- BRAINSTORM -->
       <g class="node" data-id="brainstorm" data-flow="main-chain">
-        <rect x="30" y="308" width="180" height="52" rx="8" fill="#1c1f23" stroke="#f0a732" stroke-width="1.5"/>
-        <text x="120" y="327" font-size="11" fill="#f0a732" text-anchor="middle" font-weight="700">BRAINSTORM</text>
-        <text x="120" y="341" font-size="9.5" fill="#8b91a0" text-anchor="middle">explore idea · value moment</text>
-        <text x="120" y="353" font-size="9.5" fill="#8b91a0" text-anchor="middle">rough sketch · process sketch</text>
+        <rect x="30" y="308" width="180" height="52" rx="8" fill="#1c1f23" stroke="#d1bfa7" stroke-width="1.5"/>
+        <text x="120" y="327" font-size="11" fill="#d1bfa7" text-anchor="middle" font-weight="700">BRAINSTORM</text>
+        <text x="120" y="341" font-size="9.5" fill="#8e8e90" text-anchor="middle">explore idea · value moment</text>
+        <text x="120" y="353" font-size="9.5" fill="#8e8e90" text-anchor="middle">rough sketch · process sketch</text>
       </g>
       <!-- Artifact: brainstorm-*.md -->
-      <text x="120" y="376" font-size="9" fill="#3fcbcb" text-anchor="middle" font-family="monospace">📄 docs/brainstorm-*.md</text>
+      <text x="120" y="376" font-size="9" fill="#8e8e90" text-anchor="middle" font-family="monospace">📄 docs/brainstorm-*.md</text>
 
       <!-- Gate: brainstorm → discover -->
       <g class="node" data-id="gate-brainstorm-discover" data-flow="gates">
-        <rect x="70" y="384" width="100" height="20" rx="4" fill="rgba(255,124,60,0.15)" stroke="#ff7c3c" stroke-width="1.2"/>
-        <text x="120" y="397" font-size="9" fill="#ff7c3c" text-anchor="middle" font-weight="700">▶ GATE · Clear idea?</text>
+        <rect x="70" y="384" width="100" height="20" rx="4" fill="rgba(189,140,125,0.15)" stroke="#bd8c7d" stroke-width="1.2"/>
+        <text x="120" y="397" font-size="9" fill="#bd8c7d" text-anchor="middle" font-weight="700">▶ GATE · Clear idea?</text>
       </g>
 
       <!-- Arrow: brainstorm → discover -->
@@ -429,23 +429,23 @@
 
       <!-- Also: research-spike off brainstorm -->
       <path class="edge" data-edges="brainstorm,research-spike" d="M210,334 Q260,334 260,370 Q260,390 298,390" stroke="#3a3f4a" stroke-width="1" stroke-dasharray="2,2" marker-end="url(#arr-default)" fill="none"/>
-      <text x="240" y="355" font-size="8.5" fill="#555c6b" font-style="italic">feasibility?</text>
+      <text x="240" y="355" font-size="8.5" fill="#8e8e90" font-style="italic">feasibility?</text>
 
       <!-- DISCOVER -->
       <g class="node" data-id="discover" data-flow="main-chain">
-        <rect x="30" y="428" width="180" height="68" rx="8" fill="#1c1f23" stroke="#4d9cff" stroke-width="1.5"/>
-        <text x="120" y="448" font-size="11" fill="#4d9cff" text-anchor="middle" font-weight="700">DISCOVER</text>
-        <text x="120" y="463" font-size="9.5" fill="#8b91a0" text-anchor="middle">who · journey · value moment</text>
-        <text x="120" y="476" font-size="9.5" fill="#8b91a0" text-anchor="middle">as-is map · to-be map</text>
-        <text x="120" y="489" font-size="9.5" fill="#8b91a0" text-anchor="middle">design on-ramp decision</text>
+        <rect x="30" y="428" width="180" height="68" rx="8" fill="#1c1f23" stroke="#8e8e90" stroke-width="1.5"/>
+        <text x="120" y="448" font-size="11" fill="#8e8e90" text-anchor="middle" font-weight="700">DISCOVER</text>
+        <text x="120" y="463" font-size="9.5" fill="#8e8e90" text-anchor="middle">who · journey · value moment</text>
+        <text x="120" y="476" font-size="9.5" fill="#8e8e90" text-anchor="middle">as-is map · to-be map</text>
+        <text x="120" y="489" font-size="9.5" fill="#8e8e90" text-anchor="middle">design on-ramp decision</text>
       </g>
       <!-- Artifact: discovery-brief.md -->
-      <text x="120" y="510" font-size="9" fill="#3fcbcb" text-anchor="middle" font-family="monospace">📄 docs/discovery-brief.md + process maps</text>
+      <text x="120" y="510" font-size="9" fill="#8e8e90" text-anchor="middle" font-family="monospace">📄 docs/discovery-brief.md + process maps</text>
 
       <!-- Gate: discover → tech-context -->
       <g class="node" data-id="gate-discover-tech" data-flow="gates">
-        <rect x="55" y="518" width="130" height="20" rx="4" fill="rgba(255,124,60,0.15)" stroke="#ff7c3c" stroke-width="1.2"/>
-        <text x="120" y="531" font-size="9" fill="#ff7c3c" text-anchor="middle" font-weight="700">▶ GATE · Brief + process maps?</text>
+        <rect x="55" y="518" width="130" height="20" rx="4" fill="rgba(189,140,125,0.15)" stroke="#bd8c7d" stroke-width="1.2"/>
+        <text x="120" y="531" font-size="9" fill="#bd8c7d" text-anchor="middle" font-weight="700">▶ GATE · Brief + process maps?</text>
       </g>
 
       <!-- Arrow: discover → tech-context -->
@@ -453,19 +453,19 @@
 
       <!-- TECH CONTEXT -->
       <g class="node" data-id="tech-context" data-flow="main-chain">
-        <rect x="30" y="563" width="180" height="64" rx="8" fill="#1c1f23" stroke="#4caf7d" stroke-width="1.5"/>
-        <text x="120" y="583" font-size="11" fill="#4caf7d" text-anchor="middle" font-weight="700">TECH CONTEXT</text>
-        <text x="120" y="598" font-size="9.5" fill="#8b91a0" text-anchor="middle">stack · deployment · CI/CD</text>
-        <text x="120" y="611" font-size="9.5" fill="#8b91a0" text-anchor="middle">security class · infra slices</text>
-        <text x="120" y="621" font-size="9" fill="#8b91a0" text-anchor="middle">observability · secrets pattern</text>
+        <rect x="30" y="563" width="180" height="64" rx="8" fill="#1c1f23" stroke="#8e8e90" stroke-width="1.5"/>
+        <text x="120" y="583" font-size="11" fill="#8e8e90" text-anchor="middle" font-weight="700">TECH CONTEXT</text>
+        <text x="120" y="598" font-size="9.5" fill="#8e8e90" text-anchor="middle">stack · deployment · CI/CD</text>
+        <text x="120" y="611" font-size="9.5" fill="#8e8e90" text-anchor="middle">security class · infra slices</text>
+        <text x="120" y="621" font-size="9" fill="#8e8e90" text-anchor="middle">observability · secrets pattern</text>
       </g>
       <!-- Artifact -->
-      <text x="120" y="641" font-size="9" fill="#3fcbcb" text-anchor="middle" font-family="monospace">📄 docs/tech-context.md</text>
+      <text x="120" y="641" font-size="9" fill="#8e8e90" text-anchor="middle" font-family="monospace">📄 docs/tech-context.md</text>
 
       <!-- Gate: tech → design sprint -->
       <g class="node" data-id="gate-tech-design" data-flow="gates">
-        <rect x="55" y="649" width="130" height="20" rx="4" fill="rgba(255,124,60,0.15)" stroke="#ff7c3c" stroke-width="1.2"/>
-        <text x="120" y="662" font-size="9" fill="#ff7c3c" text-anchor="middle" font-weight="700">▶ GATE · tech-context.md?</text>
+        <rect x="55" y="649" width="130" height="20" rx="4" fill="rgba(189,140,125,0.15)" stroke="#bd8c7d" stroke-width="1.2"/>
+        <text x="120" y="662" font-size="9" fill="#bd8c7d" text-anchor="middle" font-weight="700">▶ GATE · tech-context.md?</text>
       </g>
 
       <!-- Arrow: tech → design-sprint -->
@@ -473,20 +473,20 @@
 
       <!-- DESIGN SPRINT -->
       <g class="node" data-id="design-sprint" data-flow="main-chain">
-        <rect x="30" y="694" width="180" height="80" rx="8" fill="#1c1f23" stroke="#4d9cff" stroke-width="1.5"/>
-        <text x="120" y="714" font-size="11" fill="#4d9cff" text-anchor="middle" font-weight="700">DESIGN SPRINT</text>
-        <text x="120" y="729" font-size="9.5" fill="#8b91a0" text-anchor="middle">design identity · hero screen</text>
-        <text x="120" y="742" font-size="9.5" fill="#8b91a0" text-anchor="middle">warmer/colder loop · all screens</text>
-        <text x="120" y="755" font-size="9.5" fill="#8b91a0" text-anchor="middle">walk-through · defer decisions</text>
-        <text x="120" y="768" font-size="9" fill="#8b91a0" text-anchor="middle">figma / reference / scratch</text>
+        <rect x="30" y="694" width="180" height="80" rx="8" fill="#1c1f23" stroke="#8e8e90" stroke-width="1.5"/>
+        <text x="120" y="714" font-size="11" fill="#8e8e90" text-anchor="middle" font-weight="700">DESIGN SPRINT</text>
+        <text x="120" y="729" font-size="9.5" fill="#8e8e90" text-anchor="middle">design identity · hero screen</text>
+        <text x="120" y="742" font-size="9.5" fill="#8e8e90" text-anchor="middle">warmer/colder loop · all screens</text>
+        <text x="120" y="755" font-size="9.5" fill="#8e8e90" text-anchor="middle">walk-through · defer decisions</text>
+        <text x="120" y="768" font-size="9" fill="#8e8e90" text-anchor="middle">figma / reference / scratch</text>
       </g>
       <!-- Artifacts -->
-      <text x="120" y="789" font-size="9" fill="#3fcbcb" text-anchor="middle" font-family="monospace">📄 sprint-*.html · deferred-decisions.md</text>
+      <text x="120" y="789" font-size="9" fill="#8e8e90" text-anchor="middle" font-family="monospace">📄 sprint-*.html · deferred-decisions.md</text>
 
       <!-- Gate: design-sprint → data-scaffold -->
       <g class="node" data-id="gate-sprint-data" data-flow="gates">
-        <rect x="45" y="797" width="150" height="20" rx="4" fill="rgba(255,124,60,0.15)" stroke="#ff7c3c" stroke-width="1.2"/>
-        <text x="120" y="810" font-size="9" fill="#ff7c3c" text-anchor="middle" font-weight="700">▶ GATE · screens + deferred log?</text>
+        <rect x="45" y="797" width="150" height="20" rx="4" fill="rgba(189,140,125,0.15)" stroke="#bd8c7d" stroke-width="1.2"/>
+        <text x="120" y="810" font-size="9" fill="#bd8c7d" text-anchor="middle" font-weight="700">▶ GATE · screens + deferred log?</text>
       </g>
 
       <!-- Arrow: design-sprint → data-scaffold -->
@@ -494,34 +494,34 @@
 
       <!-- DATA SCAFFOLD -->
       <g class="node" data-id="data-scaffold" data-flow="main-chain">
-        <rect x="30" y="842" width="180" height="64" rx="8" fill="#1c1f23" stroke="#3fcbcb" stroke-width="1.5"/>
-        <text x="120" y="862" font-size="11" fill="#3fcbcb" text-anchor="middle" font-weight="700">DATA SCAFFOLD</text>
-        <text x="120" y="877" font-size="9.5" fill="#8b91a0" text-anchor="middle">realistic mock data · mock layer</text>
-        <text x="120" y="890" font-size="9.5" fill="#8b91a0" text-anchor="middle">data-mapping.md (proto API)</text>
-        <text x="120" y="900" font-size="9" fill="#8b91a0" text-anchor="middle">update backlog data anchors</text>
+        <rect x="30" y="842" width="180" height="64" rx="8" fill="#1c1f23" stroke="#8e8e90" stroke-width="1.5"/>
+        <text x="120" y="862" font-size="11" fill="#8e8e90" text-anchor="middle" font-weight="700">DATA SCAFFOLD</text>
+        <text x="120" y="877" font-size="9.5" fill="#8e8e90" text-anchor="middle">realistic mock data · mock layer</text>
+        <text x="120" y="890" font-size="9.5" fill="#8e8e90" text-anchor="middle">data-mapping.md (proto API)</text>
+        <text x="120" y="900" font-size="9" fill="#8e8e90" text-anchor="middle">update backlog data anchors</text>
       </g>
       <!-- Artifacts -->
-      <text x="120" y="920" font-size="9" fill="#3fcbcb" text-anchor="middle" font-family="monospace">📄 data/mock/ · data-mapping.md</text>
+      <text x="120" y="920" font-size="9" fill="#8e8e90" text-anchor="middle" font-family="monospace">📄 data/mock/ · data-mapping.md</text>
 
       <!-- Arrow: data-scaffold → design-review -->
       <line class="edge" data-edges="data-scaffold,design-review" x1="120" y1="927" x2="120" y2="949" stroke="#3a3f4a" stroke-width="1.5" marker-end="url(#arr-default)"/>
 
       <!-- DESIGN REVIEW -->
       <g class="node" data-id="design-review" data-flow="main-chain">
-        <rect x="30" y="952" width="180" height="84" rx="8" fill="#1c1f23" stroke="#4d9cff" stroke-width="1.5"/>
-        <text x="120" y="972" font-size="11" fill="#4d9cff" text-anchor="middle" font-weight="700">DESIGN REVIEW</text>
-        <text x="120" y="987" font-size="9.5" fill="#8b91a0" text-anchor="middle">PM · tech · data lenses</text>
-        <text x="120" y="1000" font-size="9.5" fill="#8b91a0" text-anchor="middle">define slices · quality contract</text>
-        <text x="120" y="1013" font-size="9.5" fill="#8b91a0" text-anchor="middle">process coverage · data behavior</text>
-        <text x="120" y="1026" font-size="9" fill="#8b91a0" text-anchor="middle">→ slices reach READY status</text>
+        <rect x="30" y="952" width="180" height="84" rx="8" fill="#1c1f23" stroke="#8e8e90" stroke-width="1.5"/>
+        <text x="120" y="972" font-size="11" fill="#8e8e90" text-anchor="middle" font-weight="700">DESIGN REVIEW</text>
+        <text x="120" y="987" font-size="9.5" fill="#8e8e90" text-anchor="middle">PM · tech · data lenses</text>
+        <text x="120" y="1000" font-size="9.5" fill="#8e8e90" text-anchor="middle">define slices · quality contract</text>
+        <text x="120" y="1013" font-size="9.5" fill="#8e8e90" text-anchor="middle">process coverage · data behavior</text>
+        <text x="120" y="1026" font-size="9" fill="#8e8e90" text-anchor="middle">→ slices reach READY status</text>
       </g>
       <!-- Artifacts -->
-      <text x="120" y="1049" font-size="9" fill="#3fcbcb" text-anchor="middle" font-family="monospace">📄 docs/backlog.md (slices defined)</text>
+      <text x="120" y="1049" font-size="9" fill="#8e8e90" text-anchor="middle" font-family="monospace">📄 docs/backlog.md (slices defined)</text>
 
       <!-- Gate: design-review → prd-to-plan -->
       <g class="node" data-id="gate-review-plan" data-flow="gates">
-        <rect x="40" y="1057" width="160" height="20" rx="4" fill="rgba(255,124,60,0.15)" stroke="#ff7c3c" stroke-width="1.2"/>
-        <text x="120" y="1070" font-size="9" fill="#ff7c3c" text-anchor="middle" font-weight="700">▶ GATE · Ready slices exist?</text>
+        <rect x="40" y="1057" width="160" height="20" rx="4" fill="rgba(189,140,125,0.15)" stroke="#bd8c7d" stroke-width="1.2"/>
+        <text x="120" y="1070" font-size="9" fill="#bd8c7d" text-anchor="middle" font-weight="700">▶ GATE · Ready slices exist?</text>
       </g>
 
       <!-- Arrow: design-review → prd-to-plan -->
@@ -529,23 +529,23 @@
 
       <!-- PRD-TO-PLAN -->
       <g class="node" data-id="prd-to-plan" data-flow="main-chain">
-        <rect x="30" y="1102" width="180" height="72" rx="8" fill="#1c1f23" stroke="#4caf7d" stroke-width="1.5"/>
-        <text x="120" y="1122" font-size="11" fill="#4caf7d" text-anchor="middle" font-weight="700">PRD-TO-PLAN</text>
-        <text x="120" y="1137" font-size="9.5" fill="#8b91a0" text-anchor="middle">phases · deliverables · tracer bullets</text>
-        <text x="120" y="1150" font-size="9.5" fill="#8b91a0" text-anchor="middle">risk + process order · arch types</text>
-        <text x="120" y="1163" font-size="9" fill="#8b91a0" text-anchor="middle">quality scan · slice approval</text>
+        <rect x="30" y="1102" width="180" height="72" rx="8" fill="#1c1f23" stroke="#8e8e90" stroke-width="1.5"/>
+        <text x="120" y="1122" font-size="11" fill="#8e8e90" text-anchor="middle" font-weight="700">PRD-TO-PLAN</text>
+        <text x="120" y="1137" font-size="9.5" fill="#8e8e90" text-anchor="middle">phases · deliverables · tracer bullets</text>
+        <text x="120" y="1150" font-size="9.5" fill="#8e8e90" text-anchor="middle">risk + process order · arch types</text>
+        <text x="120" y="1163" font-size="9" fill="#8e8e90" text-anchor="middle">quality scan · slice approval</text>
       </g>
       <!-- Artifacts -->
-      <text x="120" y="1185" font-size="9" fill="#3fcbcb" text-anchor="middle" font-family="monospace">📄 backlog.md (phases + deliverables)</text>
+      <text x="120" y="1185" font-size="9" fill="#8e8e90" text-anchor="middle" font-family="monospace">📄 backlog.md (phases + deliverables)</text>
 
       <!-- Arrow: prd-to-plan → to-issues -->
       <line class="edge" data-edges="prd-to-plan,to-issues" x1="120" y1="1192" x2="120" y2="1210" stroke="#3a3f4a" stroke-width="1.5" marker-end="url(#arr-default)"/>
 
       <!-- TO-ISSUES -->
       <g class="node" data-id="to-issues" data-flow="main-chain">
-        <rect x="30" y="1213" width="180" height="44" rx="8" fill="#1c1f23" stroke="#4caf7d" stroke-width="1.5"/>
-        <text x="120" y="1233" font-size="11" fill="#4caf7d" text-anchor="middle" font-weight="700">TO-ISSUES</text>
-        <text x="120" y="1248" font-size="9.5" fill="#8b91a0" text-anchor="middle">GitHub issues · dependency order</text>
+        <rect x="30" y="1213" width="180" height="44" rx="8" fill="#1c1f23" stroke="#8e8e90" stroke-width="1.5"/>
+        <text x="120" y="1233" font-size="11" fill="#8e8e90" text-anchor="middle" font-weight="700">TO-ISSUES</text>
+        <text x="120" y="1248" font-size="9.5" fill="#8e8e90" text-anchor="middle">GitHub issues · dependency order</text>
       </g>
 
       <!-- Arrow: to-issues → solo-build -->
@@ -553,46 +553,46 @@
 
       <!-- SOLO BUILD -->
       <g class="node" data-id="solo-build" data-flow="main-chain">
-        <rect x="30" y="1278" width="180" height="80" rx="8" fill="#1c1f23" stroke="#f0a732" stroke-width="2"/>
-        <text x="120" y="1298" font-size="11" fill="#f0a732" text-anchor="middle" font-weight="700">SOLO BUILD</text>
-        <text x="120" y="1313" font-size="9.5" fill="#8b91a0" text-anchor="middle">4 anchors · correlation gate</text>
-        <text x="120" y="1326" font-size="9.5" fill="#8b91a0" text-anchor="middle">arch gate · security pre-flight</text>
-        <text x="120" y="1339" font-size="9.5" fill="#8b91a0" text-anchor="middle">build → builder QA → review agent</text>
-        <text x="120" y="1352" font-size="9" fill="#8b91a0" text-anchor="middle">journey order · dependency blocking</text>
+        <rect x="30" y="1278" width="180" height="80" rx="8" fill="#1c1f23" stroke="#d1bfa7" stroke-width="2"/>
+        <text x="120" y="1298" font-size="11" fill="#d1bfa7" text-anchor="middle" font-weight="700">SOLO BUILD</text>
+        <text x="120" y="1313" font-size="9.5" fill="#8e8e90" text-anchor="middle">4 anchors · correlation gate</text>
+        <text x="120" y="1326" font-size="9.5" fill="#8e8e90" text-anchor="middle">arch gate · security pre-flight</text>
+        <text x="120" y="1339" font-size="9.5" fill="#8e8e90" text-anchor="middle">build → builder QA → review agent</text>
+        <text x="120" y="1352" font-size="9" fill="#8e8e90" text-anchor="middle">journey order · dependency blocking</text>
       </g>
 
       <!-- Arrow: solo-build → solo-qa (auto chain) -->
-      <path class="edge" data-edges="solo-build,code-review,solo-qa" d="M210,1318 Q265,1318 265,1365 Q265,1405 210,1405" stroke="#4caf7d" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#arr-green)" fill="none"/>
-      <text x="275" y="1363" font-size="8.5" fill="#4caf7d" font-style="italic">auto chain</text>
+      <path class="edge" data-edges="solo-build,code-review,solo-qa" d="M210,1318 Q265,1318 265,1365 Q265,1405 210,1405" stroke="#8e8e90" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#arr-green)" fill="none"/>
+      <text x="275" y="1363" font-size="8.5" fill="#8e8e90" font-style="italic">auto chain</text>
       <!-- label boxes for code-review and solo-qa on the side -->
-      <rect x="210" y="1383" width="108" height="22" rx="4" fill="rgba(76,175,125,0.12)" stroke="#4caf7d" stroke-width="1"/>
-      <text x="264" y="1394" font-size="9" fill="#4caf7d" text-anchor="middle" font-weight="600">code-review-and-quality</text>
-      <text x="264" y="1403" font-size="8.5" fill="#4caf7d" text-anchor="middle">→ auto: solo-qa</text>
+      <rect x="210" y="1383" width="108" height="22" rx="4" fill="rgba(142,142,144,0.12)" stroke="#8e8e90" stroke-width="1"/>
+      <text x="264" y="1394" font-size="9" fill="#8e8e90" text-anchor="middle" font-weight="600">code-review-and-quality</text>
+      <text x="264" y="1403" font-size="8.5" fill="#8e8e90" text-anchor="middle">→ auto: solo-qa</text>
 
       <!-- Arrow: solo-build → phase-test -->
       <line class="edge" data-edges="solo-build,phase-test" x1="120" y1="1358" x2="120" y2="1420" stroke="#3a3f4a" stroke-width="1.5" marker-end="url(#arr-default)"/>
       <!-- Gate before phase-test -->
       <g class="node" data-id="gate-build-phasetest" data-flow="gates">
-        <rect x="40" y="1409" width="160" height="20" rx="4" fill="rgba(255,124,60,0.15)" stroke="#ff7c3c" stroke-width="1.2"/>
-        <text x="120" y="1422" font-size="9" fill="#ff7c3c" text-anchor="middle" font-weight="700">▶ GATE · All slices In Test?</text>
+        <rect x="40" y="1409" width="160" height="20" rx="4" fill="rgba(189,140,125,0.15)" stroke="#bd8c7d" stroke-width="1.2"/>
+        <text x="120" y="1422" font-size="9" fill="#bd8c7d" text-anchor="middle" font-weight="700">▶ GATE · All slices In Test?</text>
       </g>
       <line class="edge" data-edges="gate-build-phasetest,phase-test" x1="120" y1="1429" x2="120" y2="1449" stroke="#3a3f4a" stroke-width="1.5" marker-end="url(#arr-default)"/>
 
       <!-- PHASE TEST -->
       <g class="node" data-id="phase-test" data-flow="main-chain">
-        <rect x="30" y="1452" width="180" height="72" rx="8" fill="#1c1f23" stroke="#ff7c3c" stroke-width="1.5"/>
-        <text x="120" y="1472" font-size="11" fill="#ff7c3c" text-anchor="middle" font-weight="700">PHASE TEST</text>
-        <text x="120" y="1487" font-size="9.5" fill="#8b91a0" text-anchor="middle">env ready · use cases · data</text>
-        <text x="120" y="1500" font-size="9.5" fill="#8b91a0" text-anchor="middle">tester + regression (parallel)</text>
-        <text x="120" y="1513" font-size="9" fill="#8b91a0" text-anchor="middle">acceptance · GATE: OPEN or HOLD</text>
+        <rect x="30" y="1452" width="180" height="72" rx="8" fill="#1c1f23" stroke="#bd8c7d" stroke-width="1.5"/>
+        <text x="120" y="1472" font-size="11" fill="#bd8c7d" text-anchor="middle" font-weight="700">PHASE TEST</text>
+        <text x="120" y="1487" font-size="9.5" fill="#8e8e90" text-anchor="middle">env ready · use cases · data</text>
+        <text x="120" y="1500" font-size="9.5" fill="#8e8e90" text-anchor="middle">tester + regression (parallel)</text>
+        <text x="120" y="1513" font-size="9" fill="#8e8e90" text-anchor="middle">acceptance · GATE: OPEN or HOLD</text>
       </g>
       <!-- Artifact -->
-      <text x="120" y="1536" font-size="9" fill="#3fcbcb" text-anchor="middle" font-family="monospace">📄 docs/phase-test-*.md</text>
+      <text x="120" y="1536" font-size="9" fill="#8e8e90" text-anchor="middle" font-family="monospace">📄 docs/phase-test-*.md</text>
 
       <!-- Gate: phase-test → deploy -->
       <g class="node" data-id="gate-phasetest-deploy" data-flow="gates">
-        <rect x="45" y="1543" width="150" height="20" rx="4" fill="rgba(255,124,60,0.15)" stroke="#ff7c3c" stroke-width="1.2"/>
-        <text x="120" y="1556" font-size="9" fill="#ff7c3c" text-anchor="middle" font-weight="700">▶ GATE · Phase test OPEN?</text>
+        <rect x="45" y="1543" width="150" height="20" rx="4" fill="rgba(189,140,125,0.15)" stroke="#bd8c7d" stroke-width="1.2"/>
+        <text x="120" y="1556" font-size="9" fill="#bd8c7d" text-anchor="middle" font-weight="700">▶ GATE · Phase test OPEN?</text>
       </g>
       <line class="edge" data-edges="gate-phasetest-deploy,deploy" x1="120" y1="1563" x2="120" y2="1529" stroke="#3a3f4a" stroke-width="0" marker-end="url(#arr-default)"/>
       <!-- Arrow right to deploy -->
@@ -602,10 +602,10 @@
            DEPLOY (right-side box near bottom)
       ═══════════════════════════════════════════════ -->
       <g class="node" data-id="deploy" data-flow="main-chain">
-        <rect x="340" y="1542" width="160" height="56" rx="8" fill="rgba(240,167,50,0.12)" stroke="#f0a732" stroke-width="2"/>
-        <text x="420" y="1564" font-size="12" fill="#f0a732" text-anchor="middle" font-weight="700">DEPLOY</text>
-        <text x="420" y="1579" font-size="9.5" fill="#8b91a0" text-anchor="middle">CI/CD · MCP · manual CLI</text>
-        <text x="420" y="1591" font-size="9" fill="#8b91a0" text-anchor="middle">reads tech-context deploy method</text>
+        <rect x="340" y="1542" width="160" height="56" rx="8" fill="rgba(209,191,167,0.12)" stroke="#d1bfa7" stroke-width="2"/>
+        <text x="420" y="1564" font-size="12" fill="#d1bfa7" text-anchor="middle" font-weight="700">DEPLOY</text>
+        <text x="420" y="1579" font-size="9.5" fill="#8e8e90" text-anchor="middle">CI/CD · MCP · manual CLI</text>
+        <text x="420" y="1591" font-size="9" fill="#8e8e90" text-anchor="middle">reads tech-context deploy method</text>
       </g>
 
       <!-- ═══════════════════════════════════════════════
@@ -613,32 +613,32 @@
       ═══════════════════════════════════════════════ -->
 
       <!-- Workshop section bg -->
-      <rect x="682" y="240" width="164" height="160" rx="8" fill="rgba(76,175,125,0.05)" stroke="#2a2d35" stroke-width="1" stroke-dasharray="3,2"/>
+      <rect x="682" y="240" width="164" height="160" rx="8" fill="rgba(142,142,144,0.05)" stroke="#2a2d35" stroke-width="1" stroke-dasharray="3,2"/>
 
       <!-- Scope Check -->
       <g class="node" data-id="scope-check" data-flow="workshop">
-        <rect x="692" y="250" width="144" height="34" rx="6" fill="#1c1f23" stroke="#4caf7d" stroke-width="1.5"/>
-        <text x="764" y="265" font-size="10.5" fill="#4caf7d" text-anchor="middle" font-weight="600">Scope Check</text>
-        <text x="764" y="278" font-size="9" fill="#8b91a0" text-anchor="middle">product vs tool vs spike?</text>
+        <rect x="692" y="250" width="144" height="34" rx="6" fill="#1c1f23" stroke="#8e8e90" stroke-width="1.5"/>
+        <text x="764" y="265" font-size="10.5" fill="#8e8e90" text-anchor="middle" font-weight="600">Scope Check</text>
+        <text x="764" y="278" font-size="9" fill="#8e8e90" text-anchor="middle">product vs tool vs spike?</text>
       </g>
       <line x1="764" y1="284" x2="764" y2="304" stroke="#3a3f4a" stroke-width="1" marker-end="url(#arr-default)"/>
 
       <!-- Spike -->
       <g class="node" data-id="spike" data-flow="workshop">
-        <rect x="692" y="306" width="144" height="30" rx="6" fill="#1c1f23" stroke="#4caf7d" stroke-width="1.5"/>
-        <text x="764" y="321" font-size="10.5" fill="#4caf7d" text-anchor="middle" font-weight="600">Spike</text>
-        <text x="764" y="333" font-size="9" fill="#8b91a0" text-anchor="middle">investigate · time-boxed</text>
+        <rect x="692" y="306" width="144" height="30" rx="6" fill="#1c1f23" stroke="#8e8e90" stroke-width="1.5"/>
+        <text x="764" y="321" font-size="10.5" fill="#8e8e90" text-anchor="middle" font-weight="600">Spike</text>
+        <text x="764" y="333" font-size="9" fill="#8e8e90" text-anchor="middle">investigate · time-boxed</text>
       </g>
       <line x1="764" y1="336" x2="764" y2="356" stroke="#3a3f4a" stroke-width="1" marker-end="url(#arr-default)"/>
 
       <!-- Land -->
       <g class="node" data-id="land" data-flow="workshop">
-        <rect x="692" y="358" width="144" height="30" rx="6" fill="#1c1f23" stroke="#4caf7d" stroke-width="1.5"/>
-        <text x="764" y="373" font-size="10.5" fill="#4caf7d" text-anchor="middle" font-weight="600">Land</text>
-        <text x="764" y="385" font-size="9" fill="#8b91a0" text-anchor="middle">ship the tool / spike result</text>
+        <rect x="692" y="358" width="144" height="30" rx="6" fill="#1c1f23" stroke="#8e8e90" stroke-width="1.5"/>
+        <text x="764" y="373" font-size="10.5" fill="#8e8e90" text-anchor="middle" font-weight="600">Land</text>
+        <text x="764" y="385" font-size="9" fill="#8e8e90" text-anchor="middle">ship the tool / spike result</text>
       </g>
       <!-- Workshop label -->
-      <text x="764" y="404" font-size="8.5" fill="#4caf7d" text-anchor="middle" font-style="italic">Workshop companion chain</text>
+      <text x="764" y="404" font-size="8.5" fill="#8e8e90" text-anchor="middle" font-style="italic">Workshop companion chain</text>
 
       <!-- ═══════════════════════════════════════════════
            ON-DEMAND SKILLS (right column)
@@ -647,119 +647,119 @@
       <!-- grill-me -->
       <g class="node" data-id="grill-me" data-flow="on-demand">
         <rect x="692" y="448" width="144" height="26" rx="5" fill="#1c1f23" stroke="#3a3f4a" stroke-width="1.2"/>
-        <text x="764" y="460" font-size="10" fill="#8b91a0" text-anchor="middle" font-weight="500">Grill Me</text>
-        <text x="764" y="470" font-size="8.5" fill="#555c6b" text-anchor="middle">stress-test assumptions</text>
+        <text x="764" y="460" font-size="10" fill="#8e8e90" text-anchor="middle" font-weight="500">Grill Me</text>
+        <text x="764" y="470" font-size="8.5" fill="#8e8e90" text-anchor="middle">stress-test assumptions</text>
       </g>
 
       <!-- research-spike -->
       <g class="node" data-id="research-spike" data-flow="on-demand">
         <rect x="692" y="482" width="144" height="26" rx="5" fill="#1c1f23" stroke="#3a3f4a" stroke-width="1.2"/>
-        <text x="764" y="494" font-size="10" fill="#8b91a0" text-anchor="middle" font-weight="500">Research Spike</text>
-        <text x="764" y="504" font-size="8.5" fill="#555c6b" text-anchor="middle">timeboxed unknown investigation</text>
+        <text x="764" y="494" font-size="10" fill="#8e8e90" text-anchor="middle" font-weight="500">Research Spike</text>
+        <text x="764" y="504" font-size="8.5" fill="#8e8e90" text-anchor="middle">timeboxed unknown investigation</text>
       </g>
 
       <!-- principal-engineer -->
       <g class="node" data-id="principal-engineer" data-flow="on-demand">
         <rect x="692" y="516" width="144" height="26" rx="5" fill="#1c1f23" stroke="#3a3f4a" stroke-width="1.2"/>
-        <text x="764" y="528" font-size="10" fill="#8b91a0" text-anchor="middle" font-weight="500">Principal Engineer</text>
-        <text x="764" y="538" font-size="8.5" fill="#555c6b" text-anchor="middle">fires on Core Architecture slices</text>
+        <text x="764" y="528" font-size="10" fill="#8e8e90" text-anchor="middle" font-weight="500">Principal Engineer</text>
+        <text x="764" y="538" font-size="8.5" fill="#8e8e90" text-anchor="middle">fires on Core Architecture slices</text>
       </g>
 
       <!-- tdd -->
       <g class="node" data-id="tdd" data-flow="on-demand">
         <rect x="692" y="550" width="144" height="26" rx="5" fill="#1c1f23" stroke="#3a3f4a" stroke-width="1.2"/>
-        <text x="764" y="562" font-size="10" fill="#8b91a0" text-anchor="middle" font-weight="500">TDD</text>
-        <text x="764" y="572" font-size="8.5" fill="#555c6b" text-anchor="middle">test-driven build support</text>
+        <text x="764" y="562" font-size="10" fill="#8e8e90" text-anchor="middle" font-weight="500">TDD</text>
+        <text x="764" y="572" font-size="8.5" fill="#8e8e90" text-anchor="middle">test-driven build support</text>
       </g>
 
       <!-- qa-triage -->
       <g class="node" data-id="qa-triage" data-flow="on-demand">
         <rect x="692" y="584" width="144" height="26" rx="5" fill="#1c1f23" stroke="#3a3f4a" stroke-width="1.2"/>
-        <text x="764" y="596" font-size="10" fill="#8b91a0" text-anchor="middle" font-weight="500">QA Triage</text>
-        <text x="764" y="606" font-size="8.5" fill="#555c6b" text-anchor="middle">bug / missing req / regression</text>
+        <text x="764" y="596" font-size="10" fill="#8e8e90" text-anchor="middle" font-weight="500">QA Triage</text>
+        <text x="764" y="606" font-size="8.5" fill="#8e8e90" text-anchor="middle">bug / missing req / regression</text>
       </g>
 
       <!-- onboard -->
       <g class="node" data-id="onboard" data-flow="on-demand">
         <rect x="692" y="618" width="144" height="26" rx="5" fill="#1c1f23" stroke="#3a3f4a" stroke-width="1.2"/>
-        <text x="764" y="630" font-size="10" fill="#8b91a0" text-anchor="middle" font-weight="500">Onboard</text>
-        <text x="764" y="640" font-size="8.5" fill="#555c6b" text-anchor="middle">bring existing project in</text>
+        <text x="764" y="630" font-size="10" fill="#8e8e90" text-anchor="middle" font-weight="500">Onboard</text>
+        <text x="764" y="640" font-size="8.5" fill="#8e8e90" text-anchor="middle">bring existing project in</text>
       </g>
 
       <!-- ren -->
       <g class="node" data-id="ren" data-flow="on-demand">
-        <rect x="692" y="652" width="144" height="26" rx="5" fill="rgba(232,121,160,0.1)" stroke="#e879a0" stroke-width="1.2"/>
-        <text x="764" y="664" font-size="10" fill="#e879a0" text-anchor="middle" font-weight="600">Ren</text>
-        <text x="764" y="674" font-size="8.5" fill="#c06080" text-anchor="middle">framework partner · curator</text>
+        <rect x="692" y="652" width="144" height="26" rx="5" fill="rgba(189,140,125,0.1)" stroke="#bd8c7d" stroke-width="1.2"/>
+        <text x="764" y="664" font-size="10" fill="#bd8c7d" text-anchor="middle" font-weight="600">Ren</text>
+        <text x="764" y="674" font-size="8.5" fill="#bd8c7d" text-anchor="middle">framework partner · curator</text>
       </g>
 
       <!-- nivya -->
       <g class="node" data-id="nivya" data-flow="on-demand">
         <rect x="692" y="686" width="144" height="26" rx="5" fill="#1c1f23" stroke="#3a3f4a" stroke-width="1.2"/>
-        <text x="764" y="698" font-size="10" fill="#8b91a0" text-anchor="middle" font-weight="500">Nivya</text>
-        <text x="764" y="708" font-size="8.5" fill="#555c6b" text-anchor="middle">companion recall · routing</text>
+        <text x="764" y="698" font-size="10" fill="#8e8e90" text-anchor="middle" font-weight="500">Nivya</text>
+        <text x="764" y="708" font-size="8.5" fill="#8e8e90" text-anchor="middle">companion recall · routing</text>
       </g>
 
       <!-- solo-simulator -->
       <g class="node" data-id="solo-simulator" data-flow="on-demand">
         <rect x="692" y="720" width="144" height="26" rx="5" fill="#1c1f23" stroke="#3a3f4a" stroke-width="1.2"/>
-        <text x="764" y="732" font-size="10" fill="#8b91a0" text-anchor="middle" font-weight="500">Solo Simulator</text>
-        <text x="764" y="742" font-size="8.5" fill="#555c6b" text-anchor="middle">stands in for solo at gates</text>
+        <text x="764" y="732" font-size="10" fill="#8e8e90" text-anchor="middle" font-weight="500">Solo Simulator</text>
+        <text x="764" y="742" font-size="8.5" fill="#8e8e90" text-anchor="middle">stands in for solo at gates</text>
       </g>
 
       <!-- autopilot -->
       <g class="node" data-id="autopilot" data-flow="on-demand">
         <rect x="692" y="754" width="144" height="26" rx="5" fill="#1c1f23" stroke="#3a3f4a" stroke-width="1.2"/>
-        <text x="764" y="766" font-size="10" fill="#8b91a0" text-anchor="middle" font-weight="500">Autopilot</text>
-        <text x="764" y="776" font-size="8.5" fill="#555c6b" text-anchor="middle">autonomous build mode</text>
+        <text x="764" y="766" font-size="10" fill="#8e8e90" text-anchor="middle" font-weight="500">Autopilot</text>
+        <text x="764" y="776" font-size="8.5" fill="#8e8e90" text-anchor="middle">autonomous build mode</text>
       </g>
 
       <!-- Post-deploy support -->
-      <text x="692" y="797" font-size="9" fill="#555c6b" font-weight="700" letter-spacing="0.08em">POST-DEPLOY SUPPORT</text>
+      <text x="692" y="797" font-size="9" fill="#8e8e90" font-weight="700" letter-spacing="0.08em">POST-DEPLOY SUPPORT</text>
       <g class="node" data-id="bug-fix" data-flow="on-demand">
         <rect x="692" y="804" width="68" height="26" rx="5" fill="#1c1f23" stroke="#3a3f4a" stroke-width="1.2"/>
-        <text x="726" y="821" font-size="9.5" fill="#8b91a0" text-anchor="middle">Bug Fix</text>
+        <text x="726" y="821" font-size="9.5" fill="#8e8e90" text-anchor="middle">Bug Fix</text>
       </g>
       <g class="node" data-id="enhancement" data-flow="on-demand">
         <rect x="768" y="804" width="68" height="26" rx="5" fill="#1c1f23" stroke="#3a3f4a" stroke-width="1.2"/>
-        <text x="802" y="821" font-size="9.5" fill="#8b91a0" text-anchor="middle">Enhancement</text>
+        <text x="802" y="821" font-size="9.5" fill="#8e8e90" text-anchor="middle">Enhancement</text>
       </g>
       <g class="node" data-id="dependency-upgrade" data-flow="on-demand">
         <rect x="692" y="836" width="68" height="26" rx="5" fill="#1c1f23" stroke="#3a3f4a" stroke-width="1.2"/>
-        <text x="726" y="853" font-size="9.5" fill="#8b91a0" text-anchor="middle">Dep Upgrade</text>
+        <text x="726" y="853" font-size="9.5" fill="#8e8e90" text-anchor="middle">Dep Upgrade</text>
       </g>
       <g class="node" data-id="security-patch" data-flow="on-demand">
         <rect x="768" y="836" width="68" height="26" rx="5" fill="#1c1f23" stroke="#3a3f4a" stroke-width="1.2"/>
-        <text x="802" y="853" font-size="9.5" fill="#8b91a0" text-anchor="middle">Sec Patch</text>
+        <text x="802" y="853" font-size="9.5" fill="#8e8e90" text-anchor="middle">Sec Patch</text>
       </g>
 
       <!-- ═══════════════════════════════════════════════
            KEY SLICE STATUS FLOW (mid-right)
       ═══════════════════════════════════════════════ -->
-      <text x="350" y="900" font-size="9" fill="#555c6b" font-weight="700" letter-spacing="0.08em">SLICE LIFECYCLE</text>
+      <text x="350" y="900" font-size="9" fill="#8e8e90" font-weight="700" letter-spacing="0.08em">SLICE LIFECYCLE</text>
       <rect x="344" y="908" width="300" height="260" rx="8" fill="rgba(20,22,24,0.8)" stroke="#2a2d35" stroke-width="1"/>
 
       <!-- Status boxes -->
-      <rect x="360" y="920" width="80" height="22" rx="4" fill="#1c1f23" stroke="#555c6b" stroke-width="1"/>
-      <text x="400" y="934" font-size="9.5" fill="#8b91a0" text-anchor="middle" font-weight="600">In Review</text>
+      <rect x="360" y="920" width="80" height="22" rx="4" fill="#1c1f23" stroke="#8e8e90" stroke-width="1"/>
+      <text x="400" y="934" font-size="9.5" fill="#8e8e90" text-anchor="middle" font-weight="600">In Review</text>
 
-      <rect x="360" y="952" width="80" height="22" rx="4" fill="rgba(255,90,90,0.1)" stroke="#ff5a5a" stroke-width="1"/>
-      <text x="400" y="966" font-size="9.5" fill="#ff5a5a" text-anchor="middle" font-weight="600">Blocked</text>
+      <rect x="360" y="952" width="80" height="22" rx="4" fill="rgba(189,140,125,0.1)" stroke="#bd8c7d" stroke-width="1"/>
+      <text x="400" y="966" font-size="9.5" fill="#bd8c7d" text-anchor="middle" font-weight="600">Blocked</text>
 
-      <rect x="360" y="984" width="80" height="22" rx="4" fill="rgba(77,156,255,0.1)" stroke="#4d9cff" stroke-width="1"/>
-      <text x="400" y="998" font-size="9.5" fill="#4d9cff" text-anchor="middle" font-weight="600">Ready</text>
+      <rect x="360" y="984" width="80" height="22" rx="4" fill="rgba(142,142,144,0.1)" stroke="#8e8e90" stroke-width="1"/>
+      <text x="400" y="998" font-size="9.5" fill="#8e8e90" text-anchor="middle" font-weight="600">Ready</text>
 
-      <rect x="460" y="984" width="80" height="22" rx="4" fill="rgba(240,167,50,0.1)" stroke="#f0a732" stroke-width="1"/>
-      <text x="500" y="998" font-size="9.5" fill="#f0a732" text-anchor="middle" font-weight="600">In Build</text>
+      <rect x="460" y="984" width="80" height="22" rx="4" fill="rgba(209,191,167,0.1)" stroke="#d1bfa7" stroke-width="1"/>
+      <text x="500" y="998" font-size="9.5" fill="#d1bfa7" text-anchor="middle" font-weight="600">In Build</text>
 
-      <rect x="560" y="984" width="70" height="22" rx="4" fill="rgba(76,175,125,0.1)" stroke="#4caf7d" stroke-width="1"/>
-      <text x="595" y="998" font-size="9.5" fill="#4caf7d" text-anchor="middle" font-weight="600">In QA</text>
+      <rect x="560" y="984" width="70" height="22" rx="4" fill="rgba(142,142,144,0.1)" stroke="#8e8e90" stroke-width="1"/>
+      <text x="595" y="998" font-size="9.5" fill="#8e8e90" text-anchor="middle" font-weight="600">In QA</text>
 
-      <rect x="460" y="1018" width="80" height="22" rx="4" fill="rgba(76,175,125,0.15)" stroke="#4caf7d" stroke-width="1.5"/>
-      <text x="500" y="1032" font-size="9.5" fill="#4caf7d" text-anchor="middle" font-weight="600">In Test</text>
+      <rect x="460" y="1018" width="80" height="22" rx="4" fill="rgba(142,142,144,0.15)" stroke="#8e8e90" stroke-width="1.5"/>
+      <text x="500" y="1032" font-size="9.5" fill="#8e8e90" text-anchor="middle" font-weight="600">In Test</text>
 
-      <rect x="560" y="1018" width="70" height="22" rx="4" fill="rgba(76,175,125,0.2)" stroke="#4caf7d" stroke-width="2"/>
-      <text x="595" y="1032" font-size="9.5" fill="#4caf7d" text-anchor="middle" font-weight="700">Done ✓</text>
+      <rect x="560" y="1018" width="70" height="22" rx="4" fill="rgba(142,142,144,0.2)" stroke="#8e8e90" stroke-width="2"/>
+      <text x="595" y="1032" font-size="9.5" fill="#8e8e90" text-anchor="middle" font-weight="700">Done ✓</text>
 
       <!-- Arrows between statuses -->
       <line x1="440" y1="931" x2="455" y2="995" stroke="#3a3f4a" stroke-width="1" marker-end="url(#arr-default)"/>
@@ -770,32 +770,32 @@
       <line x1="595" y1="1006" x2="595" y2="1013" stroke="#3a3f4a" stroke-width="1" marker-end="url(#arr-default)"/>
 
       <!-- 4 anchors -->
-      <text x="358" y="1060" font-size="9" fill="#555c6b" font-weight="700" letter-spacing="0.08em">4 ANCHORS (required before build)</text>
-      <rect x="358" y="1068" width="272" height="22" rx="4" fill="rgba(77,156,255,0.08)" stroke="#4d9cff" stroke-width="1"/>
-      <text x="494" y="1082" font-size="9" fill="#4d9cff" text-anchor="middle">Design · Data · Done (criteria + quality contract) · Process</text>
-      <text x="358" y="1104" font-size="9" fill="#555c6b" font-weight="700" letter-spacing="0.08em">QUALITY CONTRACT FIELDS</text>
-      <text x="358" y="1118" font-size="8.5" fill="#555c6b">Failure states · Edge cases · Input validation · Security</text>
-      <text x="358" y="1132" font-size="8.5" fill="#555c6b">Written at design review. Checked at code review. Not optional.</text>
+      <text x="358" y="1060" font-size="9" fill="#8e8e90" font-weight="700" letter-spacing="0.08em">4 ANCHORS (required before build)</text>
+      <rect x="358" y="1068" width="272" height="22" rx="4" fill="rgba(142,142,144,0.08)" stroke="#8e8e90" stroke-width="1"/>
+      <text x="494" y="1082" font-size="9" fill="#8e8e90" text-anchor="middle">Design · Data · Done (criteria + quality contract) · Process</text>
+      <text x="358" y="1104" font-size="9" fill="#8e8e90" font-weight="700" letter-spacing="0.08em">QUALITY CONTRACT FIELDS</text>
+      <text x="358" y="1118" font-size="8.5" fill="#8e8e90">Failure states · Edge cases · Input validation · Security</text>
+      <text x="358" y="1132" font-size="8.5" fill="#8e8e90">Written at design review. Checked at code review. Not optional.</text>
 
       <!-- Continuity docs block -->
-      <text x="350" y="1162" font-size="9" fill="#555c6b" font-weight="700" letter-spacing="0.08em">CONTINUITY DOCS (docs/continuity/)</text>
-      <rect x="344" y="1170" width="300" height="80" rx="6" fill="rgba(155,109,255,0.06)" stroke="#9b6dff" stroke-width="1" stroke-dasharray="3,2"/>
-      <text x="494" y="1188" font-size="9" fill="#9b6dff" text-anchor="middle">handoff.md · decisions.md · sessions.md</text>
-      <text x="494" y="1202" font-size="9" fill="#9b6dff" text-anchor="middle">questions.md · assumptions.md · risks.md</text>
-      <text x="494" y="1216" font-size="9" fill="#9b6dff" text-anchor="middle">changes.md · glossary.md · target-state.md</text>
-      <text x="494" y="1230" font-size="9" fill="#9b6dff" text-anchor="middle">current-phase.md · onboarding.md · retro-notes.md</text>
+      <text x="350" y="1162" font-size="9" fill="#8e8e90" font-weight="700" letter-spacing="0.08em">CONTINUITY DOCS (docs/continuity/)</text>
+      <rect x="344" y="1170" width="300" height="80" rx="6" fill="rgba(73,73,75,0.06)" stroke="#49494b" stroke-width="1" stroke-dasharray="3,2"/>
+      <text x="494" y="1188" font-size="9" fill="#49494b" text-anchor="middle">handoff.md · decisions.md · sessions.md</text>
+      <text x="494" y="1202" font-size="9" fill="#49494b" text-anchor="middle">questions.md · assumptions.md · risks.md</text>
+      <text x="494" y="1216" font-size="9" fill="#49494b" text-anchor="middle">changes.md · glossary.md · target-state.md</text>
+      <text x="494" y="1230" font-size="9" fill="#49494b" text-anchor="middle">current-phase.md · onboarding.md · retro-notes.md</text>
 
       <!-- Profiles block -->
-      <text x="350" y="1272" font-size="9" fill="#555c6b" font-weight="700" letter-spacing="0.08em">PROFILES</text>
+      <text x="350" y="1272" font-size="9" fill="#8e8e90" font-weight="700" letter-spacing="0.08em">PROFILES</text>
       <rect x="344" y="1278" width="300" height="36" rx="6" fill="#1c1f23" stroke="#2a2d35" stroke-width="1"/>
-      <text x="494" y="1294" font-size="9" fill="#8b91a0" text-anchor="middle">bayer-aurora.md · general solo (built in-session)</text>
-      <text x="494" y="1306" font-size="9" fill="#8b91a0" text-anchor="middle">Loaded by tech-context · overrideable per project</text>
+      <text x="494" y="1294" font-size="9" fill="#8e8e90" text-anchor="middle">bayer-aurora.md · general solo (built in-session)</text>
+      <text x="494" y="1306" font-size="9" fill="#8e8e90" text-anchor="middle">Loaded by tech-context · overrideable per project</text>
 
       <!-- Handoff template -->
-      <text x="350" y="1337" font-size="9" fill="#555c6b" font-weight="700" letter-spacing="0.08em">HANDOFF TEMPLATE</text>
+      <text x="350" y="1337" font-size="9" fill="#8e8e90" font-weight="700" letter-spacing="0.08em">HANDOFF TEMPLATE</text>
       <rect x="344" y="1343" width="300" height="26" rx="6" fill="#1c1f23" stroke="#2a2d35" stroke-width="1"/>
-      <text x="494" y="1353" font-size="9" fill="#8b91a0" text-anchor="middle">docs/engineering/HANDOFF.template.md</text>
-      <text x="494" y="1362" font-size="9" fill="#8b91a0" text-anchor="middle">Copy to project root · tool handoffs + mid-flight</text>
+      <text x="494" y="1353" font-size="9" fill="#8e8e90" text-anchor="middle">docs/engineering/HANDOFF.template.md</text>
+      <text x="494" y="1362" font-size="9" fill="#8e8e90" text-anchor="middle">Copy to project root · tool handoffs + mid-flight</text>
 
     </svg>
   </div>
@@ -814,13 +814,13 @@
     </div>
   </div>
   <div id="legend">
-    <div class="legend-item"><div class="legend-swatch" style="background:#f0a732"></div>Entry / Core</div>
-    <div class="legend-item"><div class="legend-swatch" style="background:#4d9cff"></div>Discovery / Design</div>
-    <div class="legend-item"><div class="legend-swatch" style="background:#4caf7d"></div>Planning / Deploy</div>
-    <div class="legend-item"><div class="legend-swatch" style="background:#3fcbcb"></div>Data</div>
-    <div class="legend-item"><div class="legend-swatch" style="background:#ff7c3c"></div>Gate</div>
-    <div class="legend-item"><div class="legend-swatch" style="background:#9b6dff"></div>Always-On</div>
-    <div class="legend-item"><div class="legend-swatch" style="background:#555c6b"></div>On-Demand</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#d1bfa7"></div>Entry / Core</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#8e8e90"></div>Discovery / Design</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#8e8e90"></div>Planning / Deploy</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#8e8e90"></div>Data</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#bd8c7d"></div>Gate</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#49494b"></div>Always-On</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#8e8e90"></div>On-Demand</div>
   </div>
 </div>
 
@@ -831,7 +831,7 @@ const FLOWS = [
     id: 'main-chain',
     name: 'Main Phase Chain',
     desc: 'Full product build flow from idea to deployed product',
-    color: '#f0a732',
+    color: '#d1bfa7',
     nodes: ['start','brainstorm','discover','tech-context','design-sprint','data-scaffold','design-review','prd-to-plan','to-issues','solo-build','phase-test','deploy'],
     gates: ['gate-brainstorm-discover','gate-discover-tech','gate-tech-design','gate-sprint-data','gate-review-plan','gate-build-phasetest','gate-phasetest-deploy'],
     steps: [
@@ -860,7 +860,7 @@ const FLOWS = [
     id: 'always-on',
     name: 'Always-On Skills',
     desc: 'Auto-fire in guided/piloted mode — invisible to the solo',
-    color: '#9b6dff',
+    color: '#49494b',
     nodes: ['always-process-mapper','always-product-continuity','always-framework-health','always-retrospective','mode-guided','mode-piloted'],
     steps: [
       { num:'01', title:'Activation', body:'Always-on skills fire once when guided or piloted mode is chosen. They are never invoked by the solo. They run throughout their designated phases without being re-invoked. In bare mode (the default) they are silent.' },
@@ -874,7 +874,7 @@ const FLOWS = [
     id: 'session-modes',
     name: 'Session Modes',
     desc: 'Three modes control what fires automatically',
-    color: '#9b6dff',
+    color: '#49494b',
     nodes: ['mode-guided','mode-piloted','mode-bare'],
     steps: [
       { num:'01', title:'Bare Mode (default)', body:'No routing, no always-on skills. Skills load only when explicitly invoked. The solo drives everything manually. Use when you know exactly what you need and don\'t want the framework\'s automatic behavior.' },
@@ -887,7 +887,7 @@ const FLOWS = [
     id: 'gates',
     name: 'Phase Gates',
     desc: 'Named gates that enforce prerequisite artifacts exist',
-    color: '#ff7c3c',
+    color: '#bd8c7d',
     nodes: ['gate-brainstorm-discover','gate-discover-tech','gate-tech-design','gate-sprint-data','gate-review-plan','gate-build-phasetest','gate-phasetest-deploy'],
     steps: [
       { num:'01', title:'Gate Principle', body:'Every phase transition has a named gate. The gate checks that the required output from the previous phase exists before the next phase reads it. Gates stop silently proceeding with partial prerequisites.' },
@@ -901,7 +901,7 @@ const FLOWS = [
     id: 'qa-chain',
     name: 'QA Chain (auto)',
     desc: 'Builder → code-review → solo-qa fires automatically',
-    color: '#4caf7d',
+    color: '#8e8e90',
     nodes: ['solo-build','code-review','solo-qa'],
     steps: [
       { num:'01', title:'Builder QA', body:'When code is complete, builder runs its own observation pass (not self-certification). Takes screenshots, reads console logs, checks network failures, navigates interactive elements, reads data store. Produces a QA manifest of observations — no pass/fail calls. Commits, sets status to In QA, signals Review Agent.' },
@@ -916,7 +916,7 @@ const FLOWS = [
     id: 'workshop',
     name: 'Workshop Path',
     desc: 'For tools, spikes, and personal scripts — not products',
-    color: '#4caf7d',
+    color: '#8e8e90',
     nodes: ['scope-check','spike','land'],
     steps: [
       { num:'01', title:'Scope Check', body:'The front door for Workshop. One question: "Who is this for, and how long does it live?" Spike/tool for yourself → Workshop. Product other people use → main framework Start.' },
@@ -929,7 +929,7 @@ const FLOWS = [
     id: 'on-demand',
     name: 'On-Demand Skills',
     desc: 'Invoked by the solo when needed, not auto-triggered',
-    color: '#8b91a0',
+    color: '#8e8e90',
     nodes: ['grill-me','research-spike','principal-engineer','tdd','qa-triage','onboard','ren','nivya','solo-simulator','autopilot','bug-fix','enhancement','dependency-upgrade','security-patch'],
     steps: [
       { num:'01', title:'Grill Me', body:'Stress-tests the current plan, design, or assumption set. Challenges from multiple angles. Use before committing to a direction.' },
@@ -1016,7 +1016,7 @@ function renderSteps(flow) {
   stepsContent.innerHTML = flow.steps.map((step, i) => `
     <div class="step-block highlighted" data-step="${i}">
       <div class="step-num">${step.num}</div>
-      <div class="step-title" style="color:${step.gate ? '#ff7c3c' : flow.color || '#e8eaed'}">${step.title}</div>
+      <div class="step-title" style="color:${step.gate ? '#bd8c7d' : flow.color || '#faf8f5'}">${step.title}</div>
       <div class="step-body">${step.body}${step.artifacts && step.artifacts.length ? '<br><br>' + step.artifacts.map(a => `<span class="step-artifact">${a}</span>`).join('') : ''}${step.gate ? '<br><span class="step-gate">GATE</span>' : ''}</div>
     </div>
   `).join('');

@@ -9,18 +9,18 @@
 
   :root {
     --navy: #0F1729;
-    --navy-mid: #1A2744;
-    --navy-light: #243357;
+    --navy-mid: #2a2a2a;
+    --navy-light: #2a2a2a;
     --blue: #bd8c7d;
     --blue-light: rgba(209,191,167,0.20);
     --teal: #8e8e90;
     --teal-light: rgba(142,142,144,0.15);
-    --gold: #F59E0B;
-    --gold-light: #FCD34D;
+    --gold: #d1bfa7;
+    --gold-light: rgba(209,191,167,0.9);
     --white: #FFFFFF;
-    --off-white: #F1F5F9;
-    --gray: #94A3B8;
-    --gray-light: #CBD5E1;
+    --off-white: #faf8f5;
+    --gray: #8e8e90;
+    --gray-light: #DDD6CC;
   }
 
   html, body {
@@ -100,11 +100,11 @@
 
   /* Nav on light-background slides */
   .nav.on-light { background: rgba(0,0,0,0.08); border-color: rgba(0,0,0,0.12); }
-  .nav.on-light button { color: rgba(0,0,0,0.5); }
-  .nav.on-light button:hover { color: #000; background: rgba(0,0,0,0.07); }
+  .nav.on-light button { color: rgba(26,26,26,0.5); }
+  .nav.on-light button:hover { color: #1a1a1a; background: rgba(26,26,26,0.07); }
   .nav.on-light .slide-counter { color: rgba(0,0,0,0.45); }
-  .nav.on-light .progress-dots span { background: rgba(0,0,0,0.18); }
-  .nav.on-light .progress-dots span.active { background: rgba(0,0,0,0.65); }
+  .nav.on-light .progress-dots span { background: rgba(26,26,26,0.18); }
+  .nav.on-light .progress-dots span.active { background: rgba(26,26,26,0.65); }
 
   /* ── SLIDE LAYOUTS ── */
 
@@ -195,9 +195,9 @@
     justify-content: center;
     padding: 60px 56px;
   }
-  .split-right.bg-blue { background: #1E3A6E; }
-  .split-right.bg-teal { background: #0A3D38; }
-  .split-right.bg-gold { background: #3D2A00; }
+  .split-right.bg-blue { background: #2a2a2a; }
+  .split-right.bg-teal { background: #2a2a2a; }
+  .split-right.bg-gold { background: #2a2a2a; }
   .split-right.bg-navy-mid { background: var(--navy-mid); }
 
   /* Light slide */
@@ -239,7 +239,7 @@
   }
   .pill-blue { background: rgba(189,140,125,0.15); border-color: rgba(189,140,125,0.4); color: var(--blue-light); }
   .pill-teal { background: rgba(142,142,144,0.15); border-color: rgba(142,142,144,0.4); color: var(--teal-light); }
-  .pill-gold { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.4); color: var(--gold-light); }
+  .pill-gold { background: rgba(209,191,167,0.15); border-color: rgba(209,191,167,0.4); color: var(--gold-light); }
   .pill-white { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.8); }
 
   .role-grid {
@@ -490,11 +490,11 @@
         <div class="role-desc">Defines the problem. Challenges assumptions. Holds the "why" before a line of code is written.</div>
       </div>
       <div class="role-card">
-        <div class="role-name" style="color:#b5a090">Tech Lead</div>
+        <div class="role-name" style="color:#8e8e90">Tech Lead</div>
         <div class="role-desc">Validates buildability. Sequences work by risk. Prevents the expensive wrong turns.</div>
       </div>
       <div class="role-card">
-        <div class="role-name" style="color:#FCD34D">Designer</div>
+        <div class="role-name" style="color:#d1bfa7">Designer</div>
         <div class="role-desc">Produces the shared artifact everyone points at. Surfaces data, flow, and scope questions before build.</div>
       </div>
       <div class="role-card">
@@ -541,23 +541,23 @@
     <h2>When the team goes away, so does the discipline</h2>
     <ul class="point-list" style="max-width:700px">
       <li>
-        <div class="pt-icon" style="background:rgba(239,68,68,0.15);color:#F87171;font-size:16px">✕</div>
+        <div class="pt-icon" style="background:rgba(189,140,125,0.15);color:#bd8c7d;font-size:16px">✕</div>
         <div class="pt-text"><strong>No PM challenge</strong> — features get built without validating the problem first. Assumptions go unchecked.</div>
       </li>
       <li>
-        <div class="pt-icon" style="background:rgba(239,68,68,0.15);color:#F87171;font-size:16px">✕</div>
+        <div class="pt-icon" style="background:rgba(189,140,125,0.15);color:#bd8c7d;font-size:16px">✕</div>
         <div class="pt-text"><strong>No tech review</strong> — work gets sequenced by comfort, not by risk. Expensive wrong turns happen late.</div>
       </li>
       <li>
-        <div class="pt-icon" style="background:rgba(239,68,68,0.15);color:#F87171;font-size:16px">✕</div>
+        <div class="pt-icon" style="background:rgba(189,140,125,0.15);color:#bd8c7d;font-size:16px">✕</div>
         <div class="pt-text"><strong>No shared design artifact</strong> — everyone works from a description. Scope, data gaps, and flow issues surface in code.</div>
       </li>
       <li>
-        <div class="pt-icon" style="background:rgba(239,68,68,0.15);color:#F87171;font-size:16px">✕</div>
+        <div class="pt-icon" style="background:rgba(189,140,125,0.15);color:#bd8c7d;font-size:16px">✕</div>
         <div class="pt-text"><strong>No QA gate</strong> — "it works on my machine" replaces structured verification. Quality is inconsistent.</div>
       </li>
       <li>
-        <div class="pt-icon" style="background:rgba(239,68,68,0.15);color:#F87171;font-size:16px">✕</div>
+        <div class="pt-icon" style="background:rgba(189,140,125,0.15);color:#bd8c7d;font-size:16px">✕</div>
         <div class="pt-text"><strong>No process accountability</strong> — what was agreed in discovery gets quietly lost during build.</div>
       </li>
     </ul>
@@ -581,32 +581,32 @@
         <tr>
           <td class="col-today">PM challenge</td>
           <td class="col-arrow">→</td>
-          <td class="col-framework">discover · grill-me <span class="skill-badge" style="background:rgba(45,212,191,0.15);color:var(--teal-light)">built in</span></td>
+          <td class="col-framework">discover · grill-me <span class="skill-badge" style="background:rgba(142,142,144,0.15);color:var(--teal-light)">built in</span></td>
         </tr>
         <tr>
           <td class="col-today">Tech Lead review</td>
           <td class="col-arrow">→</td>
-          <td class="col-framework">principal-engineer · prd-to-plan <span class="skill-badge" style="background:rgba(45,212,191,0.15);color:var(--teal-light)">built in</span></td>
+          <td class="col-framework">principal-engineer · prd-to-plan <span class="skill-badge" style="background:rgba(142,142,144,0.15);color:var(--teal-light)">built in</span></td>
         </tr>
         <tr>
           <td class="col-today">Design review</td>
           <td class="col-arrow">→</td>
-          <td class="col-framework">design-sprint · design-review <span class="skill-badge" style="background:rgba(45,212,191,0.15);color:var(--teal-light)">built in</span></td>
+          <td class="col-framework">design-sprint · design-review <span class="skill-badge" style="background:rgba(142,142,144,0.15);color:var(--teal-light)">built in</span></td>
         </tr>
         <tr>
           <td class="col-today">QA gate</td>
           <td class="col-arrow">→</td>
-          <td class="col-framework">code-review · solo-qa · phase-test <span class="skill-badge" style="background:rgba(45,212,191,0.15);color:var(--teal-light)">built in</span></td>
+          <td class="col-framework">code-review · solo-qa · phase-test <span class="skill-badge" style="background:rgba(142,142,144,0.15);color:var(--teal-light)">built in</span></td>
         </tr>
         <tr>
           <td class="col-today">Process mapping</td>
           <td class="col-arrow">→</td>
-          <td class="col-framework">process-mapper (always-on) <span class="skill-badge" style="background:rgba(45,212,191,0.15);color:var(--teal-light)">built in</span></td>
+          <td class="col-framework">process-mapper (always-on) <span class="skill-badge" style="background:rgba(142,142,144,0.15);color:var(--teal-light)">built in</span></td>
         </tr>
         <tr>
           <td class="col-today">Institutional memory</td>
           <td class="col-arrow">→</td>
-          <td class="col-framework">product-continuity (always-on) <span class="skill-badge" style="background:rgba(45,212,191,0.15);color:var(--teal-light)">built in</span></td>
+          <td class="col-framework">product-continuity (always-on) <span class="skill-badge" style="background:rgba(142,142,144,0.15);color:var(--teal-light)">built in</span></td>
         </tr>
       </table>
     </div>
@@ -618,19 +618,19 @@
     <h2>Process is the thread that runs through <em>everything</em></h2>
     <ul class="point-list" style="max-width:780px">
       <li>
-        <div class="pt-icon" style="background:rgba(245,158,11,0.15);color:var(--gold-light)">1</div>
+        <div class="pt-icon" style="background:rgba(209,191,167,0.15);color:var(--gold-light)">1</div>
         <div class="pt-text"><strong>Every project starts with a process conversation</strong> — how does this work today (even if it's manual)? What should it look like when we're done?</div>
       </li>
       <li>
-        <div class="pt-icon" style="background:rgba(245,158,11,0.15);color:var(--gold-light)">2</div>
+        <div class="pt-icon" style="background:rgba(209,191,167,0.15);color:var(--gold-light)">2</div>
         <div class="pt-text"><strong>The to-be map becomes the contract</strong> — agreed before design begins, held as the accountability standard through build and testing.</div>
       </li>
       <li>
-        <div class="pt-icon" style="background:rgba(245,158,11,0.15);color:var(--gold-light)">3</div>
+        <div class="pt-icon" style="background:rgba(209,191,167,0.15);color:var(--gold-light)">3</div>
         <div class="pt-text"><strong>Every feature slice maps to a process step</strong> — nothing gets built that can't be traced to an agreed process outcome. No scope creep by accident.</div>
       </li>
       <li>
-        <div class="pt-icon" style="background:rgba(245,158,11,0.15);color:var(--gold-light)">4</div>
+        <div class="pt-icon" style="background:rgba(209,191,167,0.15);color:var(--gold-light)">4</div>
         <div class="pt-text"><strong>Phase test validates process coverage</strong> — did we actually build what the process requires? Not just "does it work" but "does it implement the right thing."</div>
       </li>
     </ul>
@@ -691,23 +691,23 @@
     <ul class="point-list">
       <li>
         <div class="pt-icon" style="background:rgba(189,140,125,0.1);color:var(--blue)">✓</div>
-        <div class="pt-text" style="color:#374151"><strong style="color:var(--navy)">Process maps</strong> — your team already does this. The framework formalizes as-is and to-be maps in every project, holds them as the accountability contract.</div>
+        <div class="pt-text" style="color:#49494b"><strong style="color:var(--navy)">Process maps</strong> — your team already does this. The framework formalizes as-is and to-be maps in every project, holds them as the accountability contract.</div>
       </li>
       <li>
         <div class="pt-icon" style="background:rgba(189,140,125,0.1);color:var(--blue)">✓</div>
-        <div class="pt-text" style="color:#374151"><strong style="color:var(--navy)">PM, Tech Lead, Designer, QA roles</strong> — these exist in the framework as specialist skills. The builder activates them at the right phase without having to assemble a team.</div>
+        <div class="pt-text" style="color:#49494b"><strong style="color:var(--navy)">PM, Tech Lead, Designer, QA roles</strong> — these exist in the framework as specialist skills. The builder activates them at the right phase without having to assemble a team.</div>
       </li>
       <li>
         <div class="pt-icon" style="background:rgba(189,140,125,0.1);color:var(--blue)">✓</div>
-        <div class="pt-text" style="color:#374151"><strong style="color:var(--navy)">Review gates</strong> — nothing advances without passing the gate. The same discipline that makes your team reviews valuable is enforced at every phase transition.</div>
+        <div class="pt-text" style="color:#49494b"><strong style="color:var(--navy)">Review gates</strong> — nothing advances without passing the gate. The same discipline that makes your team reviews valuable is enforced at every phase transition.</div>
       </li>
       <li>
         <div class="pt-icon" style="background:rgba(189,140,125,0.1);color:var(--blue)">✓</div>
-        <div class="pt-text" style="color:#374151"><strong style="color:var(--navy)">Institutional memory</strong> — decisions, assumptions, risks, and changes are captured continuously. A new session picks up exactly where the last one left off.</div>
+        <div class="pt-text" style="color:#49494b"><strong style="color:var(--navy)">Institutional memory</strong> — decisions, assumptions, risks, and changes are captured continuously. A new session picks up exactly where the last one left off.</div>
       </li>
       <li>
         <div class="pt-icon" style="background:rgba(189,140,125,0.1);color:var(--blue)">✓</div>
-        <div class="pt-text" style="color:#374151"><strong style="color:var(--navy)">Continuous improvement</strong> — the retrospective skill captures what works and what doesn't, and feeds it back into the framework. It gets better with every project.</div>
+        <div class="pt-text" style="color:#49494b"><strong style="color:var(--navy)">Continuous improvement</strong> — the retrospective skill captures what works and what doesn't, and feeds it back into the framework. It gets better with every project.</div>
       </li>
     </ul>
   </div>

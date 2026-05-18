@@ -8,21 +8,21 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --navy: #0F1729;
-    --amber: #B45309;
-    --amber-light: #FEF3C7;
-    --amber-mid: #92400E;
-    --gray-50: #F8FAFC;
-    --gray-100: #F1F5F9;
-    --gray-200: #E2E8F0;
-    --gray-300: #CBD5E1;
-    --gray-500: #64748B;
-    --gray-700: #334155;
-    --gray-900: #0F172A;
-    --green: #15803D;
-    --green-light: #DCFCE7;
-    --red: #BE123C;
-    --red-light: #FFE4E6;
+    --navy: #1a1a1a;
+    --amber: #d1bfa7;
+    --amber-light: rgba(209,191,167,0.15);
+    --amber-mid: #d1bfa7;
+    --gray-50: #faf8f5;
+    --gray-100: #e8ddd4;
+    --gray-200: #e8ddd4;
+    --gray-300: #DDD6CC;
+    --gray-500: #8e8e90;
+    --gray-700: #49494b;
+    --gray-900: #1a1a1a;
+    --green: #8e8e90;
+    --green-light: rgba(142,142,144,0.12);
+    --red: #bd8c7d;
+    --red-light: rgba(189,140,125,0.12);
   }
 
   body {
@@ -388,7 +388,7 @@
     align-items: center;
     justify-content: center;
     padding: 20px 0;
-    border-right: 1px solid #FDE68A;
+    border-right: 1px solid rgba(209,191,167,0.4);
   }
   .stage-num-label {
     font-size: 9px;
@@ -558,17 +558,17 @@
     font-family: 'SF Mono', 'Fira Code', monospace;
     font-size: 12.5px;
     line-height: 1.7;
-    color: #E2E8F0;
+    color: #e8ddd4;
     overflow-x: auto;
     margin: 12px 0;
   }
-  .code-block .cb-green { color: #86EFAC; }
-  .code-block .cb-red { color: #FCA5A5; }
-  .code-block .cb-amber { color: #FCD34D; }
-  .code-block .cb-dim { color: rgba(226,232,240,0.45); }
-  .code-block .cb-divider { color: rgba(226,232,240,0.25); }
-  .code-block .cb-open { color: #86EFAC; font-weight: 700; }
-  .code-block .cb-hold { color: #FCA5A5; font-weight: 700; }
+  .code-block .cb-green { color: #DDD6CC; }
+  .code-block .cb-red { color: rgba(189,140,125,0.4); }
+  .code-block .cb-amber { color: rgba(209,191,167,0.5); }
+  .code-block .cb-dim { color: rgba(221,214,204,0.45); }
+  .code-block .cb-divider { color: rgba(221,214,204,0.25); }
+  .code-block .cb-open { color: #DDD6CC; font-weight: 700; }
+  .code-block .cb-hold { color: rgba(189,140,125,0.4); font-weight: 700; }
 
   /* ── WARNING / CALLOUT ── */
   .callout {
@@ -579,8 +579,8 @@
     line-height: 1.6;
   }
   .callout-warn {
-    background: #FFFBEB;
-    border: 1px solid #FDE68A;
+    background: rgba(209,191,167,0.08);
+    border: 1px solid rgba(209,191,167,0.4);
     color: var(--amber-mid);
   }
   .callout-warn strong { color: var(--amber); }
@@ -592,7 +592,7 @@
   .callout-info strong { color: var(--gray-900); }
   .callout-stop {
     background: var(--red-light);
-    border: 1px solid #FECDD3;
+    border: 1px solid rgba(189,140,125,0.22);
     color: var(--red);
   }
   .callout-stop strong { color: var(--red); }
@@ -695,7 +695,7 @@
   }
   .flow-node.amber {
     background: var(--amber-light);
-    border-color: #FDE68A;
+    border-color: rgba(209,191,167,0.4);
     color: var(--amber);
   }
   .flow-arrow {
@@ -714,7 +714,7 @@
   }
   .output-card-header {
     background: var(--amber-light);
-    border-bottom: 1px solid #FDE68A;
+    border-bottom: 1px solid rgba(209,191,167,0.4);
     padding: 16px 20px;
     display: flex;
     align-items: center;
@@ -1138,7 +1138,7 @@
         </div>
 
         <!-- Stage 7 -->
-        <div class="stage-card" style="border-color: #FDE68A; background: #FFFBEB;">
+        <div class="stage-card" style="border-color: rgba(209,191,167,0.4); background: rgba(209,191,167,0.08);">
           <div class="stage-number" style="background: var(--amber); border-color: var(--amber);">
             <div class="stage-num-label" style="color: rgba(255,255,255,0.7);">Stage</div>
             <div class="stage-num-val" style="color: #fff;">7</div>

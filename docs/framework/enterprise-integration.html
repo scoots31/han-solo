@@ -13,23 +13,23 @@
     --panel-2: #1B2340;
     --border: rgba(255,255,255,0.08);
     --border-strong: rgba(255,255,255,0.14);
-    --white: #F8FAFC;
-    --gray: #94A3B8;
-    --gray-light: #CBD5E1;
-    --gray-dark: #64748B;
+    --white: #ffffff;
+    --gray: #8e8e90;
+    --gray-light: #DDD6CC;
+    --gray-dark: #8e8e90;
     --blue: #bd8c7d;
     --blue-light: rgba(209,191,167,0.20);
     --teal: #8e8e90;
     --teal-light: rgba(142,142,144,0.15);
-    --gold: #EAB308;
-    --gold-light: #FCD34D;
-    --purple: #8B5CF6;
+    --gold: #d1bfa7;
+    --gold-light: rgba(209,191,167,0.9);
+    --purple: #49494b;
     --purple-light: #d1bfa7;
-    --rose: #F43F5E;
-    --rose-light: #FB7185;
-    --green: #22C55E;
-    --green-light: #4ADE80;
-    --amber: #F59E0B;
+    --rose: #bd8c7d;
+    --rose-light: rgba(189,140,125,0.7);
+    --green: #8e8e90;
+    --green-light: rgba(142,142,144,0.7);
+    --amber: #d1bfa7;
     --bayer-green: #8e8e90;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -65,7 +65,7 @@
   .state-card.today { border-left: 3px solid var(--gray-dark); }
   .state-card.enterprise { border-left: 3px solid var(--bayer-green); background: linear-gradient(180deg, rgba(142,142,144,0.05) 0%, var(--panel) 40%); }
   .state-tag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; margin-bottom: 14px; }
-  .state-card.today .state-tag { background: rgba(100,116,139,0.15); color: var(--gray); }
+  .state-card.today .state-tag { background: rgba(142,142,144,0.15); color: var(--gray); }
   .state-card.enterprise .state-tag { background: rgba(142,142,144,0.15); color: var(--bayer-green); }
   .state-card h3 { font-size: 22px; margin-bottom: 8px; }
   .state-card .sub { color: var(--gray); font-size: 14px; margin-bottom: 18px; }
@@ -80,10 +80,10 @@
   .diagram-caption { margin-top: 18px; color: var(--gray); font-size: 13px; text-align: center; }
   svg.arch { display: block; margin: 0 auto; width: 100%; max-width: 1060px; height: auto; }
   .arch .node rect { fill: var(--panel); stroke: var(--border-strong); stroke-width: 1; }
-  .arch .node.core rect { fill: #1E2A4A; stroke: var(--blue); stroke-width: 1.5; }
+  .arch .node.core rect { fill: #2a2a2a; stroke: var(--blue); stroke-width: 1.5; }
   .arch .node.ai rect { fill: rgba(189,140,125,0.08); stroke: var(--purple); stroke-width: 1.5; }
   .arch .node.enterprise rect { fill: rgba(142,142,144,0.05); stroke: rgba(142,142,144,0.4); }
-  .arch .node.data rect { fill: rgba(234,179,8,0.05); stroke: rgba(234,179,8,0.35); }
+  .arch .node.data rect { fill: rgba(209,191,167,0.05); stroke: rgba(209,191,167,0.35); }
   .arch .node.user rect { fill: rgba(209,191,167,0.08); stroke: var(--blue-light); stroke-width: 1.5; }
   .arch .label-title { fill: var(--white); font-size: 13px; font-weight: 700; font-family: inherit; }
   .arch .label-sub { fill: var(--gray); font-size: 10px; font-family: inherit; font-weight: 500; }

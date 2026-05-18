@@ -8,32 +8,32 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --navy: #0F1729;
-    --navy-mid: #1E3A5F;
+    --navy: #1a1a1a;
+    --navy-mid: #2a2a2a;
     --blue: #bd8c7d;
-    --blue-light: #DBEAFE;
+    --blue-light: rgba(142,142,144,0.15);
     --teal: #8e8e90;
-    --teal-light: #CCFBF1;
+    --teal-light: rgba(142,142,144,0.15);
     --purple: #bd8c7d;
     --purple-light: rgba(189,140,125,0.12);
-    --indigo: #4338CA;
-    --indigo-light: #E0E7FF;
-    --orange: #EA580C;
-    --orange-light: #FFEDD5;
-    --green: #15803D;
-    --green-light: #DCFCE7;
-    --rose: #BE123C;
-    --rose-light: #FFE4E6;
-    --amber: #B45309;
-    --amber-light: #FEF3C7;
-    --gray-50: #F8FAFC;
-    --gray-100: #F1F5F9;
-    --gray-200: #E2E8F0;
-    --gray-300: #CBD5E1;
-    --gray-400: #94A3B8;
-    --gray-500: #64748B;
-    --gray-700: #334155;
-    --gray-900: #0F172A;
+    --indigo: #49494b;
+    --indigo-light: rgba(73,73,75,0.12);
+    --orange: #bd8c7d;
+    --orange-light: rgba(189,140,125,0.12);
+    --green: #8e8e90;
+    --green-light: rgba(142,142,144,0.12);
+    --rose: #bd8c7d;
+    --rose-light: rgba(189,140,125,0.12);
+    --amber: #d1bfa7;
+    --amber-light: rgba(209,191,167,0.15);
+    --gray-50: #faf8f5;
+    --gray-100: #e8ddd4;
+    --gray-200: #e8ddd4;
+    --gray-300: #DDD6CC;
+    --gray-400: #8e8e90;
+    --gray-500: #8e8e90;
+    --gray-700: #49494b;
+    --gray-900: #1a1a1a;
   }
 
   body {
@@ -315,36 +315,36 @@
     <div class="object-desc">The atomic unit of build work. Each slice is one specific element or behavior — fully defined with four anchors before build starts. Slices are verified individually by solo-qa before contributing to a deliverable.</div>
 
     <div class="flow-chain">
-      <span class="flow-status" style="background:#F0FDF4;color:#15803D">In Review</span>
+      <span class="flow-status" style="background:#faf8f5;color:#8e8e90">In Review</span>
       <span class="flow-arrow">→</span>
-      <span class="flow-status" style="background:#F0FDF4;color:#15803D">Ready</span>
+      <span class="flow-status" style="background:#faf8f5;color:#8e8e90">Ready</span>
       <span class="flow-arrow">→</span>
-      <span class="flow-status" style="background:#F0FDF4;color:#15803D">In Build</span>
+      <span class="flow-status" style="background:#faf8f5;color:#8e8e90">In Build</span>
       <span class="flow-arrow">→</span>
-      <span class="flow-status" style="background:#F0FDF4;color:#15803D">In QA</span>
+      <span class="flow-status" style="background:#faf8f5;color:#8e8e90">In QA</span>
       <span class="flow-arrow">→</span>
-      <span class="flow-status" style="background:#F0FDF4;color:#15803D">In Test</span>
+      <span class="flow-status" style="background:#faf8f5;color:#8e8e90">In Test</span>
       <span class="flow-arrow">→</span>
-      <span class="flow-status" style="background:#15803D;color:#fff">Done</span>
+      <span class="flow-status" style="background:#8e8e90;color:#fff">Done</span>
       <span class="flow-branch">· branches: Blocked · Deferred</span>
     </div>
 
     <div class="status-grid" style="grid-template-columns: repeat(4, 1fr); gap: 12px;">
 
       <div class="status-card">
-        <div class="status-badge" style="background:#F0FDF4;color:#15803D">In Review</div>
+        <div class="status-badge" style="background:#faf8f5;color:#8e8e90">In Review</div>
         <div class="status-who">Set by: design-review</div>
         <div class="status-meaning">Identified but not fully defined yet. Needs more work before it can be built — a missing anchor, an open question, or a dependency that hasn't resolved.</div>
       </div>
 
-      <div class="status-card" style="border-color:#D1D5DB;background:#F9FAFB">
-        <div class="status-badge" style="background:#F1F5F9;color:#64748B">Blocked</div>
+      <div class="status-card" style="border-color:#e8ddd4;background:#faf8f5">
+        <div class="status-badge" style="background:#faf8f5;color:#8e8e90">Blocked</div>
         <div class="status-who">Set by: solo-build</div>
         <div class="status-meaning">Waiting on a named dependency. Always named explicitly — not "backend" but a specific slice ID, deliverable, or external dependency.</div>
       </div>
 
-      <div class="status-card" style="border-color:#D1D5DB;background:#F9FAFB">
-        <div class="status-badge" style="background:#F1F5F9;color:#64748B">Deferred</div>
+      <div class="status-card" style="border-color:#e8ddd4;background:#faf8f5">
+        <div class="status-badge" style="background:#faf8f5;color:#8e8e90">Deferred</div>
         <div class="status-who">Set by: solo-build / curator</div>
         <div class="status-meaning">Explicitly set aside with a trigger condition noted. Not abandoned — it has a named condition that would bring it back into scope.</div>
       </div>
@@ -374,7 +374,7 @@
       </div>
 
       <div class="status-card" style="border: 2px solid var(--green); background: var(--green-light);">
-        <div class="status-badge" style="background:#15803D;color:#fff">Done</div>
+        <div class="status-badge" style="background:#8e8e90;color:#fff">Done</div>
         <div class="status-who">Set by: phase-test at gate-open</div>
         <div class="status-meaning">Built, QA verified, and phase-tested end-to-end. This is the terminal state. Done is permanent unless a later slice reveals a regression.</div>
       </div>
@@ -465,13 +465,13 @@
     <div class="object-desc">A group of deliverables that together prove one meaningful capability. A phase is not a time box, a sprint, or a feature list. Every phase answers exactly one question — if that question can't be stated in one sentence, the phase boundary is wrong.</div>
 
     <div class="flow-chain">
-      <span class="flow-status" style="background:#FEF3C7;color:#B45309">Planning</span>
+      <span class="flow-status" style="background:rgba(209,191,167,0.15);color:#d1bfa7">Planning</span>
       <span class="flow-arrow">→</span>
-      <span class="flow-status" style="background:#FEF3C7;color:#B45309">Ready for Build</span>
+      <span class="flow-status" style="background:rgba(209,191,167,0.15);color:#d1bfa7">Ready for Build</span>
       <span class="flow-arrow">→</span>
-      <span class="flow-status" style="background:#FEF3C7;color:#B45309">In Progress</span>
+      <span class="flow-status" style="background:rgba(209,191,167,0.15);color:#d1bfa7">In Progress</span>
       <span class="flow-arrow">→</span>
-      <span class="flow-status" style="background:#B45309;color:#fff">Completed</span>
+      <span class="flow-status" style="background:#d1bfa7;color:#fff">Completed</span>
     </div>
 
     <div class="status-grid cols-4">
@@ -495,7 +495,7 @@
       </div>
 
       <div class="status-card" style="border: 2px solid var(--amber); background: var(--amber-light);">
-        <div class="status-badge" style="background:#B45309;color:#fff">Completed</div>
+        <div class="status-badge" style="background:#d1bfa7;color:#fff">Completed</div>
         <div class="status-who">Set by: phase-test at gate-open</div>
         <div class="status-meaning">All deliverables Accepted. Phase test gate open. All slices marked Done. The capability this phase was built to prove has been confirmed end-to-end.</div>
       </div>
