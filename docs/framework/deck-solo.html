@@ -3,320 +3,759 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Solo Builder Framework — Overview</title>
+  <title>Solo Builder Framework — Solo Deck</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../_shared.css">
+  <style>
+    /* ── Full-screen override ─────────────────────────────────────── */
+    html, body { width: 100%; height: 100%; overflow: hidden; }
+    body { padding-top: 64px !important; overflow: hidden; }
+    .site-nav { position: fixed !important; }
+
+    /* ── Deck container ───────────────────────────────────────────── */
+    .deck {
+      width: 100%;
+      height: calc(100vh - 64px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ── Slide base ───────────────────────────────────────────────── */
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
+    }
+    .slide.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* ── Slide variants ───────────────────────────────────────────── */
+    .slide-dark  { background: #1a1a1a; }
+    .slide-light { background: #fafaf8; }
+    .slide-warm  { background: #f0ebe4; }
+    .slide-split { flex-direction: row; }
+
+    /* ── Content padding ──────────────────────────────────────────── */
+    .slide-pad {
+      padding: 60px 100px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100%;
+    }
+
+    /* ── Typography helpers ───────────────────────────────────────── */
+    .eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #bd8c7d;
+      margin-bottom: 16px;
+    }
+    .h1-hero {
+      font-size: 72px;
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -2px;
+      color: #f0ece6;
+      margin: 0 0 20px;
+    }
+    .h2-dark  { font-size: 42px; font-weight: 700; line-height: 1.15; color: #f0ece6; margin: 0 0 16px; border: none; }
+    .h2-light { font-size: 42px; font-weight: 700; line-height: 1.15; color: #1a1a1a; margin: 0 0 16px; border: none; }
+    .h2-warm  { font-size: 42px; font-weight: 700; line-height: 1.15; color: #1a1a1a; margin: 0 0 16px; border: none; }
+    .h2-split { font-size: 44px; font-weight: 700; line-height: 1.15; color: #f0ece6; margin: 0 0 16px; border: none; }
+    .h2-end   { font-size: 56px; font-weight: 800; line-height: 1.1; color: #f0ece6; letter-spacing: -1.5px; margin: 0 0 20px; border: none; }
+
+    .body-dark  { font-size: 16px; line-height: 1.65; color: rgba(240,236,230,0.55); margin: 0; }
+    .body-light { font-size: 16px; line-height: 1.65; color: rgba(26,26,26,0.55); margin: 0; }
+    .sub-hero   { font-size: 18px; line-height: 1.6; color: rgba(240,236,230,0.55); margin: 28px 0 0; max-width: 620px; }
+
+    /* ── Terracotta rule ──────────────────────────────────────────── */
+    .tc-rule {
+      width: 60px; height: 3px;
+      background: #bd8c7d;
+      border-radius: 2px;
+      margin: 24px 0 0;
+    }
+
+    /* ── Split panels ─────────────────────────────────────────────── */
+    .split-left {
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 60px 60px 60px 100px;
+    }
+    .split-right {
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 60px;
+      border-left: 1px solid rgba(240,236,230,0.10);
+      background: #242424;
+    }
+
+    /* ── Panel label ──────────────────────────────────────────────── */
+    .panel-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: #bd8c7d; margin-bottom: 16px;
+    }
+
+    /* ── Dot list ─────────────────────────────────────────────────── */
+    .dot-list { list-style: none; padding: 0; margin: 16px 0 0; }
+    .dot-list li {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 14px; color: rgba(240,236,230,0.70);
+      line-height: 1.55; margin-bottom: 14px;
+    }
+    .dot-list li::before {
+      content: ''; display: block; width: 6px; height: 6px;
+      border-radius: 50%; background: #bd8c7d;
+      margin-top: 6px; flex-shrink: 0;
+    }
+
+    /* ── Card grids ───────────────────────────────────────────────── */
+    .card-grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-top: 28px; }
+    .card-grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 20px; margin-top: 28px; }
+    .card-grid-2x2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 20px; margin-top: 28px; }
+
+    .card {
+      background: #fff; border: 1px solid #eae6e1;
+      border-radius: 10px; padding: 24px 28px;
+    }
+    .card-dark {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(240,236,230,0.10);
+      border-radius: 10px; padding: 22px 24px;
+    }
+    .card-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: #bd8c7d; margin-bottom: 8px;
+    }
+    .card-title       { font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; }
+    .card-title-dark  { font-size: 15px; font-weight: 700; color: #f0ece6; margin-bottom: 8px; }
+    .card-body        { font-size: 13px; line-height: 1.6; color: rgba(26,26,26,0.55); margin: 0; }
+    .card-body-dark   { font-size: 13px; line-height: 1.6; color: rgba(240,236,230,0.50); margin: 0; }
+    .card-signal      { font-size: 11px; font-weight: 600; color: #bd8c7d; margin-top: 12px; font-style: italic; }
+    .card-consequence { font-size: 11px; font-style: italic; color: #bd8c7d; margin-top: 12px; }
+
+    /* ── Mode cards ───────────────────────────────────────────────── */
+    .mode-card {
+      background: #fff; border: 1px solid #eae6e1;
+      border-radius: 10px; padding: 22px 24px;
+    }
+    .mode-card.bare    { border-left: 3px solid #8e8e90; }
+    .mode-card.piloted { border-left: 3px solid #bd8c7d; }
+    .mode-card.guided  { border-left: 3px solid #1a1a1a; }
+    .mode-title { font-size: 14px; font-weight: 700; color: #1a1a1a; margin-bottom: 6px; }
+    .mode-desc  { font-size: 13px; color: rgba(26,26,26,0.55); line-height: 1.5; margin-bottom: 8px; }
+    .mode-tag   { font-size: 11px; font-weight: 600; color: #bd8c7d; }
+    .mode-callout {
+      margin-top: 20px; padding: 14px 20px;
+      background: rgba(189,140,125,0.10); border: 1px solid rgba(189,140,125,0.25);
+      border-radius: 8px; font-size: 13px; color: rgba(26,26,26,0.65); line-height: 1.5;
+    }
+
+    /* ── Skill list ───────────────────────────────────────────────── */
+    .skill-list { list-style: none; padding: 0; margin: 0; }
+    .skill-list li { padding: 14px 0; border-bottom: 1px solid rgba(240,236,230,0.08); }
+    .skill-list li:last-child { border-bottom: none; }
+    .skill-name {
+      font-family: 'SF Mono','Fira Code',monospace;
+      font-size: 12px; font-weight: 600; color: #bd8c7d; margin-bottom: 4px;
+    }
+    .skill-desc { font-size: 12px; color: rgba(240,236,230,0.50); line-height: 1.5; }
+
+    /* ── Phase chain ──────────────────────────────────────────────── */
+    .phase-chain {
+      display: flex; align-items: center; flex-wrap: wrap;
+      gap: 0; margin: 28px 0 24px;
+    }
+    .phase-pill {
+      font-size: 11px; font-weight: 600; padding: 6px 13px;
+      border-radius: 20px; white-space: nowrap;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(240,236,230,0.12);
+      color: rgba(240,236,230,0.65);
+    }
+    .phase-pill.gate {
+      background: rgba(189,140,125,0.15); border: 1px solid rgba(189,140,125,0.35);
+      color: #bd8c7d;
+    }
+    .phase-arrow { font-size: 14px; color: rgba(240,236,230,0.25); padding: 0 4px; }
+    .phase-row-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+    .phase-row-card {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(240,236,230,0.08);
+      border-radius: 8px; padding: 16px 20px;
+    }
+    .prc-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.10em;
+      text-transform: uppercase; color: rgba(240,236,230,0.40); margin-bottom: 6px;
+    }
+    .prc-body { font-size: 13px; color: rgba(240,236,230,0.65); line-height: 1.5; }
+
+    /* ── QA chain ─────────────────────────────────────────────────── */
+    .qa-chain { display: flex; align-items: flex-start; margin: 28px 0 20px; }
+    .qa-node  { display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1; }
+    .qa-box {
+      background: rgba(189,140,125,0.10); border: 1px solid rgba(189,140,125,0.25);
+      border-radius: 8px; padding: 14px 12px; width: 100%; margin-bottom: 8px;
+    }
+    .qa-name  { font-size: 12px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
+    .qa-desc  { font-size: 11px; color: rgba(26,26,26,0.55); line-height: 1.45; }
+    .qa-pass  { font-size: 10px; font-weight: 600; color: #bd8c7d; letter-spacing: 0.04em; }
+    .qa-arrow { font-size: 22px; color: rgba(26,26,26,0.25); padding: 0 6px; margin-top: 22px; flex-shrink: 0; }
+    .qa-footer {
+      font-size: 13px; color: rgba(26,26,26,0.50);
+      border-top: 1px solid #eae6e1; padding-top: 16px; margin-top: 4px;
+    }
+
+    /* ── Step list ────────────────────────────────────────────────── */
+    .step-list { list-style: none; padding: 0; margin: 16px 0 0; }
+    .step-item { display: flex; align-items: flex-start; gap: 14px; padding: 10px 0; border-bottom: 1px solid rgba(240,236,230,0.08); }
+    .step-item:last-child { border-bottom: none; }
+    .step-num  { font-size: 14px; font-weight: 800; color: #bd8c7d; width: 24px; flex-shrink: 0; margin-top: 1px; }
+    .step-body { font-size: 13px; color: rgba(240,236,230,0.65); line-height: 1.55; }
+    .step-label { font-weight: 700; color: rgba(240,236,230,0.85); }
+
+    /* ── Phase test list ──────────────────────────────────────────── */
+    .pt-list { list-style: none; padding: 0; margin: 20px 0 0; }
+    .pt-item {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 9px 0; border-bottom: 1px solid rgba(240,236,230,0.08);
+    }
+    .pt-item:last-child { border-bottom: none; }
+    .pt-chip {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: rgba(189,140,125,0.15); border: 1px solid rgba(189,140,125,0.30);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; color: #bd8c7d; flex-shrink: 0; margin-top: 2px;
+    }
+    .pt-name { font-size: 14px; font-weight: 700; color: #f0ece6; margin-bottom: 2px; }
+    .pt-desc { font-size: 12px; color: rgba(240,236,230,0.50); line-height: 1.5; }
+
+    /* ── Diff list ────────────────────────────────────────────────── */
+    .diff-list { list-style: none; padding: 0; margin: 24px 0 0; }
+    .diff-item { display: flex; align-items: flex-start; gap: 16px; padding: 13px 0; border-bottom: 1px solid #eae6e1; }
+    .diff-item:last-child { border-bottom: none; }
+    .diff-num   { font-size: 11px; font-weight: 700; color: #bd8c7d; width: 20px; flex-shrink: 0; margin-top: 2px; }
+    .diff-label { font-size: 14px; font-weight: 700; color: #1a1a1a; margin-bottom: 2px; }
+    .diff-body  { font-size: 13px; color: rgba(26,26,26,0.55); line-height: 1.5; }
+
+    /* ── End slide ────────────────────────────────────────────────── */
+    .slide-end {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; height: 100%; padding: 80px 100px;
+    }
+    .body-end { font-size: 17px; line-height: 1.7; color: rgba(240,236,230,0.55); max-width: 600px; margin: 0; }
+
+    /* ── Pills ────────────────────────────────────────────────────── */
+    .pill-row {
+      display: flex; gap: 12px; flex-wrap: wrap;
+      justify-content: center; margin-top: 32px;
+    }
+    .pill {
+      font-size: 13px; font-weight: 600; color: #f0ece6;
+      border: 1.5px solid rgba(189,140,125,0.50);
+      border-radius: 20px; padding: 8px 18px;
+    }
+
+    /* ── Title layout ─────────────────────────────────────────────── */
+    .slide-hero {
+      display: flex; flex-direction: column;
+      justify-content: center; height: 100%;
+      padding: 80px 100px;
+    }
+
+    /* ── Bottom deck nav ──────────────────────────────────────────── */
+    .deck-nav {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+      background: rgba(26,26,26,0.85); backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(240,236,230,0.15);
+      padding: 10px 20px; border-radius: 40px;
+      display: flex; align-items: center; gap: 16px; z-index: 100;
+    }
+    .deck-nav button {
+      background: none; border: none; cursor: pointer;
+      color: rgba(240,236,230,0.60); font-size: 16px;
+      padding: 4px 6px; transition: color 0.2s; line-height: 1;
+    }
+    .deck-nav button:hover  { color: #f0ece6; }
+    .deck-nav button:disabled { opacity: 0.2; cursor: default; }
+    .dots { display: flex; align-items: center; gap: 6px; }
+    .dot {
+      width: 6px; height: 6px; border-radius: 3px;
+      background: rgba(240,236,230,0.25); transition: all 0.25s ease; cursor: pointer;
+    }
+    .dot.active { width: 18px; background: #bd8c7d; }
+    .slide-counter {
+      font-size: 11px; font-weight: 600; color: rgba(240,236,230,0.40);
+      min-width: 36px; text-align: center;
+    }
+  </style>
 </head>
 <body>
 
+<!-- ── Nav ──────────────────────────────────────────────────────────── -->
 <nav class="site-nav">
   <span class="brand">Solo Builder</span>
-  <a class="nav-link" href="getting-started.html">Getting Started</a>
-  <a class="nav-link" href="process-map.html">Process Map</a>
-  <a class="nav-link" href="skills-reference.html">Skills</a>
-  <a class="nav-link" href="framework-architecture.html">Architecture</a>
+  <div class="nav-dropdown">
+    <span class="nav-dropdown-trigger">Guides</span>
+    <div class="nav-dropdown-menu">
+      <a href="getting-started.html">Getting Started</a>
+      <div class="nav-menu-divider"></div>
+      <a href="guide-brainstorm.html">Brainstorm</a>
+      <a href="guide-discover.html">Discover</a>
+      <a href="guide-design-sprint.html">Design Sprint</a>
+      <a href="guide-data-review.html">Data Review</a>
+      <a href="guide-plan.html">Plan</a>
+      <a href="guide-build.html">Build</a>
+      <a href="guide-qa.html">QA</a>
+      <a href="guide-phase-test.html">Phase Test</a>
+      <a href="guide-deploy.html">Deploy</a>
+    </div>
+  </div>
+  <div class="nav-dropdown">
+    <span class="nav-dropdown-trigger">Reference</span>
+    <div class="nav-dropdown-menu">
+      <a href="process-map.html">Process Map</a>
+      <a href="skills-reference.html">Skills</a>
+      <a href="framework-architecture.html">Architecture</a>
+      <a href="backlog-status-reference.html">Backlog Status</a>
+      <a href="faq.html">FAQ</a>
+      <a href="blog.html">Release Notes</a>
+    </div>
+  </div>
+  <div class="nav-dropdown">
+    <span class="nav-dropdown-trigger active">More</span>
+    <div class="nav-dropdown-menu">
+      <a href="deck-solo.html" class="active">Solo Deck</a>
+      <a href="deck-business.html">Business Deck</a>
+    </div>
+  </div>
 </nav>
 
-<div class="page">
-  <div class="hero">
-    <div class="hero-label">Solo Builder Framework</div>
-    <h1>Team Discipline. Without the Team.</h1>
-    <p class="hero-sub">A complete lifecycle framework for building software solo with AI — from first idea through deployed and tested.</p>
-  </div>
+<!-- ── Deck ─────────────────────────────────────────────────────────── -->
+<div class="deck">
 
-  <h2>The Problem</h2>
-  <p>Solo builders using AI drift toward waterfall. No external forcing function — no standup, no sprint review, no teammate waiting. AI defaults to building what you describe, not challenging whether you're ready to build it. No shared artifact before code starts means scope, data gaps, and flow issues surface in code, not in design. Quality gates disappear.</p>
-  <p>The agile reframe: replace "phase complete" with "enough to learn from." The framework provides the forcing functions a team would provide.</p>
-
-  <h2>Three Entry Points</h2>
-  <p>The framework routes for you based on your opening message.</p>
-  <div class="card-grid">
-    <div class="card">
-      <div class="section-label">Entry 1</div>
-      <h3>You know what you want to build</h3>
-      <p>The idea is clear. Who it's for, what it does, what value it delivers. Skip brainstorming — go straight to Discover.</p>
-      <p><strong>Signals:</strong> specific solution in mind, clear user, defined outcome</p>
-    </div>
-    <div class="card">
-      <div class="section-label">Entry 2</div>
-      <h3>You're working through an idea</h3>
-      <p>The problem is real but the solution isn't clear yet. Brainstorming gives the idea something concrete to react to — including a rough visual sketch mid-session.</p>
-      <p><strong>Signals:</strong> exploratory tone, "what if", uncertain scope or user</p>
-    </div>
-    <div class="card">
-      <div class="section-label">Entry 3</div>
-      <h3>You have an existing project</h3>
-      <p>Code already exists — you want framework discipline applied to it. Onboard reads the project, maps content to gate artifacts, surfaces gaps, and places you at the correct starting phase.</p>
-      <p><strong>Signals:</strong> existing repo, mid-flight work, "bring this into the framework"</p>
+  <!-- 01 — Title -->
+  <div class="slide slide-dark active" data-index="0">
+    <div class="slide-hero">
+      <div class="eyebrow">Solo Builder Framework</div>
+      <h1 class="h1-hero">Team Discipline.<br>Without the Team.</h1>
+      <div class="tc-rule"></div>
+      <p class="sub-hero">A complete lifecycle framework for building software solo with AI — from first idea through deployed and tested.</p>
     </div>
   </div>
 
-  <h2>The Full Lifecycle</h2>
-  <p>Every phase has a purpose, an output, and a gate.</p>
-  <div class="workflow-steps">
-    <div class="workflow-step">Brainstorm</div>
-    <div class="workflow-step">Discover</div>
-    <div class="workflow-step">Tech Context</div>
-    <div class="workflow-step">Design Sprint</div>
-    <div class="workflow-step">Design Review</div>
-    <div class="workflow-step">Plan</div>
-    <div class="workflow-step">Build</div>
-    <div class="workflow-step">QA Chain</div>
-    <div class="workflow-step">Phase Test</div>
-    <div class="workflow-step">Deploy</div>
-  </div>
-  <div class="card-grid">
-    <div class="card">
-      <h3>You bring</h3>
-      <p>The idea, domain knowledge, "warmer / colder" judgment, and final decisions.</p>
+  <!-- 02 — The Problem -->
+  <div class="slide slide-dark slide-split" data-index="1">
+    <div class="split-left" style="flex: 0 0 60%;">
+      <div class="eyebrow">The Problem</div>
+      <h2 class="h2-split">Solo builders using AI drift toward waterfall.</h2>
+      <p class="body-dark">No external forcing function — no standup, no sprint review, no teammate waiting. AI defaults to building what you describe, not challenging whether you're ready to build it.</p>
     </div>
-    <div class="card">
-      <h3>The framework brings</h3>
-      <p>Specialist thinking, design execution, quality gates, process accountability, institutional memory.</p>
-    </div>
-    <div class="card">
-      <h3>Gates stop advancement</h3>
-      <p>Until conditions are met — to-be map agreed before design, enough Ready slices before build, phase test OPEN before deploy.</p>
+    <div class="split-right" style="flex: 0 0 40%;">
+      <div class="panel-label">What disappears</div>
+      <ul class="dot-list">
+        <li>No shared design artifact before code</li>
+        <li>Scope and data gaps surface in code, not design</li>
+        <li>Quality gates disappear</li>
+        <li>"Phase complete" replaces "enough to learn from"</li>
+      </ul>
     </div>
   </div>
 
-  <h2>Three Session Modes</h2>
-  <p>You choose how much the framework carries.</p>
-  <div class="card-grid">
-    <div class="card">
-      <div class="section-label">Default</div>
-      <h3>Bare</h3>
-      <p>Nothing loads until you ask for it. You invoke the skill you need, it runs, the framework stays out of the way.</p>
-      <p><strong>Right for:</strong> focused work where you know exactly what you want.</p>
-    </div>
-    <div class="card">
-      <div class="section-label">Active</div>
-      <h3>Piloted</h3>
-      <p>You're flying it. The four always-on skills load at session start — memory, continuity, process accountability, health. You set the course: you choose which phase to run next.</p>
-      <p><strong>Right for:</strong> builders who want instruments live while staying in control.</p>
-    </div>
-    <div class="card">
-      <div class="section-label">Guided</div>
-      <h3>Guided</h3>
-      <p>The framework leads, you decide. Always-on skills active plus the full phase chain — phases flow forward automatically. You're in every conversation and every sign-off, but not managing the navigation.</p>
-      <p><strong>Right for:</strong> new projects or when you want to stay in the work, not the framework.</p>
-    </div>
-  </div>
-  <div class="callout"><strong>Enhanced mode</strong> — Claude Code only. A separate capability layer, not a session mode. Unlocks multi-agent orchestration for supported skills. Can combine with any of the three modes above.</div>
-
-  <h2>Four Always-On Skills</h2>
-  <p>These activate on piloted or guided mode — silent in bare. Bare mode is the default. Say "guided mode" or "piloted mode" to activate them. One load per session.</p>
-  <div class="card-grid">
-    <div class="card">
-      <div class="section-label">Process Accountability</div>
-      <h3>process-mapper</h3>
-      <p>Documents how the process works today (as-is) and what it should look like when you're done (to-be). Holds the to-be map as the contract — every phase is accountable to it.</p>
-      <p><strong>Active across:</strong> Discover → Design Sprint → Design Review → Build → Phase Test</p>
-    </div>
-    <div class="card">
-      <div class="section-label">Institutional Memory</div>
-      <h3>product-continuity</h3>
-      <p>Captures decisions, assumptions, risks, questions, changes, and glossary across sessions. The first thing read when a session opens — you never lose context between sessions.</p>
-      <p><strong>Active across:</strong> Every phase, every session</p>
-    </div>
-    <div class="card">
-      <div class="section-label">Framework Health</div>
-      <h3>framework-health</h3>
-      <p>Background monitor — checks signals, not full documents. Surfaces one issue at a time with a specific recovery path. Silent when everything is healthy. Never blocks.</p>
-      <p><strong>Active across:</strong> Mode activation, between phases, session end</p>
-    </div>
-    <div class="card">
-      <div class="section-label">Continuous Learning</div>
-      <h3>retrospective</h3>
-      <p>Captures observations in the moment as lightweight flags. Processes them at phase end — finding patterns, naming root causes, proposing specific improvements to the playbook.</p>
-      <p><strong>Active across:</strong> Every phase — flags in moment, processes at phase end</p>
+  <!-- 03 — Three Entry Points -->
+  <div class="slide slide-light" data-index="2">
+    <div class="slide-pad">
+      <div class="eyebrow">Getting Started</div>
+      <h2 class="h2-light">Three ways in. The framework routes you.</h2>
+      <div class="card-grid-3">
+        <div class="card">
+          <div class="card-label">Entry 1</div>
+          <div class="card-title">You know what you want</div>
+          <p class="card-body">You have a clear picture of the product, you've thought through the problem, and you're ready to design it. Start with Discover to validate assumptions before building.</p>
+          <div class="card-signal">Signal: "I want to build X for Y users"</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Entry 2</div>
+          <div class="card-title">You're working through an idea</div>
+          <p class="card-body">You have a direction but the shape isn't clear yet. Brainstorm explores what you're actually trying to solve and whether this is the right thing to build.</p>
+          <div class="card-signal">Signal: "I've been thinking about something that..."</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Entry 3</div>
+          <div class="card-title">You have an existing project</div>
+          <p class="card-body">A project is already running but isn't inside the framework. Onboard reads the project directory, matches content to framework artifacts, and places it at the right phase.</p>
+          <div class="card-signal">Signal: "I already have code — let's bring it in"</div>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="callout"><strong>Companion — on-demand, not always-on.</strong> <strong>nivya</strong> — conversational companion invoked with /nivya. She's read the framework and the project's continuity and process artifacts. Answers questions — doesn't do work. Nothing gets captured from a Nivya conversation without explicit consent. For focused sit-downs, Nivya offers to huddle as a dedicated subagent.</div>
 
-  <h2>The Design Artifact</h2>
-  <p>Before a line of code is written, the Design Sprint produces an HTML artifact — all screens, interactive, good enough to make real decisions from. This artifact isn't a finished product — it's a thinking tool that surfaces four categories of work that couldn't be seen before.</p>
-  <div class="card-grid">
-    <div class="card">
-      <h3>Data questions</h3>
-      <p>Every field on screen gets "where does this come from?" answered before build.</p>
-    </div>
-    <div class="card">
-      <h3>Process gaps</h3>
-      <p>Missing steps, decision points, and handoffs surface when you see the flow.</p>
-    </div>
-    <div class="card">
-      <h3>Scope decisions</h3>
-      <p>Every element on screen becomes an explicit build/defer decision.</p>
-    </div>
-    <div class="card">
-      <h3>Implied infrastructure</h3>
-      <p>A simple toggle may hide a data pipeline. The design surfaces it before code commits to it.</p>
-    </div>
-  </div>
-  <p>Three on-ramps: start from scratch (warmer/colder loop) · import from Figma · reference-based aesthetic</p>
-
-  <h2>The Deliverable</h2>
-  <p>Not a user story. Not a feature. A contract. A deliverable is the agreed body of work between the solo and the framework — defined before build starts, accepted when it's complete. Each deliverable is made up of <strong>slices</strong> — individual units of work built, reviewed, and marked Done one at a time.</p>
-  <table>
-    <thead>
-      <tr><th>Field</th><th>Who reads it</th><th>Purpose</th></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Technical spec</strong></td>
-        <td>Framework</td>
-        <td>How to build it correctly — implementation-level, precise</td>
-      </tr>
-      <tr>
-        <td><strong>Solo description</strong></td>
-        <td>Framework + Solo</td>
-        <td>What the solo is getting — plain language, outcome-focused. Framework surfaces this at review time.</td>
-      </tr>
-      <tr>
-        <td><strong>Acceptance criteria</strong></td>
-        <td>Framework + Solo</td>
-        <td>Shared contract — agreed before build, self-verified by the framework, confirmed by the solo</td>
-      </tr>
-    </tbody>
-  </table>
-  <p>Two views available at any time — "show progress" for the active deliverable · "show plan" for the full build</p>
-
-  <h2>Build Discipline — Four Anchors</h2>
-  <p>No slice starts without four anchors.</p>
-  <div class="card-grid">
-    <div class="card">
-      <div class="section-label">Design Anchor</div>
-      <p>The exact screen and element from the design sprint. No ambiguity about what's being built.</p>
-    </div>
-    <div class="card">
-      <div class="section-label">Data Anchor</div>
-      <p>The specific fields this slice reads, and where they live. Confirmed before code touches them. Mock data generated by data-scaffold before build begins — one swap point to replace with real API data when ready.</p>
-    </div>
-    <div class="card">
-      <div class="section-label">Done Anchor</div>
-      <p>2–3 verifiable criteria. Not "it works" — specific, checkable statements.</p>
-    </div>
-    <div class="card">
-      <div class="section-label">Process Anchor</div>
-      <p>Which step in the agreed to-be process map this slice implements. Nothing gets built that isn't traced to the agreed process.</p>
+  <!-- 04 — The Lifecycle -->
+  <div class="slide slide-dark" data-index="3">
+    <div class="slide-pad">
+      <div class="eyebrow">End to End</div>
+      <h2 class="h2-dark">Every phase has a purpose, an output, and a gate.</h2>
+      <div class="phase-chain">
+        <div class="phase-pill">Brainstorm</div><span class="phase-arrow">›</span>
+        <div class="phase-pill gate">Discover</div><span class="phase-arrow">›</span>
+        <div class="phase-pill">Tech Context</div><span class="phase-arrow">›</span>
+        <div class="phase-pill gate">Design Sprint</div><span class="phase-arrow">›</span>
+        <div class="phase-pill">Data &amp; Review</div><span class="phase-arrow">›</span>
+        <div class="phase-pill gate">Plan</div><span class="phase-arrow">›</span>
+        <div class="phase-pill">Build</div><span class="phase-arrow">›</span>
+        <div class="phase-pill gate">QA Chain</div><span class="phase-arrow">›</span>
+        <div class="phase-pill gate">Phase Test</div><span class="phase-arrow">›</span>
+        <div class="phase-pill">Deploy</div>
+      </div>
+      <div class="phase-row-cards">
+        <div class="phase-row-card">
+          <div class="prc-label">You bring</div>
+          <div class="prc-body">Idea, judgment, and final decisions at every gate</div>
+        </div>
+        <div class="phase-row-card">
+          <div class="prc-label">Framework brings</div>
+          <div class="prc-body">Specialist thinking, quality gates, and session memory</div>
+        </div>
+        <div class="phase-row-card">
+          <div class="prc-label">Gates stop advancement</div>
+          <div class="prc-body">Until conditions are met — terracotta nodes above are hard gates</div>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="callout">If a slice has no process anchor → the framework stops and asks: "Is this building something not in the agreed process?" That question matters.</div>
 
-  <h2>The QA Chain</h2>
-  <p>Code-complete triggers an automatic QA chain — ending in deliverable acceptance.</p>
-  <div class="workflow-steps">
-    <div class="workflow-step">code-review-and-quality<br><small>7 checks on code-complete</small></div>
-    <div class="workflow-step">solo-qa Part 1<br><small>Active testing with evidence</small></div>
-    <div class="workflow-step">Solo browser sign-off<br><small>Verify visual + behavior</small></div>
-    <div class="workflow-step">Deliverable Acceptance<br><small>All slices Done</small></div>
-  </div>
-  <p>When testing surfaces something unexpected → qa-triage classifies it: bug / missing requirement / regression — then routes it correctly. Fix the right thing, not the nearest thing.</p>
-
-  <h2>The Process Thread</h2>
-  <p>The to-be process map isn't filed and forgotten. It's the contract every downstream phase is held to — automatically.</p>
-  <table>
-    <thead>
-      <tr><th>Phase</th><th>How the process thread runs</th></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Discover</strong></td>
-        <td>As-is and to-be process maps produced and agreed. The to-be map is the contract.</td>
-      </tr>
-      <tr>
-        <td><strong>Design Sprint</strong></td>
-        <td>Screens cross-referenced against to-be map. Gaps become explicit decisions.</td>
-      </tr>
-      <tr>
-        <td><strong>Design Review</strong></td>
-        <td>Coverage check every round. Every slice gets a process anchor before reaching Ready.</td>
-      </tr>
-      <tr>
-        <td><strong>Build</strong></td>
-        <td>Process anchor required on every slice. Stops if something isn't in the agreed process.</td>
-      </tr>
-      <tr>
-        <td><strong>Phase Test</strong></td>
-        <td>Use cases derived from the to-be map. Did we build what the process requires?</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h2>Phase Test — Seven Specialist Lenses</h2>
-  <p>You invoke /phase-test explicitly when you decide the phase is built. Deliberate — not automatic.</p>
-  <table>
-    <thead>
-      <tr><th>Stage</th><th>What it does</th></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Stage 1 — Environment Readiness</strong></td>
-        <td>Pre-flight gate. Nothing runs until mock is inactive, all slices deployed, app loads clean.</td>
-      </tr>
-      <tr>
-        <td><strong>Stage 2 — Use Case Creator</strong></td>
-        <td>Derives the test plan from the discovery brief and to-be process map. Not invented — derived.</td>
-      </tr>
-      <tr>
-        <td><strong>Stage 3 — Data Specialist</strong></td>
-        <td>Mock→real swap confirmed. API read and write verified. Data mapping validated.</td>
-      </tr>
-      <tr>
-        <td><strong>Stage 4+5 — Tester + Regression Specialist</strong></td>
-        <td>Every scenario with named evidence. All Done slices re-walked. Integration points checked.</td>
-      </tr>
-      <tr>
-        <td><strong>Stage 6 — Acceptance Reviewer</strong></td>
-        <td>PM lens. Does what was built match what was discovered? Process intent, not just feature behavior.</td>
-      </tr>
-      <tr>
-        <td><strong>Stage 7 — Gate Decision</strong></td>
-        <td>OPEN (deploy) or HOLD (specific items to resolve). HOLD = re-test affected scenarios only, no full re-run.</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h2>What Makes This Different</h2>
-  <table>
-    <thead>
-      <tr><th>What</th><th>Why it matters</th></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Not a prompt collection</strong></td>
-        <td>28 interconnected skills that chain automatically — plus Nivya, the on-demand companion. Skills invoke each other. The QA chain runs without you triggering it. The always-on skills run throughout.</td>
-      </tr>
-      <tr>
-        <td><strong>Process contract</strong></td>
-        <td>The to-be process map is agreed before design begins and held as the accountability standard through Phase Test. Most tools have no concept of this.</td>
-      </tr>
-      <tr>
-        <td><strong>Design before code</strong></td>
-        <td>The HTML artifact is produced before build starts — not after. Scope, data, and flow issues surface in design, not in code. The artifact becomes the starting point for the frontend.</td>
-      </tr>
-      <tr>
-        <td><strong>Quality with evidence</strong></td>
-        <td>solo-qa cross-references rendered values against mock data files. Not "I reviewed the code" — actual verification with named evidence. Done means Done.</td>
-      </tr>
-      <tr>
-        <td><strong>Self-improving</strong></td>
-        <td>The retrospective skill captures what works and what doesn't. Framework-level improvements queue to the playbook. Every project makes the framework better.</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h2>How to Start</h2>
-  <div class="callout">Open a new project. Let the framework route you — Brainstorm or Discover. Stay with it through Design Sprint, Build, and Phase Test. Everything else follows from there.</div>
-  <div class="stat-grid">
-    <div class="stat"><span class="stat-num">28</span><span class="stat-label">Skills + Nivya</span></div>
-    <div class="stat"><span class="stat-num">Auto</span><span class="stat-label">QA Chain</span></div>
-    <div class="stat"><span class="stat-num">Process</span><span class="stat-label">First</span></div>
-    <div class="stat"><span class="stat-num">Cursor</span><span class="stat-label">+ Claude Code</span></div>
+  <!-- 05 — Session Modes -->
+  <div class="slide slide-warm" data-index="4">
+    <div class="slide-pad">
+      <div class="eyebrow">How Much You Want the Framework to Carry</div>
+      <h2 class="h2-warm">Three session modes.</h2>
+      <div class="card-grid-3">
+        <div class="mode-card bare">
+          <div class="mode-title">Bare</div>
+          <div class="mode-desc">Default. Nothing loads until you ask. Skills activate only when you invoke a phase explicitly. Token efficient — nothing extra running in the background.</div>
+          <div class="mode-tag">Zero overhead</div>
+        </div>
+        <div class="mode-card piloted">
+          <div class="mode-title">Piloted</div>
+          <div class="mode-desc">You're flying it. Always-on skills load once at session start. You choose each phase and invoke it manually — the framework follows your lead.</div>
+          <div class="mode-tag">You lead, framework supports</div>
+        </div>
+        <div class="mode-card guided">
+          <div class="mode-title">Guided</div>
+          <div class="mode-desc">Framework leads. Always-on plus the full phase chain. You're consulted at every decision point — gates, direction, scope. Framework does the routing.</div>
+          <div class="mode-tag">Framework leads, you decide</div>
+        </div>
+      </div>
+      <div class="mode-callout"><strong>Enhanced mode</strong> — Claude Code only. Multi-agent orchestration for supported skills. Parallel workstreams, automated handoffs between agents.</div>
+    </div>
   </div>
 
+  <!-- 06 — Always-On Skills -->
+  <div class="slide slide-dark slide-split" data-index="5">
+    <div class="split-left" style="flex: 0 0 60%;">
+      <div class="eyebrow">Active in Guided + Piloted Mode</div>
+      <h2 class="h2-split">Four skills that never turn off.</h2>
+      <p class="body-dark">Fire once at session start. Silent in bare mode. They hold the project's memory, process accountability, and health checks — running in the background so nothing slips through the cracks.</p>
+    </div>
+    <div class="split-right" style="flex: 0 0 40%;">
+      <ul class="skill-list">
+        <li>
+          <div class="skill-name">process-mapper</div>
+          <div class="skill-desc">As-is and to-be process maps, coverage checks throughout the lifecycle</div>
+        </li>
+        <li>
+          <div class="skill-name">product-continuity</div>
+          <div class="skill-desc">Decisions, assumptions, risks, and session memory — the project's institutional record</div>
+        </li>
+        <li>
+          <div class="skill-name">framework-health</div>
+          <div class="skill-desc">Background monitor — flags one issue at a time, doesn't pile on</div>
+        </li>
+        <li>
+          <div class="skill-name">retrospective</div>
+          <div class="skill-desc">Flags in the moment, processes at phase end, feeds learning back into the playbook</div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 07 — The Design Artifact -->
+  <div class="slide slide-light" data-index="6">
+    <div class="slide-pad">
+      <div class="eyebrow">Before Code Starts</div>
+      <h2 class="h2-light">A shared HTML artifact — all screens, interactive, good enough to decide from.</h2>
+      <div class="card-grid-2x2">
+        <div class="card">
+          <div class="card-label">01 — Data Questions</div>
+          <div class="card-title">Every field gets an answer</div>
+          <p class="card-body">Where does this data come from? Is it user input, an API, a calculation, or static? Every field in the design has a source before a line of code is written.</p>
+        </div>
+        <div class="card">
+          <div class="card-label">02 — Process Gaps</div>
+          <div class="card-title">Missing steps surface early</div>
+          <p class="card-body">When you see the full flow in a screen, missing steps become obvious. Gaps that would have been found in code get caught in the artifact — when they're still cheap to fix.</p>
+        </div>
+        <div class="card">
+          <div class="card-label">03 — Scope Decisions</div>
+          <div class="card-title">Every element is explicit</div>
+          <p class="card-body">Every button, filter, field, and state becomes a build-or-defer decision. Nothing sneaks into the build that wasn't deliberately included in the artifact.</p>
+        </div>
+        <div class="card">
+          <div class="card-label">04 — Implied Infrastructure</div>
+          <div class="card-title">Surfaces hidden complexity</div>
+          <p class="card-body">A simple toggle might hide a background job, a caching layer, or a new data relationship. The artifact makes that visible before it becomes a problem in the code.</p>
+        </div>
+      </div>
+      <p style="font-size:13px;color:rgba(26,26,26,0.45);margin-top:18px;margin-bottom:0;">Three on-ramps: scratch (warmer/colder loop) · Figma import · reference-based aesthetic</p>
+    </div>
+  </div>
+
+  <!-- 08 — Build Discipline -->
+  <div class="slide slide-dark" data-index="7">
+    <div class="slide-pad">
+      <div class="eyebrow">No Slice Starts Without Four Anchors</div>
+      <h2 class="h2-dark">Four anchors required before any slice enters build.</h2>
+      <div class="card-grid-4">
+        <div class="card-dark">
+          <div class="card-title-dark">Design Anchor</div>
+          <p class="card-body-dark">Exact screen and element from the design artifact. Not a description — a specific reference the build can be held to.</p>
+          <div class="card-consequence">Missing: building the wrong thing</div>
+        </div>
+        <div class="card-dark">
+          <div class="card-title-dark">Data Anchor</div>
+          <p class="card-body-dark">Every field in the slice mapped to its source. API, user input, calculation, or stored value — defined before code starts.</p>
+          <div class="card-consequence">Missing: hardcoded data in code</div>
+        </div>
+        <div class="card-dark">
+          <div class="card-title-dark">Done Anchor</div>
+          <p class="card-body-dark">Two to three verifiable done criteria. Not "it works" — specific, observable conditions checkable in the browser.</p>
+          <div class="card-consequence">Missing: no way to know when done</div>
+        </div>
+        <div class="card-dark">
+          <div class="card-title-dark">Process Anchor</div>
+          <p class="card-body-dark">The to-be map step this slice implements. Every unit of work maps back to the agreed process contract.</p>
+          <div class="card-consequence">Missing: framework stops and asks</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 09 — QA Chain -->
+  <div class="slide slide-warm" data-index="8">
+    <div class="slide-pad">
+      <div class="eyebrow">Automatic on Code-Complete</div>
+      <h2 class="h2-warm">Code-complete triggers the QA chain. You don't invoke it.</h2>
+      <div class="qa-chain">
+        <div class="qa-node">
+          <div class="qa-box">
+            <div class="qa-name">Code Review + Quality</div>
+            <div class="qa-desc">Automated review for bugs, style, and coverage. Flags issues before they reach the human gate.</div>
+          </div>
+          <div class="qa-pass">Pass: no open issues</div>
+        </div>
+        <div class="qa-arrow">›</div>
+        <div class="qa-node">
+          <div class="qa-box">
+            <div class="qa-name">Solo QA — Part 1</div>
+            <div class="qa-desc">Cross-references rendered values against mock data. Verifies done criteria from the slice definition.</div>
+          </div>
+          <div class="qa-pass">Pass: values match data</div>
+        </div>
+        <div class="qa-arrow">›</div>
+        <div class="qa-node">
+          <div class="qa-box">
+            <div class="qa-name">Browser Sign-Off</div>
+            <div class="qa-desc">You open a live link and walk through specific scenarios. Plain language: where to go, what to click, what to expect.</div>
+          </div>
+          <div class="qa-pass">Pass: solo approves</div>
+        </div>
+        <div class="qa-arrow">›</div>
+        <div class="qa-node">
+          <div class="qa-box">
+            <div class="qa-name">Deliverable Acceptance</div>
+            <div class="qa-desc">Slice is formally closed. Backlog and handoff updated in the same pass. Status moves to Done.</div>
+          </div>
+          <div class="qa-pass">Pass: slice closed</div>
+        </div>
+      </div>
+      <div class="qa-footer">qa-triage classifies unexpected findings: bug / missing requirement / regression — so they route to the right response.</div>
+    </div>
+  </div>
+
+  <!-- 10 — Process Thread -->
+  <div class="slide slide-dark slide-split" data-index="9">
+    <div class="split-left" style="flex: 0 0 60%;">
+      <div class="eyebrow">The Backbone</div>
+      <h2 class="h2-split">The to-be map is the contract every phase is held to.</h2>
+      <p class="body-dark">Not just a discovery artifact. It's the thread that runs from the first process conversation through the final Phase Test — referenced at every gate in between.</p>
+    </div>
+    <div class="split-right" style="flex: 0 0 40%;">
+      <ul class="step-list">
+        <li class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-body"><span class="step-label">Discover</span> — as-is and to-be maps produced and agreed with the solo</div>
+        </li>
+        <li class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-body"><span class="step-label">Design Sprint</span> — every screen cross-referenced against the to-be map</div>
+        </li>
+        <li class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-body"><span class="step-label">Design Review</span> — coverage check every round, gaps flagged before build</div>
+        </li>
+        <li class="step-item">
+          <div class="step-num">4</div>
+          <div class="step-body"><span class="step-label">Build</span> — process anchor required for every slice, no exceptions</div>
+        </li>
+        <li class="step-item">
+          <div class="step-num">5</div>
+          <div class="step-body"><span class="step-label">Phase Test</span> — use cases derived directly from the to-be map steps</div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 11 — Phase Test -->
+  <div class="slide slide-dark" data-index="10">
+    <div class="slide-pad">
+      <div class="eyebrow">Phase 5 — You Invoke It Deliberately</div>
+      <h2 class="h2-dark">Seven specialist lenses before anything ships.</h2>
+      <ul class="pt-list">
+        <li class="pt-item">
+          <div class="pt-chip">1</div>
+          <div><div class="pt-name">Environment Readiness</div><div class="pt-desc">Validates build environment, dependencies, and configuration before any testing begins</div></div>
+        </li>
+        <li class="pt-item">
+          <div class="pt-chip">2</div>
+          <div><div class="pt-name">Use Case Creator</div><div class="pt-desc">Derives test cases from the to-be process map — coverage is process-driven, not assumption-driven</div></div>
+        </li>
+        <li class="pt-item">
+          <div class="pt-chip">3</div>
+          <div><div class="pt-name">Data Specialist</div><div class="pt-desc">Verifies data integrity, edge cases, and boundary conditions across all data inputs and outputs</div></div>
+        </li>
+        <li class="pt-item">
+          <div class="pt-chip">4–5</div>
+          <div><div class="pt-name">Tester + Regression Specialist</div><div class="pt-desc">Executes use cases and regression suite — surfaces any failures or regressions against prior-phase behavior</div></div>
+        </li>
+        <li class="pt-item">
+          <div class="pt-chip">6</div>
+          <div><div class="pt-name">Acceptance Reviewer</div><div class="pt-desc">Reviews all findings against acceptance criteria — determines whether each condition is met</div></div>
+        </li>
+        <li class="pt-item">
+          <div class="pt-chip">7</div>
+          <div><div class="pt-name">Gate Decision</div><div class="pt-desc">OPEN (ready to deploy) or HOLD (blocking issues documented) — explicit, not implied</div></div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 12 — What Makes This Different -->
+  <div class="slide slide-light" data-index="11">
+    <div class="slide-pad">
+      <div class="eyebrow">Factual Differentiation</div>
+      <h2 class="h2-light">What makes this different.</h2>
+      <ul class="diff-list">
+        <li class="diff-item">
+          <div class="diff-num">01</div>
+          <div>
+            <div class="diff-label">Not a prompt collection</div>
+            <div class="diff-body">28+ interconnected skills that chain automatically — each activates at the right phase and hands off to the next without manual routing.</div>
+          </div>
+        </li>
+        <li class="diff-item">
+          <div class="diff-num">02</div>
+          <div>
+            <div class="diff-label">Process contract</div>
+            <div class="diff-body">The to-be map is agreed before design starts and held through Phase Test — every gate references it.</div>
+          </div>
+        </li>
+        <li class="diff-item">
+          <div class="diff-num">03</div>
+          <div>
+            <div class="diff-label">Design before code</div>
+            <div class="diff-body">HTML artifact reviewed and approved before any slice enters build — scope, data, and process questions answered first.</div>
+          </div>
+        </li>
+        <li class="diff-item">
+          <div class="diff-num">04</div>
+          <div>
+            <div class="diff-label">Quality with evidence</div>
+            <div class="diff-body">Solo QA cross-references rendered values against mock data — "it looks right" is not the bar.</div>
+          </div>
+        </li>
+        <li class="diff-item">
+          <div class="diff-num">05</div>
+          <div>
+            <div class="diff-label">Self-improving</div>
+            <div class="diff-body">Retrospective flags real friction in real usage and feeds improvements back into the playbook — not a theoretical framework.</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 13 — End -->
+  <div class="slide slide-dark" data-index="12">
+    <div class="slide-end">
+      <h2 class="h2-end">Start with one idea.<br>Run it end to end.</h2>
+      <p class="body-end">Open a new project. Let the framework route you — Brainstorm or Discover. Stay with it through Design Sprint, Build, and Phase Test. Everything else follows.</p>
+      <div class="pill-row">
+        <div class="pill">28 Skills + Nivya</div>
+        <div class="pill">Auto QA Chain</div>
+        <div class="pill">Process-First</div>
+        <div class="pill">Claude Code + Cursor</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.deck -->
+
+<!-- ── Bottom nav ────────────────────────────────────────────────────── -->
+<div class="deck-nav">
+  <button id="prev-btn" onclick="navigate(-1)" disabled>&#8592;</button>
+  <div class="dots" id="dots"></div>
+  <div class="slide-counter" id="counter">1 / 13</div>
+  <button id="next-btn" onclick="navigate(1)">&#8594;</button>
 </div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total  = slides.length;
+  let current  = 0;
+
+  const dotsEl = document.getElementById('dots');
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => goTo(i);
+    dotsEl.appendChild(d);
+  });
+
+  function goTo(n) {
+    slides[current].classList.remove('active');
+    dotsEl.children[current].classList.remove('active');
+    current = Math.max(0, Math.min(total - 1, n));
+    slides[current].classList.add('active');
+    dotsEl.children[current].classList.add('active');
+    document.getElementById('counter').textContent = (current + 1) + ' / ' + total;
+    document.getElementById('prev-btn').disabled = current === 0;
+    document.getElementById('next-btn').disabled = current === total - 1;
+  }
+
+  function navigate(dir) { goTo(current + dir); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   navigate(-1);
+  });
+</script>
 </body>
 </html>

@@ -7,8 +7,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../_shared.css">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* Override _shared.css — this page uses a full-screen flex layout */
+  body { padding-top: 0 !important; }
+  .site-nav { position: relative !important; width: auto !important; left: auto !important; right: auto !important; }
 
   :root {
     --bg: #faf8f5;
@@ -322,11 +327,41 @@
 <body>
 
 <nav class="site-nav">
-  <span class="brand">Solo Builder Framework</span>
-  <a href="getting-started.html" class="nav-link">Getting Started</a>
-  <a href="process-map.html" class="nav-link">Process Map</a>
-  <a href="skills-reference.html" class="nav-link">Skills</a>
-  <a href="framework-architecture.html" class="nav-link active">Architecture</a>
+  <span class="brand">Solo Builder</span>
+  <div class="nav-dropdown">
+    <span class="nav-dropdown-trigger">Guides</span>
+    <div class="nav-dropdown-menu">
+      <a href="getting-started.html">Getting Started</a>
+      <div class="nav-menu-divider"></div>
+      <a href="guide-brainstorm.html">Brainstorm</a>
+      <a href="guide-discover.html">Discover</a>
+      <a href="guide-design-sprint.html">Design Sprint</a>
+      <a href="guide-data-review.html">Data Review</a>
+      <a href="guide-plan.html">Plan</a>
+      <a href="guide-build.html">Build</a>
+      <a href="guide-qa.html">QA</a>
+      <a href="guide-phase-test.html">Phase Test</a>
+      <a href="guide-deploy.html">Deploy</a>
+    </div>
+  </div>
+  <div class="nav-dropdown">
+    <span class="nav-dropdown-trigger active">Reference</span>
+    <div class="nav-dropdown-menu">
+      <a href="process-map.html">Process Map</a>
+      <a href="skills-reference.html">Skills</a>
+      <a href="framework-architecture.html" class="active">Architecture</a>
+      <a href="backlog-status-reference.html">Backlog Status</a>
+      <a href="faq.html">FAQ</a>
+      <a href="blog.html">Release Notes</a>
+    </div>
+  </div>
+  <div class="nav-dropdown">
+    <span class="nav-dropdown-trigger">More</span>
+    <div class="nav-dropdown-menu">
+      <a href="deck-solo.html">Solo Deck</a>
+      <a href="deck-business.html">Business Deck</a>
+    </div>
+  </div>
 </nav>
 
 <div class="panels">

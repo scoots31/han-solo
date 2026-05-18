@@ -14,11 +14,17 @@
       border-radius: 12px;
       box-shadow: 0 4px 24px rgba(0,0,0,0.06);
       margin: 32px 0;
+      width: 100vw;
+      position: relative;
+      left: 50%;
+      margin-left: -50vw;
+      margin-right: -50vw;
+      padding: 0 48px;
     }
     .map {
       display: grid;
-      grid-template-columns: 130px repeat(11, minmax(190px, 1fr));
-      min-width: 2220px;
+      grid-template-columns: 130px repeat(11, minmax(260px, 1fr));
+      min-width: 2990px;
       background: #fff;
       border-radius: 12px;
       overflow: hidden;
@@ -196,10 +202,40 @@
 
 <nav class="site-nav">
   <span class="brand">Solo Builder</span>
-  <a class="nav-link" href="getting-started.html">Getting Started</a>
-  <a class="nav-link" href="process-map.html">Process Map</a>
-  <a class="nav-link" href="skills-reference.html">Skills</a>
-  <a class="nav-link" href="framework-architecture.html">Architecture</a>
+  <div class="nav-dropdown">
+    <span class="nav-dropdown-trigger">Guides</span>
+    <div class="nav-dropdown-menu">
+      <a href="getting-started.html">Getting Started</a>
+      <div class="nav-menu-divider"></div>
+      <a href="guide-brainstorm.html">Brainstorm</a>
+      <a href="guide-discover.html">Discover</a>
+      <a href="guide-design-sprint.html">Design Sprint</a>
+      <a href="guide-data-review.html">Data Review</a>
+      <a href="guide-plan.html">Plan</a>
+      <a href="guide-build.html">Build</a>
+      <a href="guide-qa.html">QA</a>
+      <a href="guide-phase-test.html">Phase Test</a>
+      <a href="guide-deploy.html">Deploy</a>
+    </div>
+  </div>
+  <div class="nav-dropdown">
+    <span class="nav-dropdown-trigger active">Reference</span>
+    <div class="nav-dropdown-menu">
+      <a href="process-map.html" class="active">Process Map</a>
+      <a href="skills-reference.html">Skills</a>
+      <a href="framework-architecture.html">Architecture</a>
+      <a href="backlog-status-reference.html">Backlog Status</a>
+      <a href="faq.html">FAQ</a>
+      <a href="blog.html">Release Notes</a>
+    </div>
+  </div>
+  <div class="nav-dropdown">
+    <span class="nav-dropdown-trigger">More</span>
+    <div class="nav-dropdown-menu">
+      <a href="deck-solo.html">Solo Deck</a>
+      <a href="deck-business.html">Business Deck</a>
+    </div>
+  </div>
 </nav>
 
 <div class="page">
