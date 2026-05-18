@@ -1,804 +1,325 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Solo Builder Framework — Process Map</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    background: #faf8f5;
-    color: #1a1a1a;
-    padding: 32px 24px 48px;
-  }
-
-  .page-header {
-    margin-bottom: 28px;
-  }
-  .page-header h1 {
-    font-size: 22px;
-    font-weight: 700;
-    color: #1a1a1a;
-    letter-spacing: -0.3px;
-  }
-  .page-header p {
-    font-size: 13px;
-    color: #8e8e90;
-    margin-top: 4px;
-  }
-
-  .legend {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-  }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-size: 12px;
-    color: #49494b;
-    font-weight: 500;
-  }
-  .legend-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 3px;
-    flex-shrink: 0;
-  }
-
-  .map-wrapper {
-    overflow-x: auto;
-    border-radius: 12px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
-  }
-
-  .map {
-    display: grid;
-    grid-template-columns: 130px repeat(11, minmax(190px, 1fr));
-    min-width: 2220px;
-    background: #fff;
-    border-radius: 12px;
-    overflow: hidden;
-  }
-
-  /* Phase header row */
-  .phase-corner {
-    background: #1a1a1a;
-    padding: 14px 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .phase-corner span {
-    font-size: 10px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.5);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-  }
-
-  .phase-header {
-    background: #1a1a1a;
-    padding: 14px 14px 12px;
-    border-left: 1px solid rgba(255,255,255,0.08);
-  }
-  .phase-header .phase-num {
-    font-size: 10px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.4);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 3px;
-  }
-  .phase-header .phase-name {
-    font-size: 13px;
-    font-weight: 700;
-    color: #fff;
-    line-height: 1.2;
-  }
-  .phase-header .phase-tag {
-    display: inline-block;
-    margin-top: 5px;
-    font-size: 10px;
-    padding: 2px 7px;
-    border-radius: 10px;
-    font-weight: 600;
-  }
-  .tag-optional { background: rgba(209,191,167,0.2); color: #d1bfa7; }
-  .tag-auto { background: rgba(142,142,144,0.15); color: #8e8e90; }
-  .tag-explicit { background: rgba(209,191,167,0.2); color: #d1bfa7; }
-
-  /* Lane label column */
-  .lane-label {
-    padding: 16px 10px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    border-top: 1px solid #e8ddd4;
-  }
-  .lane-label .label-title {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    line-height: 1.2;
-  }
-  .lane-label .label-sub {
-    font-size: 10px;
-    margin-top: 3px;
-    opacity: 0.7;
-    font-weight: 500;
-  }
-
-  /* Lane colors */
-  .lane-solo .lane-label { background: #EBF4FF; border-right: 3px solid #bd8c7d; }
-  .lane-solo .lane-label .label-title { color: #bd8c7d; }
-  .lane-solo .lane-label .label-sub { color: #bd8c7d; }
-
-  .lane-skills .lane-label { background: #E6F4F1; border-right: 3px solid #8e8e90; }
-  .lane-skills .lane-label .label-title { color: #8e8e90; }
-  .lane-skills .lane-label .label-sub { color: #8e8e90; }
-
-  .lane-always .lane-label { background: rgba(209,191,167,0.10); border-right: 3px solid #d1bfa7; }
-  .lane-always .lane-label .label-title { color: #d1bfa7; }
-  .lane-always .lane-label .label-sub { color: #d1bfa7; }
-
-  .lane-output .lane-label { background: #faf8f5; border-right: 3px solid #8e8e90; }
-  .lane-output .lane-label .label-title { color: #49494b; }
-  .lane-output .lane-label .label-sub { color: #49494b; }
-
-  /* Cells */
-  .cell {
-    padding: 14px 14px 14px;
-    border-left: 1px solid #e8ddd4;
-    border-top: 1px solid #e8ddd4;
-    vertical-align: top;
-  }
-
-  .lane-solo .cell { background: #faf8f5; }
-  .lane-skills .cell { background: #faf8f5; }
-  .lane-always .cell { background: rgba(209,191,167,0.06); }
-  .lane-output .cell { background: #faf8f5; }
-
-  .cell ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  .cell ul li {
-    font-size: 11.5px;
-    color: #49494b;
-    line-height: 1.45;
-    padding: 3px 0 3px 14px;
-    position: relative;
-    border-bottom: 1px solid rgba(0,0,0,0.04);
-  }
-  .cell ul li:last-child { border-bottom: none; }
-  .cell ul li::before {
-    content: '›';
-    position: absolute;
-    left: 2px;
-    color: #8e8e90;
-    font-size: 13px;
-    line-height: 1.35;
-  }
-
-  .cell .skill-tag {
-    display: inline-block;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 7px;
-    border-radius: 4px;
-    margin-bottom: 7px;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-  }
-  .lane-skills .skill-tag { background: #CCFBF1; color: #8e8e90; }
-  .lane-always .skill-tag { background: rgba(209,191,167,0.15); color: #d1bfa7; }
-  .lane-output .skill-tag { background: #e8ddd4; color: #49494b; font-family: 'SF Mono', 'Fira Code', monospace; }
-
-  .cell .gate-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 3px 8px;
-    border-radius: 4px;
-    margin-top: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-  }
-  .gate-required { background: rgba(189,140,125,0.12); color: #bd8c7d; }
-  .gate-auto { background: rgba(142,142,144,0.12); color: #8e8e90; }
-
-  .cell-empty {
-    opacity: 0.3;
-    font-size: 11px;
-    color: #8e8e90;
-    padding: 14px;
-    border-left: 1px solid #e8ddd4;
-    border-top: 1px solid #e8ddd4;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .lane-solo .cell-empty { background: #faf8f5; }
-  .lane-skills .cell-empty { background: #faf8f5; }
-  .lane-always .cell-empty { background: rgba(209,191,167,0.06); }
-  .lane-output .cell-empty { background: #faf8f5; }
-
-  /* Row grouping via display:contents */
-  .row { display: contents; }
-
-  .footnote {
-    margin-top: 20px;
-    font-size: 11.5px;
-    color: #8e8e90;
-    line-height: 1.6;
-  }
-  .footnote strong { color: #49494b; }
-
-  @media print {
-    body { background: white; padding: 16px; }
-    .map-wrapper { box-shadow: none; overflow: visible; }
-    .map { min-width: unset; }
-    @page { size: A3 landscape; margin: 15mm; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solo Builder Framework — Process Map</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../_shared.css">
+  <style>
+    /* Process map grid — specific to this page only */
+    .map-wrapper {
+      overflow-x: auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+      margin: 32px 0;
+    }
+    .map {
+      display: grid;
+      grid-template-columns: 130px repeat(11, minmax(190px, 1fr));
+      min-width: 2220px;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .phase-corner {
+      background: #49494b;
+      padding: 14px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .phase-corner span {
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    .phase-header {
+      background: #49494b;
+      padding: 14px 14px 12px;
+      border-left: 1px solid rgba(255,255,255,0.10);
+    }
+    .phase-header .phase-num {
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 3px;
+    }
+    .phase-header .phase-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.2;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .phase-header .phase-tag {
+      display: inline-block;
+      margin-top: 5px;
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    .tag-optional { background: rgba(209,191,167,0.25); color: #d1bfa7; }
+    .tag-auto { background: rgba(142,142,144,0.2); color: #ccc; }
+    .tag-explicit { background: rgba(209,191,167,0.25); color: #d1bfa7; }
+    .lane-label {
+      padding: 16px 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border-top: 1px solid #e8ddd4;
+    }
+    .lane-label .label-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      line-height: 1.2;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .lane-label .label-sub {
+      font-size: 10px;
+      margin-top: 3px;
+      opacity: 0.7;
+      font-weight: 500;
+    }
+    .lane-solo .lane-label { background: rgba(189,140,125,0.08); border-right: 3px solid #bd8c7d; }
+    .lane-solo .lane-label .label-title { color: #bd8c7d; }
+    .lane-solo .lane-label .label-sub { color: #bd8c7d; }
+    .lane-skills .lane-label { background: rgba(142,142,144,0.08); border-right: 3px solid #8e8e90; }
+    .lane-skills .lane-label .label-title { color: #8e8e90; }
+    .lane-skills .lane-label .label-sub { color: #8e8e90; }
+    .lane-always .lane-label { background: rgba(209,191,167,0.10); border-right: 3px solid #d1bfa7; }
+    .lane-always .lane-label .label-title { color: #a89070; }
+    .lane-always .lane-label .label-sub { color: #a89070; }
+    .lane-output .lane-label { background: #faf8f5; border-right: 3px solid #8e8e90; }
+    .lane-output .lane-label .label-title { color: #49494b; }
+    .lane-output .lane-label .label-sub { color: #49494b; }
+    .cell {
+      padding: 14px;
+      border-left: 1px solid #e8ddd4;
+      border-top: 1px solid #e8ddd4;
+      vertical-align: top;
+    }
+    .lane-solo .cell { background: #fdf9f7; }
+    .lane-skills .cell { background: #faf8f5; }
+    .lane-always .cell { background: rgba(209,191,167,0.05); }
+    .lane-output .cell { background: #faf8f5; }
+    .cell ul { list-style: none; padding: 0; margin: 0; }
+    .cell ul li {
+      font-size: 11.5px;
+      color: #49494b;
+      line-height: 1.45;
+      padding: 3px 0 3px 14px;
+      position: relative;
+      border-bottom: 1px solid rgba(0,0,0,0.04);
+      font-family: 'DM Sans', sans-serif;
+    }
+    .cell ul li:last-child { border-bottom: none; }
+    .cell ul li::before {
+      content: '›';
+      position: absolute;
+      left: 2px;
+      color: #8e8e90;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+    .cell .skill-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+      margin-bottom: 6px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      background: #e8ddd4;
+      color: #49494b;
+    }
+    .lane-skills .skill-tag { background: rgba(142,142,144,0.12); color: #8e8e90; }
+    .lane-always .skill-tag { background: rgba(209,191,167,0.18); color: #a89070; }
+    .lane-output .skill-tag { background: #e8ddd4; color: #49494b; }
+    .cell .gate-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-top: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .gate-required { background: rgba(189,140,125,0.12); color: #bd8c7d; }
+    .gate-auto { background: rgba(142,142,144,0.12); color: #8e8e90; }
+    .row { display: contents; }
+    .map-legend {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+      align-items: center;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      color: #49494b;
+      font-weight: 500;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .map-footnote {
+      font-size: 12px;
+      color: #8e8e90;
+      line-height: 1.7;
+      margin-top: 20px;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .map-footnote strong { color: #49494b; }
+  </style>
 </head>
 <body>
 
-<div class="page-header">
-  <h1>Solo Builder Framework — End-to-End Process Map</h1>
-  <p>What the builder does · What the framework executes · What runs continuously · What gets produced</p>
+<nav class="site-nav">
+  <span class="brand">Solo Builder</span>
+  <a class="nav-link" href="getting-started.html">Getting Started</a>
+  <a class="nav-link" href="process-map.html">Process Map</a>
+  <a class="nav-link" href="skills-reference.html">Skills</a>
+  <a class="nav-link" href="framework-architecture.html">Architecture</a>
+</nav>
+
+<div class="page">
+  <div class="hero">
+    <div class="hero-label">Solo Builder Framework</div>
+    <h1>End-to-End Process Map</h1>
+    <p class="hero-sub">What the builder does · What the framework executes · What runs continuously · What gets produced</p>
+  </div>
+
+  <div class="map-legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#bd8c7d"></div> The Builder (Solo)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#8e8e90"></div> Framework — Active Skills</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#d1bfa7"></div> Always-On Skills</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#49494b"></div> Outputs &amp; Handoffs</div>
+    <div class="legend-item" style="margin-left:12px"><span style="background:rgba(189,140,125,0.12);color:#bd8c7d;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;font-family:'DM Sans',sans-serif;">GATE</span>&nbsp; Required before advancing</div>
+    <div class="legend-item"><span style="background:rgba(142,142,144,0.12);color:#8e8e90;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;font-family:'DM Sans',sans-serif;">AUTO</span>&nbsp; Framework-triggered, no user action</div>
+  </div>
+
+  <div class="map-wrapper">
+  <div class="map">
+
+    <!-- HEADER ROW -->
+    <div class="phase-corner"><span>Phase</span></div>
+    <div class="phase-header"><div class="phase-num">Entry</div><div class="phase-name">Start</div></div>
+    <div class="phase-header"><div class="phase-num">0 — Optional</div><div class="phase-name">Brainstorm</div><div class="phase-tag tag-optional">Optional</div></div>
+    <div class="phase-header"><div class="phase-num">1</div><div class="phase-name">Discover</div></div>
+    <div class="phase-header"><div class="phase-num">1.5</div><div class="phase-name">Tech Context</div></div>
+    <div class="phase-header"><div class="phase-num">2</div><div class="phase-name">Design Sprint</div></div>
+    <div class="phase-header"><div class="phase-num">2.5 – 2.6</div><div class="phase-name">Data &amp; Review</div></div>
+    <div class="phase-header"><div class="phase-num">3</div><div class="phase-name">Plan</div></div>
+    <div class="phase-header"><div class="phase-num">4</div><div class="phase-name">Build</div></div>
+    <div class="phase-header"><div class="phase-num">4.5 — Auto</div><div class="phase-name">QA Chain</div><div class="phase-tag tag-auto">Auto-triggered</div></div>
+    <div class="phase-header"><div class="phase-num">5 — Explicit</div><div class="phase-name">Phase Test</div><div class="phase-tag tag-explicit">Solo invokes</div></div>
+    <div class="phase-header"><div class="phase-num">6</div><div class="phase-name">Deploy</div></div>
+
+    <!-- SOLO LANE -->
+    <div class="row">
+      <div class="lane-label lane-solo">
+        <div class="label-title">The Builder</div>
+        <div class="label-sub">Solo decisions &amp; approvals</div>
+      </div>
+      <div class="cell lane-solo"><ul><li>Opens a new project or idea</li><li>Framework reads the opening and routes automatically</li></ul></div>
+      <div class="cell lane-solo"><ul><li>Shares the idea conversationally</li><li>Reacts to rough visual sketch — "warmer / colder"</li><li>Confirms directional clarity before Discover</li></ul></div>
+      <div class="cell lane-solo"><ul><li>Answers who/what/value questions</li><li>Validates the as-is process map</li><li>Agrees the to-be process map — the contract for everything downstream</li><li>Chooses design on-ramp (scratch / Figma / reference)</li></ul></div>
+      <div class="cell lane-solo"><ul><li>Answers stack questions or selects a team profile</li><li>Confirms deploy method and branching model</li></ul></div>
+      <div class="cell lane-solo"><ul><li>"Warmer / colder" on every screen iteration</li><li>Makes build/defer decisions on visible elements</li><li>Approves final screens before review begins</li></ul></div>
+      <div class="cell lane-solo"><ul><li>Confirms data entities and mock values look real</li><li>Reviews slice definitions each round</li><li>Approves Ready status — "clear enough to build"</li><li>Resolves uncovered process steps flagged by coverage check</li></ul></div>
+      <div class="cell lane-solo"><ul><li>Reviews phase sequencing</li><li>Approves risk vs. process order tradeoffs</li><li>Confirms open questions or states assumptions to proceed</li><li>Approves deliverables alongside the phase plan — both reviewed together</li></ul></div>
+      <div class="cell lane-solo"><ul><li>Confirms four anchors before each slice starts</li><li>Reviews deliverable orientation at the start of each new deliverable</li><li>Reviews mid-build discoveries as they surface</li><li>Says "show progress" or "show plan" for on-demand views</li><li>Marks slice code-complete when done</li></ul></div>
+      <div class="cell lane-solo"><ul><li>Opens browser for Part 2 sign-off on each slice</li><li>Verifies visual, behavior, and done criteria in practice</li><li>No sign-off allowed while open missing requirement exists</li><li>Signs off on deliverable acceptance after all slices in a deliverable are Done</li></ul></div>
+      <div class="cell lane-solo"><ul><li>Explicitly invokes /phase-test when all phase slices are Done</li><li>Deliberate decision — not automatic</li><li>Reviews gate decision: OPEN or HOLD</li><li>Resolves HOLD items before re-test</li></ul></div>
+      <div class="cell lane-solo"><ul><li>Executes deploy command (Method C) or monitors pipeline (Method A/B)</li><li>Confirms environment is live after deploy</li></ul></div>
+    </div>
+
+    <!-- SKILLS LANE -->
+    <div class="row">
+      <div class="lane-label lane-skills">
+        <div class="label-title">Framework Skills</div>
+        <div class="label-sub">Active phase execution</div>
+      </div>
+      <div class="cell lane-skills"><div class="skill-tag">start</div><ul><li>Reads opening message</li><li>Routes to Brainstorm (exploratory) or Discover (clear idea)</li><li>One question if ambiguous</li><li>Deployed project detected → new cycle protocol, new phase in existing backlog</li></ul></div>
+      <div class="cell lane-skills"><div class="skill-tag">brainstorming</div><ul><li>Conversational exploration — not a checklist</li><li>Process sketch moment: captures preliminary as-is / to-be</li><li>Visual sketch mid-session as a thinking tool</li><li>Routes to Discover, Research, or more brainstorming</li></ul></div>
+      <div class="cell lane-skills"><div class="skill-tag">discover</div><ul><li>Narrative conversation — beginning to end use case</li><li>Produces as-is map (how it works today, including manual processes)</li><li>Produces and agrees to-be map — the process contract</li><li>Produces discovery brief</li></ul></div>
+      <div class="cell lane-skills"><div class="skill-tag">tech-context</div><ul><li>Establishes stack, constraints, infrastructure</li><li>Documents deploy method, branching model, CI/CD</li><li>Identifies infrastructure slices — prerequisites for all feature slices</li></ul></div>
+      <div class="cell lane-skills"><div class="skill-tag">design-sprint</div><ul><li>On-ramp A: scratch → hero screen → warmer/colder → all screens</li><li>On-ramp B: Figma import via MCP</li><li>On-ramp C: reference-based aesthetic constraint</li><li>Walk-through conversation surfaces build/defer decisions</li><li>Produces deferred decisions log</li></ul></div>
+      <div class="cell lane-skills"><div class="skill-tag">data-scaffold</div> <div class="skill-tag">design-review</div><ul><li>data-scaffold: generates realistic mock data · flags list entities as data behavior candidates · updates mock after data questions resolve</li><li>design-review: PM + Tech Lead + Data lenses applied every round</li><li>Data behavior pass — volume, list behavior, nulls, empty/error/loading states asked for every screen with external data</li><li>Unresolved data question blocks dependent UI slices from Ready</li><li>Coverage check: every to-be step mapped to a slice or decided</li><li>Slice Ready requires: design ref, done criteria, process anchor, no open spikes, no blocking data questions</li></ul></div>
+      <div class="cell lane-skills"><div class="skill-tag">prd-to-plan</div> <div class="skill-tag">to-issues</div><ul><li>Maps every Ready slice to its to-be process step</li><li>Sequences by risk order AND process order — conflicts named explicitly</li><li>Infrastructure slices always first</li><li>Defines deliverables with three-field record (technical spec · solo description · acceptance criteria)</li><li>Integration deliverables — Screen deliverable with external data gets a companion Logic deliverable; sequences after Screen is Accepted</li><li>to-issues: creates GitHub issues in dependency order</li></ul></div>
+      <div class="cell lane-skills"><div class="skill-tag">solo-build</div> <div class="skill-tag">autopilot</div><ul><li>Two modes — solo chooses: solo-build (solo at every gate) · autopilot (simulator at every gate, solo reviews at phase test)</li><li>Creates feature branch on slice start</li><li>Requires four anchors: design · data · done · process</li><li>Journey order — first screen before second</li><li>Mid-build discoveries surfaced immediately</li><li>Commits on code-complete → auto-invokes code-review-and-quality</li><li>When all slices in a deliverable are Done → auto-triggers deliverable acceptance</li></ul></div>
+      <div class="cell lane-skills"><div class="skill-tag">code-review-and-quality</div> <div class="skill-tag">solo-qa</div> <div class="skill-tag">qa-triage</div><ul><li>7-check gate: pattern, data sourcing, expandability, cleanliness, scope, docs, stack</li><li>Pass → logs confirmation → auto-invokes solo-qa</li><li>solo-qa Part 1: active testing — renders screen, cross-checks values against mock data</li><li>solo-qa Part 2: structured solo browser sign-off</li><li>Unexpected findings → qa-triage: bug / missing req / regression / map-level gap</li><li>When all slices Done → auto-runs deliverable acceptance</li></ul></div>
+      <div class="cell lane-skills"><div class="skill-tag">phase-test</div><ul><li>Stage 1: Environment readiness (pre-flight gate)</li><li>Stage 2: Use case creator — test plan from discovery brief + design</li><li>Stage 3: Data specialist — mock→real swap, API read/write verified</li><li>Stage 4+5: Tester + Regression specialist</li><li>Stage 6: Acceptance reviewer — PM lens vs. discovery brief</li><li>Stage 7: Gate — OPEN or HOLD with specific items</li></ul></div>
+      <div class="cell lane-skills"><div class="skill-tag">deploy</div><ul><li>Reads tech-context — method and deployment path determined by stack</li><li>CI/CD Setup: one-time — generates GitHub Actions workflow</li><li>Confirms gate OPEN + all branches merged</li><li>Method A: CI/CD on merge · B: MCP tool · C: Manual CLI · D: Define first</li><li>Verifies environment actually live — not just pipeline green</li></ul></div>
+    </div>
+
+    <!-- ALWAYS-ON LANE -->
+    <div class="row">
+      <div class="lane-label lane-always">
+        <div class="label-title">Always-On Skills</div>
+        <div class="label-sub">Active in guided + piloted mode — silent in bare</div>
+      </div>
+      <div class="cell lane-always"><div class="skill-tag">framework-health</div><ul><li>Signal check at session start</li><li>Checks for existing context before routing</li><li>Long-gap detection — 21+ days since last session surfaces re-entry check</li></ul></div>
+      <div class="cell lane-always"><div class="skill-tag">process-mapper</div> <div class="skill-tag">product-continuity</div><ul><li>process-mapper: captures preliminary as-is / to-be sketch as conversation develops</li><li>product-continuity: logs key decisions, assumptions, research items</li></ul></div>
+      <div class="cell lane-always"><div class="skill-tag">process-mapper</div> <div class="skill-tag">product-continuity</div><ul><li>process-mapper: formalizes as-is + to-be maps, validates with solo</li><li>product-continuity: captures discovery decisions, outstanding questions, assumptions</li></ul></div>
+      <div class="cell lane-always"><div class="skill-tag">product-continuity</div><ul><li>Logs stack decisions with reasoning</li><li>Captures infrastructure dependencies</li></ul></div>
+      <div class="cell lane-always"><div class="skill-tag">process-mapper</div> <div class="skill-tag">product-continuity</div><ul><li>process-mapper: cross-references screens against to-be map, annotates with screen refs, flags gaps as decisions</li><li>product-continuity: captures scope and design decisions</li></ul></div>
+      <div class="cell lane-always"><div class="skill-tag">process-mapper</div> <div class="skill-tag">framework-health</div> <div class="skill-tag">retrospective</div><ul><li>process-mapper: coverage check every round — no uncovered step left unresolved</li><li>framework-health: monitors backlog At a Glance signal</li><li>retrospective: flags observations in the moment</li></ul></div>
+      <div class="cell lane-always"><div class="skill-tag">product-continuity</div><ul><li>Captures sequencing decisions and tradeoffs</li><li>Logs open questions and stated assumptions</li></ul></div>
+      <div class="cell lane-always"><div class="skill-tag">retrospective</div> <div class="skill-tag">framework-health</div><ul><li>retrospective: flags issues in the moment — no interruption to flow</li><li>framework-health: checks between slices, one issue surfaced at a time</li><li>framework-health: fires once when all current-phase slices are Done — phase test readiness nudge</li></ul></div>
+      <div class="cell lane-always"><div class="skill-tag">retrospective</div> <div class="skill-tag">product-continuity</div><ul><li>retrospective: captures QA observations as they happen</li><li>product-continuity: logs any changes to requirements discovered during QA</li></ul></div>
+      <div class="cell lane-always"><div class="skill-tag">retrospective</div> <div class="skill-tag">product-continuity</div><ul><li>retrospective: processes all phase observations — patterns, root causes, proposed fixes</li><li>product-continuity: session handoff updated, phase completion recorded</li></ul></div>
+      <div class="cell lane-always"><div class="skill-tag">product-continuity</div> <div class="skill-tag">framework-health</div><ul><li>product-continuity: records deployment — method, environment, verified</li><li>framework-health: end-of-session signal check</li></ul></div>
+    </div>
+
+    <!-- OUTPUTS LANE -->
+    <div class="row">
+      <div class="lane-label lane-output">
+        <div class="label-title">Outputs &amp; Handoffs</div>
+        <div class="label-sub">Documents · Artifacts · Gates</div>
+      </div>
+      <div class="cell lane-output"><ul><li>Routing decision: Brainstorm or Discover</li></ul></div>
+      <div class="cell lane-output"><div class="skill-tag">docs/brainstorm-[date]-[topic].md</div><ul><li>Idea summary + value moment</li><li>Preliminary process sketch (as-is + to-be draft)</li><li>Research items with specific questions</li><li>Routing: Discover / Research / more brainstorming</li></ul></div>
+      <div class="cell lane-output"><div class="skill-tag">docs/discovery-brief.md</div><div class="skill-tag">docs/process/as-is-[name].md</div><div class="skill-tag">docs/process/to-be-[name].md</div><ul><li>Design on-ramp decision documented</li></ul><div class="gate-badge gate-required">GATE — to-be map agreed before design begins</div></div>
+      <div class="cell lane-output"><div class="skill-tag">docs/tech-context.md</div><ul><li>Stack, deploy method, branching model</li><li>Infrastructure slices identified</li><li>Referenced by every downstream skill</li></ul><div class="gate-badge gate-required">GATE — required before design sprint begins</div></div>
+      <div class="cell lane-output"><div class="skill-tag">docs/design/sprint-[id].html</div><div class="skill-tag">docs/design/deferred-decisions.md</div><ul><li>All screens — the shared visual artifact</li><li>to-be map annotated with screen references</li><li>Visible scope + implied infrastructure decisions logged</li></ul><div class="gate-badge gate-required">GATE — deferred decisions log before planning</div></div>
+      <div class="cell lane-output"><div class="skill-tag">data/mock/[entity].json</div><div class="skill-tag">docs/data-mapping.md</div><div class="skill-tag">docs/backlog.md</div><ul><li>Mock data layer — one seam, easy to swap to real</li><li>Proto-API contract</li><li>Backlog: ID, Name, Process Anchor, Status per slice</li><li>Process coverage map per round</li></ul><div class="gate-badge gate-required">GATE — enough Ready slices for Phase 1</div></div>
+      <div class="cell lane-output"><ul><li>Phased implementation plan — risk + process ordered</li><li>Process anchors on every slice</li><li>GitHub issues created in dependency order</li><li>Backlog updated with process anchors</li></ul><div class="gate-badge gate-required">GATE — GitHub issues created before build starts</div></div>
+      <div class="cell lane-output"><ul><li>Feature branch per slice</li><li>Code commit: "SL-[ID] code-complete — [name]"</li><li>Auto-handoff to QA chain on code-complete</li></ul></div>
+      <div class="cell lane-output"><ul><li>Code review log in backlog slice detail</li><li>QA verification with named evidence</li><li>Slice status: Done in backlog</li><li>Feature branch pushed, PR created</li><li>qa-triage log if issues found</li></ul><div class="gate-badge gate-required">GATE — solo browser sign-off required for Done</div></div>
+      <div class="cell lane-output"><div class="skill-tag">docs/phase-test-[phase]-[date].md</div><ul><li>Full test report — 7 specialist stages</li><li>Gate: OPEN (deploy) or HOLD (specific items)</li><li>Phase completion record appended to backlog.md</li></ul><div class="gate-badge gate-required">GATE — OPEN required before deploy</div></div>
+      <div class="cell lane-output"><ul><li>Deployed environment — confirmed live, not just pipeline green</li><li>Phase completion record updated: Complete → Tested → Deployed</li><li>Full lifecycle documented in backlog.md</li></ul></div>
+    </div>
+
+  </div><!-- end .map -->
+  </div><!-- end .map-wrapper -->
+
+  <p class="map-footnote">
+    <strong>Reading this map:</strong> Time flows left to right. Each column is a phase. Each row is a lane — who's doing what. The Builder lane shows what the solo contributes at each phase. The Framework Skills lane shows which skills are active and what they execute. The Always-On lane shows the four skills that activate when guided or piloted mode is chosen — silent in bare mode (the default). The Outputs lane shows what each phase produces and where gates exist.
+    <br><br>
+    <strong>Gates</strong> are hard stops — the framework will not advance past them without the required condition being met. <strong>Auto-triggered</strong> phases (QA Chain) are invoked by the framework on completion of the prior phase — the solo does not need to invoke them.
+  </p>
+
 </div>
-
-<div class="legend">
-  <div class="legend-item"><div class="legend-dot" style="background:#bd8c7d"></div> The Builder (Solo)</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#8e8e90"></div> Framework — Active Skills</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#d1bfa7"></div> Always-On Skills</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#8e8e90"></div> Outputs &amp; Handoffs</div>
-  <div class="legend-item" style="margin-left:12px"><span style="background:rgba(189,140,125,0.12);color:#bd8c7d;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;">GATE</span> &nbsp;Required before advancing</div>
-  <div class="legend-item"><span style="background:rgba(142,142,144,0.12);color:#8e8e90;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;">AUTO</span> &nbsp;Framework-triggered, no user action</div>
-  <div class="legend-item"><span style="background:#2a2a2a;color:#8e8e90;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;border:1px solid #49494b">MODE</span> &nbsp;<strong>Bare</strong> (default, silent, lowest tokens) · <strong>Assisted</strong> (always-on fires, moderate) · <strong>Auto-Pilot</strong> (full chain + always-on, highest)</div>
-</div>
-
-<div class="map-wrapper">
-<div class="map">
-
-  <!-- HEADER ROW -->
-  <div class="phase-corner"><span>Phase</span></div>
-
-  <div class="phase-header">
-    <div class="phase-num">Entry</div>
-    <div class="phase-name">Start</div>
-  </div>
-  <div class="phase-header">
-    <div class="phase-num">0 — Optional</div>
-    <div class="phase-name">Brainstorm</div>
-    <div class="phase-tag tag-optional">Optional</div>
-  </div>
-  <div class="phase-header">
-    <div class="phase-num">1</div>
-    <div class="phase-name">Discover</div>
-  </div>
-  <div class="phase-header">
-    <div class="phase-num">1.5</div>
-    <div class="phase-name">Tech Context</div>
-  </div>
-  <div class="phase-header">
-    <div class="phase-num">2</div>
-    <div class="phase-name">Design Sprint</div>
-  </div>
-  <div class="phase-header">
-    <div class="phase-num">2.5 – 2.6</div>
-    <div class="phase-name">Data &amp; Review</div>
-  </div>
-  <div class="phase-header">
-    <div class="phase-num">3</div>
-    <div class="phase-name">Plan</div>
-  </div>
-  <div class="phase-header">
-    <div class="phase-num">4</div>
-    <div class="phase-name">Build</div>
-  </div>
-  <div class="phase-header">
-    <div class="phase-num">4.5 — Auto</div>
-    <div class="phase-name">QA Chain</div>
-    <div class="phase-tag tag-auto">Auto-triggered</div>
-  </div>
-  <div class="phase-header">
-    <div class="phase-num">5 — Explicit</div>
-    <div class="phase-name">Phase Test</div>
-    <div class="phase-tag tag-explicit">Solo invokes</div>
-  </div>
-  <div class="phase-header">
-    <div class="phase-num">6</div>
-    <div class="phase-name">Deploy</div>
-  </div>
-
-  <!-- ═══════════════════════ SOLO LANE ═══════════════════════ -->
-  <div class="row">
-    <div class="lane-label lane-solo">
-      <div class="label-title">The Builder</div>
-      <div class="label-sub">Solo decisions &amp; approvals</div>
-    </div>
-
-    <!-- Start -->
-    <div class="cell lane-solo">
-      <ul>
-        <li>Opens a new project or idea</li>
-        <li>Framework reads the opening and routes automatically</li>
-      </ul>
-    </div>
-    <!-- Brainstorm -->
-    <div class="cell lane-solo">
-      <ul>
-        <li>Shares the idea conversationally</li>
-        <li>Reacts to rough visual sketch — "warmer / colder"</li>
-        <li>Confirms directional clarity before Discover</li>
-      </ul>
-    </div>
-    <!-- Discover -->
-    <div class="cell lane-solo">
-      <ul>
-        <li>Answers who/what/value questions</li>
-        <li>Validates the as-is process map</li>
-        <li>Agrees the to-be process map — the contract for everything downstream</li>
-        <li>Chooses design on-ramp (scratch / Figma / reference)</li>
-      </ul>
-    </div>
-    <!-- Tech Context -->
-    <div class="cell lane-solo">
-      <ul>
-        <li>Answers stack questions or selects a team profile</li>
-        <li>Confirms deploy method and branching model</li>
-      </ul>
-    </div>
-    <!-- Design Sprint -->
-    <div class="cell lane-solo">
-      <ul>
-        <li>"Warmer / colder" on every screen iteration</li>
-        <li>Makes build/defer decisions on visible elements</li>
-        <li>Approves final screens before review begins</li>
-      </ul>
-    </div>
-    <!-- Data + Review -->
-    <div class="cell lane-solo">
-      <ul>
-        <li>Confirms data entities and mock values look real</li>
-        <li>Reviews slice definitions each round</li>
-        <li>Approves Ready status — "clear enough to build"</li>
-        <li>Resolves uncovered process steps flagged by coverage check</li>
-      </ul>
-    </div>
-    <!-- Plan -->
-    <div class="cell lane-solo">
-      <ul>
-        <li>Reviews phase sequencing</li>
-        <li>Approves risk vs. process order tradeoffs</li>
-        <li>Confirms open questions or states assumptions to proceed</li>
-        <li>Approves deliverables alongside the phase plan — both reviewed together</li>
-      </ul>
-    </div>
-    <!-- Build -->
-    <div class="cell lane-solo">
-      <ul>
-        <li>Confirms four anchors before each slice starts</li>
-        <li>Reviews deliverable orientation at the start of each new deliverable</li>
-        <li>Reviews mid-build discoveries as they surface</li>
-        <li>Says "show progress" or "show plan" for on-demand views</li>
-        <li>Marks slice code-complete when done</li>
-      </ul>
-    </div>
-    <!-- QA Chain -->
-    <div class="cell lane-solo">
-      <ul>
-        <li>Opens browser for Part 2 sign-off on each slice</li>
-        <li>Verifies visual, behavior, and done criteria in practice</li>
-        <li>No sign-off allowed while open missing requirement exists</li>
-        <li>Signs off on deliverable acceptance after all slices in a deliverable are Done</li>
-      </ul>
-    </div>
-    <!-- Phase Test -->
-    <div class="cell lane-solo">
-      <ul>
-        <li>Explicitly invokes /phase-test when all phase slices are Done</li>
-        <li>Deliberate decision — not automatic</li>
-        <li>Reviews gate decision: OPEN or HOLD</li>
-        <li>Resolves HOLD items before re-test</li>
-      </ul>
-    </div>
-    <!-- Deploy -->
-    <div class="cell lane-solo">
-      <ul>
-        <li>Executes deploy command (Method C) or monitors pipeline (Method A/B)</li>
-        <li>Confirms environment is live after deploy</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════ SKILLS LANE ═══════════════════════ -->
-  <div class="row">
-    <div class="lane-label lane-skills">
-      <div class="label-title">Framework Skills</div>
-      <div class="label-sub">Active phase execution</div>
-    </div>
-
-    <!-- Start -->
-    <div class="cell lane-skills">
-      <div class="skill-tag">start</div>
-      <ul>
-        <li>Reads opening message</li>
-        <li>Routes to Brainstorm (exploratory) or Discover (clear idea)</li>
-        <li>One question if ambiguous</li>
-        <li>Deployed project detected → new cycle protocol, new phase in existing backlog</li>
-      </ul>
-    </div>
-    <!-- Brainstorm -->
-    <div class="cell lane-skills">
-      <div class="skill-tag">brainstorming</div>
-      <ul>
-        <li>Conversational exploration — not a checklist</li>
-        <li>Process sketch moment: captures preliminary as-is / to-be</li>
-        <li>Visual sketch mid-session as a thinking tool</li>
-        <li>Routes to Discover, Research, or more brainstorming</li>
-      </ul>
-    </div>
-    <!-- Discover -->
-    <div class="cell lane-skills">
-      <div class="skill-tag">discover</div>
-      <ul>
-        <li>Narrative conversation — beginning to end use case</li>
-        <li>Produces as-is map (how it works today, including manual processes)</li>
-        <li>Produces and agrees to-be map — the process contract</li>
-        <li>Produces discovery brief</li>
-      </ul>
-    </div>
-    <!-- Tech Context -->
-    <div class="cell lane-skills">
-      <div class="skill-tag">tech-context</div>
-      <ul>
-        <li>Establishes stack, constraints, infrastructure</li>
-        <li>Documents deploy method, branching model, CI/CD</li>
-        <li>Identifies infrastructure slices — prerequisites for all feature slices</li>
-      </ul>
-    </div>
-    <!-- Design Sprint -->
-    <div class="cell lane-skills">
-      <div class="skill-tag">design-sprint</div>
-      <ul>
-        <li>On-ramp A: scratch → hero screen → warmer/colder → all screens</li>
-        <li>On-ramp B: Figma import via MCP</li>
-        <li>On-ramp C: reference-based aesthetic constraint</li>
-        <li>Walk-through conversation surfaces build/defer decisions</li>
-        <li>Produces deferred decisions log</li>
-      </ul>
-    </div>
-    <!-- Data + Review -->
-    <div class="cell lane-skills">
-      <div class="skill-tag">data-scaffold</div>
-      <div class="skill-tag" style="margin-left:4px">design-review</div>
-      <ul>
-        <li>data-scaffold: generates realistic mock data · flags list entities as data behavior candidates · updates mock after data questions resolve</li>
-        <li>design-review: PM + Tech Lead + Data lenses applied every round</li>
-        <li>Data behavior pass — volume, list behavior, nulls, empty/error/loading states asked for every screen with external data → produces data questions log</li>
-        <li>Unresolved data question blocks dependent UI slices from Ready</li>
-        <li>Coverage check: every to-be step mapped to a slice or decided</li>
-        <li>Slice Ready requires: design ref, done criteria, process anchor, no open spikes, no blocking data questions</li>
-      </ul>
-    </div>
-    <!-- Plan -->
-    <div class="cell lane-skills">
-      <div class="skill-tag">prd-to-plan</div>
-      <div class="skill-tag" style="margin-left:4px">to-issues</div>
-      <ul>
-        <li>Maps every Ready slice to its to-be process step</li>
-        <li>Sequences by risk order AND process order — conflicts named explicitly</li>
-        <li>Infrastructure slices always first</li>
-        <li>Defines deliverables: groups slices by shared outcome, assigns type (Screen/Logic), writes three-field record (technical spec · solo description · acceptance criteria)</li>
-        <li>Integration deliverables — Screen deliverable with external data gets a companion Logic deliverable (Data Integration); sequences after Screen is Accepted; requires data questions log resolved before scoping</li>
-        <li>Deliverables presented alongside plan — both approved together before build starts</li>
-        <li>to-issues: creates GitHub issues in dependency order</li>
-      </ul>
-    </div>
-    <!-- Build -->
-    <div class="cell lane-skills">
-      <div class="skill-tag">solo-build</div>
-      <div class="skill-tag" style="margin-left:4px;margin-top:4px">autopilot</div>
-      <ul>
-        <li><strong>Two modes — solo chooses:</strong> solo-build (solo at every gate) · autopilot (simulator at every gate, solo reviews at phase test)</li>
-        <li>Creates feature branch on slice start</li>
-        <li>Requires four anchors: design · data · done · process</li>
-        <li>Journey order — first screen before second</li>
-        <li>Mid-build discoveries surfaced immediately</li>
-        <li>Commits on code-complete → auto-invokes code-review-and-quality</li>
-        <li>When all slices in a deliverable are Done → auto-triggers deliverable acceptance</li>
-        <li><em>Autopilot only:</em> pre-flight check surfaces judgment gaps before build begins · deliverable boundary writes enforced automatically · Refinement cycles after phase test for implementation delta</li>
-      </ul>
-    </div>
-    <!-- QA Chain -->
-    <div class="cell lane-skills">
-      <div class="skill-tag">code-review-and-quality</div>
-      <div class="skill-tag" style="margin-left:4px;margin-top:4px">solo-qa</div>
-      <div class="skill-tag" style="margin-left:4px;margin-top:4px">qa-triage</div>
-      <div class="skill-tag" style="margin-left:4px;margin-top:4px">process-change</div>
-      <ul>
-        <li>7-check gate: pattern, data sourcing, expandability, cleanliness, scope, docs, stack</li>
-        <li>Pass → logs confirmation → auto-invokes solo-qa</li>
-        <li>solo-qa Part 1: active testing — renders screen, cross-checks values against mock data</li>
-        <li>solo-qa Part 2: structured solo browser sign-off</li>
-        <li>Unexpected findings → qa-triage: bug / missing req / regression / map-level gap</li>
-        <li>Map-level gap (no to-be step for this behavior) → qa-triage auto-invokes process-change</li>
-        <li>When all slices in a deliverable are Done → auto-runs deliverable acceptance: verifies all acceptance criteria against the full running experience, prompts solo sign-off on the build contract</li>
-        <li>Integration deliverable acceptance — UX impact check: does live data produce anything the design didn't account for? If yes → flag for design review, affected UI slices reopen</li>
-      </ul>
-    </div>
-    <!-- Phase Test -->
-    <div class="cell lane-skills">
-      <div class="skill-tag">phase-test</div>
-      <ul>
-        <li>Stage 1: Environment readiness (pre-flight gate)</li>
-        <li>Stage 2: Use case creator — test plan from discovery brief + design</li>
-        <li>Stage 3: Data specialist — mock→real swap, API read/write verified</li>
-        <li>Stage 4+5: Tester + Regression specialist</li>
-        <li>Stage 6: Acceptance reviewer — PM lens vs. discovery brief; process-level mismatch → process-change before gate</li>
-        <li>Stage 7: Gate — OPEN or HOLD with specific items</li>
-      </ul>
-    </div>
-    <!-- Deploy -->
-    <div class="cell lane-skills">
-      <div class="skill-tag">deploy</div>
-      <ul>
-        <li>Reads tech-context — method and deployment path determined by stack</li>
-        <li>CI/CD Setup: one-time — generates GitHub Actions workflow, walks solo through platform token setup in plain language</li>
-        <li>Confirms gate OPEN + all branches merged</li>
-        <li>Method A: CI/CD on merge · B: MCP tool · C: Manual CLI · D: Define first</li>
-        <li>Verifies environment actually live — not just pipeline green</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════ ALWAYS-ON LANE ═══════════════════════ -->
-  <div class="row">
-    <div class="lane-label lane-always">
-      <div class="label-title">Always-On Skills</div>
-      <div class="label-sub">Active in guided + piloted mode — silent in bare</div>
-    </div>
-
-    <!-- Start -->
-    <div class="cell lane-always">
-      <div class="skill-tag">framework-health</div>
-      <ul>
-        <li>Signal check at session start</li>
-        <li>Checks for existing context before routing</li>
-        <li>Long-gap detection — 21+ days since last session surfaces re-entry check before any work starts</li>
-      </ul>
-    </div>
-    <!-- Brainstorm -->
-    <div class="cell lane-always">
-      <div class="skill-tag">process-mapper</div>
-      <div class="skill-tag" style="margin-left:4px">product-continuity</div>
-      <ul>
-        <li>process-mapper: captures preliminary as-is / to-be sketch as conversation develops</li>
-        <li>product-continuity: logs key decisions, assumptions, research items</li>
-      </ul>
-    </div>
-    <!-- Discover -->
-    <div class="cell lane-always">
-      <div class="skill-tag">process-mapper</div>
-      <div class="skill-tag" style="margin-left:4px">product-continuity</div>
-      <ul>
-        <li>process-mapper: formalizes as-is + to-be maps, validates with solo</li>
-        <li>product-continuity: captures discovery decisions, outstanding questions, assumptions</li>
-      </ul>
-    </div>
-    <!-- Tech Context -->
-    <div class="cell lane-always">
-      <div class="skill-tag">product-continuity</div>
-      <ul>
-        <li>Logs stack decisions with reasoning</li>
-        <li>Captures infrastructure dependencies</li>
-      </ul>
-    </div>
-    <!-- Design Sprint -->
-    <div class="cell lane-always">
-      <div class="skill-tag">process-mapper</div>
-      <div class="skill-tag" style="margin-left:4px">product-continuity</div>
-      <ul>
-        <li>process-mapper: cross-references screens against to-be map, annotates with screen refs, flags gaps as decisions</li>
-        <li>product-continuity: captures scope and design decisions</li>
-      </ul>
-    </div>
-    <!-- Data + Review -->
-    <div class="cell lane-always">
-      <div class="skill-tag">process-mapper</div>
-      <div class="skill-tag" style="margin-left:4px">framework-health</div>
-      <div class="skill-tag" style="margin-left:4px;margin-top:4px">retrospective</div>
-      <ul>
-        <li>process-mapper: coverage check every round — no uncovered step left unresolved</li>
-        <li>framework-health: monitors backlog At a Glance signal</li>
-        <li>retrospective: flags observations in the moment</li>
-      </ul>
-    </div>
-    <!-- Plan -->
-    <div class="cell lane-always">
-      <div class="skill-tag">product-continuity</div>
-      <ul>
-        <li>Captures sequencing decisions and tradeoffs</li>
-        <li>Logs open questions and stated assumptions</li>
-      </ul>
-    </div>
-    <!-- Build -->
-    <div class="cell lane-always">
-      <div class="skill-tag">retrospective</div>
-      <div class="skill-tag" style="margin-left:4px">framework-health</div>
-      <ul>
-        <li>retrospective: flags issues in the moment — no interruption to flow</li>
-        <li>framework-health: checks between slices, one issue surfaced at a time</li>
-        <li>framework-health: fires once when all current-phase slices are Done — phase test readiness nudge</li>
-      </ul>
-    </div>
-    <!-- QA Chain -->
-    <div class="cell lane-always">
-      <div class="skill-tag">retrospective</div>
-      <div class="skill-tag" style="margin-left:4px">product-continuity</div>
-      <ul>
-        <li>retrospective: captures QA observations as they happen</li>
-        <li>product-continuity: logs any changes to requirements discovered during QA</li>
-      </ul>
-    </div>
-    <!-- Phase Test -->
-    <div class="cell lane-always">
-      <div class="skill-tag">retrospective</div>
-      <div class="skill-tag" style="margin-left:4px">product-continuity</div>
-      <ul>
-        <li>retrospective: processes all phase observations — patterns, root causes, proposed fixes</li>
-        <li>product-continuity: session handoff updated, phase completion recorded</li>
-      </ul>
-    </div>
-    <!-- Deploy -->
-    <div class="cell lane-always">
-      <div class="skill-tag">product-continuity</div>
-      <div class="skill-tag" style="margin-left:4px">framework-health</div>
-      <ul>
-        <li>product-continuity: records deployment — method, environment, verified</li>
-        <li>framework-health: end-of-session signal check</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════ OUTPUTS LANE ═══════════════════════ -->
-  <div class="row">
-    <div class="lane-label lane-output">
-      <div class="label-title">Outputs &amp; Handoffs</div>
-      <div class="label-sub">Documents · Artifacts · Gates</div>
-    </div>
-
-    <!-- Start -->
-    <div class="cell lane-output">
-      <ul>
-        <li>Routing decision: Brainstorm or Discover</li>
-      </ul>
-    </div>
-    <!-- Brainstorm -->
-    <div class="cell lane-output">
-      <div class="skill-tag">docs/brainstorm-[date]-[topic].md</div>
-      <ul>
-        <li>Idea summary + value moment</li>
-        <li>Preliminary process sketch (as-is + to-be draft)</li>
-        <li>Research items with specific questions</li>
-        <li>Routing: Discover / Research / more brainstorming</li>
-      </ul>
-    </div>
-    <!-- Discover -->
-    <div class="cell lane-output">
-      <div class="skill-tag">docs/discovery-brief.md</div>
-      <div class="skill-tag" style="margin-top:4px">docs/process/as-is-[name].md</div>
-      <div class="skill-tag" style="margin-top:4px">docs/process/to-be-[name].md</div>
-      <ul>
-        <li>Design on-ramp decision documented</li>
-      </ul>
-      <div class="gate-badge gate-required">GATE — to-be map agreed before design begins</div>
-    </div>
-    <!-- Tech Context -->
-    <div class="cell lane-output">
-      <div class="skill-tag">docs/tech-context.md</div>
-      <ul>
-        <li>Stack, deploy method, branching model</li>
-        <li>Infrastructure slices identified</li>
-        <li>Referenced by every downstream skill</li>
-      </ul>
-      <div class="gate-badge gate-required">GATE — required before design sprint begins</div>
-    </div>
-    <!-- Design Sprint -->
-    <div class="cell lane-output">
-      <div class="skill-tag">docs/design/sprint-[id].html</div>
-      <div class="skill-tag" style="margin-top:4px">docs/design/deferred-decisions.md</div>
-      <div class="skill-tag" style="margin-top:4px">docs/design/handoff/&lt;date&gt;/ (optional)</div>
-      <ul>
-        <li>All screens — the shared visual artifact</li>
-        <li>to-be map annotated with screen references</li>
-        <li>Visible scope + implied infrastructure decisions logged</li>
-        <li>Optional handoff package — HTML + PDF + feedback template for stakeholder review</li>
-      </ul>
-      <div class="gate-badge gate-required">GATE — deferred decisions log before planning</div>
-    </div>
-    <!-- Data + Review -->
-    <div class="cell lane-output">
-      <div class="skill-tag">data/mock/[entity].json</div>
-      <div class="skill-tag" style="margin-top:4px">data/mock/mock-index.js</div>
-      <div class="skill-tag" style="margin-top:4px">docs/data-mapping.md</div>
-      <div class="skill-tag" style="margin-top:4px">docs/backlog.md</div>
-      <ul>
-        <li>Mock data layer — one seam, easy to swap to real</li>
-        <li>Proto-API contract</li>
-        <li>Backlog: ID, Name, Process Anchor, Status per slice</li>
-        <li>Process coverage map per round</li>
-      </ul>
-      <div class="gate-badge gate-required">GATE — enough Ready slices for Phase 1</div>
-    </div>
-    <!-- Plan -->
-    <div class="cell lane-output">
-      <ul>
-        <li>Phased implementation plan — risk + process ordered</li>
-        <li>Process anchors on every slice</li>
-        <li>GitHub issues created in dependency order</li>
-        <li>Backlog updated with process anchors</li>
-      </ul>
-      <div class="gate-badge gate-required">GATE — GitHub issues created before build starts</div>
-    </div>
-    <!-- Build -->
-    <div class="cell lane-output">
-      <ul>
-        <li>Feature branch per slice</li>
-        <li>Code commit: "SL-[ID] code-complete — [name]"</li>
-        <li>Auto-handoff to QA chain on code-complete</li>
-      </ul>
-    </div>
-    <!-- QA Chain -->
-    <div class="cell lane-output">
-      <ul>
-        <li>Code review log in backlog slice detail</li>
-        <li>QA verification with named evidence</li>
-        <li>Slice status: Done in backlog</li>
-        <li>Feature branch pushed, PR created</li>
-        <li>qa-triage log if issues found</li>
-      </ul>
-      <div class="gate-badge gate-required">GATE — solo browser sign-off required for Done</div>
-    </div>
-    <!-- Phase Test -->
-    <div class="cell lane-output">
-      <div class="skill-tag">docs/phase-test-[phase]-[date].md</div>
-      <ul>
-        <li>Full test report — 7 specialist stages</li>
-        <li>Gate: OPEN (deploy) or HOLD (specific items)</li>
-        <li>Phase completion record appended to backlog.md</li>
-      </ul>
-      <div class="gate-badge gate-required">GATE — OPEN required before deploy</div>
-    </div>
-    <!-- Deploy -->
-    <div class="cell lane-output">
-      <ul>
-        <li>Deployed environment — confirmed live, not just pipeline green</li>
-        <li>Phase completion record updated: Complete → Tested → Deployed</li>
-        <li>Full lifecycle documented in backlog.md</li>
-      </ul>
-    </div>
-  </div>
-
-</div><!-- end .map -->
-</div><!-- end .map-wrapper -->
-
-<div class="footnote">
-  <strong>Reading this map:</strong> Time flows left to right. Each column is a phase. Each row is a lane — who's doing what. The Builder lane shows what the solo contributes at each phase. The Framework Skills lane shows which skills are active and what they execute. The Always-On lane shows the four skills that activate when guided or piloted mode is chosen — silent in bare mode (the default). The Outputs lane shows what each phase produces and where gates exist.
-  <br><br>
-  <strong>Gates</strong> are hard stops — the framework will not advance past them without the required condition being met. <strong>Auto-triggered</strong> phases (QA Chain) are invoked by the framework on completion of the prior phase — the solo does not need to invoke them.
-</div>
-
 </body>
 </html>

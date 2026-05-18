@@ -1,1359 +1,251 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Solo Builder Framework — Deploy Phase Guide</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --navy: #1a1a1a;
-    --navy-mid: #2a2a2a;
-    --blue: #bd8c7d;
-    --blue-light: rgba(142,142,144,0.15);
-    --teal: #8e8e90;
-    --teal-light: rgba(142,142,144,0.15);
-    --purple: #bd8c7d;
-    --purple-light: rgba(189,140,125,0.12);
-    --indigo: #49494b;
-    --indigo-light: rgba(73,73,75,0.12);
-    --orange: #bd8c7d;
-    --orange-light: rgba(189,140,125,0.12);
-    --green: #8e8e90;
-    --green-light: rgba(142,142,144,0.12);
-    --rose: #bd8c7d;
-    --rose-light: rgba(189,140,125,0.12);
-    --amber: #d1bfa7;
-    --amber-light: rgba(209,191,167,0.15);
-    --gold: #d1bfa7;
-    --gold-light: rgba(209,191,167,0.15);
-    --gray-50: #faf8f5;
-    --gray-100: #e8ddd4;
-    --gray-200: #e8ddd4;
-    --gray-300: #DDD6CC;
-    --gray-500: #8e8e90;
-    --gray-700: #49494b;
-    --gray-900: #1a1a1a;
-  }
-
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    background: var(--gray-50);
-    color: var(--gray-900);
-    display: flex;
-    min-height: 100vh;
-  }
-
-  /* ── SIDEBAR ── */
-  .sidebar {
-    width: 240px;
-    flex-shrink: 0;
-    background: var(--navy);
-    position: fixed;
-    top: 0; left: 0; bottom: 0;
-    overflow-y: auto;
-    padding: 28px 0 40px;
-    z-index: 10;
-  }
-  .sidebar::-webkit-scrollbar { width: 4px; }
-  .sidebar::-webkit-scrollbar-track { background: transparent; }
-  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
-
-  .sidebar-header {
-    padding: 0 20px 24px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    margin-bottom: 16px;
-  }
-  .sidebar-header .sh-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: rgba(255,255,255,0.35);
-    margin-bottom: 6px;
-  }
-  .sidebar-header .sh-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: #fff;
-    line-height: 1.3;
-  }
-
-  .nav-group { margin-bottom: 6px; }
-  .nav-group-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    padding: 8px 20px 4px;
-    display: block;
-  }
-  .nav-link {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 20px;
-    font-size: 12px;
-    font-weight: 500;
-    color: rgba(255,255,255,0.55);
-    text-decoration: none;
-    transition: all 0.15s;
-    border-left: 2px solid transparent;
-  }
-  .nav-link:hover {
-    color: #fff;
-    background: rgba(255,255,255,0.06);
-  }
-  .nav-link.active {
-    color: #fff;
-    border-left-color: var(--green);
-    background: rgba(255,255,255,0.06);
-  }
-  .nav-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  /* ── MAIN ── */
-  .main {
-    margin-left: 240px;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .page-header {
-    background: var(--navy);
-    color: #fff;
-    padding: 48px 60px 40px;
-  }
-  .page-header .ph-eyebrow {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: rgba(255,255,255,0.4);
-    margin-bottom: 12px;
-  }
-  .page-header h1 {
-    font-size: 32px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    margin-bottom: 12px;
-    line-height: 1.1;
-  }
-  .page-header h1 .phase-num {
-    color: var(--green);
-    opacity: 0.75;
-    margin-right: 4px;
-  }
-  .page-header p {
-    font-size: 15px;
-    color: rgba(255,255,255,0.55);
-    max-width: 620px;
-    line-height: 1.6;
-  }
-  .header-stats {
-    display: flex;
-    gap: 32px;
-    margin-top: 28px;
-    padding-top: 28px;
-    border-top: 1px solid rgba(255,255,255,0.08);
-  }
-  .header-stat .hs-num {
-    font-size: 28px;
-    font-weight: 800;
-    color: #fff;
-    letter-spacing: -0.5px;
-  }
-  .header-stat .hs-label {
-    font-size: 12px;
-    color: rgba(255,255,255,0.4);
-    margin-top: 2px;
-  }
-
-  /* ── CONTENT ── */
-  .content {
-    padding: 48px 60px 80px;
-    max-width: 960px;
-  }
-
-  .section {
-    margin-bottom: 56px;
-    scroll-margin-top: 24px;
-  }
-
-  .section-header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 2px solid var(--gray-200);
-  }
-  .section-icon {
-    width: 36px; height: 36px;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
-    background: var(--green-light);
-  }
-  .section-title {
-    font-size: 20px;
-    font-weight: 800;
-    color: var(--green);
-    letter-spacing: -0.3px;
-  }
-  .section-desc {
-    font-size: 13px;
-    color: var(--gray-500);
-    margin-top: 2px;
-  }
-
-  /* ── CARDS ── */
-  .card {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    margin-bottom: 20px;
-    overflow: hidden;
-  }
-  .card-header {
-    padding: 20px 24px 16px;
-    border-bottom: 1px solid var(--gray-100);
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-  }
-  .card-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--green);
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    letter-spacing: -0.3px;
-    flex: 1;
-  }
-  .card-title-plain {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--gray-900);
-    letter-spacing: -0.3px;
-    flex: 1;
-  }
-  .card-badge {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    padding: 3px 9px;
-    border-radius: 20px;
-    white-space: nowrap;
-    flex-shrink: 0;
-    margin-top: 2px;
-    background: var(--green-light);
-    color: var(--green);
-  }
-  .card-badge-amber {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    padding: 3px 9px;
-    border-radius: 20px;
-    white-space: nowrap;
-    flex-shrink: 0;
-    margin-top: 2px;
-    background: var(--amber-light);
-    color: var(--amber);
-  }
-  .card-description {
-    padding: 16px 24px;
-    font-size: 14px;
-    color: var(--gray-700);
-    line-height: 1.65;
-    border-bottom: 1px solid var(--gray-100);
-    background: var(--gray-50);
-  }
-  .card-body {
-    padding: 20px 24px;
-  }
-  .card-body-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 0;
-  }
-  .card-section {
-    padding: 18px 22px;
-    border-right: 1px solid var(--gray-100);
-  }
-  .card-section:last-child { border-right: none; }
-  .card-section-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--green);
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .card-section-label::before {
-    content: '';
-    width: 3px; height: 12px;
-    border-radius: 2px;
-    background: currentColor;
-    flex-shrink: 0;
-  }
-  .card-section ul {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .card-section ul li {
-    font-size: 12.5px;
-    color: var(--gray-700);
-    line-height: 1.5;
-    padding-left: 12px;
-    position: relative;
-  }
-  .card-section ul li::before {
-    content: '›';
-    position: absolute;
-    left: 0;
-    color: var(--gray-300);
-    font-size: 14px;
-    line-height: 1.35;
-  }
-  .card-section ul li strong { color: var(--gray-900); font-weight: 600; }
-
-  /* ── PROSE CARD ── */
-  .prose-card {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    padding: 28px 32px;
-    margin-bottom: 20px;
-  }
-  .prose-card p {
-    font-size: 14px;
-    color: var(--gray-700);
-    line-height: 1.7;
-    margin-bottom: 14px;
-  }
-  .prose-card p:last-child { margin-bottom: 0; }
-  .prose-card p strong { color: var(--gray-900); font-weight: 600; }
-  .prose-card p em { font-style: italic; }
-  .prose-card code {
-    font-size: 12.5px;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    background: var(--gray-100);
-    color: var(--gray-700);
-    padding: 2px 6px;
-    border-radius: 4px;
-  }
-
-  /* ── METHOD CARDS ── */
-  .method-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 0;
-  }
-  .method-card {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  .method-card-header {
-    background: var(--green-light);
-    padding: 14px 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .method-label {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: var(--green);
-    opacity: 0.65;
-  }
-  .method-name {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--green);
-    flex: 1;
-  }
-  .method-card-body {
-    padding: 18px 20px;
-  }
-  .method-trigger {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--gray-500);
-    margin-bottom: 8px;
-  }
-  .method-trigger-val {
-    font-size: 13px;
-    color: var(--gray-700);
-    line-height: 1.5;
-    margin-bottom: 14px;
-  }
-  .method-steps {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-    margin-bottom: 14px;
-  }
-  .method-steps li {
-    font-size: 12.5px;
-    color: var(--gray-700);
-    line-height: 1.5;
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-  }
-  .step-num {
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--green);
-    background: var(--green-light);
-    width: 18px; height: 18px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-  .method-verify {
-    font-size: 12px;
-    color: var(--gray-500);
-    background: var(--gray-50);
-    border: 1px solid var(--gray-200);
-    border-radius: 6px;
-    padding: 10px 12px;
-    line-height: 1.5;
-  }
-  .method-verify strong {
-    color: var(--gray-700);
-    font-weight: 600;
-  }
-
-  /* ── SPECIAL: Method D ── */
-  .method-card.method-d .method-card-header {
-    background: var(--amber-light);
-  }
-  .method-card.method-d .method-label { color: var(--amber); }
-  .method-card.method-d .method-name { color: var(--amber); }
-  .method-card.method-d .step-num {
-    color: var(--amber);
-    background: var(--amber-light);
-  }
-
-  /* ── CHECKLIST ── */
-  .checklist {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-  .checklist li {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--gray-100);
-    font-size: 14px;
-    color: var(--gray-700);
-    line-height: 1.55;
-  }
-  .checklist li:last-child { border-bottom: none; }
-  .check-icon {
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    background: var(--green-light);
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-  .check-icon svg { width: 12px; height: 12px; }
-  .check-icon.stop {
-    background: var(--rose-light);
-  }
-  .check-title {
-    font-weight: 600;
-    color: var(--gray-900);
-    display: block;
-    margin-bottom: 3px;
-  }
-  .check-sub {
-    font-size: 12.5px;
-    color: var(--gray-500);
-    line-height: 1.5;
-  }
-
-  /* ── ANTI-PATTERN TABLE ── */
-  .ap-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
-  .ap-table th {
-    background: var(--gray-100);
-    color: var(--gray-700);
-    font-weight: 700;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    padding: 10px 16px;
-    text-align: left;
-    border-bottom: 2px solid var(--gray-200);
-  }
-  .ap-table td {
-    padding: 12px 16px;
-    vertical-align: top;
-    border-bottom: 1px solid var(--gray-100);
-    color: var(--gray-700);
-    line-height: 1.55;
-  }
-  .ap-table tr:last-child td { border-bottom: none; }
-  .ap-table tr:hover td { background: var(--gray-50); }
-  .ap-pattern {
-    font-weight: 600;
-    color: var(--rose);
-  }
-  .ap-fix {
-    color: var(--green);
-    font-weight: 600;
-  }
-
-  /* ── VERIFICATION STEPS ── */
-  .verify-flow {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-  .verify-step {
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-  }
-  .verify-connector {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    flex-shrink: 0;
-    width: 32px;
-  }
-  .verify-dot {
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    background: var(--green-light);
-    border: 2px solid var(--green);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--green);
-    flex-shrink: 0;
-  }
-  .verify-line {
-    width: 2px;
-    height: 28px;
-    background: var(--gray-200);
-    margin: 2px 0;
-  }
-  .verify-content {
-    padding: 4px 0 24px;
-    flex: 1;
-  }
-  .verify-content:last-child { padding-bottom: 0; }
-  .verify-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--gray-900);
-    margin-bottom: 4px;
-  }
-  .verify-desc {
-    font-size: 13px;
-    color: var(--gray-500);
-    line-height: 1.55;
-  }
-  .verify-desc code {
-    font-size: 12px;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    background: var(--gray-100);
-    color: var(--gray-700);
-    padding: 1px 5px;
-    border-radius: 3px;
-  }
-
-  /* ── COMPLETION RECORD ── */
-  .completion-record {
-    background: var(--gray-900);
-    border-radius: 10px;
-    padding: 20px 24px;
-    margin-top: 0;
-  }
-  .cr-comment {
-    font-size: 12px;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    color: rgba(255,255,255,0.3);
-    margin-bottom: 8px;
-  }
-  .cr-line {
-    font-size: 13px;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    color: rgba(255,255,255,0.7);
-    line-height: 1.7;
-    padding: 2px 0;
-  }
-  .cr-line .cr-key { color: #8e8e90; }
-  .cr-line .cr-val { color: #DDD6CC; }
-  .cr-line .cr-sym { color: rgba(255,255,255,0.3); }
-
-  /* ── NOT THIS / NOT THAT ── */
-  .does-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-  .does-card {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  .does-card-header {
-    padding: 12px 18px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-  .does-card-header.no {
-    background: var(--rose-light);
-    color: var(--rose);
-  }
-  .does-card-header.yes {
-    background: var(--green-light);
-    color: var(--green);
-  }
-  .does-card ul {
-    list-style: none;
-    padding: 16px 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 9px;
-  }
-  .does-card ul li {
-    font-size: 13px;
-    color: var(--gray-700);
-    line-height: 1.5;
-    padding-left: 14px;
-    position: relative;
-  }
-  .does-card ul li::before {
-    content: '›';
-    position: absolute;
-    left: 0;
-    color: var(--gray-300);
-    font-size: 14px;
-    line-height: 1.35;
-  }
-  .does-card ul li strong { color: var(--gray-900); font-weight: 600; }
-
-  /* ── CALLOUT ── */
-  .callout {
-    display: flex;
-    gap: 14px;
-    padding: 16px 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    align-items: flex-start;
-  }
-  .callout.info {
-    background: var(--green-light);
-    border: 1px solid #DDD6CC;
-  }
-  .callout.warn {
-    background: var(--amber-light);
-    border: 1px solid rgba(209,191,167,0.5);
-  }
-  .callout-icon {
-    font-size: 16px;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-  .callout-body {
-    font-size: 13.5px;
-    color: var(--gray-700);
-    line-height: 1.6;
-  }
-  .callout-body strong { color: var(--gray-900); font-weight: 700; }
-
-  /* ── INLINE TAGS ── */
-  .tag {
-    display: inline-block;
-    font-size: 10.5px;
-    font-weight: 600;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    padding: 3px 8px;
-    border-radius: 4px;
-    background: var(--gray-100);
-    color: var(--gray-700);
-    line-height: 1.4;
-    white-space: nowrap;
-  }
-  .tag-green {
-    background: var(--green-light);
-    color: var(--green);
-  }
-  .tag-amber {
-    background: var(--amber-light);
-    color: var(--amber);
-  }
-  .tag-rose {
-    background: var(--rose-light);
-    color: var(--rose);
-  }
-
-  /* ── GATE PILL ── */
-  .gate-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--green-light);
-    color: var(--green);
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    padding: 4px 12px;
-    border-radius: 20px;
-    border: 1px solid #DDD6CC;
-  }
-  .gate-pill .gate-dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--green);
-    flex-shrink: 0;
-  }
-
-  /* ── FRAMEWORK CONTEXT BAR ── */
-  .framework-bar {
-    background: var(--navy-mid);
-    padding: 14px 60px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    overflow-x: auto;
-    white-space: nowrap;
-  }
-  .fb-phase {
-    font-size: 11px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.35);
-    padding: 4px 10px;
-    border-radius: 6px;
-  }
-  .fb-phase.current {
-    background: var(--green);
-    color: #fff;
-    font-weight: 700;
-  }
-  .fb-arrow {
-    color: rgba(255,255,255,0.2);
-    font-size: 12px;
-  }
-
-  @media print {
-    .sidebar { display: none; }
-    .main { margin-left: 0; }
-    .page-header { padding: 32px 40px; }
-    .framework-bar { padding: 12px 40px; }
-    .content { padding: 32px 40px 60px; }
-    .card { break-inside: avoid; }
-    @page { size: A4; margin: 15mm; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solo Builder Framework — Deploy Phase Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../_shared.css">
 </head>
 <body>
 
-<!-- ── SIDEBAR ── -->
-<aside class="sidebar">
-  <div class="sidebar-header">
-    <div class="sh-label">Phase Guide</div>
-    <div class="sh-title">Deploy</div>
+<nav class="site-nav">
+  <span class="brand">Solo Builder</span>
+  <a class="nav-link" href="getting-started.html">Getting Started</a>
+  <a class="nav-link" href="process-map.html">Process Map</a>
+  <a class="nav-link" href="skills-reference.html">Skills</a>
+  <a class="nav-link" href="framework-architecture.html">Architecture</a>
+</nav>
+
+<div class="page">
+  <div class="hero">
+    <div class="hero-label">Solo Builder Framework — Phase Guide</div>
+    <h1>Deploy</h1>
+    <p class="hero-sub">The finish line. Deploy is the only phase entirely determined by the stack — it reads <code>docs/tech-context.md</code> to know what to do and does not ask questions that tech-context already answered. Its job is to confirm the gate is open, confirm code is ready, execute the correct deploy method, and verify the environment is actually live — not just that a pipeline went green.</p>
   </div>
 
-  <div class="nav-group">
-    <span class="nav-group-label" style="color:rgba(142,142,144,0.6)">On this page</span>
-    <a href="#what-this-phase-is" class="nav-link" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>What this phase is</a>
-    <a href="#skill" class="nav-link" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>Skill in this phase</a>
-    <a href="#deploy-methods" class="nav-link" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>Deploy methods</a>
-    <a href="#pre-deploy-checklist" class="nav-link" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>Pre-deploy checklist</a>
-    <a href="#verification" class="nav-link" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>Verification</a>
-    <a href="#completion-record" class="nav-link" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>Phase completion record</a>
-    <a href="#what-deploy-does-not-do" class="nav-link" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>What deploy does not do</a>
-    <a href="#watch-for" class="nav-link" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>What to watch for</a>
+  <div class="stat-grid">
+    <div><strong>1</strong><span>Phase skill</span></div>
+    <div><strong>4</strong><span>Deploy methods</span></div>
+    <div><strong>6</strong><span>Steps to execute</span></div>
+    <div><strong>1</strong><span>Hard gate: test OPEN</span></div>
   </div>
 
-  <div class="nav-group" style="margin-top:20px">
-    <span class="nav-group-label" style="color:rgba(255,255,255,0.3)">Phase sequence</span>
-    <a href="#" class="nav-link" style="color:rgba(255,255,255,0.3); font-size:11px"><span class="nav-dot" style="background:#8e8e90"></span>1 · Discover</a>
-    <a href="#" class="nav-link" style="color:rgba(255,255,255,0.3); font-size:11px"><span class="nav-dot" style="background:#8e8e90"></span>2 · Design Sprint</a>
-    <a href="#" class="nav-link" style="color:rgba(255,255,255,0.3); font-size:11px"><span class="nav-dot" style="background:#8e8e90"></span>3 · Plan</a>
-    <a href="#" class="nav-link" style="color:rgba(255,255,255,0.3); font-size:11px"><span class="nav-dot" style="background:#8e8e90"></span>4 · Build</a>
-    <a href="#" class="nav-link" style="color:rgba(255,255,255,0.3); font-size:11px"><span class="nav-dot" style="background:#8e8e90"></span>5 · QA</a>
-    <a href="#" class="nav-link" style="color:rgba(255,255,255,0.3); font-size:11px"><span class="nav-dot" style="background:#8e8e90"></span>5.5 · Phase Test</a>
-    <a href="#" class="nav-link active" style="font-size:11px"><span class="nav-dot" style="background:#8e8e90"></span>6 · Deploy</a>
+  <h2>What This Phase Is</h2>
+  <p>Every other phase in the framework involves judgment: what to discover, how to design, what to build first, how to test it. Deploy involves almost none of that. By the time deploy runs, the decisions are locked in. The code is correct — phase test confirmed it. The scope is settled — the backlog says so. The only question is: <strong>how does this project ship, and does it actually ship correctly?</strong></p>
+  <p>The answer to the first question lives in <code>docs/tech-context.md</code>. The deploy skill reads it, finds the deploy method — CI/CD pipeline, MCP tool, manual CLI command, or an undefined method that needs to be filled in — and routes accordingly. It does not guess. If the method is not defined, deploy stops and asks exactly the right questions to define it, then proceeds.</p>
+  <p>The answer to the second question requires active verification. Deploy does not stop at "the pipeline went green." A pipeline that completes successfully and an environment that is actually running correctly are two different things. Misconfigured environment variables, a failed container start, a missing database migration, a routing misconfiguration — all of these produce a passing pipeline and a broken environment. Until verification passes, the deploy is not done.</p>
+  <p>There are <strong>two deploy moments</strong> in a full phase lifecycle. The first is before phase test: all Done slices need to be accessible in a test environment so Phase Test Stage 1 can confirm environment readiness — deploy confirms this happened, it does not initiate it. The second moment is the one this guide covers: after the phase test gate opens, the explicit production deploy.</p>
+
+  <div class="callout">
+    <strong>The gate is a prerequisite, not a step.</strong> Deploy cannot begin until the phase test gate shows OPEN. If the gate is not open, deploy stops completely and directs back to phase-test. The gate exists precisely so deploy is never executing in parallel with open quality questions.
   </div>
 
-  <div class="nav-group" style="margin-top:20px">
-    <span class="nav-group-label" style="color:rgba(255,255,255,0.3)">Related</span>
-    <a href="skills-reference.html#phase-test" class="nav-link" style="color:rgba(209,191,167,0.5); font-size:11px"><span class="nav-dot" style="background:#d1bfa7"></span>phase-test guide</a>
-    <a href="skills-reference.html#deploy" class="nav-link" style="color:rgba(142,142,144,0.5); font-size:11px"><span class="nav-dot" style="background:#8e8e90"></span>deploy skill ref</a>
+  <h2>Skill in This Phase</h2>
+
+  <h3>deploy — Phase skill</h3>
+  <p>Stack-driven deploy orchestrator. Reads <code>docs/tech-context.md</code> to determine the deploy method — it does not assume Railway, Vercel, GitHub Actions, or any specific platform. Confirms the phase test gate is OPEN before anything runs. Confirms all phase branches are merged. Routes to the correct deploy method for the stack. Verifies the environment is actually live after deploy completes. Updates the phase completion record when done.</p>
+
+  <table>
+    <thead>
+      <tr><th>Aspect</th><th>Detail</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>How to invoke</strong></td>
+        <td>In Cursor: say "deploy" or "run the deploy." In Claude Code: <code>/deploy</code>. Only after phase test gate is OPEN — never before.</td>
+      </tr>
+      <tr>
+        <td><strong>Reads</strong></td>
+        <td><code>docs/tech-context.md</code> — deploy method, branch model, verification. <code>docs/backlog.md</code> — phase completion record, gate status. CI/CD system or MCP tool as configured.</td>
+      </tr>
+      <tr>
+        <td><strong>Produces</strong></td>
+        <td>Updated phase completion record in <code>docs/backlog.md</code>. Deploy report: method, branch, environment, verification result, status. Phase lifecycle complete: Tested → Deployed.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Deploy Methods and Deployment Paths</h2>
+  <p>Deploy routes to the correct method based on what tech-context defines. When GitHub Actions is selected but not yet configured, CI/CD Setup runs first — one time, at first deploy. Method is determined by tech-context, not by the deploy skill. If the method isn't defined in <code>docs/tech-context.md</code>, the deploy skill stops and asks what it needs to know before writing it in and proceeding — Method D handles that path explicitly.</p>
+
+  <h3>Seven supported deployment paths</h3>
+  <p>Tech-context captures the deployment path once. Every downstream skill reads it — deploy skill, CI/CD setup, observability recommendation. The solo never chooses from this list directly; the framework captures intent through plain-language questions and maps internally.</p>
+
+  <table>
+    <thead>
+      <tr><th>Path</th><th>When to select</th><th>Observability default</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Local Mac</strong></td><td>Personal tool, no remote users</td><td>None</td></tr>
+      <tr><td><strong>Cloudflare Pages/Workers</strong></td><td>Static sites, edge functions, Cloudflare-hosted apps</td><td>Datadog</td></tr>
+      <tr><td><strong>Railway</strong></td><td>First-time deployers, simple managed hosting</td><td>Datadog</td></tr>
+      <tr><td><strong>Render</strong></td><td>Production solo apps, more control than Railway</td><td>Datadog</td></tr>
+      <tr><td><strong>Fly.io</strong></td><td>Docker-comfortable builders, geographic distribution</td><td>Datadog</td></tr>
+      <tr><td><strong>AWS App Runner</strong></td><td>AWS ecosystem, enterprise-adjacent products</td><td>CloudWatch</td></tr>
+      <tr><td><strong>No pipeline</strong></td><td>Manual control, or product type doesn't support CI/CD</td><td>None</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <strong>CI/CD Setup — one time, fires at first deploy when GitHub Actions is selected.</strong> When tech-context records CI/CD: GitHub Actions but no <code>.github/workflows/ci.yml</code> exists, the deploy skill sets it up before routing to Method A. The framework generates the workflow file entirely — the solo never writes or reviews YAML. The only solo action is a one-time token or key paste in GitHub and the platform dashboard, walked through step by step in plain language. After setup: every push to the base branch runs the full test suite automatically. Every merge to main deploys. Nothing else to configure.
   </div>
-</aside>
 
-<!-- ── MAIN ── -->
-<main class="main">
+  <h3>Method A — CI/CD, triggered by merge</h3>
+  <p>Code merged to the production branch (e.g. <code>main</code> or <code>release</code>) automatically starts a GitHub Actions, CircleCI, or equivalent pipeline. Steps: (1) Confirm the production branch has the full phase merged in — all Done slice branches resolved into the base branch. (2) If not yet merged: merge the base branch into the production branch per the branching model in tech-context. (3) Confirm the CI/CD pipeline triggered. (4) Monitor until the pipeline completes — do not declare success during a run. (5) Verify the deployment using the verification method from tech-context.</p>
+  <p><strong>Verify success:</strong> CI dashboard shows green AND the environment responds correctly to the verification check defined in tech-context.</p>
 
-  <!-- Framework context bar -->
-  <div class="framework-bar">
-    <span class="fb-phase">Discover</span>
-    <span class="fb-arrow">›</span>
-    <span class="fb-phase">Design Sprint</span>
-    <span class="fb-arrow">›</span>
-    <span class="fb-phase">Plan</span>
-    <span class="fb-arrow">›</span>
-    <span class="fb-phase">Build</span>
-    <span class="fb-arrow">›</span>
-    <span class="fb-phase">QA</span>
-    <span class="fb-arrow">›</span>
-    <span class="fb-phase">Phase Test</span>
-    <span class="fb-arrow">›</span>
-    <span class="fb-phase current">Deploy</span>
-  </div>
+  <h3>Method B — MCP tool, triggered directly</h3>
+  <p>A connected MCP tool — Railway, Vercel, Netlify, or similar — can trigger the deploy without a CLI command or a git merge. Steps: (1) Confirm the MCP tool is connected and accessible in the current session. (2) Identify the project and target environment using the configuration notes in tech-context. (3) Trigger the deploy via the MCP tool and capture the deploy ID or run reference. (4) Monitor deployment status until complete — not just submitted. (5) Verify the environment is live using the method defined in tech-context.</p>
+  <p><strong>Verify success:</strong> Tool reports deployment complete AND the environment URL or health endpoint returns expected response.</p>
 
-  <div class="page-header">
-    <div class="ph-eyebrow">Solo Builder Framework · Phase Guide</div>
-    <h1><span class="phase-num">6 ·</span>Deploy</h1>
-    <p>The finish line. Deploy is the only phase that is entirely determined by the stack — it reads <code style="font-family:'SF Mono','Fira Code',monospace;font-size:13px;background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.8);padding:2px 7px;border-radius:4px">docs/tech-context.md</code> to know what to do and does not ask questions that tech-context already answered. Its job is to confirm the gate is open, confirm code is ready, execute the correct deploy method for the stack, and then verify the environment is actually live — not just that a pipeline went green.</p>
-    <div class="header-stats">
-      <div class="header-stat"><div class="hs-num">1</div><div class="hs-label">Phase skill</div></div>
-      <div class="header-stat"><div class="hs-num">4</div><div class="hs-label">Deploy methods</div></div>
-      <div class="header-stat"><div class="hs-num">6</div><div class="hs-label">Steps to execute</div></div>
-      <div class="header-stat"><div class="hs-num">1</div><div class="hs-label">Hard gate: test OPEN</div></div>
+  <h3>Method C — Manual CLI, solo runs the command</h3>
+  <p>Deploy requires running a specific command — a platform CLI, a custom script, or a direct push. The deploy skill surfaces the exact command from tech-context; the solo executes it. Steps: (1) Read the exact deploy command from tech-context, including the working directory it must run from. (2) Surface it to the solo clearly — the full command, the directory, any flags or environment requirements. (3) Wait for solo to confirm successful execution. (4) Log the deploy with timestamp and solo confirmation. (5) Verify the environment is live — confirmation from the solo alone is not enough.</p>
+  <p><strong>Verify success:</strong> Solo confirms command completed AND the environment verification check defined in tech-context passes.</p>
+
+  <h3>Method D — Not yet defined, define then deploy</h3>
+  <p>Tech-context exists but has no deploy configuration. This isn't an error — it means the solo hasn't set up the deploy definition yet. The skill asks exactly what it needs. Steps: (1) "Where does this live when deployed — what platform or environment?" (2) "Is deploy automated (CI/CD on git events) or manual (you run a command or click something)?" (3) "What branch or action triggers production deploy?" (4) "How do you verify the deploy succeeded?" (5) Write the answers into the Deployment section of <code>docs/tech-context.md</code>, then proceed via the appropriate method above. Once defined, the deploy section in tech-context serves all future deploys — Method D should only run once per project.</p>
+
+  <h2>Pre-Deploy Checklist</h2>
+  <p>The deploy skill reads and confirms four conditions before triggering anything. A failure on any of them stops the deploy entirely — the deploy skill surfaces what's missing, where to find it, and what to do before continuing.</p>
+
+  <table>
+    <thead>
+      <tr><th>Condition</th><th>What it checks</th><th>If it fails</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Phase test gate is OPEN</strong></td>
+        <td>Reads <code>docs/backlog.md</code> and finds the phase completion record. Confirms status shows OPEN and a phase test report is referenced.</td>
+        <td>Hard stop. "Phase test must pass before deploy. Run phase-test to complete testing." There is no bypass.</td>
+      </tr>
+      <tr>
+        <td><strong>All phase branches merged</strong></td>
+        <td>Every slice that reached Done status in this phase must have its feature branch merged to the base branch.</td>
+        <td>Deploy skill surfaces branches by name: "SL-007 feature branch hasn't been merged yet. Merge it to [base branch] before proceeding." Partial phases cannot ship.</td>
+      </tr>
+      <tr>
+        <td><strong>Environment variables set in target environment</strong></td>
+        <td>Cross-references environment variables documented in tech-context against what's confirmed present in the deploy target.</td>
+        <td>Variables that exist locally in <code>.env</code> but haven't been set in the target environment will cause a runtime failure. Surface any gaps before deploying.</td>
+      </tr>
+      <tr>
+        <td><strong>No open missing requirements in the backlog</strong></td>
+        <td>Checks the backlog for any items marked as Missing Requirement that haven't been resolved or formally deferred.</td>
+        <td>Confirm the item was deliberately deferred and the backlog reflects that decision before proceeding.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Verification — Environment Actually Live</h2>
+  <p>The deploy skill does not declare success when the pipeline completes. A pipeline can succeed — every build step, every test, every artifact — and still result in an environment that isn't serving traffic correctly. Misconfigured environment variables, a failed container start, a missing database migration, a routing misconfiguration: all of these produce a passing pipeline and a broken environment.</p>
+  <p><strong>Deploy is not done until the environment is confirmed live.</strong> What "live" means is defined in tech-context — but the deploy skill always verifies it, regardless of method.</p>
+
+  <div class="workflow-steps">
+    <div>
+      <h3>1 · Pipeline or tool shows complete</h3>
+      <p>CI dashboard, Railway deploy log, Netlify deploy summary — whatever the system is — shows the deploy process finished without errors. This is a necessary condition, not a sufficient one.</p>
+    </div>
+    <div>
+      <h3>2 · Environment URL is accessible</h3>
+      <p>The deployed environment responds to an HTTP request. For a web app: the root URL loads. For an API: a known endpoint returns a response. For a module in a platform: the module registers and appears in the expected location.</p>
+    </div>
+    <div>
+      <h3>3 · Health check or version confirmation</h3>
+      <p>If the project exposes a <code>/health</code> or <code>/version</code> endpoint, hit it. The response should match what was built — right version string, right environment identifier. If no endpoint exists: confirm a visible element on the first screen reflects the work that was deployed in this phase.</p>
+    </div>
+    <div>
+      <h3>4 · Failure path — environment issue, not code issue</h3>
+      <p>If verification fails after a successful deploy pipeline, this is an environment-specific failure — not a reason to reopen phase test or QA. The code was confirmed correct. Route separately: diagnose the environment configuration, fix the specific failure, re-verify. Do not re-run QA on code that already passed.</p>
     </div>
   </div>
 
-  <div class="content">
+  <div class="callout">
+    <strong>"Green pipeline" and "working in production" are not the same thing.</strong> The pipeline validates the build process. Verification validates the running environment. Both must pass. Always check both.
+  </div>
 
-    <!-- ══════════════════ WHAT THIS PHASE IS ══════════════════ -->
-    <div class="section" id="what-this-phase-is">
-      <div class="section-header">
-        <div class="section-icon">🚀</div>
-        <div>
-          <div class="section-title">What this phase is</div>
-          <div class="section-desc">Deploy is stack-determined execution — not a decision point, not a QA loop</div>
-        </div>
-      </div>
+  <h2>The Phase Completion Record</h2>
+  <p>The phase completion record in <code>docs/backlog.md</code> captures the full lifecycle of a phase in one place. It was created by phase-test when the gate opened — it already shows what was delivered, what comes next, and the test report reference. Deploy adds the final layer: how it shipped, where it went, and how it was verified.</p>
+  <p>After deploy is confirmed, the status changes from <strong>Tested and ready to deploy</strong> to <strong>Deployed</strong>. The record reads: Complete → Tested → Deployed. This is the authoritative record of the phase. When Phase 2 starts, it reads the completion record to confirm what was shipped, what was deferred, and where to pick up.</p>
 
-      <div class="prose-card">
-        <p>Every other phase in the framework involves judgment: what to discover, how to design, what to build first, how to test it. Deploy involves almost none of that. By the time deploy runs, the decisions are locked in. The code is correct — phase test confirmed it. The scope is settled — the backlog says so. The only question is: <strong>how does this project ship, and does it actually ship correctly?</strong></p>
-        <p>The answer to the first question lives in <code>docs/tech-context.md</code>. The deploy skill reads it, finds the deploy method — CI/CD pipeline, MCP tool, manual CLI command, or an undefined method that needs to be filled in — and routes accordingly. It does not guess. If the method is not defined, deploy stops and asks exactly the right questions to define it, then proceeds.</p>
-        <p>The answer to the second question requires active verification. Deploy does not stop at "the pipeline went green." A pipeline that completes successfully and an environment that is actually running correctly are two different things. The skill verifies the environment is live using whatever method tech-context defines — hitting an endpoint, checking a health route, confirming a version string, validating a module registered in the target platform. Until that verification passes, the deploy is not done.</p>
-        <p>There are <strong>two deploy moments</strong> in a full phase lifecycle. The first is before phase test: all Done slices need to be accessible in a test environment so phase-test Stage 1 can confirm environment readiness. Deploy confirms this happened — it does not initiate it. The second moment is the one this guide covers: after the phase test gate opens, the explicit production deploy.</p>
-      </div>
+  <table>
+    <thead>
+      <tr><th>Field</th><th>What deploy writes</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Status</strong></td><td>Phase N Complete — Deployed</td></tr>
+      <tr><td><strong>Deployed</strong></td><td>Date of successful deploy</td></tr>
+      <tr><td><strong>Deploy method</strong></td><td>e.g. "GitHub Actions on merge to main"</td></tr>
+      <tr><td><strong>Environment</strong></td><td>URL and environment name (production / staging)</td></tr>
+      <tr><td><strong>Verified</strong></td><td>Verification method and result — e.g. "GET /health → 200 OK, version 1.2.0 confirmed"</td></tr>
+    </tbody>
+  </table>
 
-      <div class="callout info">
-        <div class="callout-icon">💡</div>
-        <div class="callout-body"><strong>The gate is a prerequisite, not a step.</strong> Deploy cannot begin until the phase test gate shows OPEN. This is not a soft check — if the gate is not open, deploy stops completely and directs back to <code>/phase-test</code>. The gate exists precisely so deploy is never executing in parallel with open quality questions.</div>
-      </div>
+  <h2>What Deploy Does and Does Not Do</h2>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="section-label">Deploy does not do these things</div>
+      <ul>
+        <li><strong>Define the deploy method.</strong> That's tech-context. If it isn't defined there, deploy asks questions and writes it in — it does not invent a method on its own.</li>
+        <li><strong>Run tests.</strong> That's phase-test. The gate being open means testing is done. Deploy does not re-run QA or validate the code itself.</li>
+        <li><strong>Decide what to ship.</strong> That's the entire framework that came before. Deploy ships what the framework already decided to ship.</li>
+        <li><strong>Merge feature branches.</strong> That happened at solo-qa when slices were marked Done. Deploy confirms the merges are complete, but does not do them.</li>
+        <li><strong>Proceed with the gate closed.</strong> No path forward if phase test gate is not OPEN. No manual override, no "soft launch," no "we'll run phase test after."</li>
+      </ul>
     </div>
-
-    <!-- ══════════════════ SKILL ══════════════════ -->
-    <div class="section" id="skill">
-      <div class="section-header">
-        <div class="section-icon">⚙️</div>
-        <div>
-          <div class="section-title">Skill in this phase</div>
-          <div class="section-desc">One skill — stack-driven, reads tech-context, routes to the correct method</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">deploy</div>
-          <div class="card-badge">Phase skill</div>
-        </div>
-        <div class="card-description">
-          Stack-driven deploy orchestrator. Reads <code>docs/tech-context.md</code> to determine the deploy method — it does not assume Railway, Vercel, GitHub Actions, or any specific platform. Confirms the phase test gate is OPEN before anything runs. Confirms all phase branches are merged. Routes to the correct deploy method for the stack. Verifies the environment is actually live after deploy completes. Updates the phase completion record when done.
-        </div>
-        <div class="card-body-grid">
-          <div class="card-section">
-            <div class="card-section-label">Invoke</div>
-            <ul>
-              <li><strong>Cursor:</strong> "deploy" or "run the deploy"</li>
-              <li><strong>Claude Code:</strong> <code>/deploy</code></li>
-              <li>Only after phase test gate is OPEN — never before</li>
-            </ul>
-          </div>
-          <div class="card-section">
-            <div class="card-section-label">Reads</div>
-            <ul>
-              <li><code>docs/tech-context.md</code> — deploy method, branch model, verification</li>
-              <li><code>docs/backlog.md</code> — phase completion record, gate status</li>
-              <li>CI/CD system or MCP tool as configured</li>
-            </ul>
-          </div>
-          <div class="card-section">
-            <div class="card-section-label">Produces</div>
-            <ul>
-              <li>Updated phase completion record in <code>docs/backlog.md</code></li>
-              <li>Deploy report: method, branch, environment, verification result, status</li>
-              <li>Phase lifecycle complete: Tested → Deployed</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+    <div class="card">
+      <div class="section-label">Deploy does do these things</div>
+      <ul>
+        <li><strong>Reads tech-context every time.</strong> Never assumes a platform. Routes from what tech-context says, not from what the last project used.</li>
+        <li><strong>Confirms the gate hard.</strong> Checks the phase completion record in the backlog, not just a verbal confirmation. Gate must show OPEN in the document.</li>
+        <li><strong>Verifies the environment.</strong> Active check — hits an endpoint, confirms a response, validates the deployed state. Not passive pipeline monitoring.</li>
+        <li><strong>Writes the completion record.</strong> Updates <code>docs/backlog.md</code> with deploy date, method, environment URL, and verification result when successful.</li>
+        <li><strong>Routes environment failures separately.</strong> If the environment fails post-pipeline, it diagnoses the environment — not the code. Does not reopen QA.</li>
+      </ul>
     </div>
+  </div>
 
-    <!-- ══════════════════ DEPLOY METHODS ══════════════════ -->
-    <div class="section" id="deploy-methods">
-      <div class="section-header">
-        <div class="section-icon">🗺️</div>
-        <div>
-          <div class="section-title">Deploy methods and deployment paths</div>
-          <div class="section-desc">Deploy routes to the correct method based on what tech-context defines. When GitHub Actions is selected but not yet configured, CI/CD Setup runs first — one time, at first deploy.</div>
-        </div>
-      </div>
+  <h2>What to Watch For</h2>
 
-      <div class="callout info" style="margin-bottom:20px">
-        <div class="callout-icon">📌</div>
-        <div class="callout-body"><strong>Method is determined by tech-context, not by the deploy skill.</strong> If the method isn't defined in <code>docs/tech-context.md</code>, the deploy skill stops and asks what it needs to know before writing it in and proceeding — Method D handles that path explicitly.</div>
-      </div>
+  <table>
+    <thead>
+      <tr><th>Anti-pattern</th><th>What goes wrong</th><th>What to do instead</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Deploying without phase test OPEN</strong></td>
+        <td>Untested code ships. If something breaks in production, there's no phase test baseline to compare against. The gate exists to make "it worked before deploy, it broke after deploy" a diagnosable statement — not a guess.</td>
+        <td>Hard stop. Run phase-test. Get the gate to OPEN. Then deploy.</td>
+      </tr>
+      <tr>
+        <td><strong>Skipping branch merge verification</strong></td>
+        <td>A slice that's marked Done in the backlog but whose branch wasn't merged ships a partial phase — or ships nothing, if the pipeline builds from a branch that doesn't have the work. The backlog says it's done. Production says otherwise.</td>
+        <td>Check explicitly. For every Done slice in the phase, confirm the feature branch was merged to the base branch. Surface any that weren't before triggering the deploy.</td>
+      </tr>
+      <tr>
+        <td><strong>Declaring success when the pipeline went green but the environment wasn't verified</strong></td>
+        <td>The deploy looks done. It isn't. Misconfigured env vars, a failed migration, a routing issue — any of these produces a green pipeline and a broken product.</td>
+        <td>Always verify the environment actively. Hit an endpoint. Check a health route. Confirm the deployed version. Pipeline + environment check = done. Pipeline alone = not done.</td>
+      </tr>
+      <tr>
+        <td><strong>Deploying with other changes bundled in</strong></td>
+        <td>If the production branch has changes beyond what was in this phase — a hotfix merged during the phase, a dependency bump, exploratory commits — the deploy ships more than what was tested. The phase test covered a specific state of the codebase. Bundled changes aren't covered.</td>
+        <td>Deploy only what was tested. The base branch should contain exactly what phase test validated. Extra changes go through their own process — bug-fix or enhancement skills — before or after this deploy, not bundled into it.</td>
+      </tr>
+      <tr>
+        <td><strong>Reopening QA when deploy verification fails</strong></td>
+        <td>Phase test confirmed the code is correct. A failed deploy verification doesn't invalidate that. Reopening QA wastes time re-testing code that was already confirmed to work — and it muddies the record for what phase test actually covers.</td>
+        <td>Route the environment failure separately. Diagnose what's wrong in the environment — missing env var, wrong port, failed start command. Fix the environment. Re-verify. The code doesn't need to be retested.</td>
+      </tr>
+    </tbody>
+  </table>
 
-      <!-- Deployment paths -->
-      <div style="margin-bottom:28px">
-        <div style="font-size:13px;font-weight:700;color:var(--gray-900);margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em">Seven supported deployment paths</div>
-        <div style="font-size:13px;color:var(--gray-600);margin-bottom:14px">Tech-context captures the deployment path once. Every downstream skill reads it — deploy skill, CI/CD setup, observability recommendation. The solo never chooses from this list directly; the framework captures intent through plain-language questions and maps internally.</div>
-        <table style="width:100%;border-collapse:collapse;font-size:13px">
-          <thead><tr style="background:var(--gray-50)">
-            <th style="text-align:left;padding:8px 12px;font-weight:600;color:var(--gray-700);border-bottom:1px solid var(--gray-200)">Path</th>
-            <th style="text-align:left;padding:8px 12px;font-weight:600;color:var(--gray-700);border-bottom:1px solid var(--gray-200)">When to select</th>
-            <th style="text-align:left;padding:8px 12px;font-weight:600;color:var(--gray-700);border-bottom:1px solid var(--gray-200)">Observability default</th>
-          </tr></thead>
-          <tbody>
-            <tr><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);font-weight:500">Local Mac</td><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);color:var(--gray-600)">Personal tool, no remote users</td><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);color:var(--gray-500)">None</td></tr>
-            <tr><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);font-weight:500">Cloudflare Pages/Workers</td><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);color:var(--gray-600)">Static sites, edge functions, Cloudflare-hosted apps</td><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);color:var(--gray-500)">Datadog</td></tr>
-            <tr><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);font-weight:500">Railway</td><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);color:var(--gray-600)">First-time deployers, simple managed hosting</td><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);color:var(--gray-500)">Datadog</td></tr>
-            <tr><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);font-weight:500">Render</td><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);color:var(--gray-600)">Production solo apps, more control than Railway</td><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);color:var(--gray-500)">Datadog</td></tr>
-            <tr><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);font-weight:500">Fly.io</td><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);color:var(--gray-600)">Docker-comfortable builders, geographic distribution</td><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);color:var(--gray-500)">Datadog</td></tr>
-            <tr><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);font-weight:500">AWS App Runner</td><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);color:var(--gray-600)">AWS ecosystem, enterprise-adjacent products</td><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);color:var(--gray-500)">CloudWatch</td></tr>
-            <tr><td style="padding:8px 12px;font-weight:500">No pipeline</td><td style="padding:8px 12px;color:var(--gray-600)">Manual control, or product type doesn't support CI/CD</td><td style="padding:8px 12px;color:var(--gray-500)">None</td></tr>
-          </tbody>
-        </table>
-      </div>
+  <div class="callout">
+    <strong>When deploy is done, the phase lifecycle is complete.</strong> The backlog shows Deployed. The completion record has a date, a method, an environment, and a verification result. The work exists in production. Phase N is closed — Phase N+1 reads what was delivered and continues from there.
+  </div>
 
-      <!-- CI/CD Setup -->
-      <div style="background:#faf8f5;border:1px solid #DDD6CC;border-radius:10px;padding:20px 24px;margin-bottom:28px">
-        <div style="font-size:13px;font-weight:700;color:#8e8e90;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">CI/CD Setup — one-time, fires at first deploy when GitHub Actions is selected</div>
-        <p style="font-size:13px;color:#49494b;margin:0 0 12px">When tech-context records <code>CI/CD: GitHub Actions</code> but no <code>.github/workflows/ci.yml</code> exists, the deploy skill sets it up before routing to Method A. The framework generates the workflow file entirely — the solo never writes or reviews YAML. The only solo action is a one-time token or key paste in GitHub and the platform dashboard — walked through step by step in plain language.</p>
-        <div style="font-size:13px;font-weight:600;color:#8e8e90;margin-bottom:8px">What the solo does (one time only):</div>
-        <ul style="margin:0;padding-left:18px;font-size:13px;color:#49494b">
-          <li><strong>Railway</strong> — copy a token from the Railway dashboard, paste it as a GitHub secret named <code>RAILWAY_TOKEN</code></li>
-          <li><strong>Render</strong> — copy a deploy hook URL from Render, paste as <code>RENDER_DEPLOY_HOOK</code></li>
-          <li><strong>Cloudflare</strong> — create an API token, paste as <code>CLOUDFLARE_API_TOKEN</code></li>
-          <li><strong>Fly.io</strong> — run one terminal command to get a token, paste as <code>FLY_API_TOKEN</code></li>
-          <li><strong>AWS App Runner</strong> — create IAM credentials + copy service ARN, paste four secrets (~15 min, most setup of any path)</li>
-        </ul>
-        <p style="font-size:13px;color:#49494b;margin:12px 0 0">After setup: every push to the base branch runs the full test suite automatically. Every merge to main deploys. Nothing else to configure.</p>
-      </div>
-
-      <div class="method-grid">
-
-        <!-- Method A -->
-        <div class="method-card">
-          <div class="method-card-header">
-            <div>
-              <div class="method-label">Method A</div>
-              <div class="method-name">CI/CD — triggered by merge</div>
-            </div>
-          </div>
-          <div class="method-card-body">
-            <div class="method-trigger">What triggers it</div>
-            <div class="method-trigger-val">Code merged to the production branch (e.g. <code>main</code> or <code>release</code>) automatically starts a GitHub Actions, CircleCI, or equivalent pipeline.</div>
-            <ol class="method-steps">
-              <li><span class="step-num">1</span><span>Confirm the production branch has the full phase merged in — all Done slice branches resolved into the base branch</span></li>
-              <li><span class="step-num">2</span><span>If not yet merged: merge the base branch (<code>development</code> or equivalent) into the production branch per the branching model in tech-context</span></li>
-              <li><span class="step-num">3</span><span>Confirm the CI/CD pipeline triggered — check the system named in tech-context</span></li>
-              <li><span class="step-num">4</span><span>Monitor until the pipeline completes — do not declare success during a run</span></li>
-              <li><span class="step-num">5</span><span>Verify the deployment using the verification method from tech-context</span></li>
-            </ol>
-            <div class="method-verify"><strong>Verify success:</strong> CI dashboard shows green AND the environment responds correctly to the verification check defined in tech-context.</div>
-          </div>
-        </div>
-
-        <!-- Method B -->
-        <div class="method-card">
-          <div class="method-card-header">
-            <div>
-              <div class="method-label">Method B</div>
-              <div class="method-name">MCP tool — triggered directly</div>
-            </div>
-          </div>
-          <div class="method-card-body">
-            <div class="method-trigger">What triggers it</div>
-            <div class="method-trigger-val">A connected MCP tool — Railway, Vercel, Netlify, or similar — can trigger the deploy without a CLI command or a git merge.</div>
-            <ol class="method-steps">
-              <li><span class="step-num">1</span><span>Confirm the MCP tool is connected and accessible in the current session</span></li>
-              <li><span class="step-num">2</span><span>Identify the project and target environment using the configuration notes in tech-context</span></li>
-              <li><span class="step-num">3</span><span>Trigger the deploy via the MCP tool and capture the deploy ID or run reference</span></li>
-              <li><span class="step-num">4</span><span>Monitor deployment status until complete — not just submitted</span></li>
-              <li><span class="step-num">5</span><span>Verify the environment is live using the method defined in tech-context</span></li>
-            </ol>
-            <div class="method-verify"><strong>Verify success:</strong> Tool reports deployment complete AND the environment URL or health endpoint returns expected response.</div>
-          </div>
-        </div>
-
-        <!-- Method C -->
-        <div class="method-card">
-          <div class="method-card-header">
-            <div>
-              <div class="method-label">Method C</div>
-              <div class="method-name">Manual CLI — solo runs the command</div>
-            </div>
-          </div>
-          <div class="method-card-body">
-            <div class="method-trigger">What triggers it</div>
-            <div class="method-trigger-val">Deploy requires running a specific command — a platform CLI, a custom script, or a direct push. The deploy skill surfaces the exact command from tech-context; the solo executes it.</div>
-            <ol class="method-steps">
-              <li><span class="step-num">1</span><span>Read the exact deploy command from tech-context, including the working directory it must run from</span></li>
-              <li><span class="step-num">2</span><span>Surface it to the solo clearly — the full command, the directory, any flags or environment requirements</span></li>
-              <li><span class="step-num">3</span><span>Wait for solo to confirm successful execution</span></li>
-              <li><span class="step-num">4</span><span>Log the deploy with timestamp and solo confirmation</span></li>
-              <li><span class="step-num">5</span><span>Verify the environment is live — confirmation from the solo alone is not enough</span></li>
-            </ol>
-            <div class="method-verify"><strong>Verify success:</strong> Solo confirms command completed AND the environment verification check defined in tech-context passes.</div>
-          </div>
-        </div>
-
-        <!-- Method D -->
-        <div class="method-card method-d">
-          <div class="method-card-header">
-            <div>
-              <div class="method-label">Method D</div>
-              <div class="method-name">Not yet defined — define then deploy</div>
-            </div>
-          </div>
-          <div class="method-card-body">
-            <div class="method-trigger">What triggers it</div>
-            <div class="method-trigger-val">Tech-context exists but has no deploy configuration. This isn't an error — it means the solo hasn't set up the deploy definition yet. The skill asks exactly what it needs.</div>
-            <ol class="method-steps">
-              <li><span class="step-num">1</span><span>Ask: "Where does this live when deployed — what platform or environment?"</span></li>
-              <li><span class="step-num">2</span><span>Ask: "Is deploy automated (CI/CD on git events) or manual (you run a command or click something)?"</span></li>
-              <li><span class="step-num">3</span><span>Ask: "What branch or action triggers production deploy?"</span></li>
-              <li><span class="step-num">4</span><span>Ask: "How do you verify the deploy succeeded?"</span></li>
-              <li><span class="step-num">5</span><span>Write the answers into the Deployment section of <code>docs/tech-context.md</code>, then proceed via the appropriate method above</span></li>
-            </ol>
-            <div class="method-verify" style="background:var(--amber-light);border-color:rgba(209,191,167,0.5)"><strong>Note:</strong> Once defined, the deploy section in tech-context serves all future deploys — Method D should only run once per project.</div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- ══════════════════ PRE-DEPLOY CHECKLIST ══════════════════ -->
-    <div class="section" id="pre-deploy-checklist">
-      <div class="section-header">
-        <div class="section-icon">✅</div>
-        <div>
-          <div class="section-title">Pre-deploy checklist</div>
-          <div class="section-desc">What deploy confirms before anything executes — hard stops are hard stops</div>
-        </div>
-      </div>
-
-      <div class="prose-card" style="margin-bottom:16px">
-        <p>The deploy skill reads and confirms four conditions before triggering anything. These are not suggestions. A failure on any of them stops the deploy entirely — the deploy skill surfaces what's missing, where to find it, and what to do before continuing.</p>
-      </div>
-
-      <div class="card">
-        <div class="card-body" style="padding:4px 0">
-          <ul class="checklist" style="padding:0 24px">
-
-            <li>
-              <div class="check-icon stop">
-                <svg viewBox="0 0 12 12" fill="none" stroke="#bd8c7d" stroke-width="2">
-                  <line x1="2" y1="6" x2="10" y2="6"/>
-                </svg>
-              </div>
-              <div>
-                <span class="check-title">Phase test gate is OPEN — hard stop if not</span>
-                <span class="check-sub">Reads <code>docs/backlog.md</code> and finds the phase completion record for the phase being deployed. Confirms status shows the gate as OPEN and a phase test report is referenced. If the gate is HOLD or missing, deploy stops: "Phase test must pass before deploy. Run /phase-test to complete testing." There is no bypass.</span>
-              </div>
-            </li>
-
-            <li>
-              <div class="check-icon">
-                <svg viewBox="0 0 12 12" fill="none" stroke="#8e8e90" stroke-width="2">
-                  <polyline points="2,6 5,9 10,3"/>
-                </svg>
-              </div>
-              <div>
-                <span class="check-title">All phase branches merged</span>
-                <span class="check-sub">Every slice that reached Done status in this phase must have its feature branch merged to the base branch. The deploy skill checks for any open feature branches from this phase and surfaces them by name if found: "SL-007 feature branch hasn't been merged yet. Merge it to [base branch] before proceeding." Partial phases cannot ship.</span>
-              </div>
-            </li>
-
-            <li>
-              <div class="check-icon">
-                <svg viewBox="0 0 12 12" fill="none" stroke="#8e8e90" stroke-width="2">
-                  <polyline points="2,6 5,9 10,3"/>
-                </svg>
-              </div>
-              <div>
-                <span class="check-title">Environment variables set in the target environment</span>
-                <span class="check-sub">Cross-references environment variables documented in tech-context against what's confirmed present in the deploy target. Variables that exist locally in <code>.env</code> but haven't been set in the target environment (Railway project, Vercel deployment, server config) will cause a runtime failure the first time they're accessed. Surface any gaps before deploying.</span>
-              </div>
-            </li>
-
-            <li>
-              <div class="check-icon">
-                <svg viewBox="0 0 12 12" fill="none" stroke="#8e8e90" stroke-width="2">
-                  <polyline points="2,6 5,9 10,3"/>
-                </svg>
-              </div>
-              <div>
-                <span class="check-title">No open missing requirements in the backlog</span>
-                <span class="check-sub">Checks the backlog for any items marked as Missing Requirement that haven't been resolved or formally deferred. A missing requirement that was discovered during QA and left unresolved is a gap in what was committed to. If one is open: confirm it was deliberately deferred (and the backlog reflects that decision) before proceeding.</span>
-              </div>
-            </li>
-
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════════════ VERIFICATION ══════════════════ -->
-    <div class="section" id="verification">
-      <div class="section-header">
-        <div class="section-icon">🔍</div>
-        <div>
-          <div class="section-title">Verification — environment actually live</div>
-          <div class="section-desc">Pipeline green and environment running are two different facts — deploy confirms both</div>
-        </div>
-      </div>
-
-      <div class="prose-card" style="margin-bottom:20px">
-        <p>The deploy skill does not declare success when the pipeline completes. A pipeline can succeed — every build step, every test, every artifact — and still result in an environment that isn't serving traffic correctly. Misconfigured environment variables, a failed container start, a missing database migration, a routing misconfiguration: all of these produce a passing pipeline and a broken environment.</p>
-        <p><strong>Deploy is not done until the environment is confirmed live.</strong> What "live" means is defined in tech-context — but the deploy skill always verifies it, regardless of method.</p>
-      </div>
-
-      <div class="card" style="margin-bottom:16px">
-        <div class="card-header">
-          <div class="card-title-plain">Verification sequence</div>
-          <div class="card-badge">After deploy completes</div>
-        </div>
-        <div class="card-body">
-          <div class="verify-flow">
-
-            <div class="verify-step">
-              <div class="verify-connector">
-                <div class="verify-dot">1</div>
-                <div class="verify-line"></div>
-              </div>
-              <div class="verify-content">
-                <div class="verify-title">Pipeline or tool shows complete</div>
-                <div class="verify-desc">CI dashboard, Railway deploy log, Netlify deploy summary — whatever the system is — shows the deploy process finished without errors. This is a necessary condition, not a sufficient one.</div>
-              </div>
-            </div>
-
-            <div class="verify-step">
-              <div class="verify-connector">
-                <div class="verify-dot">2</div>
-                <div class="verify-line"></div>
-              </div>
-              <div class="verify-content">
-                <div class="verify-title">Environment URL is accessible</div>
-                <div class="verify-desc">The deployed environment responds to an HTTP request. For a web app: the root URL loads. For an API: a known endpoint returns a response. For a module in a platform (e.g. Bayer Aurora): the module registers and appears in the expected location.</div>
-              </div>
-            </div>
-
-            <div class="verify-step">
-              <div class="verify-connector">
-                <div class="verify-dot">3</div>
-                <div class="verify-line"></div>
-              </div>
-              <div class="verify-content">
-                <div class="verify-title">Health check or version confirmation</div>
-                <div class="verify-desc">If the project exposes a <code>/health</code> or <code>/version</code> endpoint, hit it. The response should match what was built — right version string, right environment identifier. If no endpoint exists: confirm a visible element on the first screen reflects the work that was deployed in this phase.</div>
-              </div>
-            </div>
-
-            <div class="verify-step">
-              <div class="verify-connector">
-                <div class="verify-dot">4</div>
-              </div>
-              <div class="verify-content" style="padding-bottom:0">
-                <div class="verify-title">Failure path — environment issue, not code issue</div>
-                <div class="verify-desc">If verification fails after a successful deploy pipeline, this is an environment-specific failure — not a reason to reopen phase test or QA. The code was confirmed correct. Route separately: diagnose the environment configuration, fix the specific failure, re-verify. Do not re-run QA on code that already passed.</div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      <div class="callout warn">
-        <div class="callout-icon">⚠️</div>
-        <div class="callout-body"><strong>"Green pipeline" and "working in production" are not the same thing.</strong> The pipeline validates the build process. Verification validates the running environment. Both must pass. Always check both.</div>
-      </div>
-    </div>
-
-    <!-- ══════════════════ COMPLETION RECORD ══════════════════ -->
-    <div class="section" id="completion-record">
-      <div class="section-header">
-        <div class="section-icon">📋</div>
-        <div>
-          <div class="section-title">The phase completion record</div>
-          <div class="section-desc">After successful deploy, the backlog is updated — the phase lifecycle is documented in one place</div>
-        </div>
-      </div>
-
-      <div class="prose-card" style="margin-bottom:20px">
-        <p>The phase completion record in <code>docs/backlog.md</code> captures the full lifecycle of a phase in one place. It was created by phase-test when the gate opened — it already shows what was delivered, what comes next, and the test report reference. Deploy adds the final layer: how it shipped, where it went, and how it was verified.</p>
-        <p>After deploy is confirmed, the status changes from <strong>Tested and ready to deploy</strong> to <strong>Deployed</strong>. The record now reads: Complete → Tested → Deployed. This is the authoritative record of the phase.</p>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title-plain">Deploy additions to the phase completion record</div>
-          <div class="card-badge">Written by deploy on success</div>
-        </div>
-        <div class="card-body">
-          <div class="completion-record">
-            <div class="cr-comment">## Phase completion record (already exists from phase-test)</div>
-            <div class="cr-line"><span class="cr-sym">...</span></div>
-            <div class="cr-line"><span class="cr-key">Status</span><span class="cr-sym">: </span><span class="cr-val">✅ Phase 1 Complete — Deployed</span></div>
-            <div class="cr-line"><span class="cr-sym"> </span></div>
-            <div class="cr-comment">### Deploy record (added by deploy skill)</div>
-            <div class="cr-line"><span class="cr-key">Deployed</span><span class="cr-sym">: </span><span class="cr-val">2026-04-23</span></div>
-            <div class="cr-line"><span class="cr-key">Deploy method</span><span class="cr-sym">: </span><span class="cr-val">GitHub Actions on merge to main</span></div>
-            <div class="cr-line"><span class="cr-key">Environment</span><span class="cr-sym">: </span><span class="cr-val">https://app.example.com (production)</span></div>
-            <div class="cr-line"><span class="cr-key">Verified</span><span class="cr-sym">: </span><span class="cr-val">GET /health → 200 OK, version 1.2.0 confirmed</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="callout info" style="margin-top:16px">
-        <div class="callout-icon">📌</div>
-        <div class="callout-body">The completed phase record becomes the reference point for the next phase. When Phase 2 starts, it reads the completion record to confirm what was shipped, what was deferred, and where to pick up. Nothing is held in session memory — it's all in the backlog.</div>
-      </div>
-    </div>
-
-    <!-- ══════════════════ WHAT DEPLOY DOES NOT DO ══════════════════ -->
-    <div class="section" id="what-deploy-does-not-do">
-      <div class="section-header">
-        <div class="section-icon">🚫</div>
-        <div>
-          <div class="section-title">What deploy does not do</div>
-          <div class="section-desc">Scope boundaries — what belongs to other skills, phases, or tech-context</div>
-        </div>
-      </div>
-
-      <div class="does-grid">
-        <div class="does-card">
-          <div class="does-card-header no">Deploy does not do these things</div>
-          <ul>
-            <li><strong>Define the deploy method.</strong> That's tech-context. If it isn't defined there, deploy asks questions and writes it in — it does not invent a method on its own.</li>
-            <li><strong>Run tests.</strong> That's phase-test. The gate being open means testing is done. Deploy does not re-run QA, re-run phase test, or validate the code itself.</li>
-            <li><strong>Decide what to ship.</strong> That's the entire framework that came before — planning, build, QA, phase test. Deploy ships what the framework already decided to ship.</li>
-            <li><strong>Merge feature branches.</strong> That happened at solo-qa when slices were marked Done. Deploy confirms the merges are complete, but does not do them.</li>
-            <li><strong>Proceed with the gate closed.</strong> No path forward if phase test gate is not OPEN. No manual override, no "soft launch," no "we'll run phase test after."</li>
-          </ul>
-        </div>
-        <div class="does-card">
-          <div class="does-card-header yes">Deploy does do these things</div>
-          <ul>
-            <li><strong>Reads tech-context every time.</strong> Never assumes a platform. The deploy method could be anything — it routes from what tech-context says, not from what the last project used.</li>
-            <li><strong>Confirms the gate hard.</strong> Checks the phase completion record in the backlog, not just a verbal confirmation. Gate must show OPEN in the document.</li>
-            <li><strong>Verifies the environment.</strong> Active check — hits an endpoint, confirms a response, validates the deployed state. Not passive pipeline monitoring.</li>
-            <li><strong>Writes the completion record.</strong> Updates <code>docs/backlog.md</code> with deploy date, method, environment URL, and verification result when successful.</li>
-            <li><strong>Routes environment failures separately.</strong> If the environment fails post-pipeline, it diagnoses the environment — not the code. Does not reopen QA.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════════════ WATCH FOR ══════════════════ -->
-    <div class="section" id="watch-for">
-      <div class="section-header">
-        <div class="section-icon">⚠️</div>
-        <div>
-          <div class="section-title">What to watch for</div>
-          <div class="section-desc">Anti-patterns that lead to bad deploys — each one is specific, each one has a cost</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-body" style="padding:0">
-          <table class="ap-table">
-            <thead>
-              <tr>
-                <th style="width:30%">Anti-pattern</th>
-                <th style="width:35%">What goes wrong</th>
-                <th style="width:35%">What to do instead</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><span class="ap-pattern">Deploying without phase test OPEN</span></td>
-                <td>Untested code ships. If something breaks in production, there's no phase test baseline to compare against. The gate exists to make "it worked before deploy, it broke after deploy" a diagnosable statement — not a guess.</td>
-                <td><span class="ap-fix">Hard stop.</span> Run <code>/phase-test</code>. Get the gate to OPEN. Then deploy.</td>
-              </tr>
-              <tr>
-                <td><span class="ap-pattern">Skipping branch merge verification</span></td>
-                <td>A slice that's marked Done in the backlog but whose branch wasn't merged ships a partial phase — or ships nothing, if the pipeline builds from a branch that doesn't have the work. The backlog says it's done. Production says otherwise.</td>
-                <td><span class="ap-fix">Check explicitly.</span> For every Done slice in the phase, confirm the feature branch was merged to the base branch. Surface any that weren't before triggering the deploy.</td>
-              </tr>
-              <tr>
-                <td><span class="ap-pattern">Declaring success when the pipeline went green but the environment wasn't verified</span></td>
-                <td>The deploy looks done. It isn't. Misconfigured env vars, a failed migration, a routing issue — any of these produces a green pipeline and a broken product. Users (or the solo, the next morning) discover the failure instead of the deploy skill.</td>
-                <td><span class="ap-fix">Always verify the environment actively.</span> Hit an endpoint. Check a health route. Confirm the deployed version. Pipeline + environment check = done. Pipeline alone = not done.</td>
-              </tr>
-              <tr>
-                <td><span class="ap-pattern">Deploying with other changes bundled in</span></td>
-                <td>If the production branch has changes beyond what was in this phase — a hotfix merged during the phase, a dependency bump, exploratory commits — the deploy ships more than what was tested. The phase test covered a specific state of the codebase. Bundled changes aren't covered.</td>
-                <td><span class="ap-fix">Deploy only what was tested.</span> The base branch should contain exactly what phase test validated. Extra changes should go through their own process — bug-fix or enhancement skills — before or after this deploy, not bundled into it.</td>
-              </tr>
-              <tr>
-                <td><span class="ap-pattern">Reopening QA when deploy verification fails</span></td>
-                <td>Phase test confirmed the code is correct. A failed deploy verification doesn't invalidate that. Reopening QA wastes time re-testing code that was already confirmed to work — and it muddies the record for what phase test actually covers.</td>
-                <td><span class="ap-fix">Route the environment failure separately.</span> Diagnose what's wrong in the environment — missing env var, wrong port, failed start command. Fix the environment. Re-verify. The code doesn't need to be retested.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="callout info" style="margin-top:20px">
-        <div class="callout-icon">🏁</div>
-        <div class="callout-body"><strong>When deploy is done, the phase lifecycle is complete.</strong> The backlog shows Deployed. The completion record has a date, a method, an environment, and a verification result. The work exists in production. Phase N is closed — Phase N+1 reads what was delivered and continues from there.</div>
-      </div>
-    </div>
-
-  </div><!-- /content -->
-</main>
-
+</div>
 </body>
 </html>

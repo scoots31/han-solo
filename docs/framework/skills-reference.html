@@ -1,2317 +1,536 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Solo Builder Framework — Skills Reference</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --navy: #1a1a1a;
-    --navy-mid: #2a2a2a;
-    --blue: #bd8c7d;
-    --blue-light: rgba(142,142,144,0.15);
-    --teal: #8e8e90;
-    --teal-light: rgba(142,142,144,0.15);
-    --purple: #bd8c7d;
-    --purple-light: rgba(189,140,125,0.12);
-    --indigo: #49494b;
-    --indigo-light: rgba(73,73,75,0.12);
-    --orange: #bd8c7d;
-    --orange-light: rgba(189,140,125,0.12);
-    --green: #8e8e90;
-    --green-light: rgba(142,142,144,0.12);
-    --rose: #bd8c7d;
-    --rose-light: rgba(189,140,125,0.12);
-    --amber: #d1bfa7;
-    --amber-light: rgba(209,191,167,0.15);
-    --gold: #d1bfa7;
-    --gold-light: rgba(209,191,167,0.15);
-    --gray-50: #faf8f5;
-    --gray-100: #e8ddd4;
-    --gray-200: #e8ddd4;
-    --gray-300: #DDD6CC;
-    --gray-500: #8e8e90;
-    --gray-700: #49494b;
-    --gray-900: #1a1a1a;
-  }
-
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    background: var(--gray-50);
-    color: var(--gray-900);
-    display: flex;
-    min-height: 100vh;
-  }
-
-  /* ── SIDEBAR ── */
-  .sidebar {
-    width: 240px;
-    flex-shrink: 0;
-    background: var(--navy);
-    position: fixed;
-    top: 0; left: 0; bottom: 0;
-    overflow-y: auto;
-    padding: 28px 0 40px;
-    z-index: 10;
-  }
-  .sidebar::-webkit-scrollbar { width: 4px; }
-  .sidebar::-webkit-scrollbar-track { background: transparent; }
-  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
-
-  .sidebar-header {
-    padding: 0 20px 24px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    margin-bottom: 16px;
-  }
-  .sidebar-header .sh-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: rgba(255,255,255,0.35);
-    margin-bottom: 6px;
-  }
-  .sidebar-header .sh-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: #fff;
-    line-height: 1.3;
-  }
-
-  .nav-group { margin-bottom: 6px; }
-  .nav-group-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    padding: 8px 20px 4px;
-    display: block;
-  }
-  .nav-skill {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 20px;
-    font-size: 12px;
-    font-weight: 500;
-    color: rgba(255,255,255,0.55);
-    text-decoration: none;
-    transition: all 0.15s;
-    border-left: 2px solid transparent;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-  }
-  .nav-skill:hover {
-    color: #fff;
-    background: rgba(255,255,255,0.06);
-  }
-  .nav-skill.active {
-    color: #fff;
-    border-left-color: currentColor;
-    background: rgba(255,255,255,0.06);
-  }
-  .nav-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  /* ── MAIN ── */
-  .main {
-    margin-left: 240px;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .page-header {
-    background: var(--navy);
-    color: #fff;
-    padding: 48px 60px 40px;
-  }
-  .page-header .ph-eyebrow {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: rgba(255,255,255,0.4);
-    margin-bottom: 12px;
-  }
-  .page-header h1 {
-    font-size: 32px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    margin-bottom: 12px;
-    line-height: 1.1;
-  }
-  .page-header p {
-    font-size: 15px;
-    color: rgba(255,255,255,0.55);
-    max-width: 600px;
-    line-height: 1.6;
-  }
-  .header-stats {
-    display: flex;
-    gap: 32px;
-    margin-top: 28px;
-    padding-top: 28px;
-    border-top: 1px solid rgba(255,255,255,0.08);
-  }
-  .header-stat .hs-num {
-    font-size: 28px;
-    font-weight: 800;
-    color: #fff;
-    letter-spacing: -0.5px;
-  }
-  .header-stat .hs-label {
-    font-size: 12px;
-    color: rgba(255,255,255,0.4);
-    margin-top: 2px;
-  }
-
-  /* ── CONTENT ── */
-  .content {
-    padding: 48px 60px 80px;
-    max-width: 960px;
-  }
-
-  .category-section {
-    margin-bottom: 56px;
-  }
-  .category-header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 2px solid var(--gray-200);
-  }
-  .category-icon {
-    width: 36px; height: 36px;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
-  }
-  .category-title {
-    font-size: 20px;
-    font-weight: 800;
-    color: var(--gray-900);
-    letter-spacing: -0.3px;
-  }
-  .category-desc {
-    font-size: 13px;
-    color: var(--gray-500);
-    margin-top: 2px;
-  }
-  .skill-count {
-    margin-left: auto;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--gray-500);
-    background: var(--gray-200);
-    padding: 3px 10px;
-    border-radius: 12px;
-  }
-
-  /* ── SKILL CARD ── */
-  .skill-card {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    margin-bottom: 20px;
-    overflow: hidden;
-    scroll-margin-top: 24px;
-  }
-  .skill-card-header {
-    padding: 20px 24px 16px;
-    border-bottom: 1px solid var(--gray-100);
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-  }
-  .skill-name {
-    font-size: 16px;
-    font-weight: 700;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    letter-spacing: -0.3px;
-    flex: 1;
-  }
-  .skill-badge {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    padding: 3px 9px;
-    border-radius: 20px;
-    white-space: nowrap;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-  .skill-description {
-    padding: 16px 24px;
-    font-size: 14px;
-    color: var(--gray-700);
-    line-height: 1.65;
-    border-bottom: 1px solid var(--gray-100);
-    background: var(--gray-50);
-  }
-  .skill-body {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 0;
-  }
-  .skill-section {
-    padding: 18px 22px;
-    border-right: 1px solid var(--gray-100);
-  }
-  .skill-section:last-child { border-right: none; }
-  .skill-section-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--gray-500);
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .skill-section-label::before {
-    content: '';
-    width: 3px; height: 12px;
-    border-radius: 2px;
-    background: currentColor;
-    flex-shrink: 0;
-  }
-  .skill-section ul {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .skill-section ul li {
-    font-size: 12.5px;
-    color: var(--gray-700);
-    line-height: 1.5;
-    padding-left: 12px;
-    position: relative;
-  }
-  .skill-section ul li::before {
-    content: '›';
-    position: absolute;
-    left: 0;
-    color: var(--gray-300);
-    font-size: 14px;
-    line-height: 1.35;
-  }
-  .skill-section ul li strong { color: var(--gray-900); font-weight: 600; }
-
-  .output-tag {
-    display: inline-block;
-    font-size: 10.5px;
-    font-weight: 600;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    padding: 3px 8px;
-    border-radius: 4px;
-    background: var(--gray-100);
-    color: var(--gray-700);
-    margin: 2px 0;
-    line-height: 1.4;
-  }
-
-  .always-on-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    padding: 4px 10px;
-    border-radius: 12px;
-    background: var(--gold-light);
-    color: var(--gold);
-    margin-bottom: 16px;
-  }
-
-  /* Category color themes */
-  .cat-entry .category-icon { background: var(--blue-light); }
-  .cat-entry .category-title { color: var(--blue); }
-  .cat-entry .skill-name { color: var(--blue); }
-  .cat-entry .skill-badge { background: var(--blue-light); color: var(--blue); }
-  .cat-entry .skill-section-label { color: var(--blue); }
-
-  .cat-discovery .category-icon { background: var(--teal-light); }
-  .cat-discovery .category-title { color: var(--teal); }
-  .cat-discovery .skill-name { color: var(--teal); }
-  .cat-discovery .skill-badge { background: var(--teal-light); color: var(--teal); }
-  .cat-discovery .skill-section-label { color: var(--teal); }
-
-  .cat-design .category-icon { background: var(--purple-light); }
-  .cat-design .category-title { color: var(--purple); }
-  .cat-design .skill-name { color: var(--purple); }
-  .cat-design .skill-badge { background: var(--purple-light); color: var(--purple); }
-  .cat-design .skill-section-label { color: var(--purple); }
-
-  .cat-data .category-icon { background: var(--indigo-light); }
-  .cat-data .category-title { color: var(--indigo); }
-  .cat-data .skill-name { color: var(--indigo); }
-  .cat-data .skill-badge { background: var(--indigo-light); color: var(--indigo); }
-  .cat-data .skill-section-label { color: var(--indigo); }
-
-  .cat-planning .category-icon { background: var(--orange-light); }
-  .cat-planning .category-title { color: var(--orange); }
-  .cat-planning .skill-name { color: var(--orange); }
-  .cat-planning .skill-badge { background: var(--orange-light); color: var(--orange); }
-  .cat-planning .skill-section-label { color: var(--orange); }
-
-  .cat-build .category-icon { background: var(--green-light); }
-  .cat-build .category-title { color: var(--green); }
-  .cat-build .skill-name { color: var(--green); }
-  .cat-build .skill-badge { background: var(--green-light); color: var(--green); }
-  .cat-build .skill-section-label { color: var(--green); }
-
-  .cat-qa .category-icon { background: var(--rose-light); }
-  .cat-qa .category-title { color: var(--rose); }
-  .cat-qa .skill-name { color: var(--rose); }
-  .cat-qa .skill-badge { background: var(--rose-light); color: var(--rose); }
-  .cat-qa .skill-section-label { color: var(--rose); }
-
-  .cat-deploy .category-icon { background: var(--amber-light); }
-  .cat-deploy .category-title { color: var(--amber); }
-  .cat-deploy .skill-name { color: var(--amber); }
-  .cat-deploy .skill-badge { background: var(--amber-light); color: var(--amber); }
-  .cat-deploy .skill-section-label { color: var(--amber); }
-
-  .cat-always .category-icon { background: var(--gold-light); }
-  .cat-always .category-title { color: var(--gold); }
-  .cat-always .skill-name { color: var(--gold); }
-  .cat-always .skill-badge { background: var(--gold-light); color: var(--gold); }
-  .cat-always .skill-section-label { color: var(--gold); }
-  .cat-always .skill-card { border-color: rgba(209,191,167,0.4); }
-
-  .cat-meta .category-icon { background: var(--gray-100); }
-  .cat-meta .category-title { color: var(--gray-700); }
-  .cat-meta .skill-name { color: var(--gray-900); }
-  .cat-meta .skill-badge { background: var(--gray-100); color: var(--gray-700); }
-  .cat-meta .skill-section-label { color: var(--gray-700); }
-
-  @media print {
-    .sidebar { display: none; }
-    .main { margin-left: 0; }
-    .page-header { padding: 32px 40px; }
-    .content { padding: 32px 40px 60px; }
-    .skill-card { break-inside: avoid; }
-    @page { size: A4; margin: 15mm; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solo Builder Framework — Skills Reference</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../_shared.css">
 </head>
 <body>
 
-<!-- ── SIDEBAR ── -->
-<aside class="sidebar">
-  <div class="sidebar-header">
-    <div class="sh-label">Framework</div>
-    <div class="sh-title">Skills Reference</div>
-  </div>
+<nav class="site-nav">
+  <span class="brand">Solo Builder</span>
+  <a class="nav-link" href="getting-started.html">Getting Started</a>
+  <a class="nav-link" href="process-map.html">Process Map</a>
+  <a class="nav-link" href="skills-reference.html">Skills</a>
+  <a class="nav-link" href="framework-architecture.html">Architecture</a>
+</nav>
 
-  <div class="nav-group">
-    <span class="nav-group-label" style="color:rgba(142,142,144,0.6)">Session Modes</span>
-    <a href="#mode-bare" class="nav-skill" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>bare</a>
-    <a href="#mode-piloted" class="nav-skill" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>piloted</a>
-    <a href="#mode-guided" class="nav-skill" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>guided</a>
-  </div>
-
-  <div class="nav-group">
-    <span class="nav-group-label" style="color:rgba(209,191,167,0.6)">Entry</span>
-    <a href="#start" class="nav-skill" style="color:rgba(209,191,167,0.7)"><span class="nav-dot" style="background:#bd8c7d"></span>start</a>
-    <a href="#onboard" class="nav-skill" style="color:rgba(209,191,167,0.7)"><span class="nav-dot" style="background:#bd8c7d"></span>onboard</a>
-  </div>
-
-  <div class="nav-group">
-    <span class="nav-group-label" style="color:rgba(142,142,144,0.6)">Discovery</span>
-    <a href="#brainstorming" class="nav-skill" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>brainstorming</a>
-    <a href="#discover" class="nav-skill" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>discover</a>
-    <a href="#tech-context" class="nav-skill" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>tech-context</a>
-    <a href="#research-spike" class="nav-skill" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>research-spike</a>
-  </div>
-
-  <div class="nav-group">
-    <span class="nav-group-label" style="color:rgba(209,191,167,0.6)">Design</span>
-    <a href="#design-sprint" class="nav-skill" style="color:rgba(209,191,167,0.7)"><span class="nav-dot" style="background:#bd8c7d"></span>design-sprint</a>
-    <a href="#frontend-design" class="nav-skill" style="color:rgba(209,191,167,0.7)"><span class="nav-dot" style="background:#bd8c7d"></span>frontend-design</a>
-    <a href="#awesome-design-md" class="nav-skill" style="color:rgba(209,191,167,0.7)"><span class="nav-dot" style="background:#bd8c7d"></span>awesome-design-md</a>
-  </div>
-
-  <div class="nav-group">
-    <span class="nav-group-label" style="color:rgba(73,73,75,0.6)">Data & Review</span>
-    <a href="#data-scaffold" class="nav-skill" style="color:rgba(73,73,75,0.7)"><span class="nav-dot" style="background:#49494b"></span>data-scaffold</a>
-    <a href="#design-review" class="nav-skill" style="color:rgba(73,73,75,0.7)"><span class="nav-dot" style="background:#49494b"></span>design-review</a>
-  </div>
-
-  <div class="nav-group">
-    <span class="nav-group-label" style="color:rgba(189,140,125,0.6)">Planning</span>
-    <a href="#prd-to-plan" class="nav-skill" style="color:rgba(189,140,125,0.7)"><span class="nav-dot" style="background:#bd8c7d"></span>prd-to-plan</a>
-    <a href="#to-issues" class="nav-skill" style="color:rgba(189,140,125,0.7)"><span class="nav-dot" style="background:#bd8c7d"></span>to-issues</a>
-    <a href="#to-prd" class="nav-skill" style="color:rgba(189,140,125,0.7)"><span class="nav-dot" style="background:#bd8c7d"></span>to-prd</a>
-    <a href="#grill-me" class="nav-skill" style="color:rgba(189,140,125,0.7)"><span class="nav-dot" style="background:#bd8c7d"></span>grill-me</a>
-  </div>
-
-  <div class="nav-group">
-    <span class="nav-group-label" style="color:rgba(142,142,144,0.6)">Build</span>
-    <a href="#solo-build" class="nav-skill" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>solo-build</a>
-    <a href="#autopilot" class="nav-skill" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>autopilot</a>
-    <a href="#tdd" class="nav-skill" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>tdd</a>
-    <a href="#principal-engineer" class="nav-skill" style="color:rgba(142,142,144,0.7)"><span class="nav-dot" style="background:#8e8e90"></span>principal-engineer</a>
-  </div>
-
-  <div class="nav-group">
-    <span class="nav-group-label" style="color:rgba(189,140,125,0.6)">QA</span>
-    <a href="#code-review-and-quality" class="nav-skill" style="color:rgba(189,140,125,0.7)"><span class="nav-dot" style="background:#bd8c7d"></span>code-review-and-quality</a>
-    <a href="#solo-qa" class="nav-skill" style="color:rgba(189,140,125,0.7)"><span class="nav-dot" style="background:#bd8c7d"></span>solo-qa</a>
-    <a href="#qa-triage" class="nav-skill" style="color:rgba(189,140,125,0.7)"><span class="nav-dot" style="background:#bd8c7d"></span>qa-triage</a>
-    <a href="#process-change" class="nav-skill" style="color:rgba(189,140,125,0.7)"><span class="nav-dot" style="background:#bd8c7d"></span>process-change</a>
-  </div>
-
-  <div class="nav-group">
-    <span class="nav-group-label" style="color:rgba(209,191,167,0.6)">Test & Deploy</span>
-    <a href="#phase-test" class="nav-skill" style="color:rgba(209,191,167,0.7)"><span class="nav-dot" style="background:#d1bfa7"></span>phase-test</a>
-    <a href="#deploy" class="nav-skill" style="color:rgba(209,191,167,0.7)"><span class="nav-dot" style="background:#d1bfa7"></span>deploy</a>
-  </div>
-
-  <div class="nav-group">
-    <span class="nav-group-label" style="color:rgba(209,191,167,0.6)">Always-On</span>
-    <a href="#process-mapper" class="nav-skill" style="color:rgba(209,191,167,0.7)"><span class="nav-dot" style="background:#d1bfa7"></span>process-mapper</a>
-    <a href="#product-continuity" class="nav-skill" style="color:rgba(209,191,167,0.7)"><span class="nav-dot" style="background:#d1bfa7"></span>product-continuity</a>
-    <a href="#framework-health" class="nav-skill" style="color:rgba(209,191,167,0.7)"><span class="nav-dot" style="background:#d1bfa7"></span>framework-health</a>
-    <a href="#retrospective" class="nav-skill" style="color:rgba(209,191,167,0.7)"><span class="nav-dot" style="background:#d1bfa7"></span>retrospective</a>
-  </div>
-
-  <div class="nav-group">
-    <span class="nav-group-label" style="color:rgba(73,73,75,0.7)">Companion</span>
-    <a href="#nivya" class="nav-skill" style="color:rgba(73,73,75,0.8)"><span class="nav-dot" style="background:#49494b"></span>nivya</a>
-  </div>
-  <div class="nav-group">
-    <span class="nav-group-label" style="color:rgba(189,140,125,0.7)">Framework Partner</span>
-    <a href="#ren" class="nav-skill" style="color:rgba(189,140,125,0.8)"><span class="nav-dot" style="background:#bd8c7d"></span>ren</a>
-  </div>
-  <div class="nav-group">
-    <span class="nav-group-label" style="color:rgba(142,142,144,0.7)">Meta</span>
-    <a href="#framework-curator" class="nav-skill" style="color:rgba(142,142,144,0.8)"><span class="nav-dot" style="background:#8e8e90"></span>framework-curator</a>
-    <a href="#comms-cascade" class="nav-skill" style="color:rgba(142,142,144,0.8)"><span class="nav-dot" style="background:#8e8e90"></span>comms-cascade</a>
-  </div>
-  <div class="nav-group">
-    <span class="nav-group-label" style="color:rgba(142,142,144,0.7)">Workshop</span>
-    <a href="#scope-check" class="nav-skill" style="color:rgba(142,142,144,0.8)"><span class="nav-dot" style="background:#8e8e90"></span>scope-check</a>
-    <a href="#spike" class="nav-skill" style="color:rgba(142,142,144,0.8)"><span class="nav-dot" style="background:#8e8e90"></span>spike</a>
-    <a href="#land" class="nav-skill" style="color:rgba(142,142,144,0.8)"><span class="nav-dot" style="background:#8e8e90"></span>land</a>
-  </div>
-  <div class="nav-group">
-    <span class="nav-group-label" style="color:rgba(189,140,125,0.7)">Support</span>
-    <a href="#bug-fix" class="nav-skill" style="color:rgba(189,140,125,0.8)"><span class="nav-dot" style="background:#bd8c7d"></span>bug-fix</a>
-    <a href="#enhancement" class="nav-skill" style="color:rgba(189,140,125,0.8)"><span class="nav-dot" style="background:#bd8c7d"></span>enhancement</a>
-    <a href="#dependency-upgrade" class="nav-skill" style="color:rgba(189,140,125,0.8)"><span class="nav-dot" style="background:#bd8c7d"></span>dependency-upgrade</a>
-    <a href="#security-patch" class="nav-skill" style="color:rgba(189,140,125,0.8)"><span class="nav-dot" style="background:#bd8c7d"></span>security-patch</a>
-  </div>
-</aside>
-
-<!-- ── MAIN ── -->
-<main class="main">
-
-  <div class="page-header">
-    <div class="ph-eyebrow">Solo Builder Framework</div>
+<div class="page">
+  <div class="hero">
+    <div class="hero-label">Solo Builder Framework</div>
     <h1>Skills Reference</h1>
-    <p>Every skill in the framework — what it does, how it works, what triggers it, and what it produces. Skills are organized by phase. Always-on skills activate when the user chooses guided or piloted mode — silent in bare mode (the default).</p>
-    <div class="header-stats">
-      <div class="header-stat"><div class="hs-num">36</div><div class="hs-label">Skills</div></div>
-      <div class="header-stat"><div class="hs-num">4</div><div class="hs-label">Always-on</div></div>
-      <div class="header-stat"><div class="hs-num">1</div><div class="hs-label">Companion</div></div>
-      <div class="header-stat"><div class="hs-num">3</div><div class="hs-label">Session modes</div></div>
-      <div class="header-stat"><div class="hs-num">10</div><div class="hs-label">Phase categories</div></div>
+    <p class="hero-sub">Every skill in the framework — what it does, how it works, what triggers it, and what it produces. Skills are organized by phase. Always-on skills activate when guided or piloted mode is chosen — silent in bare mode (the default).</p>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat"><span class="stat-num">36</span><span class="stat-label">Skills</span></div>
+    <div class="stat"><span class="stat-num">4</span><span class="stat-label">Always-on</span></div>
+    <div class="stat"><span class="stat-num">1</span><span class="stat-label">Companion</span></div>
+    <div class="stat"><span class="stat-num">3</span><span class="stat-label">Session modes</span></div>
+  </div>
+
+  <h2>Session Modes</h2>
+  <p>Controls how much the framework activates at the start of a session. Bare is the default — the framework is silent until you invoke a skill. Token cost scales with activation: guided (highest) · piloted (moderate) · bare (lowest).</p>
+  <div class="card-grid">
+    <div class="card">
+      <div class="section-label">Default</div>
+      <h3>bare</h3>
+      <p>The framework is silent. No routing, no always-on skills. Every skill loads only when explicitly invoked. Maximum token efficiency.</p>
+      <p><strong>Invoke:</strong> "bare mode" · <code>/bare</code></p>
+    </div>
+    <div class="card">
+      <div class="section-label">Active</div>
+      <h3>piloted</h3>
+      <p>Always-on skills activate once and persist for the session. Phase skills are invoked manually — you choose what to run and when.</p>
+      <p><strong>Invoke:</strong> "piloted mode" · <code>/piloted</code></p>
+    </div>
+    <div class="card">
+      <div class="section-label">Guided</div>
+      <h3>guided</h3>
+      <p>Full framework engagement. The start skill reads your opening message and routes automatically. Always-on skills load and persist. The phase chain drives the session.</p>
+      <p><strong>Invoke:</strong> "guided mode" · <code>/guided</code> · "guided on [project name]"</p>
+    </div>
+  </div>
+  <div class="callout"><strong>Session hygiene:</strong> End sessions at phase gates, not mid-phase. Say "let's close out" — the continuity skill captures state and updates the handoff. To resume: paste the resume prompt or say "guided on [project name]" if registered in projects.md.</div>
+
+  <h2>Entry &amp; Routing</h2>
+  <p>The front door. Reads context, routes to the right starting point.</p>
+
+  <h3>start</h3>
+  <p>The framework's front door. Reads the opening message of a new project conversation and routes automatically to Brainstorm (exploratory ideas) or Discover (clear solution in mind). Checks for existing context before routing — never restarts a project already in progress. Detects deployed projects and opens a new cycle. On named project resume, reads only the two active handoff sections on first load — full handoff loads on demand.</p>
+  <table>
+    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Routing logic</strong></td><td>Reads opening tone — exploratory vs. articulated idea. Asks one question if routing is ambiguous.</td></tr>
+      <tr><td><strong>Existing context</strong></td><td>Checks for blueprint, discovery brief, active sprint before routing — never restarts in-progress projects</td></tr>
+      <tr><td><strong>Deployed projects</strong></td><td>Detects deployed projects — routes to new cycle protocol, opens new phase in existing backlog</td></tr>
+      <tr><td><strong>Output</strong></td><td>Routing decision: Brainstorm, Discover, or new cycle — hands off immediately</td></tr>
+    </tbody>
+  </table>
+
+  <h3>onboard</h3>
+  <p>Brings an existing project into the framework without redoing the work. Reads the project directory, semantically maps content to gate artifacts, synthesizes with solo confirmation, places the project at the correct starting phase, and verifies companion compatibility before exiting.</p>
+  <table>
+    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Reading approach</strong></td><td>Reads docs, notes, and planning files — skips code files. Semantic matching — content-based, not filename-based.</td></tr>
+      <tr><td><strong>Gap handling</strong></td><td>Gaps surface as targeted discussion questions. Classifies: undocumented work (ask) vs. work not done yet (starting phase)</td></tr>
+      <tr><td><strong>Companion pass</strong></td><td>Verifies projects.md registration, backlog section headers, handoff section, and Review URL fields before exiting</td></tr>
+      <tr><td><strong>Output</strong></td><td>Framework gate files synthesized · handoff.md initialized · clear starting phase statement</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Discovery</h2>
+  <p>Understanding the problem, the process, and the constraints before anything gets designed.</p>
+
+  <h3>brainstorming</h3>
+  <p>Product exploration for ideas that aren't fully formed. A genuine collaborative conversation — not a checklist or a spec session. Includes a process sketch moment and a visual sketch mid-session when the idea benefits from something concrete to react to.</p>
+  <table>
+    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Process sketch moment</strong></td><td>process-mapper activates when conversation surfaces a process — captures preliminary as-is and to-be sketch</td></tr>
+      <tr><td><strong>Visual sketch</strong></td><td>Rough HTML screen as a thinking tool, not a deliverable. Triggers "warmer / colder" reaction.</td></tr>
+      <tr><td><strong>Approach</strong></td><td>One question per round — the right question, not the next on a list. Not a spec or feasibility session.</td></tr>
+      <tr><td><strong>Output</strong></td><td>docs/brainstorm-[date]-[topic].md · idea summary · process sketch · research items · routing decision</td></tr>
+    </tbody>
+  </table>
+
+  <h3>discover</h3>
+  <p>The day-one conversation that builds the full product story. Produces the discovery brief and, critically, produces and agrees the as-is and to-be process maps before any design begins. The to-be map agreed here becomes the process contract for every downstream phase.</p>
+  <table>
+    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Approach</strong></td><td>Narrative conversation — not a requirements form. Surfaces who/what/value with specificity, not user types.</td></tr>
+      <tr><td><strong>Process maps</strong></td><td>As-is map (including manual processes) and to-be map. To-be agreed before design begins — this is the gate.</td></tr>
+      <tr><td><strong>Gate</strong></td><td>To-be map agreed before design sprint begins</td></tr>
+      <tr><td><strong>Output</strong></td><td>docs/discovery-brief.md · docs/process/as-is-[name].md · docs/process/to-be-[name].md</td></tr>
+    </tbody>
+  </table>
+
+  <h3>tech-context</h3>
+  <p>Establishes the full technical context before design begins — stack, constraints, infrastructure requirements, deploy configuration, security classification, and Claude API authentication pattern. Every downstream skill reads this document. Required before Design Sprint can begin.</p>
+  <table>
+    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Deploy paths</strong></td><td>Plain-language question maps to one of seven named paths (Local Mac, Cloudflare, Railway, Render, Fly.io, AWS App Runner, No pipeline)</td></tr>
+      <tr><td><strong>Security classification</strong></td><td>Assigns one or more of seven classes: Standard, Personal, Financial, Authentication, Multi-tenant, Confidential, Regulated. Read by code-review-and-quality for security sub-checks.</td></tr>
+      <tr><td><strong>Infrastructure slices</strong></td><td>Identifies prerequisites that must be built before any feature slice can start</td></tr>
+      <tr><td><strong>Output</strong></td><td>docs/tech-context.md · stack, constraints, deploy method, branching model, security classification, Claude API auth pattern</td></tr>
+    </tbody>
+  </table>
+
+  <h3>research-spike</h3>
+  <p>Timeboxed investigation of a specific unknown. Callable from any phase — when a question surfaces that can't be designed around without an answer. Returns a finding and a recommendation, then hands back to the phase that triggered it.</p>
+  <table>
+    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Scope</strong></td><td>One specific question — not open-ended exploration. Timeboxed — produces a finding, not a design.</td></tr>
+      <tr><td><strong>Triggered by</strong></td><td>Any phase when a specific question blocks progress · design-review when a slice is Blocked · principal-engineer when an architectural unknown surfaces</td></tr>
+      <tr><td><strong>Output</strong></td><td>docs/spikes/[topic].md · finding: feasible / feasible with tradeoffs / not feasible · recommendation for invoking phase</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Design</h2>
+  <p>Producing the shared visual artifact that every downstream phase points at.</p>
+
+  <h3>design-sprint</h3>
+  <p>Produces the HTML artifact — all screens, good enough to make real decisions from. The design sprint is the visual contract: the first shared artifact everyone can point at and agree on. Reads both the discovery brief and the to-be process map; stops if the to-be map doesn't exist.</p>
+  <table>
+    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td><strong>On-ramp A</strong></td><td>Scratch → hero screen → warmer/colder loop → all screens</td></tr>
+      <tr><td><strong>On-ramp B</strong></td><td>Figma import via MCP — uses design as source of truth</td></tr>
+      <tr><td><strong>On-ramp C</strong></td><td>Reference screenshot → aesthetic extraction → produce in that direction</td></tr>
+      <tr><td><strong>Process thread</strong></td><td>process-mapper cross-references screens against to-be map, annotates with screen refs, flags gaps as decisions</td></tr>
+      <tr><td><strong>Gate</strong></td><td>Deferred decisions log required before planning</td></tr>
+      <tr><td><strong>Output</strong></td><td>docs/design/sprint-[id].html · docs/design/deferred-decisions.md · optional stakeholder handoff package</td></tr>
+    </tbody>
+  </table>
+
+  <h3>frontend-design</h3>
+  <p>Aesthetic and structural guidance for the HTML artifact. Provides design system direction — color, typography, spacing, component patterns — to ensure visual consistency across all screens produced in the design sprint. Activated by design-sprint, not standalone.</p>
+
+  <h3>awesome-design-md</h3>
+  <p>On-ramp 3 for the design sprint — reference-based aesthetic extraction. Takes a screenshot or design reference and extracts the design language for use as an aesthetic constraint when producing the HTML artifact. Works from screenshots, live URLs, or verbal description.</p>
+
+  <h2>Data &amp; Design Review</h2>
+  <p>Generating realistic mock data and converting design screens into a defined, Ready backlog.</p>
+
+  <h3>data-scaffold</h3>
+  <p>Generates realistic mock data for all screen data entities. Creates a clean mock layer with a single swap seam — easy to replace with real API data when ready. Flags data behavior candidates so design review can ask the right questions before UI slices are finalized.</p>
+  <table>
+    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Data quality</strong></td><td>Generates realistic (not placeholder) values — names, amounts, dates that look real</td></tr>
+      <tr><td><strong>Single seam</strong></td><td>One place to swap mock for real — nothing hardcoded across the codebase</td></tr>
+      <tr><td><strong>Behavior candidates</strong></td><td>Flags list entities and external API sources in data-mapping.md — these need the design review data behavior pass</td></tr>
+      <tr><td><strong>Updates</strong></td><td>Re-runs when data questions log has newly resolved entries — pagination edge cases, null field rates, empty/error states seeded</td></tr>
+      <tr><td><strong>Output</strong></td><td>data/mock/[entity].json · docs/data-mapping.md · proto-API contract</td></tr>
+    </tbody>
+  </table>
+
+  <h3>design-review</h3>
+  <p>The iterative loop between design artifact and build decision. Runs as many rounds as the project needs. Each round refines the design, defines slices, and updates the backlog. Build begins when enough slices are Ready — not when all are. Three specialist lenses run every round.</p>
+  <table>
+    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Three lenses</strong></td><td>PM (right problem?), Tech Lead (buildable?), Data (where does every field come from?) — every round</td></tr>
+      <tr><td><strong>Data behavior pass</strong></td><td>Required for every screen with external data: volume, list behavior, nulls, empty/error/loading states. Produces a data questions log. Unresolved question blocks dependent UI slices from Ready.</td></tr>
+      <tr><td><strong>Slice requirements</strong></td><td>Every slice needs: plain language description, technical description, process anchor, quality contract (four categories: Failure states, Edge cases, Input validation, Security), design anchor, data anchor, done criteria before reaching Ready</td></tr>
+      <tr><td><strong>Coverage check</strong></td><td>Every design review round — every to-be step mapped to a slice or explicitly decided</td></tr>
+      <tr><td><strong>Gate</strong></td><td>Enough Ready slices for Phase 1 before build starts</td></tr>
+      <tr><td><strong>Output</strong></td><td>docs/backlog.md with full slice records · process coverage map per round · review log</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Planning</h2>
+  <p>Sequencing work by risk and process order, then converting to executable issues.</p>
+
+  <h3>prd-to-plan</h3>
+  <p>Turns the backlog of Ready slices into a sequenced, multi-phase implementation plan. Sequences by two forces in tension — risk order (hardest things first) and process order (to-be map step sequence). Resolves conflicts explicitly. Stops if the to-be process map doesn't exist.</p>
+  <table>
+    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Sequencing</strong></td><td>Risk order AND process order — conflicts named explicitly. Infrastructure slices always first.</td></tr>
+      <tr><td><strong>Deliverables</strong></td><td>Groups slices by shared outcome. Each deliverable: technical spec (AI-facing), solo description (solo-facing), acceptance criteria (shared). Type assigned: Screen or Logic.</td></tr>
+      <tr><td><strong>Integration deliverables</strong></td><td>Every Screen deliverable with external data gets a companion Logic deliverable for data integration. Always sequences after its Screen companion is Accepted.</td></tr>
+      <tr><td><strong>Architecture classification</strong></td><td>Each slice classified as Leaf node (self-contained) or Core architecture (touches data models, shared logic, or infrastructure). Unclassified slices block the plan.</td></tr>
+      <tr><td><strong>Output</strong></td><td>Phased implementation plan · backlog.md updated with process anchors · hands off to to-issues on approval</td></tr>
+    </tbody>
+  </table>
+
+  <h3>to-issues</h3>
+  <p>Converts the approved implementation plan into GitHub issues in dependency order. Each issue is self-contained — design reference, process anchor, data anchor, done criteria, and dependency links included. A builder can start any slice from its issue alone.</p>
+  <table>
+    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Prerequisites</strong></td><td>Plan approved, gh CLI authenticated, process anchors on every Ready slice</td></tr>
+      <tr><td><strong>Issue format</strong></td><td>Title: [SL-XXX] [Slice Name] · labels by phase and status · deferred slices excluded</td></tr>
+      <tr><td><strong>Output</strong></td><td>GitHub issues in dependency order · confirmation report: slice ID → issue number → status</td></tr>
+    </tbody>
+  </table>
+
+  <h3>to-prd</h3>
+  <p>Synthesizes accumulated project context into a formal PRD. Optional — used when a formal requirements document is needed for stakeholder alignment, approval processes, or documentation. Reads the discovery brief, design decisions, and deferred decisions log.</p>
+
+  <h3>grill-me</h3>
+  <p>Skeptical PM stress-test. Hard questions, challenged assumptions, no vague answers accepted. Used before committing to a plan, before starting a significant build phase, or anytime the solo wants a second opinion that doesn't pull punches.</p>
+  <table>
+    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Approach</strong></td><td>Challenges the "why" — is this the right problem? Surfaces unstated assumptions and treats them as risks. Not adversarial — rigorous.</td></tr>
+      <tr><td><strong>Output</strong></td><td>List of challenged assumptions · open questions that need answers · confirmed decisions that survived the challenge</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Build</h2>
+  <p>Slice-by-slice execution with discipline, anchors, and automatic QA handoff on completion.</p>
+
+  <h3>solo-build</h3>
+  <p>Slice-by-slice build execution. Creates a feature branch at start, requires four anchors before writing code, follows journey order, surfaces mid-build discoveries immediately, and commits on code-complete — automatically invoking the QA chain. Core architecture slices trigger an automatic principal engineer review before the branch opens.</p>
+  <table>
+    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Four anchors</strong></td><td>Design, data, done, and process anchors required before writing any code</td></tr>
+      <tr><td><strong>Architecture gate</strong></td><td>Core architecture slices: principal engineer review fires automatically before branch opens. No exceptions.</td></tr>
+      <tr><td><strong>Mid-build discoveries</strong></td><td>Surfaced immediately — never silently resolved. Significant changes pause build and trigger design-review round.</td></tr>
+      <tr><td><strong>Self-verification</strong></td><td>Checklist run before code-complete — builder confirmation populated with ✓/✗ results before any handoff</td></tr>
+      <tr><td><strong>Rollback protocol</strong></td><td>When a slice that has already passed QA needs to be rebuilt, solo confirms before any status changes. Log entry written, slice returns to In Build.</td></tr>
+      <tr><td><strong>Output</strong></td><td>Feature branch · commit: "SL-[ID] code-complete — [name]" · auto-handoff to code-review-and-quality</td></tr>
+    </tbody>
+  </table>
+
+  <h3>autopilot</h3>
+  <p>Autonomous build mode. Builds the full product without solo participation after discovery (or design sprint). Solo-simulator plays every gate. First human touch point is phase test. Refinement cycles handle delta iteration.</p>
+  <table>
+    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Entry points</strong></td><td>Post-discover (leaner anchor) or post-design-review (richer anchor, fewer simulator judgment calls)</td></tr>
+      <tr><td><strong>Pre-flight check</strong></td><td>Simulator reads all discovery docs, surfaces judgment gaps, solo answers before build begins</td></tr>
+      <tr><td><strong>Refinement cycles</strong></td><td>Implementation delta builds after phase test — structural issues exit to guided mode</td></tr>
+      <tr><td><strong>Output</strong></td><td>.claude/autopilot-brief.md · .claude/autopilot-decisions.md · all slices built and committed</td></tr>
+    </tbody>
+  </table>
+
+  <h3>tdd</h3>
+  <p>Test-driven build technique. Tests are written before implementation — red, green, refactor. Invokable from solo-build when a TDD approach is chosen for a slice. Ensures test coverage is built in, not bolted on.</p>
+
+  <h3>principal-engineer</h3>
+  <p>Architecture review lens for consequential decisions. Auto-triggered before any core architecture slice enters build. Also invoked on demand when architectural stakes are high. Gives one recommendation (not a menu), names risks and debt explicitly, and holds its position under pushback unless new information changes the analysis.</p>
+  <table>
+    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Auto-triggers</strong></td><td>When a Core architecture slice moves to In Build · after tech-context for hard architecture questions · mid-build structural discoveries</td></tr>
+      <tr><td><strong>Approach</strong></td><td>One recommendation — not "here are three options." Names risks, debt, and watch-for signals. Holds position under preference-based pushback.</td></tr>
+      <tr><td><strong>Output</strong></td><td>One architectural recommendation with reasoning · risks and debt named · decision logged in backlog</td></tr>
+    </tbody>
+  </table>
+
+  <h2>QA Chain</h2>
+  <p>Three skills that chain automatically from code-complete — no user invocation needed until browser sign-off. Plus process-change for map-level conflicts.</p>
+
+  <h3>code-review-and-quality</h3>
+  <p>Ten-check quality gate that runs automatically when solo-build marks a slice code-complete. On pass: logs confirmation in the backlog slice detail and automatically invokes solo-qa. On fail: returns specific notes, slice goes back to build. Runs as an isolated sub-agent with no access to build context.</p>
+  <table>
+    <thead><tr><th>Check</th><th>What it verifies</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Check 1</strong></td><td>Pattern compliance — follows established patterns in the project</td></tr>
+      <tr><td><strong>Check 2</strong></td><td>Data sourcing — cross-references against mock data file, no hardcoded values</td></tr>
+      <tr><td><strong>Check 3</strong></td><td>Expandability — built to accommodate what's coming, not just today</td></tr>
+      <tr><td><strong>Check 4</strong></td><td>Cleanliness — no dead code, no debug artifacts, no commented-out experiments</td></tr>
+      <tr><td><strong>Check 5</strong></td><td>Scope discipline — only what was asked for, no extras</td></tr>
+      <tr><td><strong>Check 6</strong></td><td>Documentation — purpose comments, complex logic explained, tradeoffs named</td></tr>
+      <tr><td><strong>Check 7</strong></td><td>Stack compliance — follows tech-context standards</td></tr>
+      <tr><td><strong>Check 8</strong></td><td>Quality contract — reads the pre-written contract adversarially. Each line: ✅ only if the specific behavior exists and is reachable.</td></tr>
+      <tr><td><strong>Check 9</strong></td><td>Security — 5 baseline sub-checks on every slice (input sanitization, data scoped to authenticated user, auth server-side, injection prevention, no secrets in client code). Class-specific checks layer on top. Up to 20 sub-checks total.</td></tr>
+      <tr><td><strong>Check 10</strong></td><td>Design fidelity (Figma-sourced slices only) — interactive element inventory present and correct. Non-Figma slices: skip stated explicitly as N/A.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>solo-qa</h3>
+  <p>Two-part verification. Part 1 is AI-driven active testing — reads all four anchors, opens a preview, and cross-references rendered values against the mock data file with named evidence. Part 2 is a structured solo browser sign-off with specific done criteria listed. No sign-off permitted while an open missing requirement exists.</p>
+  <table>
+    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Gate check</strong></td><td>Requires code review log AND builder confirmation populated before starting</td></tr>
+      <tr><td><strong>Part 1</strong></td><td>Active testing — opens preview, verifies rendered values against mock data file. Evidence required, not code inspection.</td></tr>
+      <tr><td><strong>Part 2</strong></td><td>Structured solo browser sign-off with exact done criteria listed</td></tr>
+      <tr><td><strong>Deliverable acceptance</strong></td><td>When all slices in a deliverable are In Test, runs a deliverable-level check. Types: Screen (visual), Logic (evidence), Integration (both). Status → Accepted on solo sign-off.</td></tr>
+      <tr><td><strong>Slice status after sign-off</strong></td><td>In Test — not Done. Done is set by phase-test.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>qa-triage</h3>
+  <p>Routes unexpected QA discoveries to the correct path. Three types: bug (behavior defined, implementation wrong), missing requirement (never defined), regression (was Done, now broken). Classifies, scopes, and routes — never starts fixing before understanding what was found.</p>
+  <table>
+    <thead><tr><th>Classification</th><th>Routing</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Bug</strong></td><td>Defined behavior not implemented correctly → fix in current feature branch</td></tr>
+      <tr><td><strong>Missing requirement</strong></td><td>Never defined → define or defer before sign-off. No solo sign-off while this is open.</td></tr>
+      <tr><td><strong>Regression</strong></td><td>Was Done, now broken → regression branch, root cause first</td></tr>
+      <tr><td><strong>Map-level gap</strong></td><td>No to-be step for this behavior → auto-invokes process-change</td></tr>
+    </tbody>
+  </table>
+
+  <h3>process-change</h3>
+  <p>Consistent protocol for changes to the agreed to-be process map — regardless of cause or where it surfaces. Stakeholder input, demo gaps, technical constraints, solo realizations: all receive the same seven-step protocol.</p>
+  <table>
+    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Triggers</strong></td><td>Solo invokes directly · auto-detected by solo-build (map-level conflict) · auto-detected by qa-triage (missing requirement with no to-be step) · phase-test Stage 6 (process-level mismatch)</td></tr>
+      <tr><td><strong>Impact scan</strong></td><td>Three-tier: scheduled work · in-progress work · completed work — every item gets an explicit verdict</td></tr>
+      <tr><td><strong>Solo decides</strong></td><td>Revise / Retire / Reopen / Create / Absorb — per affected slice</td></tr>
+      <tr><td><strong>Output</strong></td><td>Updated to-be map · backlog updated · re-prioritized build sequence · process change record in continuity</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Phase Test &amp; Deploy</h2>
+  <p>Full-phase validation before anything ships. Stack-driven deploy after the gate opens.</p>
+
+  <h3>phase-test</h3>
+  <p>Full-phase testing orchestrator. Seven specialist stages run in sequence. Invoked explicitly by the solo when they decide the phase is built — a deliberate decision, not automatic. Failures at any stage route to qa-triage; the test run continues on unaffected scenarios.</p>
+  <table>
+    <thead><tr><th>Stage</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Stage 1 — Environment Readiness</strong></td><td>Pre-flight gate. Mock inactive, all slices deployed, app loads clean. Nothing runs until this passes.</td></tr>
+      <tr><td><strong>Stage 2 — Use Case Creator</strong></td><td>Derives test plan from discovery brief + to-be map. Not invented.</td></tr>
+      <tr><td><strong>Stage 3 — Data Specialist</strong></td><td>Mock→real swap confirmed, API read/write verified, data-mapping.md validated</td></tr>
+      <tr><td><strong>Stage 4+5 — Tester + Regression</strong></td><td>Every scenario with named evidence, all In Test slices re-walked</td></tr>
+      <tr><td><strong>Stage 6 — Acceptance Reviewer</strong></td><td>PM lens — does what was built match discovery brief intent? Process-level mismatch → process-change before gate.</td></tr>
+      <tr><td><strong>Stage 7 — Gate</strong></td><td>OPEN (deploy) or HOLD (specific items). On OPEN: all In Test slices → Done, phase → Completed, completion record appended to backlog.md.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>deploy</h3>
+  <p>Stack-driven deploy orchestrator. Does not assume a platform — reads tech-context.md to determine the deploy method and executes accordingly. Confirms gate is OPEN, confirms branches are merged, and verifies the environment is actually live — not just that the pipeline said it succeeded.</p>
+  <table>
+    <thead><tr><th>Method</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Method A</strong></td><td>CI/CD triggered by merge (GitHub Actions)</td></tr>
+      <tr><td><strong>Method B</strong></td><td>MCP tool triggered (Railway, Vercel, etc.)</td></tr>
+      <tr><td><strong>Method C</strong></td><td>Manual CLI — surfaces exact command, waits for solo confirmation</td></tr>
+      <tr><td><strong>Method D</strong></td><td>Not yet defined → asks 4 questions, updates tech-context, then deploys</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Always-On Skills</h2>
+  <p>Activate on guided or piloted mode. One load per session — do not reload on each skill invocation. Silent in bare mode (the default).</p>
+
+  <h3>process-mapper</h3>
+  <p>Produces and maintains the as-is and to-be process maps throughout the framework. The to-be map agreed in Discover is the process contract — process-mapper holds every downstream phase accountable to it. Never invoked by the user.</p>
+  <table>
+    <thead><tr><th>Phase</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Brainstorm</strong></td><td>Captures preliminary as-is/to-be sketch as conversation develops</td></tr>
+      <tr><td><strong>Discover</strong></td><td>Formalizes both maps, validates to-be with solo</td></tr>
+      <tr><td><strong>Design Sprint</strong></td><td>Cross-references screens vs. to-be, annotates map with screen refs, flags gaps</td></tr>
+      <tr><td><strong>Design Review</strong></td><td>Coverage check every round — every step mapped or decided</td></tr>
+      <tr><td><strong>Build</strong></td><td>Process anchor verification per slice — stops if slice has no mapping</td></tr>
+      <tr><td><strong>Phase Test</strong></td><td>Source for use case derivation</td></tr>
+    </tbody>
+  </table>
+
+  <h3>product-continuity</h3>
+  <p>Institutional memory across every session and phase. Captures decisions with reasoning, outstanding questions, assumptions, risks, changes, glossary, target state, and session handoffs. The handoff document is the first thing read when a new session opens — context is never lost between sessions.</p>
+  <table>
+    <thead><tr><th>Document</th><th>What it tracks</th></tr></thead>
+    <tbody>
+      <tr><td><strong>sessions.md</strong></td><td>Log of every session</td></tr>
+      <tr><td><strong>decisions.md</strong></td><td>With reasoning and alternatives considered</td></tr>
+      <tr><td><strong>questions.md</strong></td><td>Owner and blocking status</td></tr>
+      <tr><td><strong>assumptions.md</strong></td><td>Treated as true, unverified</td></tr>
+      <tr><td><strong>risks.md</strong></td><td>Named and tracked</td></tr>
+      <tr><td><strong>changes.md</strong></td><td>Direction changes with context</td></tr>
+      <tr><td><strong>glossary.md</strong></td><td>Project-specific terms</td></tr>
+      <tr><td><strong>handoff.md</strong></td><td>Overwritten each session, first read next session</td></tr>
+      <tr><td><strong>retrospective.md</strong></td><td>Processed retro findings</td></tr>
+      <tr><td><strong>onboarding.md</strong></td><td>New collaborator orientation</td></tr>
+    </tbody>
+  </table>
+  <div class="callout"><strong>Long-gap re-entry:</strong> Three-check protocol on 21+ day gaps — codebase state, environment, context validity — before any work begins.</div>
+
+  <h3>framework-health</h3>
+  <p>Background health monitor. Checks signals — not full document reads. Surfaces one issue at a time with a specific recovery path. Silent when everything is healthy — output is always meaningful because it's rare. Never blocks progress.</p>
+  <table>
+    <thead><tr><th>When it fires</th><th>What it checks</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Mode activation</strong></td><td>Existing context, handoff, framework documents present</td></tr>
+      <tr><td><strong>Between phases</strong></td><td>Phase prerequisites exist</td></tr>
+      <tr><td><strong>During build</strong></td><td>Between slices — one issue surfaced at a time; fires once when all phase slices are Done (phase test readiness nudge)</td></tr>
+      <tr><td><strong>Session end</strong></td><td>Handoff is current</td></tr>
+      <tr><td><strong>Long-gap detection</strong></td><td>21+ days since last session triggers re-entry check</td></tr>
+    </tbody>
+  </table>
+
+  <h3>retrospective</h3>
+  <p>Two-mode continuous learning mechanism. Flag mode captures observations in the moment as lightweight one-line notes — no interruption to flow. Retro mode processes those notes at phase end: grouping patterns vs. one-offs, naming root causes, producing proposed fixes, distinguishing project-level from framework-level improvements.</p>
+  <table>
+    <thead><tr><th>Mode</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Flag mode</strong></td><td>One-line observations — date, phase, what happened. No analysis. Captured in the moment.</td></tr>
+      <tr><td><strong>Retro mode</strong></td><td>Reads retro-notes.md only. Groups pattern vs. one-off vs. positive. Patterns get full treatment: what happened, root cause, impact, proposed fix.</td></tr>
+      <tr><td><strong>Two levels</strong></td><td>Project-level (this project only) vs. framework-level (updates the playbook). Framework improvements queue to framework-improvements.md.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Companion</h2>
+
+  <h3>nivya</h3>
+  <p>Conversational companion who has read the full framework and the project's continuity, process, and memory artifacts. Answers questions — does not replace tasks owned by other skills. Recall and explain only: never captures, decides, or builds. Addressable by name once loaded.</p>
+  <div class="card-grid">
+    <div class="card">
+      <div class="section-label">Inline mode</div>
+      <h3>/nivya</h3>
+      <p>Loads into the current conversation. Address by name. Best for quick questions mid-session.</p>
+    </div>
+    <div class="card">
+      <div class="section-label">Huddle mode</div>
+      <h3>Dedicated session</h3>
+      <p>When conversation goes deep, Nivya offers to spin up a dedicated subagent session for focused recall work.</p>
+    </div>
+    <div class="card">
+      <div class="section-label">Routing</div>
+      <h3>Explicit consent</h3>
+      <p>If a conversation produces something that should be logged, Nivya names the skill and asks consent before engaging. Nothing captured without a yes.</p>
     </div>
   </div>
 
-  <div class="content">
+  <h2>Framework Partner</h2>
 
-    <!-- ══════════════ SESSION MODES ══════════════ -->
-    <div class="category-section" id="cat-modes" style="border-left:3px solid #8e8e90">
-      <div class="category-header">
-        <div class="category-icon">⚙️</div>
-        <div>
-          <div class="category-title">Session Modes</div>
-          <div class="category-desc">Controls how much the framework activates at the start of a session. Bare is the default — the framework is silent until you invoke a skill. Token cost scales with activation: guided (highest) · piloted (moderate) · bare (lowest). Switch modes verbally in Cursor or with slash commands in Claude Code.</div>
-        </div>
-        <div class="skill-count">3 modes</div>
-      </div>
+  <h3>ren</h3>
+  <p>Scott's named framework partner. Full curator capability plus relationship context — knows the framework history, knows how Scott works, and holds both at once. Discusses, challenges, designs, and builds. Not a recall-only companion. Invoked with /ren or by name.</p>
+  <table>
+    <thead><tr><th>Capability</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Full curator capability</strong></td><td>Can propose, review, and execute framework changes — all curator rules apply</td></tr>
+      <tr><td><strong>Cross-device memory</strong></td><td>Fetches current framework state from ren-memory repo at every session start</td></tr>
+      <tr><td><strong>Daily health check</strong></td><td>8am macOS notification with GREEN/YELLOW/RED staleness scores for pending retro items, stale handoffs, unprocessed ideas</td></tr>
+      <tr><td><strong>Comms cascade</strong></td><td>When a version ships, spawns comms-cascade sub-agent with structured brief — automated doc update, commit, push, and deploy in one pass</td></tr>
+      <tr><td><strong>Relationship context</strong></td><td>Knows Scott's preferences, working style, and history of framework decisions</td></tr>
+    </tbody>
+  </table>
 
-      <div class="skill-card" id="mode-bare">
-        <div class="skill-card-header">
-          <div class="skill-name">bare</div>
-          <div class="skill-badge">Default</div>
-        </div>
-        <div class="skill-description">The framework is silent. No routing, no always-on skills. Every skill loads only when explicitly invoked. Maximum token efficiency — nothing fires until you ask for it.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Invoke</div>
-            <ul>
-              <li><strong>Cursor:</strong> "bare mode"</li>
-              <li><strong>Claude Code:</strong> <code>/bare</code></li>
-              <li>Also the default — active when no mode has been chosen</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">What activates</div>
-            <ul>
-              <li>Nothing — framework waits for explicit skill invocation</li>
-              <li>Always-on skills do not load</li>
-              <li>No phase routing or chain</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Best for</div>
-            <ul>
-              <li>Quick one-off tasks, individual skill use, or experienced builders who know exactly what they need. Lowest token cost — nothing loads until invoked.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+  <h2>Workshop</h2>
+  <p>For work that isn't a product — spikes, personal tools, exploratory builds. Invoked via slash command, never auto-loaded. The anti-framework: timebox over gates, outcome over process, disposable by default.</p>
 
-      <div class="skill-card" id="mode-piloted">
-        <div class="skill-card-header">
-          <div class="skill-name">piloted</div>
-          <div class="skill-badge">Flexible</div>
-        </div>
-        <div class="skill-description">Always-on skills activate once and persist for the session. Phase skills are invoked manually — you choose what to run and when. The framework is present but you're driving.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Invoke</div>
-            <ul>
-              <li><strong>Cursor:</strong> "piloted mode"</li>
-              <li><strong>Claude Code:</strong> <code>/piloted</code></li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">What activates</div>
-            <ul>
-              <li>All four always-on skills load once: <code>process-mapper</code>, <code>product-continuity</code>, <code>framework-health</code>, <code>retrospective</code></li>
-              <li>Phase skills wait for explicit invocation</li>
-              <li>No automatic phase routing</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Best for</div>
-            <ul>
-              <li>Builders who know the framework and want continuity capture without the full phase chain. Moderate token cost — always-on loads once, then skills on demand.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+  <h3>scope-check</h3>
+  <p>Entry gate for Workshop. Asks one question — who is this for, and how long does it live? — then routes to Workshop (spike/tool) or hands to the framework (product). Holds the line between exploratory work and product work.</p>
 
-      <div class="skill-card" id="mode-guided">
-        <div class="skill-card-header">
-          <div class="skill-name">guided</div>
-          <div class="skill-badge">Full chain</div>
-        </div>
-        <div class="skill-description">Full framework engagement. The start skill reads your opening message and routes automatically. Always-on skills load and persist. The phase chain drives the session — gates, anchors, QA chain, all of it.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Invoke</div>
-            <ul>
-              <li><strong>Cursor:</strong> "guided mode"</li>
-              <li><strong>Claude Code:</strong> <code>/guided</code></li>
-              <li><strong>Named resume — Cursor:</strong> "guided on [project name]"</li>
-              <li><strong>Named resume — Claude Code:</strong> <code>/guided [project name]</code></li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">What activates</div>
-            <ul>
-              <li>All four always-on skills load once</li>
-              <li><code>start</code> skill reads opening message and routes to Brainstorm or Discover</li>
-              <li>Full phase chain — gates, four anchors, QA chain, all active</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Best for</div>
-            <ul>
-              <li>New projects, unfamiliar territory, or when you want the full discipline of the framework driving the session. Highest token cost — full framework loads.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+  <h3>spike</h3>
+  <p>The Workshop execution skill. Timeboxed exploratory work with a single artifact and a running journal of what was tried and what happened. Outcome-first, not process-first. No gates, no anchors, no phases.</p>
+  <table>
+    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Running journal</strong></td><td>spike-journal.md — what was tried, what happened, what surprised, current best guess</td></tr>
+      <tr><td><strong>Single file bias</strong></td><td>Keep work in as few files as possible — sprawl is a signal</td></tr>
+      <tr><td><strong>No extras</strong></td><td>No tests, no abstractions, no README — the journal is the README</td></tr>
+      <tr><td><strong>Graduation triggers</strong></td><td>"Can I share this?", "Should I add auth?", someone else wants to use it → run land with Promote intent</td></tr>
+    </tbody>
+  </table>
 
-      <div style="margin-top:1.5rem; padding:1rem 1.25rem; background:rgba(142,142,144,0.06); border-radius:8px; border:1px solid rgba(142,142,144,0.12)">
-        <div class="skill-section-label" style="margin-bottom:0.6rem">Session Hygiene</div>
-        <p style="margin:0 0 0.75rem; color:var(--gray-700); font-size:0.85rem; line-height:1.6">Mode is a performance decision, not just a philosophy one. Match mode and model to the work — and end sessions at gates, not mid-phase.</p>
-        <ul style="margin:0; padding-left:1.25rem; color:var(--gray-700); font-size:0.85rem; line-height:1.9">
-          <li><strong>Mode footprint:</strong> guided (full chain — highest cost) · piloted (always-on only — moderate) · bare (nothing — zero). Switch mid-project as the work changes.</li>
-          <li><strong>Session length:</strong> Phase gates are natural session reset points. The gate output is what the next phase reads — not conversation history. One phase = one session as a rule of thumb.</li>
-          <li><strong>Model:</strong> Heavy thinking (design, architecture, discovery) → strongest model. Execution (build, bug-fix, QA) → faster, lighter model. Same guidance applies in Cursor and Claude Code.</li>
-          <li><strong>Closing:</strong> Say <em>"let's close out"</em> — continuity tracking captures state and updates the handoff for next session.</li>
-              <li><strong>Resuming by name:</strong> Register projects in <code>projects.md</code> (playbook root). Then "guided on [name]" picks up exactly where you left off — no saved prompt needed.</li>
-          <li><strong>The reminder:</strong> Once per session, at a natural pause or gate, <code>framework-health</code> will surface a clean close point. That's your signal — wrap up if you're done for the day.</li>
-        </ul>
-      </div>
-
+  <h3>land</h3>
+  <p>The Workshop exit skill. Three outcomes — Toss (capture learning, archive), Keep (personal tool with minimal hygiene), Promote (hand to the framework with a prepared brief). Every spike ends here. No exceptions.</p>
+  <div class="card-grid">
+    <div class="card">
+      <h3>Toss</h3>
+      <p>Summarize learning → write to MemPalace → archive or delete. You leave with something worth keeping, without a codebase to maintain.</p>
     </div>
-
-    <!-- ══════════════ ENTRY ══════════════ -->
-    <div class="category-section cat-entry" id="cat-entry">
-      <div class="category-header">
-        <div class="category-icon">🚪</div>
-        <div>
-          <div class="category-title">Entry & Routing</div>
-          <div class="category-desc">The front door. Reads context, routes to the right starting point.</div>
-        </div>
-        <div class="skill-count">2 skills</div>
-      </div>
-
-      <div class="skill-card" id="start">
-        <div class="skill-card-header">
-          <div class="skill-name">start</div>
-          <div class="skill-badge">Framework entry</div>
-        </div>
-        <div class="skill-description">The framework's front door. Reads the opening message of a new project conversation and routes automatically to Brainstorm (exploratory ideas) or Discover (clear solution in mind). Checks for existing context before routing — never restarts a project already in progress. Detects deployed projects and opens a new cycle rather than continuing closed work. On named project resume, reads only the two active handoff sections ("Open right now" and "Next session picks up at") on first load — full handoff loads on demand when the session actually needs it.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li>Reads opening tone — exploratory vs. articulated idea</li>
-              <li>Checks for existing context (blueprint, discovery brief, active sprint) before routing</li>
-              <li>Detects deployed projects — routes to new cycle protocol, opens new phase in existing backlog, never touches completed phases</li>
-              <li>Asks one question if routing is ambiguous</li>
-              <li>Never announces the framework or explains phases</li>
-              <li>One sentence of orientation, then just starts</li>
-              <li><strong>Lighter re-entry:</strong> named project resume reads only "Open right now" and "Next session picks up at" on load — earlier decisions, stack context, and phase history load on demand; falls back to full read if those sections are absent</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Activated By</div>
-            <ul>
-              <li>Framework activates automatically when a new project conversation opens</li>
-              <li>Any opening message with a project or feature idea triggers routing</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li>Routing decision: <strong>Brainstorm</strong>, <strong>Discover</strong>, or <strong>new cycle</strong> for deployed projects</li>
-              <li>Hands off immediately — no intermediate output</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      <div class="skill-card" id="onboard">
-        <div class="skill-card-header">
-          <div class="skill-name">onboard</div>
-          <div class="skill-badge">Framework entry</div>
-        </div>
-        <div class="skill-description">Brings an existing project into the framework without redoing the work. Reads the project directory, semantically maps content to gate artifacts, synthesizes with solo confirmation, places the project at the correct starting phase, and verifies the project will sync cleanly with the Solo Companion before exiting.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Invoke</div>
-            <ul>
-              <li><strong>Cursor:</strong> "I want to bring [project] into the framework"</li>
-              <li><strong>Claude Code:</strong> <code>/onboard</code></li>
-              <li>Also: <code>start</code> routes here when it detects existing-project language</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li>Reads docs, notes, and planning files — skips code files</li>
-              <li>Semantic matching — content-based, not filename-based</li>
-              <li>Shows mapping preview before writing any framework file</li>
-              <li>Gaps surface as targeted discussion questions, not just file names</li>
-              <li>Classifies remaining gaps: undocumented work (ask) vs. work not done yet (starting phase)</li>
-              <li>Initializes continuity docs and exits with clear orientation</li>
-              <li><strong>Companion compatibility pass</strong> — verifies projects.md registration, backlog section headers, handoff <code>## Open right now</code> section, and Review URL field on all slice records before exiting</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li>Framework gate files synthesized from existing project content</li>
-              <li><code>docs/continuity/handoff.md</code> initialized with <code>## Open right now</code></li>
-              <li>Clear statement of starting phase and first move</li>
-              <li>Companion compatibility confirmed — project syncs on next Solo Companion run</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
+    <div class="card">
+      <h3>Keep</h3>
+      <p>One-pass hygiene (rename, add header, remove secrets, sanity run) → freeze → log to MemPalace. No framework gates, no shipping requirements.</p>
     </div>
-
-    <!-- ══════════════ DISCOVERY ══════════════ -->
-    <div class="category-section cat-discovery" id="cat-discovery">
-      <div class="category-header">
-        <div class="category-icon">🔍</div>
-        <div>
-          <div class="category-title">Discovery</div>
-          <div class="category-desc">Understanding the problem, the process, and the constraints before anything gets designed.</div>
-        </div>
-        <div class="skill-count">4 skills</div>
-      </div>
-
-      <div class="skill-card" id="brainstorming">
-        <div class="skill-card-header">
-          <div class="skill-name">brainstorming</div>
-          <div class="skill-badge">Framework-routed</div>
-        </div>
-        <div class="skill-description">Product exploration for ideas that aren't fully formed. A genuine collaborative conversation — not a checklist or a spec session. Explores what the idea is and why it matters, surfaces what needs research before it can be designed, and ends with enough clarity to feed Discover. Includes a process sketch moment and a visual sketch mid-session when the idea benefits from something concrete to react to.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li><strong>Process sketch moment</strong> — process-mapper activates when conversation surfaces a process, captures preliminary as-is and to-be sketch</li>
-              <li><strong>Visual sketch mid-session</strong> — rough HTML screen as a thinking tool, not a deliverable. Triggers "warmer / colder" reaction.</li>
-              <li>One question per round — the right question, not the next one on a list</li>
-              <li>Routes to Discover, Research, or decomposition based on outcome</li>
-              <li>Explicitly not a spec or feasibility session</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Activated By</div>
-            <ul>
-              <li><strong>Framework routes here</strong> when the opening message has an exploratory tone</li>
-              <li>Also reachable when working through an unclear idea at any stage</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li><div class="output-tag">docs/brainstorm-[date]-[topic].md</div></li>
-              <li>Idea summary, value moment, preliminary process sketch (as-is + to-be draft)</li>
-              <li>Research items with specific questions</li>
-              <li>Routing decision: Discover / Research / decompose / more brainstorming</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="skill-card" id="discover">
-        <div class="skill-card-header">
-          <div class="skill-name">discover</div>
-          <div class="skill-badge">Framework-routed</div>
-        </div>
-        <div class="skill-description">The day-one conversation that builds the full product story — who it's for, what they do, where the value moment is, beginning to end. Produces the discovery brief and, critically, produces and agrees the as-is and to-be process maps before any design begins. The to-be map agreed here becomes the process contract for every downstream phase.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li>Narrative conversation — not a requirements form</li>
-              <li>Surfaces who/what/value with specificity, not user types</li>
-              <li>process-mapper produces <strong>as-is map</strong> (including manual processes) and <strong>to-be map</strong></li>
-              <li>To-be map agreed and validated before design sprint begins — this is the gate</li>
-              <li>Routes to design on-ramp: scratch / Figma / reference</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Activated By</div>
-            <ul>
-              <li><strong>Framework routes here</strong> when the opening message has a clear, articulated idea</li>
-              <li><strong>brainstorming</strong> hands off here when the idea reaches directional clarity</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li><div class="output-tag">docs/discovery-brief.md</div></li>
-              <li><div class="output-tag">docs/process/as-is-[name].md</div></li>
-              <li><div class="output-tag">docs/process/to-be-[name].md</div></li>
-              <li>Design on-ramp decision documented</li>
-              <li><strong>Gate:</strong> to-be map agreed before design begins</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="skill-card" id="tech-context">
-        <div class="skill-card-header">
-          <div class="skill-name">tech-context</div>
-          <div class="skill-badge">Phase skill</div>
-        </div>
-        <div class="skill-description">Establishes the full technical context before design begins — stack, constraints, infrastructure requirements, deploy configuration, security classification, and Claude API authentication pattern. Every downstream skill reads this document. The deploy skill routes entirely based on what tech-context defines. Regulated projects receive an acknowledgment gate here and a hard stop at deploy requiring documented external compliance review.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li>Routes to team profile (predefined stack) or general questions for greenfield</li>
-              <li>Plain-language deployment question maps to one of <strong>seven named paths</strong> (Local Mac, Cloudflare, Railway, Render, Fly.io, AWS App Runner, No pipeline) — solo never sees the list</li>
-              <li>Captures automated vs. manual deployment preference — framework sets up GitHub Actions at deploy phase if selected</li>
-              <li>Observability recommendation auto-maps to deployment path (CloudWatch for AWS App Runner; Datadog for Railway/Render/Fly.io; none for Local Mac)</li>
-              <li>Identifies <strong>infrastructure slices</strong> — prerequisites before any feature slice can start</li>
-              <li>Stack-specific coding standards referenced by code-review-and-quality</li>
-              <li><strong>Security classification</strong> — assigns one or more of seven classes: Standard (default), Personal, Financial, Authentication, Multi-tenant, Confidential, Regulated. Recorded in a Security Classification section in docs/tech-context.md. Read by code-review-and-quality to determine which Check 9 sub-checks run.</li>
-              <li><strong>Claude API authentication</strong> — for cloud deployments (Railway, Render, AWS, GCP, Azure, Fly.io, Cloudflare), Workload Identity Federation is the preferred auth pattern: the workload uses its existing cloud identity to get a short-lived access token, with no static API key to store or rotate. Local Mac projects use an API key in an env var. Recorded in docs/tech-context.md; deploy handles setup at deploy time.</li>
-              <li>Required reading for: design-sprint, solo-build, deploy, principal-engineer</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">When It Runs</div>
-            <ul>
-              <li>Phase 1.5 — runs after Discover</li>
-              <li>Required before Design Sprint can begin</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li><div class="output-tag">docs/tech-context.md</div></li>
-              <li>Stack, constraints, infrastructure slices</li>
-              <li>Deploy method, branching model, CI/CD configuration</li>
-              <li>Security Classification section — class(es) assigned, acknowledgment recorded for Regulated projects</li>
-              <li>Claude API auth pattern — Workload Identity Federation for cloud targets, API key in env var for Local Mac</li>
-              <li>Referenced by every downstream skill</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="skill-card" id="research-spike">
-        <div class="skill-card-header">
-          <div class="skill-name">research-spike</div>
-          <div class="skill-badge">On-demand</div>
-        </div>
-        <div class="skill-description">Timeboxed investigation of a specific unknown. Callable from any phase — when a question surfaces that can't be designed around without an answer. Returns a finding and a recommendation, then hands back to the phase that triggered it.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li>One specific question — not open-ended exploration</li>
-              <li>Timeboxed — produces a finding, not a design</li>
-              <li>Distinguishes "feasible with tradeoffs" from "not feasible"</li>
-              <li>Routes back to the invoking phase with the answer</li>
-              <li>Triggered by design-review when a slice is Blocked</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">When It Runs</div>
-            <ul>
-              <li>Callable from any phase — when a specific question blocks progress</li>
-              <li><strong>brainstorming</strong> surfaces research items that feed here</li>
-              <li><strong>design-review</strong> flags Blocked slices that need a spike</li>
-              <li><strong>principal-engineer</strong> triggers it when an architectural unknown surfaces</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li><div class="output-tag">docs/spikes/[topic].md</div></li>
-              <li>Finding: feasible / feasible with tradeoffs / not feasible</li>
-              <li>Recommendation for the invoking phase</li>
-              <li>Unblocks slice in design-review backlog</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+    <div class="card">
+      <h3>Promote</h3>
+      <p>Stop treating as spike code. Prepare handoff brief → hand to framework start. Do not build on spike code as if it were production architecture.</p>
     </div>
+  </div>
 
-    <!-- ══════════════ DESIGN ══════════════ -->
-    <div class="category-section cat-design" id="cat-design">
-      <div class="category-header">
-        <div class="category-icon">🎨</div>
-        <div>
-          <div class="category-title">Design</div>
-          <div class="category-desc">Producing the shared visual artifact that every downstream phase points at.</div>
-        </div>
-        <div class="skill-count">3 skills</div>
-      </div>
+  <h2>Support</h2>
+  <p>Post-deploy work on live systems — too focused for a full framework phase. Invoked via slash command. Minimal footprint, deploy alone, verify in production.</p>
 
-      <div class="skill-card" id="design-sprint">
-        <div class="skill-card-header">
-          <div class="skill-name">design-sprint</div>
-          <div class="skill-badge">Phase skill</div>
-        </div>
-        <div class="skill-description">Produces the HTML artifact — all screens, good enough to make real decisions from. The design sprint is the visual contract: the first shared artifact everyone can point at and agree on. It functions as a decision surface — the first time scope, data, process gaps, and implied infrastructure become visible. Reads both the discovery brief and the to-be process map; stops if the to-be map doesn't exist. In Claude Code, secondary screens fan out in parallel after the hero screen is approved on both structure and skin — the full set arrives faster, with a consistent design system applied across all of them. Cursor produces screens sequentially. Reads the Security Classification from tech-context.md in Step 1 — process-mapper checks for security process gaps (missing deletion paths, tenant-scoping issues, collection without disclosure) relevant to the assigned class.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li><strong>On-ramp A:</strong> scratch → hero screen → warmer/colder loop → all screens</li>
-              <li><strong>On-ramp B:</strong> Figma import via MCP — uses design as source of truth</li>
-              <li><strong>On-ramp C:</strong> reference screenshot → aesthetic extraction → produce in that direction</li>
-              <li>Walk-through conversation surfaces every element as build/defer decision</li>
-              <li>process-mapper cross-references screens against to-be map, annotates with screen refs, flags gaps</li>
-              <li>Deferred decisions log captures both scope and implied infrastructure decisions</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">When It Runs</div>
-            <ul>
-              <li>Phase 2 — runs after Discover and Tech Context are complete</li>
-              <li>Requires to-be process map — framework stops without it</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li><div class="output-tag">docs/design/sprint-[id].html</div></li>
-              <li><div class="output-tag">docs/design/deferred-decisions.md</div></li>
-              <li><div class="output-tag">docs/design/handoff/&lt;date&gt;/ (optional)</div></li>
-              <li>All screens — the shared visual artifact</li>
-              <li>to-be map annotated with screen references</li>
-              <li>Optional stakeholder handoff — HTML + PDF + feedback template for async review</li>
-              <li><strong>Gate:</strong> deferred decisions log required before planning</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+  <h3>bug-fix</h3>
+  <p>Fix a production bug correctly — reproduce first, find the root cause, make the smallest fix, verify nothing adjacent broke, deploy. Reproduce before touching anything. Root cause, not symptom. Deploy alone, never bundled.</p>
 
-      <div class="skill-card" id="frontend-design">
-        <div class="skill-card-header">
-          <div class="skill-name">frontend-design</div>
-          <div class="skill-badge">Supporting skill</div>
-        </div>
-        <div class="skill-description">Aesthetic and structural guidance for the HTML artifact. Provides design system direction — color, typography, spacing, component patterns — to ensure visual consistency across all screens produced in the design sprint.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li>Color palette, typography scale, spacing system</li>
-              <li>Component patterns: buttons, cards, forms, navigation</li>
-              <li>Ensures cross-screen visual consistency</li>
-              <li>Applied during design sprint, not as a standalone exercise</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">When It Runs</div>
-            <ul>
-              <li><strong>design-sprint</strong> activates it when aesthetic direction is needed</li>
-              <li>Also reachable when refining visual design at any point</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li>Design system applied to sprint HTML screens</li>
-              <li>Consistent visual language across all screens</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+  <h3>enhancement</h3>
+  <p>Add a small feature or improvement to an existing production application. Reads existing context first: backlog, design screens, process map, code patterns. If the change needs new design screens or a new process flow, route to design-review instead.</p>
 
-      <div class="skill-card" id="awesome-design-md">
-        <div class="skill-card-header">
-          <div class="skill-name">awesome-design-md</div>
-          <div class="skill-badge">Supporting skill</div>
-        </div>
-        <div class="skill-description">On-ramp 3 for the design sprint — reference-based aesthetic extraction. Takes a screenshot or design reference ("make it feel like ESPN") and extracts the design language for use as an aesthetic constraint when producing the HTML artifact.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li>Extracts color palette, typography choices, spacing, component style from reference</li>
-              <li>Produces design constraints document — not a copy, an interpretation</li>
-              <li>Feeds extracted constraints into design-sprint as the aesthetic foundation</li>
-              <li>Works from screenshots, live URLs, or verbal description</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">When It Runs</div>
-            <ul>
-              <li><strong>design-sprint</strong> activates it when the reference on-ramp is selected</li>
-              <li>Also reachable when aesthetic extraction is needed</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li>Design constraints applied to sprint HTML screens</li>
-              <li>Extracted aesthetic language documented</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
+  <h3>dependency-upgrade</h3>
+  <p>Safely update project dependencies — audit what's outdated, check for breaking changes, update one at a time, test, deploy. Security-flagged packages always go first. Read changelogs on major versions before upgrading.</p>
 
-    <!-- ══════════════ DATA & REVIEW ══════════════ -->
-    <div class="category-section cat-data" id="cat-data">
-      <div class="category-header">
-        <div class="category-icon">📋</div>
-        <div>
-          <div class="category-title">Data & Design Review</div>
-          <div class="category-desc">Generating realistic mock data and converting design screens into a defined, Ready backlog.</div>
-        </div>
-        <div class="skill-count">2 skills</div>
-      </div>
+  <h3>security-patch</h3>
+  <p>Address a security vulnerability in a production system — confirm the codebase is actually exposed, apply the minimal fix, verify it's closed, deploy urgently. Confirm exposure first (many CVEs affect packages in ways a specific project doesn't use). Audit for the pattern — don't fix one instance and miss three others.</p>
 
-      <div class="skill-card" id="data-scaffold">
-        <div class="skill-card-header">
-          <div class="skill-name">data-scaffold</div>
-          <div class="skill-badge">Phase skill</div>
-        </div>
-        <div class="skill-description">Generates realistic mock data for all screen data entities. Creates a clean mock layer with a single swap seam — easy to replace with real API data when ready. Flags data behavior candidates (lists, external feeds) so design review can ask the right scale and behavior questions before UI slices are finalized. Updates mock data after those questions are resolved.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li>Derives all entities from design sprint screens</li>
-              <li>Generates realistic (not placeholder) values — names, amounts, dates that look real</li>
-              <li>Single mock/real seam — one place to swap, nothing hardcoded across the codebase</li>
-              <li>Flags list entities and external API sources as <strong>data behavior candidates</strong> in data-mapping.md — these need the design review data behavior pass</li>
-              <li>Mock indicator badge on screens during development</li>
-              <li>data-mapping.md documents field-to-source mapping, behavior notes (pagination, null rates), and connection status</li>
-              <li><strong>Updates mock after data questions resolve</strong> — pagination edge cases, null field rates, empty/error states seeded before dependent slices finalize</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">When It Runs</div>
-            <ul>
-              <li>Phase 2.5 — runs after design sprint</li>
-              <li>Runs before or alongside design review (not blocked by it)</li>
-              <li>Re-runs (Step 7) when data questions log has newly resolved entries</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li><div class="output-tag">data/mock/[entity].json</div></li>
-              <li><div class="output-tag">docs/data-mapping.md</div></li>
-              <li>Proto-API contract — field names, types, source, behavior notes per screen entity</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+  <h2>Meta / Framework</h2>
+  <p>Skills that operate on the framework itself, not on projects. Used to expand, modify, fix, validate, or communicate about the playbook.</p>
 
-      <div class="skill-card" id="design-review">
-        <div class="skill-card-header">
-          <div class="skill-name">design-review</div>
-          <div class="skill-badge">Phase skill — iterative</div>
-        </div>
-        <div class="skill-description">The iterative loop between design artifact and build decision. Runs as many rounds as the project needs. Each round refines the design, defines slices, and updates the backlog. Continues in parallel with build for slices not yet started. Build begins when enough slices are Ready — not when all are. In Claude Code: Step 1.5 fires automatically before specialist review — opens each design sprint HTML in a real browser, takes desktop and mobile screenshots, inspects elements against design identity tokens, and checks console errors. Findings feed into the specialist synthesis. The three specialist lenses (PM, Tech Lead, Data) then run as a multi-agent orchestrator. Cursor users get a sequential pass with the same checks; Step 1.5 skips silently. Non-visual projects and rounds with no HTML artifacts skip Step 1.5 silently.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li>Reads <code>docs/stakeholder-feedback/*.md</code> as first-class input — per-screen comments become findings</li>
-              <li>Three lenses every round: <strong>PM</strong> (right problem?), <strong>Tech Lead</strong> (buildable?), <strong>Data</strong> (where does every field come from?)</li>
-              <li>Process coverage check every round — coverage map vs. to-be, every uncovered step surfaced as decision</li>
-              <li><strong>Data behavior pass</strong> — required for every screen with external data: volume, list behavior, nulls, empty/error/loading states. Produces a data questions log. Unresolved question blocks dependent UI slices from Ready.</li>
-              <li><strong>Process anchor required</strong> on every slice before it reaches Ready</li>
-              <li><strong>Two descriptions per slice — both required:</strong> plain language description (what the solo will see) and technical description (what the builder needs to know). Neither copies from the other. Neither can be blank.</li>
-              <li><strong>Quality contract required</strong> — four categories: Failure states, Edge cases, Input validation, Security. Each must be addressed or marked <code>N/A — [reason]</code>. A blank category is not valid. Missing quality contract blocks the slice from reaching Ready.</li>
-              <li><strong>Interactive element inventory (Figma-sourced slices)</strong> — every interactive element in the Figma frame scope must be classified: Functional (logic wired in this slice), Deferred (logic in a future slice — companion slice created in backlog now), or Out of scope. No fourth option. Inventory written to Notes field. Deferred elements require a companion slice before the current slice reaches Ready.</li>
-              <li>Slice statuses: In Review · Blocked · Deferred · Ready (full lifecycle in Backlog Status Reference)</li>
-              <li>Build signal: enough Ready slices to form a coherent Phase 1 starting point</li>
-              <li>Blocked slices have a named spike — never left open without a specific question</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">When It Runs</div>
-            <ul>
-              <li>Phase 2.6 — runs after design sprint and data scaffold</li>
-              <li>Multiple rounds — continues in parallel with build for remaining slices</li>
-              <li>Re-engages anytime: spike returns, new screen added, design updated</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li><div class="output-tag">docs/backlog.md</div></li>
-              <li>Slice records: ID, Name, Plain language description, Technical description, Design anchor, Data anchor, Process anchor, Done criteria, Quality contract (four categories), Self-verification checklist, Dependencies, Status</li>
-              <li>Process coverage map per round</li>
-              <li>Review log appended each round</li>
-              <li><strong>Gate:</strong> enough Ready slices before build starts</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
+  <h3>framework-curator</h3>
+  <p>The framework's institutional collaborator. Invoked when expanding, modifying, fixing, or validating the framework itself. Knows every skill, every doc, every gate, every principle. Always proposes changes for approval before executing — never modifies the framework silently.</p>
+  <table>
+    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Load-bearing check</strong></td><td>Checks every proposed change against the principles that define the framework — flags violations explicitly</td></tr>
+      <tr><td><strong>Documentation cascade</strong></td><td>Identifies every file a change touches (SKILL.md, README, framework doc, skills reference, process map, decks, cursor template)</td></tr>
+      <tr><td><strong>Proposal-first</strong></td><td>Drafts a full change proposal with preview of every edit before touching a single file</td></tr>
+      <tr><td><strong>Owner/contributor modes</strong></td><td>Owner can approve and execute framework changes. Contributors can propose only — direct edits redirected to ideas backlog.</td></tr>
+      <tr><td><strong>Scope boundary</strong></td><td>Operates on the framework repo only — never on projects</td></tr>
+    </tbody>
+  </table>
 
-    <!-- ══════════════ PLANNING ══════════════ -->
-    <div class="category-section cat-planning" id="cat-planning">
-      <div class="category-header">
-        <div class="category-icon">🗂️</div>
-        <div>
-          <div class="category-title">Planning</div>
-          <div class="category-desc">Sequencing work by risk and process order, then converting to executable issues.</div>
-        </div>
-        <div class="skill-count">4 skills</div>
-      </div>
+  <h3>comms-cascade</h3>
+  <p>Sub-agent that updates all framework communications docs when a version ships. Invoked by the framework curator with a structured brief. Reads every relevant doc, writes updates, commits, pushes to GitHub, and deploys to Cloudflare in one pass. Never invoked directly by the solo.</p>
+  <table>
+    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Always updates</strong></td><td>CHANGELOG.md and blog.html on every version</td></tr>
+      <tr><td><strong>Conditionally updates</strong></td><td>Skills-reference (if skills changed), guide pages (if watchfor items provided), process-map (if process flow changed)</td></tr>
+      <tr><td><strong>Never touches</strong></td><td>Manually maintained decks, unlinked reference pages, scripts</td></tr>
+      <tr><td><strong>Full deploy pass</strong></td><td>Commit → push to GitHub → wrangler pages deploy to Cloudflare, in that order</td></tr>
+    </tbody>
+  </table>
 
-      <div class="skill-card" id="prd-to-plan">
-        <div class="skill-card-header">
-          <div class="skill-name">prd-to-plan</div>
-          <div class="skill-badge">Phase skill</div>
-        </div>
-        <div class="skill-description">Turns the backlog of Ready slices into a sequenced, multi-phase implementation plan. Sequences by two forces in tension — risk order (hardest things first) and process order (to-be map step sequence). Resolves conflicts explicitly. Stops if the to-be process map doesn't exist — it's the sequencing foundation.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li>Reads: backlog, to-be map, tech-context, deferred-decisions — stops without to-be map</li>
-              <li>Maps every Ready slice to its to-be process step — flags uncovered steps</li>
-              <li>Sequences by <strong>risk order AND process order</strong> — conflicts named explicitly</li>
-              <li>Infrastructure slices always sequenced first, regardless of process order</li>
-              <li>Each phase shows: slices, process steps completed, what it proves, dependencies, definition of done</li>
-              <li>On approval: updates backlog with process anchors for every slice</li>
-              <li>Groups slices into <strong>Deliverables</strong> — each deliverable carries a technical spec (AI-facing), solo description (solo-facing), and acceptance criteria (shared contract between both)</li>
-              <li>Deliverable type assigned: <strong>Screen</strong> (reviewed visually) or <strong>Logic</strong> (reviewed against evidence)</li>
-              <li><strong>Integration deliverables</strong> — every Screen deliverable with external data gets a companion Logic deliverable for data integration. Always sequences after its Screen companion is Accepted. Data questions log must be resolved before integration slices can be scoped.</li>
-              <li><strong>Architecture type classification</strong> — each slice is classified as <strong>Leaf node</strong> (self-contained) or <strong>Core architecture</strong> (touches data models, shared logic, or infrastructure) during the slice design step. Unclassified slices cannot be approved — the quality scan blocks the plan until every slice has a type.</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">When It Runs</div>
-            <ul>
-              <li>Phase 3 — when design review has produced enough Ready slices</li>
-              <li>Requires to-be process map — framework stops without it</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li>Phased implementation plan (presented for approval)</li>
-              <li>backlog.md updated with process anchors on every slice</li>
-              <li>Open questions and stated assumptions documented</li>
-              <li>Hands off to <strong>to-issues</strong> on approval</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="skill-card" id="to-issues">
-        <div class="skill-card-header">
-          <div class="skill-name">to-issues</div>
-          <div class="skill-badge">Phase skill</div>
-        </div>
-        <div class="skill-description">Converts the approved implementation plan into GitHub issues in dependency order. Each issue is self-contained — design reference, process anchor, data anchor, done criteria, and dependency links included. A builder can start any slice from its issue alone without reading another document.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li>Confirms prerequisites first: plan approved, gh CLI authenticated, process anchors on every Ready slice</li>
-              <li>Creates issues in dependency order — blockers first so issue numbers can be referenced in dependents</li>
-              <li><strong>Required fields per issue:</strong> title, what it builds, design reference, process anchor, data anchor, done criteria, depends on, notes</li>
-              <li>Uses gh CLI with structured body — title format: <code>[SL-XXX] [Slice Name]</code></li>
-              <li>Labels by phase and status: Phase 1/2, Ready, Infrastructure, Blocked</li>
-              <li>Deferred slices excluded — only Ready slices become issues</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">When It Runs</div>
-            <ul>
-              <li>Immediately after <strong>prd-to-plan</strong> is approved — no gap between plan and issues</li>
-              <li>Plan is the source of truth — to-issues converts it, does not redesign it</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li>GitHub issues created in dependency order</li>
-              <li>Phase and status labels applied (<div class="output-tag">Phase 1</div> <div class="output-tag">Ready</div> <div class="output-tag">Infrastructure</div>)</li>
-              <li>Confirmation report: slice ID → issue number → status per slice</li>
-              <li>Each issue self-contained — builder can start without additional context</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="skill-card" id="to-prd">
-        <div class="skill-card-header">
-          <div class="skill-name">to-prd</div>
-          <div class="skill-badge">On-demand — optional</div>
-        </div>
-        <div class="skill-description">Synthesizes accumulated project context into a formal PRD. Optional — used when a formal requirements document is needed for stakeholder alignment, approval processes, or documentation. Reads the discovery brief, design decisions, and deferred decisions log.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li>Reads discovery brief, deferred decisions log, backlog, design screens</li>
-              <li>Produces structured PRD — problem, solution, scope, out of scope, success criteria</li>
-              <li>Not required for the framework flow — invoked when stakeholder documentation is needed</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">When It Runs</div>
-            <ul>
-              <li>When a formal PRD is needed for stakeholder alignment or approvals</li>
-              <li>Typically between discover and design sprint, or before planning</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li><div class="output-tag">docs/prd-[name].md</div></li>
-              <li>Structured PRD ready for stakeholder review</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="skill-card" id="grill-me">
-        <div class="skill-card-header">
-          <div class="skill-name">grill-me</div>
-          <div class="skill-badge">On-demand — optional</div>
-        </div>
-        <div class="skill-description">Skeptical PM stress-test. Hard questions, challenged assumptions, no vague answers accepted. Used before committing to a plan, before starting a significant build phase, or anytime the solo wants a second opinion that doesn't pull punches.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li>Challenges the "why" — is this the right problem to solve?</li>
-              <li>Surfaces unstated assumptions and treats them as risks</li>
-              <li>Challenges scope — what's in that shouldn't be, what's missing?</li>
-              <li>Doesn't accept "it makes sense" — requires evidence or reasoning</li>
-              <li>Not adversarial — rigorous. The goal is a stronger plan.</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">When It Runs</div>
-            <ul>
-              <li>Explicitly engaged anytime before committing to a plan or phase</li>
-              <li>Commonly: before planning, before Phase 1 build start</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li>List of challenged assumptions</li>
-              <li>Open questions that need answers before proceeding</li>
-              <li>Confirmed decisions that survived the challenge</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════════ BUILD ══════════════ -->
-    <div class="category-section cat-build" id="cat-build">
-      <div class="category-header">
-        <div class="category-icon">🔨</div>
-        <div>
-          <div class="category-title">Build</div>
-          <div class="category-desc">Slice-by-slice execution with discipline, anchors, and automatic QA handoff on completion.</div>
-        </div>
-        <div class="skill-count">4 skills</div>
-      </div>
-
-      <div class="skill-card" id="solo-build">
-        <div class="skill-card-header">
-          <div class="skill-name">solo-build</div>
-          <div class="skill-badge">Phase skill — per slice</div>
-        </div>
-        <div class="skill-description">Slice-by-slice build execution. Creates a feature branch at start, requires four anchors before writing code, follows journey order (first screen before second), surfaces mid-build discoveries immediately rather than silently resolving them, and commits on code-complete — automatically invoking the QA chain. Core architecture slices trigger an automatic principal engineer review before the branch opens. A pre-flight security check confirms the quality contract addresses the project's security class requirements before any branch opens — if not, the slice goes back to design review. Code review runs as an isolated sub-agent with no access to the build context, producing an unbiased review independent of implementation reasoning. In Claude Code: self-verification now includes a preview check — screenshot, console logs, failed network requests, interactive element click-through, and mobile viewport — all before committing. Console errors or failed network requests caused by the slice are ✗ items that must be fixed before code-complete. Skips silently for non-visual slices and in Cursor.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li>Creates feature branch: <code>feature/SL-[ID]-[slug]</code></li>
-              <li><strong>Four anchors required</strong> before writing code: design, data, done, process</li>
-              <li><strong>Architecture type gate</strong> — before branch opens, checks the slice's Architecture type. If Core architecture: principal engineer review fires automatically. No exceptions. Outcome recorded in the Notes field before any code is written.</li>
-              <li>Journey order — first screen before second, dependencies block</li>
-              <li>Mid-build discoveries surfaced immediately — never silently resolved</li>
-              <li><strong>Self-verification checklist run before code-complete</strong> — builder confirmation populated with ✓/✗ results before any handoff</li>
-              <li>Commit on code-complete: <code>SL-[ID] code-complete — [name]</code></li>
-              <li>Status after code-complete: <strong>In QA</strong> (not Done — QA and phase-test complete the chain)</li>
-              <li>Auto-invokes <strong>code-review-and-quality</strong> on code-complete</li>
-              <li><strong>Rollback protocol</strong> — when a slice that has already passed QA (In Test or Done) needs to be rebuilt, this is a rollback. Builder assesses scope (targeted fix vs. full rebuild), states the case, and waits for solo confirmation before any status changes. On confirmation: log entry written, slice returns to In Build, deliverable reverts to Pending Acceptance, phase reverts to In Progress if Completed. Full rebuild: existing code discarded, spec and design file re-read from scratch.</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">When It Runs</div>
-            <ul>
-              <li>Phase 4 — engaged per slice as each one moves to build</li>
-              <li>Requires a Ready slice with all four anchors confirmed in the backlog</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li>Feature branch created</li>
-              <li>Code commit: <div class="output-tag">SL-[ID] code-complete — [name]</div></li>
-              <li>Auto-handoff to <strong>code-review-and-quality</strong></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="skill-card" id="autopilot">
-        <div class="skill-card-header">
-          <div class="skill-name">autopilot</div>
-          <div class="skill-badge">Phase skill — autonomous build</div>
-        </div>
-        <div class="skill-description">Autonomous build mode. Builds the full product without solo participation after discovery (or design sprint). Solo-simulator plays every gate. First human touch point is phase test. Refinement cycles handle delta iteration. Single-session, context-managed.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li><strong>Two entry points:</strong> post-discover (leaner anchor) or post-design-review (richer anchor, fewer simulator judgment calls)</li>
-              <li><strong>Pre-flight check:</strong> simulator reads all discovery docs, surfaces judgment gaps, solo answers before build begins</li>
-              <li>Discovery quality guard — thin to-be map flagged before build starts</li>
-              <li>Simulator at every gate throughout build — solo not contacted during build</li>
-              <li>Deliverable boundary writes enforced automatically — not recommended</li>
-              <li>Mid-deliverable checkpoint at slice 4 fires automatically — handoff updated, build continues</li>
-              <li>Context discipline — reads from continuity docs, not conversation history</li>
-              <li><strong>Phase test is first human touch point</strong> — solo sees the full product for the first time</li>
-              <li><strong>Refinement cycles:</strong> implementation delta builds after phase test — structural issues exit to guided mode</li>
-              <li>Exit ramp to guided mode at any Refinement cycle completion</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">When It Runs</div>
-            <ul>
-              <li>Explicitly invoked — never auto-routed</li>
-              <li>Requires discovery-brief.md, to-be map, tech-context.md, and backlog.md with slices</li>
-              <li>Alternative to solo-build for the Build phase — solo chooses which mode</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li>Locked brief: <div class="output-tag">.claude/autopilot-brief.md</div></li>
-              <li>Simulator decision log: <div class="output-tag">.claude/autopilot-decisions.md</div></li>
-              <li>All slices built and committed</li>
-              <li>Continuity docs updated throughout</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="skill-card" id="tdd">
-        <div class="skill-card-header">
-          <div class="skill-name">tdd</div>
-          <div class="skill-badge">Supporting skill</div>
-        </div>
-        <div class="skill-description">Test-driven build technique. Tests are written before implementation — red, green, refactor. Invokable from solo-build when a TDD approach is chosen for a slice. Ensures test coverage is built in, not bolted on.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li>Red → green → refactor cycle</li>
-              <li>Tests written from the done anchor criteria</li>
-              <li>Coverage built before implementation, not after</li>
-              <li>Test files committed alongside implementation</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">When It Runs</div>
-            <ul>
-              <li><strong>solo-build</strong> activates it when a TDD approach is chosen for a slice</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li>Test files covering done anchor criteria</li>
-              <li>Passing implementation</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="skill-card" id="principal-engineer">
-        <div class="skill-card-header">
-          <div class="skill-name">principal-engineer</div>
-          <div class="skill-badge">On-demand</div>
-        </div>
-        <div class="skill-description">Architecture review lens for consequential decisions. Auto-triggered before any core architecture slice enters build — no manual invocation needed for those. Also invoked on demand at specific moments when the architectural stakes are high. Reads tech-context and the specific proposal, gives one recommendation (not a menu), names risks and debt explicitly, and holds its position under pushback unless new information changes the analysis.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li>Reads tech-context + discovery brief + the specific proposal</li>
-              <li><strong>One recommendation</strong> — not "here are three options"</li>
-              <li>Names risks, debt, and watch-for signals explicitly</li>
-              <li>Hard stops for genuine dealbreakers — states them clearly</li>
-              <li>Holds position under preference-based pushback; updates on new information</li>
-              <li>Logs final decision in backlog regardless of outcome</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">When It Runs</div>
-            <ul>
-              <li><strong>Automatically</strong> — when a Core architecture slice moves to In Build (fires before branch opens)</li>
-              <li>After tech-context, when the architecture needs a hard look before design</li>
-              <li>Before planning, on consequential sequencing decisions</li>
-              <li>Mid-build, when structural discovery surfaces</li>
-              <li>After a research spike returns with architectural implications</li>
-              <li>Anytime architectural uncertainty is high — engaged deliberately</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li>One architectural recommendation with reasoning</li>
-              <li>Risks, debt, and watch-for signals</li>
-              <li>Decision logged in backlog (with reasoning, even if overridden)</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ══════════════ QA ══════════════ -->
-    <div class="category-section cat-qa" id="cat-qa">
-      <div class="category-header">
-        <div class="category-icon">✅</div>
-        <div>
-          <div class="category-title">QA Chain</div>
-          <div class="category-desc">Three skills that chain automatically from code-complete — no user invocation needed until browser sign-off. Plus process-change for map-level conflicts.</div>
-        </div>
-        <div class="skill-count">4 skills</div>
-      </div>
-
-      <div class="skill-card" id="code-review-and-quality">
-        <div class="skill-card-header">
-          <div class="skill-name">code-review-and-quality</div>
-          <div class="skill-badge">Auto — invoked by solo-build</div>
-        </div>
-        <div class="skill-description">Ten-check quality gate that runs automatically when solo-build marks a slice code-complete. Checks pattern compliance, data sourcing, expandability, cleanliness, scope discipline, documentation, stack compliance, quality contract compliance, security, and design fidelity (Figma-sourced slices only). On pass: logs confirmation in the backlog slice detail and automatically invokes solo-qa. On fail: returns specific notes, slice goes back to build. Runs as an isolated sub-agent with no access to build context — sees only the code, the slice spec, and the quality contract. This makes it more likely to surface things the build pass rationalized away.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li><strong>Check 1:</strong> Pattern compliance — follows established patterns in the project</li>
-              <li><strong>Check 2:</strong> Data sourcing — cross-references against mock data file, no hardcoded values</li>
-              <li><strong>Check 3:</strong> Expandability — built to accommodate what's coming, not just today</li>
-              <li><strong>Check 4:</strong> Cleanliness — no dead code, no debug artifacts, no commented-out experiments</li>
-              <li><strong>Check 5:</strong> Scope discipline — only what was asked for, no extras</li>
-              <li><strong>Check 6:</strong> Documentation — purpose comments, complex logic explained, tradeoffs named</li>
-              <li><strong>Check 7:</strong> Stack compliance — follows tech-context standards</li>
-              <li><strong>Check 8:</strong> Quality contract — reads the pre-written contract before reading the code; checks every line adversarially. A try/catch that swallows the error silently does not satisfy "user sees an error message." Contract line is ✅ only if the specific behavior exists and is reachable.</li>
-              <li><strong>Check 9:</strong> Security — reads docs/tech-context.md to determine the project's Security Classification. Runs 5 baseline sub-checks on every slice (9a–9e: input sanitization, data scoped to authenticated user, auth checks server-side, injection prevention, no secrets in client-visible code). Class-specific checks layer on top: Personal (9f–9h), Financial (9i–9k), Authentication (9l–9n), Multi-tenant (9o–9q), Confidential (9r–9s), Regulated (9t). Projects without a Security Classification section default to Standard — baseline only. Up to 20 sub-checks total.</li>
-              <li><strong>Check 10:</strong> Design fidelity (Figma-sourced slices only) — (10a) interactive element inventory present in Notes field; (10b) every inventoried element built; (10c) Functional elements have wired logic, Deferred elements are explicit non-interactive placeholders; (10d) representative visual values traceable to Figma node properties. Non-Figma slices: skip stated explicitly as N/A in the report.</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">When It Runs</div>
-            <ul>
-              <li>Framework activates automatically when <strong>solo-build</strong> marks a slice code-complete</li>
-              <li>No manual trigger needed</li>
-              <li>Quality contract is read first — if missing from the backlog, code review cannot run</li>
-              <li>Reads docs/tech-context.md before Check 9 — Security Classification determines which sub-checks run</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li>✅/❌ per check with specific notes — Check 8 lists each contract line individually; Check 9 lists each sub-check with class label; Check 10 lists each sub-check or states N/A</li>
-              <li>On pass: <div class="output-tag">Code review passed [date]</div> logged in backlog slice detail</li>
-              <li>On pass: auto-invokes <strong>solo-qa</strong></li>
-              <li>On fail: returns to solo-build with specific items to address; slice status → In Build</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="skill-card" id="solo-qa">
-        <div class="skill-card-header">
-          <div class="skill-name">solo-qa</div>
-          <div class="skill-badge">Auto Part 1 / Solo Part 2</div>
-        </div>
-        <div class="skill-description">Two-part verification. Part 1 is AI-driven active testing — reads all four anchors, opens a preview, and cross-references rendered values against the mock data file with named evidence. Part 2 is a structured solo browser sign-off with specific done criteria listed. No sign-off permitted while an open missing requirement exists.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li>Gate check first: requires code review log in backlog AND builder confirmation populated before starting</li>
-              <li>Reads all four anchors (design, data, done, process) — not just done criteria</li>
-              <li><strong>Active testing</strong> — opens preview, verifies rendered values against mock data file. Evidence required, not code inspection.</li>
-              <li>Design fidelity check against sprint HTML</li>
-              <li>Part 2: structured prompt showing builder confirmation + exact done criteria for solo browser verification</li>
-              <li>Unexpected findings → <strong>qa-triage</strong> (classify before fixing)</li>
-              <li><strong>Slice status after solo sign-off: In Test</strong> (not Done — Done is set by phase-test)</li>
-              <li><strong>Deliverable acceptance</strong> — when all slices in a deliverable are In Test, runs a deliverable-level check. Reads plain language description, technical description, screens list, and acceptance criteria from the backlog record. Three types: Screen (visual pass), Logic (evidence pass), Integration (both). Status moves to <strong>Accepted</strong> on solo sign-off.</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">When It Runs</div>
-            <ul>
-              <li>Framework activates Part 1 automatically when <strong>code-review-and-quality</strong> passes</li>
-              <li>Part 2 requires solo browser verification before the slice moves to In Test</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li>QA verification with named evidence</li>
-              <li>Slice status: <strong>In Test</strong> in backlog (Done set later by phase-test)</li>
-              <li>Deliverable status: <strong>Accepted</strong> when all slices verified together</li>
-              <li>Feature branch pushed, PR created</li>
-              <li>Any unexpected findings → qa-triage log</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="skill-card" id="qa-triage">
-        <div class="skill-card-header">
-          <div class="skill-name">qa-triage</div>
-          <div class="skill-badge">Auto — invoked by solo-qa or phase-test</div>
-        </div>
-        <div class="skill-description">Routes unexpected QA discoveries to the correct path. Three types: bug (behavior defined, implementation wrong), missing requirement (never defined), regression (was Done, now broken). Classifies, scopes, and routes — never starts fixing before understanding what was found. "Fix the right thing, not the nearest thing."</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li><strong>Bug:</strong> defined behavior not implemented correctly → fix in current feature branch</li>
-              <li><strong>Missing requirement:</strong> never defined → define or defer before sign-off</li>
-              <li><strong>Regression:</strong> was Done, now broken → regression branch, root cause first</li>
-              <li>Scope assessment: which slice, which phase, how wide is the impact?</li>
-              <li>No solo sign-off while open missing requirement exists — must be defined or explicitly deferred</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">When It Runs</div>
-            <ul>
-              <li>Framework routes here from <strong>solo-qa</strong> when testing surfaces something unexpected</li>
-              <li>Framework routes here from <strong>phase-test</strong> when a stage finds an issue</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li>Classification: bug / missing requirement / regression / map-level gap</li>
-              <li>Scope assessment and routing decision</li>
-              <li>qa-triage log entry in backlog</li>
-              <li>Routed to correct fix path — test run continues on unaffected areas</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="skill-card" id="process-change">
-        <div class="skill-card-header">
-          <div class="skill-name">process-change</div>
-          <div class="skill-badge">Solo-invoked or Auto — from solo-build, qa-triage, phase-test</div>
-        </div>
-        <div class="skill-description">Consistent protocol for changes to the agreed to-be process map — regardless of cause or where it surfaces. Stakeholder input, demo gaps, technical constraints, solo realizations: all receive the same seven-step protocol. The where is unpredictable. The response is not.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li><strong>Cause-agnostic:</strong> four trigger sources, one protocol</li>
-              <li><strong>Three-tier impact scan:</strong> scheduled work · in-progress work · completed work — every item gets an explicit verdict</li>
-              <li><strong>Solo decides:</strong> Revise / Retire / Reopen / Create / Absorb — per affected slice</li>
-              <li><strong>Re-prioritization:</strong> resume order + revised schedule + new work from the change, surfaced explicitly</li>
-              <li><strong>Hard gate:</strong> solo confirms updated state before build resumes</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">When It Runs</div>
-            <ul>
-              <li>Solo invokes directly when they realize the to-be map needs to change</li>
-              <li>Auto-detected by <strong>solo-build</strong> when a map-level conflict is found mid-build</li>
-              <li>Auto-detected by <strong>qa-triage</strong> when a missing requirement has no to-be map step at all</li>
-              <li>Auto-detected by <strong>phase-test</strong> Stage 6 when acceptance review finds a process-level mismatch</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li>Updated to-be map (Refinement / Addition / Restructure)</li>
-              <li>Backlog updated — revised, retired, reopened, or new slices as decided</li>
-              <li>Deliverable records updated where needed</li>
-              <li>Re-prioritized build sequence</li>
-              <li>Process change record in product-continuity</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════════ TEST & DEPLOY ══════════════ -->
-    <div class="category-section cat-deploy" id="cat-deploy">
-      <div class="category-header">
-        <div class="category-icon">🚀</div>
-        <div>
-          <div class="category-title">Phase Test & Deploy</div>
-          <div class="category-desc">Full-phase validation before anything ships. Stack-driven deploy after the gate opens.</div>
-        </div>
-        <div class="skill-count">2 skills</div>
-      </div>
-
-      <div class="skill-card" id="phase-test">
-        <div class="skill-card-header">
-          <div class="skill-name">phase-test</div>
-          <div class="skill-badge">Solo explicit — /phase-test</div>
-        </div>
-        <div class="skill-description">Full-phase testing orchestrator. Seven specialist stages run in sequence. Invoked explicitly by the solo when they decide the phase is built — a deliberate decision, not automatic. Failures at any stage route to qa-triage; the test run continues on unaffected scenarios. Gate OPEN appends the phase completion record to backlog.md. In Claude Code, Stage 4 (tester) and Stage 5 (regression specialist) run in parallel — same gate logic, faster results. Cursor gets sequential execution.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li><strong>Stage 1:</strong> Environment readiness — pre-flight gate. Mock inactive, all slices deployed, app loads clean. Nothing runs until this passes.</li>
-              <li><strong>Stage 2:</strong> Use case creator — derives test plan from discovery brief + to-be map. Not invented.</li>
-              <li><strong>Stage 3:</strong> Data specialist — mock→real swap confirmed, API read/write verified, data-mapping.md validated</li>
-              <li><strong>Stage 4+5:</strong> Tester + Regression specialist — every scenario with named evidence, all In Test slices re-walked</li>
-              <li><strong>Stage 6:</strong> Acceptance reviewer — PM lens, does what was built match discovery brief intent?</li>
-              <li><strong>Stage 7:</strong> Gate — OPEN (deploy) or HOLD (specific items). HOLD: re-test affected scenarios only.</li>
-              <li><strong>On OPEN:</strong> all In Test slices move to <strong>Done</strong>, phase record moves to <strong>Completed</strong>, phase completion record appended to backlog.md</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">When It Runs</div>
-            <ul>
-              <li>Explicitly engaged via <code>/phase-test</code> — deliberate, not automatic</li>
-              <li><strong>Readiness table:</strong> three states — Ready (all slices In Test, deliverables Accepted, qa-triage clear) · Not Yet (anything still In Build or In QA) · Overdue (solo is adding scope when everything is In Test — invoke now)</li>
-              <li>Phase test isn't evidence you're done — it's the process for finding out if you are</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li><div class="output-tag">docs/phase-test-[phase]-[date].md</div></li>
-              <li>Full test report — all 7 stages</li>
-              <li>Gate: OPEN or HOLD with specific items</li>
-              <li>On OPEN: slices → Done · phase → Completed · completion record → backlog.md</li>
-              <li><strong>Gate:</strong> OPEN required before deploy</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="skill-card" id="deploy">
-        <div class="skill-card-header">
-          <div class="skill-name">deploy</div>
-          <div class="skill-badge">Phase skill</div>
-        </div>
-        <div class="skill-description">Stack-driven deploy orchestrator. Does not assume a platform — reads tech-context.md to determine the deploy method and executes accordingly. Confirms gate is OPEN, confirms branches are merged, routes to the correct method, and verifies the environment is actually live — not just that the pipeline said it succeeded.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li>Reads tech-context for deploy target, CI/CD system, branch mapping, trigger, verification method</li>
-              <li>Confirms phase test gate OPEN via phase completion record</li>
-              <li>Confirms all phase feature branches merged</li>
-              <li><strong>CI/CD Setup:</strong> one-time — generates <code>.github/workflows/ci.yml</code>, walks solo through token/secret setup in plain language per platform</li>
-              <li><strong>Method A:</strong> CI/CD triggered by merge (GitHub Actions)</li>
-              <li><strong>Method B:</strong> MCP tool triggered (Railway, Vercel, etc.)</li>
-              <li><strong>Method C:</strong> Manual CLI — surfaces exact command, waits for solo confirmation</li>
-              <li><strong>Method D:</strong> Not yet defined → asks 4 questions, updates tech-context, then deploys</li>
-              <li>Verifies environment live — not just pipeline green</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">When It Runs</div>
-            <ul>
-              <li>Phase 6 — runs after the phase test gate returns OPEN</li>
-              <li>Requires phase completion record in backlog.md before proceeding</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li>Deployed environment — confirmed live</li>
-              <li>Phase completion record updated: <div class="output-tag">Complete → Tested → Deployed</div></li>
-              <li>Deploy method, environment, and verification logged in backlog.md</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════════ ALWAYS-ON ══════════════ -->
-    <div class="category-section cat-always" id="cat-always">
-      <div class="category-header">
-        <div class="category-icon">⚡</div>
-        <div>
-          <div class="category-title">Always-On Skills</div>
-          <div class="category-desc">Activate on guided or piloted mode. One load per session — do not reload on each skill invocation. Silent in bare mode (the default).</div>
-        </div>
-        <div class="skill-count">4 skills</div>
-      </div>
-
-      <div class="skill-card" id="process-mapper">
-        <div class="skill-card-header">
-          <div class="skill-name">process-mapper</div>
-          <div class="skill-badge always-on-badge">⚡ Always-On</div>
-        </div>
-        <div class="skill-description">Produces and maintains the as-is and to-be process maps throughout the framework. The to-be map agreed in Discover is the process contract — process-mapper holds every downstream phase accountable to it. Explicitly handles manual processes (emails, spreadsheets, phone calls) in the as-is map. Never invoked by the user.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li><strong>As-is map:</strong> captures current process including manual steps, tools, handoffs, and gaps. Not limited to digital systems.</li>
-              <li><strong>To-be map:</strong> the agreed target process — validated with the solo before design begins</li>
-              <li>Cross-references screens vs. to-be during design sprint — gaps become decisions</li>
-              <li>Coverage check every design review round — every step mapped or decided</li>
-              <li>Process anchor verification in build — stops if slice has no process mapping</li>
-              <li>Source for Phase Test use case derivation</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Active Across</div>
-            <ul>
-              <li><strong>Brainstorm:</strong> captures preliminary as-is/to-be sketch</li>
-              <li><strong>Discover:</strong> formalizes both maps, validates to-be</li>
-              <li><strong>Design Sprint:</strong> cross-references screens vs. to-be, annotates map</li>
-              <li><strong>Design Review:</strong> coverage check every round</li>
-              <li><strong>Build:</strong> process anchor verification per slice</li>
-              <li><strong>Phase Test:</strong> source for use case derivation</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li><div class="output-tag">docs/process/as-is-[name].md</div></li>
-              <li><div class="output-tag">docs/process/to-be-[name].md</div></li>
-              <li>Coverage map per design review round</li>
-              <li>Process anchor on every Ready slice</li>
-              <li>to-be map annotated with screen references</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="skill-card" id="product-continuity">
-        <div class="skill-card-header">
-          <div class="skill-name">product-continuity</div>
-          <div class="skill-badge always-on-badge">⚡ Always-On</div>
-        </div>
-        <div class="skill-description">Institutional memory across every session and phase. Captures decisions with reasoning and alternatives considered, outstanding questions with owners and blocking status, assumptions being treated as true, risks, changes, glossary, target state, and session handoffs. The handoff document is the first thing read when a new session opens — context is never lost between sessions.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements (10 Documents)</div>
-            <ul>
-              <li><strong>sessions.md</strong> — log of every session</li>
-              <li><strong>decisions.md</strong> — with reasoning + alternatives</li>
-              <li><strong>questions.md</strong> — owner + blocking status</li>
-              <li><strong>assumptions.md</strong> — treated as true, unverified</li>
-              <li><strong>risks.md</strong> — named and tracked</li>
-              <li><strong>changes.md</strong> — direction changes with context</li>
-              <li><strong>glossary.md</strong> — project-specific terms</li>
-              <li><strong>target-state.md</strong> — what done looks like</li>
-              <li><strong>handoff.md</strong> — overwritten each session, first read next session</li>
-              <li><strong>onboarding.md</strong> — new collaborator orientation</li>
-              <li><strong>Long-gap re-entry</strong> — three-check protocol on 21+ day gaps: codebase state, environment, context validity</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Active Across</div>
-            <ul>
-              <li>Every phase, every session — always listening</li>
-              <li>Activates on: decision made, question surfaces, assumption stated, risk named, change occurs, new term introduced, session end</li>
-              <li>Reads handoff.md at session start</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li><div class="output-tag">docs/continuity/</div> directory — 10 documents</div></li>
-              <li>handoff.md updated every session end</li>
-              <li>Continuous capture — no batch processing</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="skill-card" id="framework-health">
-        <div class="skill-card-header">
-          <div class="skill-name">framework-health</div>
-          <div class="skill-badge always-on-badge">⚡ Always-On</div>
-        </div>
-        <div class="skill-description">Background health monitor. Checks signals — not full document reads. Surfaces one issue at a time with a specific recovery path. Silent when everything is healthy — output is always meaningful because it's rare. Never blocks progress. Deferred issues are logged to handoff, not repeated mid-session.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li><strong>Signal checks only:</strong> file existence, handoff.md summary, backlog At a Glance section</li>
-              <li>Only reads deeper when a signal is wrong</li>
-              <li>One issue at a time — most important first</li>
-              <li>Every issue includes a specific recovery path, not just identification</li>
-              <li>Silent when healthy — absence of output means everything is fine</li>
-              <li>Never halts progress; deferred issues go to handoff</li>
-              <li>Token-efficient by design</li>
-              <li><strong>Long-gap detection</strong> — 21+ days since last session triggers re-entry check before work begins</li>
-              <li><strong>Phase test readiness</strong> — fires once when all current-phase slices are Done and no open build qa-triage items remain</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Active Across</div>
-            <ul>
-              <li><strong>Mode activation</strong> — checks for existing context, handoff, framework documents when guided or piloted mode activates</li>
-              <li><strong>Between phases</strong> — checks that phase prerequisites exist</li>
-              <li><strong>Session end</strong> — ensures handoff is current</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li>Single issue surfaced with specific recovery path</li>
-              <li>Or: silence (healthy state)</li>
-              <li>Deferred issues logged to handoff.md</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="skill-card" id="retrospective">
-        <div class="skill-card-header">
-          <div class="skill-name">retrospective</div>
-          <div class="skill-badge always-on-badge">⚡ Always-On</div>
-        </div>
-        <div class="skill-description">Two-mode continuous learning mechanism. Flag mode captures observations in the moment as lightweight one-line notes — no interruption to flow. Retro mode processes those notes at phase end and after phase test: grouping patterns vs. one-offs, naming root causes, producing proposed fixes, and distinguishing project-level adjustments from framework-level playbook improvements.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li><strong>Flag mode:</strong> one-line observations — date, phase, what happened. No analysis. Captured by product-continuity in the moment.</li>
-              <li><strong>Retro mode:</strong> reads only retro-notes.md — no wide context reads. Groups pattern vs. one-off vs. positive.</li>
-              <li>Patterns get full treatment: what happened, root cause, impact, proposed fix, decision</li>
-              <li>Positive observations captured too — what worked gets reinforced, not accidentally removed</li>
-              <li><strong>Two levels:</strong> project-level (this project only) vs. framework-level (updates the playbook SKILL.md)</li>
-              <li>Framework improvements queue to framework-improvements.md, applied at next project start</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Active Across</div>
-            <ul>
-              <li><strong>Flag mode:</strong> every phase, every session via product-continuity</li>
-              <li><strong>Retro mode:</strong> end of each phase — automatically</li>
-              <li><strong>Retro mode:</strong> after phase test — the most revealing moment</li>
-              <li><strong>Retro mode:</strong> user explicit — <code>/retrospective</code> or <code>/retro</code></li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li><div class="output-tag">docs/continuity/retro-notes.md</div></li>
-              <li><div class="output-tag">docs/continuity/retrospective.md</div></li>
-              <li><div class="output-tag">docs/continuity/framework-improvements.md</div></li>
-              <li>Processed entries archived with separator after each retro run</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════════ COMPANION ══════════════ -->
-    <div class="category-section" id="cat-companion" style="border-left:3px solid #49494b">
-      <div class="category-header">
-        <div class="category-icon">🤝</div>
-        <div>
-          <div class="category-title" style="color:#49494b">Companion</div>
-          <div class="category-desc">On-demand conversational companion. Invoked by name — never automatic, never a phase. Recall and explain only: answers questions about the framework and the project without capturing, deciding, or building. Routes to the right skill with explicit consent when something said in conversation should be logged.</div>
-        </div>
-        <div class="skill-count">1 skill</div>
-      </div>
-
-      <div class="skill-card" id="nivya" style="border-color:rgba(73,73,75,0.22)">
-        <div class="skill-card-header">
-          <div class="skill-name" style="color:#49494b">nivya</div>
-          <div class="skill-badge" style="background:rgba(73,73,75,0.12);color:#49494b">On-demand companion</div>
-        </div>
-        <div class="skill-description">Conversational companion who has read the full framework and the project's continuity, process, and memory artifacts. Answers questions — does not replace the tasks of other skills. It does not facilitate work that is owned by other skills. Addressable by name once loaded. Can run a huddle as a dedicated subagent for focused sessions.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label" style="color:#49494b">Key Elements</div>
-            <ul>
-              <li><strong>Recall + explain only</strong> — never captures, decides, or builds</li>
-              <li><strong>Inline mode:</strong> <code>/nivya</code> loads her into the current conversation; address her by name</li>
-              <li><strong>Huddle mode:</strong> when conversation goes deep, Nivya offers to spin up a dedicated subagent session</li>
-              <li><strong>Explicit routing:</strong> if a conversation produces something that should be logged, she names the skill and asks consent before engaging</li>
-              <li><strong>Cites sources</strong> — points at the artifact rather than paraphrasing</li>
-              <li>Framework won't jump the gun on anything said to Nivya — nothing captured without a yes</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label" style="color:#49494b">When It Runs</div>
-            <ul>
-              <li>On-demand only — never auto-loaded</li>
-              <li>Useful mid-phase when overwhelm or memory gap hits</li>
-              <li>Useful between sessions when returning to a project cold</li>
-              <li>Useful any time the solo wants to understand <em>why</em> before acting</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label" style="color:#49494b">Output</div>
-            <ul>
-              <li>Spoken answer — no artifact</li>
-              <li>Pointers to the source documents</li>
-              <li>On consent: handoff to the relevant framework skill (product-continuity, process-mapper, design-review, research-spike, etc.)</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════════ FRAMEWORK PARTNER ══════════════ -->
-    <div class="category-section" id="cat-partner" style="border-left:3px solid #bd8c7d">
-      <div class="category-header">
-        <div class="category-icon">🤝</div>
-        <div>
-          <div class="category-title" style="color:#bd8c7d">Framework Partner</div>
-          <div class="category-desc">Scott's named framework partner. Full curator capability plus relationship context — discusses, challenges, designs, and builds alongside Scott. Not recall-only. Invoked by name or /ren.</div>
-        </div>
-        <div class="skill-count">1 skill</div>
-      </div>
-
-      <div class="skill-card" id="ren" style="border-color:rgba(189,140,125,0.22)">
-        <div class="skill-card-header">
-          <div class="skill-name" style="color:#bd8c7d">ren</div>
-          <div class="skill-badge" style="background:rgba(189,140,125,0.12);color:#bd8c7d">Framework partner</div>
-        </div>
-        <div class="skill-description">Scott's named framework partner. Full curator capability plus relationship context — knows the framework history, knows how Scott works, and holds both at once. Discusses, challenges, designs, and builds. Not a recall-only companion. Invoked by name anywhere in conversation, or with /ren.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label" style="color:#bd8c7d">Key Elements</div>
-            <ul>
-              <li><strong>Full curator capability:</strong> can propose, review, and execute framework changes — all curator rules apply</li>
-              <li><strong>Cross-device memory:</strong> fetches current framework state from ren-memory repo at every session start — context is accurate regardless of which machine the session opens on</li>
-              <li><strong>Daily health check:</strong> 8am macOS notification with GREEN/YELLOW/RED staleness scores for pending retro items, stale handoffs, unprocessed ideas, and other key indicators</li>
-              <li><strong>Comms cascade:</strong> when a version ships, the framework curator spawns the comms-cascade sub-agent with a structured brief — automated doc update, commit, push, and deploy in one pass</li>
-              <li><strong>Relationship context:</strong> knows Scott's preferences, working style, and the history of framework decisions — not starting from zero each session</li>
-              <li><strong>Challenges as a partner:</strong> pushes back on direction when warranted; holds position under preference pressure; updates on new information</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label" style="color:#bd8c7d">When It Runs</div>
-            <ul>
-              <li>Invoked with /ren</li>
-              <li>Any session involving framework discussion, framework changes, or curator work</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label" style="color:#bd8c7d">Output</div>
-            <ul>
-              <li>Framework change proposals (same format as framework-curator)</li>
-              <li>Executed cascades after approval</li>
-              <li>Comms cascade invocation on version ship</li>
-              <li>Conversational discussion, challenge, and design collaboration</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════════ WORKSHOP ══════════════ -->
-    <div class="category-section" id="cat-workshop" style="border-left:3px solid #8e8e90">
-      <div class="category-header">
-        <div class="category-icon">🔬</div>
-        <div>
-          <div class="category-title" style="color:#8e8e90">Workshop</div>
-          <div class="category-desc">For work that isn't a product — spikes, personal tools, exploratory builds. Invoked via slash command, never auto-loaded. Bare mode by default. The anti-SBF: timebox over gates, outcome over process, disposable by default.</div>
-        </div>
-        <div class="skill-count">3 skills</div>
-      </div>
-
-      <div class="skill-card" id="scope-check" style="border-color:#DDD6CC">
-        <div class="skill-card-header">
-          <div class="skill-name" style="color:#8e8e90">scope-check</div>
-          <div class="skill-badge" style="background:rgba(142,142,144,0.12);color:#8e8e90">Workshop entry</div>
-        </div>
-        <div class="skill-description">Entry gate for Workshop. Asks one question — who is this for, and how long does it live? — then routes to Workshop (spike/tool) or hands to SBF (product). Holds the line between exploratory work and product work.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label" style="color:#8e8e90">Key Elements</div>
-            <ul>
-              <li><strong>One question:</strong> "Who is this for, and how long does it live?" — routes spike/tool to Workshop, product to SBF start</li>
-              <li><strong>Challenge:</strong> if the solo says spike but describes users or external sharing, pushes back</li>
-              <li><strong>Graduation triggers:</strong> captures signals that would force promotion to SBF later</li>
-              <li><strong>Timebox:</strong> every spike gets one — default 2 hours, stretch 1 day</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label" style="color:#8e8e90">When It Runs</div>
-            <ul>
-              <li>Any new work that isn't obviously a product</li>
-              <li>"Let me try...", "quick script to...", "see if I can...", "one-shot to..."</li>
-              <li>start routes here automatically for spike-shaped openings</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label" style="color:#8e8e90">Output</div>
-            <ul>
-              <li>One-paragraph frame: shape · outcome · timebox or scope · graduation triggers</li>
-              <li>Hands off to spike</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="skill-card" id="spike" style="border-color:#DDD6CC">
-        <div class="skill-card-header">
-          <div class="skill-name" style="color:#8e8e90">spike</div>
-          <div class="skill-badge" style="background:rgba(142,142,144,0.12);color:#8e8e90">Workshop execution</div>
-        </div>
-        <div class="skill-description">The Workshop execution skill. Timeboxed exploratory work with a single artifact and a running journal of what was tried and what happened. Outcome-first, not process-first. No gates, no anchors, no phases.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label" style="color:#8e8e90">Key Elements</div>
-            <ul>
-              <li><strong>Running journal:</strong> spike-journal.md — what was tried, what happened, what surprised, current best guess</li>
-              <li><strong>Single file bias:</strong> keep work in as few files as possible — sprawl is a signal</li>
-              <li><strong>No tests, no abstractions, no README:</strong> the journal is the README</li>
-              <li><strong>Timebox enforcement:</strong> outcome reached → land · almost reached → one extension · unreachable → land with Toss</li>
-              <li><strong>Graduation triggers:</strong> "Can I share this?", "Should I add auth?", someone else wants to use it</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label" style="color:#8e8e90">Output</div>
-            <ul>
-              <li>The work (code / notebook / script) + spike-journal.md</li>
-              <li>Handed to land</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="skill-card" id="land" style="border-color:#DDD6CC">
-        <div class="skill-card-header">
-          <div class="skill-name" style="color:#8e8e90">land</div>
-          <div class="skill-badge" style="background:rgba(142,142,144,0.12);color:#8e8e90">Workshop exit</div>
-        </div>
-        <div class="skill-description">The Workshop exit skill. Three outcomes — Toss (capture learning, archive), Keep (personal tool with minimal hygiene), Promote (hand to SBF with a prepared brief). Every spike ends here. No exceptions.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label" style="color:#8e8e90">Three Outcomes</div>
-            <ul>
-              <li><strong>Toss:</strong> summarize learning → write to MemPalace → archive or delete</li>
-              <li><strong>Keep:</strong> one-pass hygiene (rename, add header, remove secrets, sanity run) → freeze → log to MemPalace</li>
-              <li><strong>Promote:</strong> stop treating as spike code → prepare handoff brief → hand to SBF start</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label" style="color:#8e8e90">When It Runs</div>
-            <ul>
-              <li>Every spike ends here — no exceptions, no "I'll land it later"</li>
-              <li>Timebox up, graduation trigger fired, or solo decides to close</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════════ SUPPORT ══════════════ -->
-    <div class="category-section" id="cat-support" style="border-left:3px solid #bd8c7d">
-      <div class="category-header">
-        <div class="category-icon">🔧</div>
-        <div>
-          <div class="category-title" style="color:#bd8c7d">Support</div>
-          <div class="category-desc">Post-deploy work on live systems — too focused for a full SBF phase. Invoked via slash command, never auto-loaded. Minimal footprint, deploy alone, verify in production.</div>
-        </div>
-        <div class="skill-count">4 skills</div>
-      </div>
-
-      <div class="skill-card" id="bug-fix" style="border-color:rgba(189,140,125,0.22)">
-        <div class="skill-card-header">
-          <div class="skill-name" style="color:#bd8c7d">bug-fix</div>
-          <div class="skill-badge" style="background:rgba(189,140,125,0.12);color:#bd8c7d">Support skill</div>
-        </div>
-        <div class="skill-description">Fix a production bug correctly — reproduce first, find the root cause, make the smallest fix, verify nothing adjacent broke, deploy. For issues in live systems, not for development-time errors caught before deploy.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label" style="color:#bd8c7d">Key Elements</div>
-            <ul>
-              <li><strong>Reproduce before touching anything:</strong> if you can't reproduce it, you don't have a bug</li>
-              <li><strong>Root cause, not symptom:</strong> fixing the symptom brings the bug back</li>
-              <li><strong>Smallest fix:</strong> every line changed is a line that can introduce a new problem</li>
-              <li><strong>Regression check:</strong> verify the fix AND that nothing adjacent broke</li>
-              <li><strong>Deploy alone:</strong> never bundled with other changes</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label" style="color:#bd8c7d">Output</div>
-            <ul>
-              <li>Commit: <code>fix: [what was broken] — root cause: [one line]</code></li>
-              <li>Verified in production — not just locally</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="skill-card" id="enhancement" style="border-color:rgba(189,140,125,0.22)">
-        <div class="skill-card-header">
-          <div class="skill-name" style="color:#bd8c7d">enhancement</div>
-          <div class="skill-badge" style="background:rgba(189,140,125,0.12);color:#bd8c7d">Support skill</div>
-        </div>
-        <div class="skill-description">Add a small feature or improvement to an existing production application. Uses existing design, context, and patterns — not a new phase of work. If the change needs new design screens or a new process flow, route to SBF design-review instead.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label" style="color:#bd8c7d">Key Elements</div>
-            <ul>
-              <li><strong>Read existing context first:</strong> backlog, design screens, process map, code patterns</li>
-              <li><strong>Coherence check:</strong> extend existing patterns — don't create parallel solutions</li>
-              <li><strong>Scope in one sentence:</strong> if it takes more, it may be a new SBF phase</li>
-              <li><strong>Lite QA:</strong> targeted verification — not the full solo-qa chain</li>
-              <li><strong>Solo confirms in browser</strong> before marking done</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label" style="color:#bd8c7d">Output</div>
-            <ul>
-              <li>Commit: <code>enhancement: [what was added]</code></li>
-              <li>Verified in production</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="skill-card" id="dependency-upgrade" style="border-color:rgba(189,140,125,0.22)">
-        <div class="skill-card-header">
-          <div class="skill-name" style="color:#bd8c7d">dependency-upgrade</div>
-          <div class="skill-badge" style="background:rgba(189,140,125,0.12);color:#bd8c7d">Support skill</div>
-        </div>
-        <div class="skill-description">Safely update project dependencies — audit what's outdated, check for breaking changes, update one at a time, test, deploy. Security-flagged packages always go first.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label" style="color:#bd8c7d">Key Elements</div>
-            <ul>
-              <li><strong>Prioritized audit:</strong> 🔴 security flagged · 🟡 major (breaking) · 🟢 minor/patch</li>
-              <li><strong>Read changelogs on major versions:</strong> never upgrade without checking</li>
-              <li><strong>One at a time:</strong> isolation means you know exactly what broke</li>
-              <li><strong>Know the rollback path</strong> before deploying</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label" style="color:#bd8c7d">Output</div>
-            <ul>
-              <li>Commit per package: <code>deps: upgrade [package] [old] → [new]</code></li>
-              <li>Verified in production after deploy</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="skill-card" id="security-patch" style="border-color:rgba(189,140,125,0.22)">
-        <div class="skill-card-header">
-          <div class="skill-name" style="color:#bd8c7d">security-patch</div>
-          <div class="skill-badge" style="background:rgba(189,140,125,0.12);color:#bd8c7d">Support skill</div>
-        </div>
-        <div class="skill-description">Address a security vulnerability in a production system — confirm the codebase is actually exposed, apply the minimal fix, verify it's closed, deploy urgently. Speed and correctness are equally required. A patch that doesn't close the vulnerability is worse than the original exposure.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label" style="color:#bd8c7d">Key Elements</div>
-            <ul>
-              <li><strong>Confirm exposure first:</strong> many CVEs affect packages in ways a specific project doesn't use</li>
-              <li><strong>Minimal fix:</strong> don't refactor or bundle — patch alone</li>
-              <li><strong>Verify it's closed:</strong> reproduce the attack vector, confirm it no longer works</li>
-              <li><strong>Audit for the pattern:</strong> don't fix one instance and miss three others</li>
-              <li><strong>Deploy urgently:</strong> skips the normal deploy queue</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label" style="color:#bd8c7d">Output</div>
-            <ul>
-              <li>Commit: <code>deps: security patch [package] → [version] — [CVE ID]</code> or <code>fix: close [type] — [CVE ID]</code></li>
-              <li>Verified closed in production</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════════ META ══════════════ -->
-    <div class="category-section cat-meta" id="cat-meta">
-      <div class="category-header">
-        <div class="category-icon">🛠️</div>
-        <div>
-          <div class="category-title">Meta / Framework</div>
-          <div class="category-desc">Skills that operate on the framework itself, not on projects. Used to expand, modify, fix, validate, or communicate about the playbook.</div>
-        </div>
-        <div class="skill-count">2 skills</div>
-      </div>
-
-      <div class="skill-card" id="framework-curator">
-        <div class="skill-card-header">
-          <div class="skill-name">framework-curator</div>
-          <div class="skill-badge">On-demand skill</div>
-        </div>
-        <div class="skill-description">The framework's institutional collaborator. Invoked when expanding, modifying, fixing, or validating the Solo Builder Framework itself. Knows every skill, every doc, every gate, every principle, and the history of decisions behind them. Always proposes changes for approval before executing — never modifies the framework silently. Supports a shared ideas backlog for contributor proposals with owner sign-off before any build work begins.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li><strong>Load-bearing principles:</strong> checks every proposed change against the principles that define the framework — flags violations explicitly</li>
-              <li><strong>Documentation cascade:</strong> identifies every file a change touches (SKILL.md, README, framework doc, skills reference, process map, decks, cursor template)</li>
-              <li><strong>Proposal-first:</strong> drafts a full change proposal with preview of every edit before touching a single file</li>
-              <li><strong>Shared ideas backlog:</strong> logs proposed changes from any session to <code>shared/ideas.md</code>; surfaces pending approvals at owner session start</li>
-              <li><strong>Owner / contributor modes:</strong> owner can approve and execute framework changes; contributors can propose only — direct edits are redirected to the ideas backlog</li>
-              <li><strong>MemPalace-aware:</strong> searches for related decisions to preserve the "why" — doesn't re-litigate closed debates</li>
-              <li><strong>Integrity validation:</strong> after any change, checks for orphaned references, missing nav entries, and taxonomy drift</li>
-              <li><strong>Scope boundary:</strong> operates on the framework repo only — never on projects</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">When It Runs</div>
-            <ul>
-              <li>Invoked explicitly by name — never auto-triggered</li>
-              <li>Adding a new skill to the framework</li>
-              <li>Modifying an existing skill's scope, behavior, routing, or output</li>
-              <li>Retiring a skill</li>
-              <li>Changing a framework-wide principle or pattern</li>
-              <li>Running a framework integrity / drift check</li>
-              <li>Logging or reviewing ideas in the shared ideas backlog</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li>Four-part change proposal: what's changing · cascade of files · preview of each edit · principle check</li>
-              <li>Executed cascade (after approval) with diff summary</li>
-              <li>Framework integrity report — drift flagged or <em>Framework integrity: clean</em></li>
-              <li>Shared ideas entry logged and pushed (contributor or owner sessions)</li>
-              <li>Optional MemPalace entry recording the decision and reasoning</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="skill-card" id="comms-cascade" style="border-color:#e8ddd4">
-        <div class="skill-card-header">
-          <div class="skill-name">comms-cascade</div>
-          <div class="skill-badge">Sub-agent skill</div>
-        </div>
-        <div class="skill-description">Sub-agent that updates all framework communications docs when a version ships. Invoked by the framework curator with a structured brief. Reads every relevant doc, writes updates where applicable, commits, pushes to GitHub, and deploys to Cloudflare in one pass. Never invoked directly by the solo.</div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Key Elements</div>
-            <ul>
-              <li><strong>Structured brief required:</strong> version, date, summary, skills affected, watchfor items, guide sections affected — the brief is the spec; a vague brief produces vague docs</li>
-              <li><strong>Always updates:</strong> CHANGELOG.md and blog.html on every version</li>
-              <li><strong>Conditionally updates:</strong> skills-reference (if skills changed), guide pages (if watchfor items provided), process-map (if process flow changed)</li>
-              <li><strong>Never touches:</strong> manually maintained decks, unlinked reference pages, scripts</li>
-              <li><strong>Read before write:</strong> reads every file before deciding whether to update; no filler entries added</li>
-              <li><strong>Full deploy pass:</strong> commit → push to GitHub → wrangler pages deploy to Cloudflare, in that order</li>
-              <li><strong>Reports back:</strong> which files were updated, commit hash, deploy confirmation</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">When It Runs</div>
-            <ul>
-              <li>Invoked by the framework curator when a framework version ships</li>
-              <li>Never invoked directly by the solo</li>
-              <li>Never invoked without a complete structured brief</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output</div>
-            <ul>
-              <li>Updated communications docs (CHANGELOG, blog, and any conditional files)</li>
-              <li>Commit: <code>v[X.Y.Z] — comms cascade</code></li>
-              <li>GitHub push confirmed</li>
-              <li>Cloudflare Pages deploy confirmed</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /content -->
-</main>
-
-<script>
-  // Highlight active nav item on scroll
-  const cards = document.querySelectorAll('.skill-card[id]');
-  const navLinks = document.querySelectorAll('.nav-skill');
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        navLinks.forEach(l => l.classList.remove('active'));
-        const link = document.querySelector(`.nav-skill[href="#${entry.target.id}"]`);
-        if (link) link.classList.add('active');
-      }
-    });
-  }, { rootMargin: '-20% 0px -70% 0px' });
-
-  cards.forEach(card => observer.observe(card));
-</script>
-
+</div>
 </body>
 </html>

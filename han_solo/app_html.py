@@ -713,11 +713,6 @@ APP_HTML = """<!DOCTYPE html>
         <div class="sbf-section">
           <div class="sbf-section-label">Overview</div>
           <div class="sbf-grid">
-            <a class="sbf-card" href="/docs/framework/index.html" target="_blank">
-              <div class="sbf-card-icon">📋</div>
-              <div class="sbf-card-title">Reference Index</div>
-              <div class="sbf-card-sub">Full nav — all pages in one place</div>
-            </a>
             <a class="sbf-card" href="/docs/framework/process-map.html" target="_blank">
               <div class="sbf-card-icon">🗺️</div>
               <div class="sbf-card-title">Process Map</div>
@@ -846,11 +841,6 @@ APP_HTML = """<!DOCTYPE html>
               <div class="sbf-card-icon">💼</div>
               <div class="sbf-card-title">Business Overview</div>
               <div class="sbf-card-sub">How we work today → how we build tomorrow · 11 slides</div>
-            </a>
-            <a class="sbf-card" href="/docs/framework/deck-bayer.html" target="_blank">
-              <div class="sbf-card-icon">🏢</div>
-              <div class="sbf-card-title">Bayer Deck</div>
-              <div class="sbf-card-sub">Building with AI without losing control</div>
             </a>
           </div>
         </div>

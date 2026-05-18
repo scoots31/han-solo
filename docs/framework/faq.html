@@ -1,675 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Solo Builder Framework — FAQ &amp; Troubleshooting</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --navy: #1a1a1a;
-    --navy-mid: #2a2a2a;
-    --blue: #bd8c7d;
-    --blue-light: rgba(142,142,144,0.15);
-    --teal: #8e8e90;
-    --teal-light: rgba(142,142,144,0.15);
-    --purple: #bd8c7d;
-    --purple-light: rgba(189,140,125,0.12);
-    --indigo: #49494b;
-    --indigo-light: rgba(73,73,75,0.12);
-    --orange: #bd8c7d;
-    --orange-light: rgba(189,140,125,0.12);
-    --green: #8e8e90;
-    --green-light: rgba(142,142,144,0.12);
-    --rose: #bd8c7d;
-    --rose-light: rgba(189,140,125,0.12);
-    --amber: #d1bfa7;
-    --amber-light: rgba(209,191,167,0.15);
-    --gold: #d1bfa7;
-    --gold-light: rgba(209,191,167,0.15);
-    --gray-50: #faf8f5;
-    --gray-100: #e8ddd4;
-    --gray-200: #e8ddd4;
-    --gray-300: #DDD6CC;
-    --gray-500: #8e8e90;
-    --gray-700: #49494b;
-    --gray-900: #1a1a1a;
-  }
-
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    background: var(--gray-50);
-    color: var(--gray-900);
-    display: flex;
-    min-height: 100vh;
-  }
-
-  /* ── SIDEBAR ── */
-  .sidebar {
-    width: 240px;
-    flex-shrink: 0;
-    background: var(--navy);
-    position: fixed;
-    top: 0; left: 0; bottom: 0;
-    overflow-y: auto;
-    padding: 28px 0 40px;
-    z-index: 10;
-  }
-  .sidebar::-webkit-scrollbar { width: 4px; }
-  .sidebar::-webkit-scrollbar-track { background: transparent; }
-  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
-
-  .sidebar-header {
-    padding: 0 20px 24px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    margin-bottom: 16px;
-  }
-  .sidebar-header .sh-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: rgba(255,255,255,0.35);
-    margin-bottom: 6px;
-  }
-  .sidebar-header .sh-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: #fff;
-    line-height: 1.3;
-  }
-
-  .nav-group { margin-bottom: 6px; }
-  .nav-group-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    padding: 8px 20px 4px;
-    display: block;
-    color: rgba(255,255,255,0.35);
-  }
-  .nav-skill {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 20px;
-    font-size: 12px;
-    font-weight: 500;
-    color: rgba(255,255,255,0.55);
-    text-decoration: none;
-    transition: all 0.15s;
-    border-left: 2px solid transparent;
-  }
-  .nav-skill:hover {
-    color: #fff;
-    background: rgba(255,255,255,0.06);
-  }
-  .nav-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  /* ── MAIN ── */
-  .main {
-    margin-left: 240px;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .page-header {
-    background: var(--navy);
-    color: #fff;
-    padding: 48px 60px 40px;
-  }
-  .page-header .ph-eyebrow {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: rgba(255,255,255,0.4);
-    margin-bottom: 12px;
-  }
-  .page-header h1 {
-    font-size: 32px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    margin-bottom: 12px;
-    line-height: 1.1;
-  }
-  .page-header p {
-    font-size: 15px;
-    color: rgba(255,255,255,0.55);
-    max-width: 600px;
-    line-height: 1.6;
-  }
-
-  /* ── CONTENT ── */
-  .content {
-    padding: 48px 60px 80px;
-    max-width: 960px;
-  }
-
-  .faq-section {
-    margin-bottom: 56px;
-    scroll-margin-top: 24px;
-  }
-
-  .section-header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 2px solid var(--gray-200);
-  }
-  .section-icon {
-    width: 36px; height: 36px;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
-  }
-  .section-title {
-    font-size: 20px;
-    font-weight: 800;
-    letter-spacing: -0.3px;
-  }
-  .section-count {
-    margin-left: auto;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--gray-500);
-    background: var(--gray-200);
-    padding: 3px 10px;
-    border-radius: 12px;
-  }
-
-  /* ── FAQ CARD ── */
-  .faq-card {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    margin-bottom: 16px;
-    overflow: hidden;
-  }
-  .faq-question {
-    padding: 18px 24px 14px;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--gray-900);
-    line-height: 1.5;
-    background: var(--gray-50);
-    border-bottom: 1px solid var(--gray-100);
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-  }
-  .faq-q-label {
-    font-size: 10px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 2px 7px;
-    border-radius: 4px;
-    flex-shrink: 0;
-    margin-top: 2px;
-    line-height: 1.6;
-  }
-  .faq-answer {
-    padding: 16px 24px;
-    font-size: 14px;
-    color: var(--gray-700);
-    line-height: 1.7;
-  }
-
-  /* ── CALLOUT ── */
-  .callout {
-    border-radius: 8px;
-    padding: 14px 18px;
-    font-size: 13.5px;
-    line-height: 1.6;
-    margin-top: 10px;
-    border-left: 3px solid;
-  }
-  .callout-rose {
-    background: var(--rose-light);
-    border-color: var(--rose);
-    color: #bd8c7d;
-  }
-  .callout-amber {
-    background: var(--amber-light);
-    border-color: var(--amber);
-    color: #d1bfa7;
-  }
-  .callout-teal {
-    background: var(--teal-light);
-    border-color: var(--teal);
-    color: #49494b;
-  }
-  .callout-blue {
-    background: var(--blue-light);
-    border-color: var(--blue);
-    color: #2a2a2a;
-  }
-  .callout strong {
-    font-weight: 700;
-  }
-
-  /* Section color themes */
-  .sec-start .section-icon { background: var(--blue-light); }
-  .sec-start .section-title { color: var(--blue); }
-  .sec-start .faq-q-label { background: var(--blue-light); color: var(--blue); }
-
-  .sec-discovery .section-icon { background: var(--teal-light); }
-  .sec-discovery .section-title { color: var(--teal); }
-  .sec-discovery .faq-q-label { background: var(--teal-light); color: var(--teal); }
-
-  .sec-design .section-icon { background: var(--purple-light); }
-  .sec-design .section-title { color: var(--purple); }
-  .sec-design .faq-q-label { background: var(--purple-light); color: var(--purple); }
-
-  .sec-build .section-icon { background: var(--green-light); }
-  .sec-build .section-title { color: var(--green); }
-  .sec-build .faq-q-label { background: var(--green-light); color: var(--green); }
-
-  .sec-qa .section-icon { background: var(--rose-light); }
-  .sec-qa .section-title { color: var(--rose); }
-  .sec-qa .faq-q-label { background: var(--rose-light); color: var(--rose); }
-
-  .sec-recovery .section-icon { background: var(--orange-light); }
-  .sec-recovery .section-title { color: var(--orange); }
-  .sec-recovery .faq-q-label { background: var(--orange-light); color: var(--orange); }
-
-  .sec-workshop .section-icon { background: var(--indigo-light); }
-  .sec-workshop .section-title { color: var(--indigo); }
-  .sec-workshop .faq-q-label { background: var(--indigo-light); color: var(--indigo); }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solo Builder Framework — FAQ &amp; Troubleshooting</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../_shared.css">
 </head>
 <body>
 
-<!-- ── SIDEBAR ── -->
-<nav class="sidebar">
-  <div class="sidebar-header">
-    <div class="sh-label">Solo Builder Framework</div>
-    <div class="sh-title">FAQ &amp; Troubleshooting</div>
-  </div>
-
-  <div class="nav-group">
-    <span class="nav-group-label">Sections</span>
-    <a href="#before-first-session" class="nav-skill">
-      <span class="nav-dot" style="background:#bd8c7d;"></span>
-      Before Your First Session
-    </a>
-    <a href="#mid-discovery" class="nav-skill">
-      <span class="nav-dot" style="background:#8e8e90;"></span>
-      Mid-Discovery
-    </a>
-    <a href="#mid-design" class="nav-skill">
-      <span class="nav-dot" style="background:#bd8c7d;"></span>
-      Mid-Design
-    </a>
-    <a href="#mid-build" class="nav-skill">
-      <span class="nav-dot" style="background:#8e8e90;"></span>
-      Mid-Build
-    </a>
-    <a href="#qa-testing" class="nav-skill">
-      <span class="nav-dot" style="background:#bd8c7d;"></span>
-      QA &amp; Testing
-    </a>
-    <a href="#out-of-order" class="nav-skill">
-      <span class="nav-dot" style="background:#bd8c7d;"></span>
-      Out of Order / Skipped
-    </a>
-    <a href="#workshop" class="nav-skill">
-      <span class="nav-dot" style="background:#49494b;"></span>
-      Workshop Questions
-    </a>
-  </div>
+<nav class="site-nav">
+  <span class="brand">Solo Builder</span>
+  <a class="nav-link" href="getting-started.html">Getting Started</a>
+  <a class="nav-link" href="process-map.html">Process Map</a>
+  <a class="nav-link" href="skills-reference.html">Skills</a>
+  <a class="nav-link" href="framework-architecture.html">Architecture</a>
 </nav>
 
-<!-- ── MAIN ── -->
-<div class="main">
-
-  <header class="page-header">
-    <div class="ph-eyebrow">Solo Builder Framework</div>
+<div class="page">
+  <div class="hero">
+    <div class="hero-label">Solo Builder Framework</div>
     <h1>FAQ &amp; Troubleshooting</h1>
-    <p>Answers organized by situation — the real questions that come up mid-session, not a catalog of features. Find your situation, get the answer, keep going.</p>
-  </header>
+    <p class="hero-sub">Answers organized by situation — the real questions that come up mid-session, not a catalog of features. Find your situation, get the answer, keep going.</p>
+  </div>
 
-  <div class="content">
+  <h2>Before Your First Session</h2>
 
-    <!-- ── BEFORE FIRST SESSION ── -->
-    <section id="before-first-session" class="faq-section sec-start">
-      <div class="section-header">
-        <div class="section-icon">🚀</div>
-        <div>
-          <div class="section-title">Before Your First Session</div>
-        </div>
-        <span class="section-count">3 questions</span>
-      </div>
+  <h3>Do I need to read all the skills before I start?</h3>
+  <p>No. Say "let's start" and describe what you want to build. The framework routes you to the right skill automatically. You'll encounter skills in context, which is a much better way to learn them than reading ahead.</p>
 
-      <div class="faq-card">
-        <div class="faq-question">
-          <span class="faq-q-label">Q</span>
-          Do I need to read all the skills before I start?
-        </div>
-        <div class="faq-answer">
-          No. Say "let's start" and describe what you want to build. The framework routes you to the right skill automatically. You'll encounter skills in context, which is a much better way to learn them than reading ahead.
-        </div>
-      </div>
+  <h3>Which session mode should I use for my first project?</h3>
+  <p>Guided. It loads full guidance automatically and makes decisions about sequencing for you. Once you've been through a full project cycle and know how the phases connect, switch to piloted — it gives you more control without the hand-holding.</p>
 
-      <div class="faq-card">
-        <div class="faq-question">
-          <span class="faq-q-label">Q</span>
-          Which session mode should I use for my first project?
-        </div>
-        <div class="faq-answer">
-          Guided. It loads full guidance automatically and makes decisions about sequencing for you. Once you've been through a full project cycle and know how the phases connect, switch to piloted — it gives you more control without the hand-holding.
-        </div>
-      </div>
+  <h3>I have an existing project with code and notes. Do I start from scratch?</h3>
+  <p>No. Run onboard directly. It reads your project directory, semantically maps prior work to framework artifacts, confirms its interpretation with you, and places you at the correct starting phase. Nothing gets thrown away — it gets organized. Don't run start first; onboard is the entry point when prior work exists.</p>
 
-      <div class="faq-card">
-        <div class="faq-question">
-          <span class="faq-q-label">Q</span>
-          I have an existing project with code and notes. Do I start from scratch?
-        </div>
-        <div class="faq-answer">
-          No. Run <code>onboard</code> directly. It reads your project directory, semantically maps prior work to framework artifacts, confirms its interpretation with you, and places you at the correct starting phase. Nothing gets thrown away — it gets organized. Don't run <code>start</code> first; <code>onboard</code> is the entry point when prior work exists.
-        </div>
-      </div>
-    </section>
+  <h2>Mid-Discovery</h2>
 
-    <!-- ── MID-DISCOVERY ── -->
-    <section id="mid-discovery" class="faq-section sec-discovery">
-      <div class="section-header">
-        <div class="section-icon">🔍</div>
-        <div>
-          <div class="section-title">Mid-Discovery</div>
-        </div>
-        <span class="section-count">3 questions</span>
-      </div>
+  <h3>Discover keeps going — how do I know when it's done?</h3>
+  <p>The gate is two artifacts: <code>docs/discovery-brief.md</code> and <code>docs/process/to-be-[name].md</code>. When both exist and the to-be map is agreed, discover is done. If either is missing or still in draft, you're not through the gate.</p>
 
-      <div class="faq-card">
-        <div class="faq-question">
-          <span class="faq-q-label">Q</span>
-          Discover keeps going — how do I know when it's done?
-        </div>
-        <div class="faq-answer">
-          The gate is two artifacts: <code>docs/discovery-brief.md</code> and <code>docs/process/to-be-[name].md</code>. When both exist and the to-be map is agreed, discover is done. If either is missing or still in draft, you're not through the gate.
-        </div>
-      </div>
+  <h3>I don't know what my to-be process looks like yet. Can I skip it?</h3>
+  <p>No.</p>
+  <div class="callout"><strong>The to-be map is what every downstream skill builds against.</strong> Design-sprint cross-references screens against it. Design-review cross-references slices against it. Without it, everything downstream is building against nothing. Go deeper in discover — Zone 2 (the journey) is where the to-be emerges.</div>
 
-      <div class="faq-card">
-        <div class="faq-question">
-          <span class="faq-q-label">Q</span>
-          I don't know what my to-be process looks like yet. Can I skip it?
-        </div>
-        <div class="faq-answer">
-          No.
-          <div class="callout callout-rose">
-            <strong>The to-be map is what every downstream skill builds against.</strong> Design-sprint cross-references screens against it. Design-review cross-references slices against it. Without it, everything downstream is building against nothing. Go deeper in discover — Zone 2 (the journey) is where the to-be emerges.
-          </div>
-        </div>
-      </div>
+  <h3>My idea changed significantly during discovery. Do I start over?</h3>
+  <p>Update the discovery brief and to-be map — don't restart. The framework works with living documents. Capture the new direction in the brief, update the to-be map to reflect it, and continue. Design-sprint reads the updated brief and builds from there.</p>
 
-      <div class="faq-card">
-        <div class="faq-question">
-          <span class="faq-q-label">Q</span>
-          My idea changed significantly during discovery. Do I start over?
-        </div>
-        <div class="faq-answer">
-          Update the discovery brief and to-be map — don't restart. The framework works with living documents. Capture the new direction in the brief, update the to-be map to reflect it, and continue. Design-sprint reads the updated brief and builds from there.
-        </div>
-      </div>
-    </section>
+  <h2>Mid-Design</h2>
 
-    <!-- ── MID-DESIGN ── -->
-    <section id="mid-design" class="faq-section sec-design">
-      <div class="section-header">
-        <div class="section-icon">🎨</div>
-        <div>
-          <div class="section-title">Mid-Design</div>
-        </div>
-        <span class="section-count">4 questions</span>
-      </div>
+  <h3>The warmer/colder loop in design-sprint isn't converging. We keep going in circles.</h3>
+  <p>Stop the design sprint and go back to discover.</p>
+  <div class="callout"><strong>The loop stalls when the story isn't clear yet.</strong> More design rounds won't fix a fuzzy journey — a clearer story will. Return to Zone 2 (the journey) in discover, deepen it until the sequence of steps is unambiguous, then re-enter design-sprint.</div>
 
-      <div class="faq-card">
-        <div class="faq-question">
-          <span class="faq-q-label">Q</span>
-          The warmer/colder loop in design-sprint isn't converging. We keep going in circles.
-        </div>
-        <div class="faq-answer">
-          Stop the design sprint and go back to discover.
-          <div class="callout callout-amber">
-            <strong>The loop stalls when the story isn't clear yet.</strong> More design rounds won't fix a fuzzy journey — a clearer story will. Return to Zone 2 (the journey) in discover, deepen it until the sequence of steps is unambiguous, then re-enter design-sprint.
-          </div>
-        </div>
-      </div>
+  <h3>Design-review keeps producing new slices. When does it end?</h3>
+  <p>Design-review ends when there's a coherent set of Ready slices for Phase 1 — not when all slices across the project are Ready. Build starts when Phase 1 is covered. Design-review continues in parallel for later phases as build is underway.</p>
 
-      <div class="faq-card">
-        <div class="faq-question">
-          <span class="faq-q-label">Q</span>
-          Design-review keeps producing new slices. When does it end?
-        </div>
-        <div class="faq-answer">
-          Design-review ends when there's a coherent set of Ready slices for Phase 1 — not when all slices across the project are Ready. Build starts when Phase 1 is covered. Design-review continues in parallel for later phases as build is underway.
-        </div>
-      </div>
+  <h3>A stakeholder wants to see the design before I proceed. What do I share?</h3>
+  <p>Design-sprint produces an optional stakeholder handoff package at <code>docs/design/handoff/&lt;date&gt;/</code> — HTML artifact, PDF export, and a structured feedback template. Share whichever format works for your stakeholder. Completed feedback goes in <code>docs/stakeholder-feedback/</code> and design-review reads it on the next round.</p>
 
-      <div class="faq-card">
-        <div class="faq-question">
-          <span class="faq-q-label">Q</span>
-          A stakeholder wants to see the design before I proceed. What do I share?
-        </div>
-        <div class="faq-answer">
-          Design-sprint produces an optional stakeholder handoff package at <code>docs/design/handoff/&lt;date&gt;/</code> — HTML artifact, PDF export, and a structured feedback template. Share whichever format works for your stakeholder. Completed feedback goes in <code>docs/stakeholder-feedback/</code> and design-review reads it on the next round.
-        </div>
-      </div>
+  <h3>A slice is blocked on a spike and the spike isn't resolving.</h3>
+  <p>Timebox the research-spike hard. If it won't resolve within the timebox, close it — document what was tried, what was learned, and what remains unknown — and mark the blocked slice as Deferred in the backlog with a clear trigger: "revisit when X is resolved."</p>
+  <div class="callout"><strong>Don't let one unresolved spike hold the entire backlog.</strong> A blocked slice is a known risk. Name it, defer it, and keep the rest of Phase 1 moving. Note: research-spike is a framework skill — it's not the same as a Workshop spike, and the land skill does not apply here.</div>
 
-      <div class="faq-card">
-        <div class="faq-question">
-          <span class="faq-q-label">Q</span>
-          A slice is blocked on a spike and the spike isn't resolving.
-        </div>
-        <div class="faq-answer">
-          Timebox the <code>research-spike</code> hard. If it won't resolve within the timebox, close it — document what was tried, what was learned, and what remains unknown — and mark the blocked slice as Deferred in the backlog with a clear trigger: "revisit when X is resolved."
-          <div class="callout callout-amber">
-            <strong>Don't let one unresolved research-spike hold the entire backlog.</strong> A blocked slice is a known risk. Name it, defer it, and keep the rest of Phase 1 moving. Note: <code>research-spike</code> is an SBF skill — it's not the same as a Workshop spike, and <code>land</code> does not apply here.
-          </div>
-        </div>
-      </div>
-    </section>
+  <h2>Mid-Build</h2>
 
-    <!-- ── MID-BUILD ── -->
-    <section id="mid-build" class="faq-section sec-build">
-      <div class="section-header">
-        <div class="section-icon">⚙️</div>
-        <div>
-          <div class="section-title">Mid-Build</div>
-        </div>
-        <span class="section-count">3 questions</span>
-      </div>
+  <h3>grill-me found a blocker I can't resolve. Do I keep building?</h3>
+  <p>No.</p>
+  <div class="callout"><strong>A real blocker means the plan has a hole.</strong> Either resolve it — research spike, architecture decision, external dependency confirmed — or pivot the plan. Building through a known blocker produces work you'll throw away. Stop, address it, then continue.</div>
 
-      <div class="faq-card">
-        <div class="faq-question">
-          <span class="faq-q-label">Q</span>
-          grill-me found a blocker I can't resolve. Do I keep building?
-        </div>
-        <div class="faq-answer">
-          No.
-          <div class="callout callout-rose">
-            <strong>A real blocker means the plan has a hole.</strong> Either resolve it — research spike, architecture decision, external dependency confirmed — or pivot the plan. Building through a known blocker produces work you'll throw away. Stop, address it, then continue.
-          </div>
-        </div>
-      </div>
+  <h3>A mid-build discovery changes the design. Do I go back to design-review?</h3>
+  <p>Surface it immediately — the build skill has a "mid-build discoveries surfaced immediately" rule. If it's significant enough to change a slice's behavior or add a new one, pause build and run another design-review round. If it's minor, log it in the deferred decisions log and keep going. The key is not to silently absorb it into the code.</p>
 
-      <div class="faq-card">
-        <div class="faq-question">
-          <span class="faq-q-label">Q</span>
-          A mid-build discovery changes the design. Do I go back to design-review?
-        </div>
-        <div class="faq-answer">
-          Surface it immediately — solo-build has a "mid-build discoveries surfaced immediately" rule. If it's significant enough to change a slice's behavior or add a new one, pause build and run another design-review round. If it's minor, log it in the deferred decisions log and keep going. The key is not to silently absorb it into the code.
-        </div>
-      </div>
+  <h3>I lost my session context. How do I resume?</h3>
+  <p>Find the resume prompt generated by the continuity skill at your last close-out and paste it into a new session. The routing skill reads it and picks up where you left off. If you didn't close out cleanly, read <code>docs/HANDOFF.md</code> directly — the continuity skill maintains it throughout the session, not just at close-out.</p>
+  <div class="callout"><strong>This is why close-out matters.</strong> A clean close-out takes 30 seconds and makes the next session instant. Skipping it adds 10 minutes of re-orientation every time.</div>
 
-      <div class="faq-card">
-        <div class="faq-question">
-          <span class="faq-q-label">Q</span>
-          I lost my session context. How do I resume?
-        </div>
-        <div class="faq-answer">
-          Find the resume prompt generated by product-continuity at your last close-out and paste it into a new session. <code>start</code> reads it and picks up where you left off. If you didn't close out cleanly, read <code>docs/HANDOFF.md</code> directly — product-continuity maintains it throughout the session, not just at close-out.
-          <div class="callout callout-teal">
-            <strong>This is why close-out matters.</strong> A clean close-out takes 30 seconds and makes the next session instant. Skipping it adds 10 minutes of re-orientation every time.
-          </div>
-        </div>
-      </div>
-    </section>
+  <h2>QA &amp; Testing</h2>
 
-    <!-- ── QA & TESTING ── -->
-    <section id="qa-testing" class="faq-section sec-qa">
-      <div class="section-header">
-        <div class="section-icon">✅</div>
-        <div>
-          <div class="section-title">QA &amp; Testing</div>
-        </div>
-        <span class="section-count">3 questions</span>
-      </div>
+  <h3>Solo-qa keeps finding issues. When do I declare a slice Done?</h3>
+  <p>Done requires three things: code review logged, AI verified with evidence, and solo confirmed in the browser. All three. No shortcuts.</p>
+  <div class="callout"><strong>If solo-qa keeps surfacing issues, the done criteria may be too vague.</strong> Sharpen the slice definition before re-running. A moving target never passes QA — a clear target usually does on the first serious pass.</div>
 
-      <div class="faq-card">
-        <div class="faq-question">
-          <span class="faq-q-label">Q</span>
-          Solo-qa keeps finding issues. When do I declare a slice Done?
-        </div>
-        <div class="faq-answer">
-          Done requires three things: code review logged, AI verified with evidence, and solo confirmed in the browser. All three. No shortcuts.
-          <div class="callout callout-rose">
-            <strong>If solo-qa keeps surfacing issues, the done criteria may be too vague.</strong> Sharpen the slice definition before re-running. A moving target never passes QA — a clear target usually does on the first serious pass.
-          </div>
-        </div>
-      </div>
+  <h3>Phase test failed. Do I re-run the whole thing?</h3>
+  <p>No. Fix the affected items, then re-test only the affected scenarios. Unaffected scenarios don't need to re-run — they passed. If you're unsure which scenarios are affected by your fix, run qa-triage — it classifies what changed and scopes the minimum re-test set.</p>
 
-      <div class="faq-card">
-        <div class="faq-question">
-          <span class="faq-q-label">Q</span>
-          Phase test failed. Do I re-run the whole thing?
-        </div>
-        <div class="faq-answer">
-          No. Fix the affected items, then re-test only the affected scenarios. Unaffected scenarios don't need to re-run — they passed. If you're unsure which scenarios are affected by your fix, run <code>qa-triage</code> — it classifies what changed and scopes the minimum re-test set.
-        </div>
-      </div>
+  <h3>QA found something that wasn't in the original slice definition. What now?</h3>
+  <p>Route it through qa-triage. It classifies the finding as one of three things: a bug (fix now, it was always implied by the slice), a missing requirement (scope it as a new slice and decide when it ships), or a regression (identify what change caused it before touching anything else).</p>
+  <div class="callout"><strong>Don't silently expand the slice.</strong> Every new item gets a triage decision. Undefined scope grows into an undefined product.</div>
 
-      <div class="faq-card">
-        <div class="faq-question">
-          <span class="faq-q-label">Q</span>
-          QA found something that wasn't in the original slice definition. What now?
-        </div>
-        <div class="faq-answer">
-          Route it through <code>qa-triage</code>. It classifies the finding as one of three things: a bug (fix now, it was always implied by the slice), a missing requirement (scope it as a new slice and decide when it ships), or a regression (identify what change caused it before touching anything else).
-          <div class="callout callout-amber">
-            <strong>Don't silently expand the slice.</strong> Every new item gets a triage decision. Undefined scope grows into an undefined product.
-          </div>
-        </div>
-      </div>
-    </section>
+  <h2>Out of Order / Skipped a Phase</h2>
 
-    <!-- ── OUT OF ORDER / SKIPPED ── -->
-    <section id="out-of-order" class="faq-section sec-recovery">
-      <div class="section-header">
-        <div class="section-icon">↩️</div>
-        <div>
-          <div class="section-title">Out of Order / Skipped a Phase</div>
-        </div>
-        <span class="section-count">3 questions</span>
-      </div>
+  <h3>I skipped discover and went straight to building. Now what?</h3>
+  <p>Run onboard. It reads what you've built, maps it to framework artifacts, and identifies what's missing. You'll likely need to produce a discovery brief and to-be map retroactively — onboard surfaces the gaps and gives you a path to fill them. The work you've already done counts; it just needs framing.</p>
 
-      <div class="faq-card">
-        <div class="faq-question">
-          <span class="faq-q-label">Q</span>
-          I skipped discover and went straight to building. Now what?
-        </div>
-        <div class="faq-answer">
-          Run <code>onboard</code>. It reads what you've built, maps it to framework artifacts, and identifies what's missing. You'll likely need to produce a discovery brief and to-be map retroactively — onboard surfaces the gaps and gives you a path to fill them. The work you've already done counts; it just needs framing.
-        </div>
-      </div>
+  <h3>My project already has a Figma and partial backend. Where do I enter?</h3>
+  <p>Run onboard directly. It reads your project directory, maps what exists to framework artifacts, and places you at the correct starting phase. For the Figma specifically — design-sprint has On-ramp 2 for existing Figma files, which imports screens via Figma MCP rather than generating new ones. You don't recreate the design work; you bring it in and run the review loop from there.</p>
 
-      <div class="faq-card">
-        <div class="faq-question">
-          <span class="faq-q-label">Q</span>
-          My project already has a Figma and partial backend. Where do I enter?
-        </div>
-        <div class="faq-answer">
-          Run <code>onboard</code> directly. It reads your project directory, maps what exists to framework artifacts, and places you at the correct starting phase. For the Figma specifically — design-sprint has On-ramp 2 for existing Figma files, which imports screens via Figma MCP rather than generating new ones. You don't recreate the design work; you bring it in and run the review loop from there.
-        </div>
-      </div>
+  <h3>The to-be process map changed mid-project. Do I restart?</h3>
+  <p>Update the map. The process-mapper skill (in piloted or guided mode) flags drift between the updated map and existing slices — which slices no longer map to a process step, which new steps need coverage. Run a design-review round to surface the gaps. The project doesn't restart; the backlog gets realigned.</p>
+  <div class="callout"><strong>A changed to-be map is normal.</strong> Discovery is iterative. The framework is designed to handle drift — the answer is always "update and realign," never "throw away and restart."</div>
 
-      <div class="faq-card">
-        <div class="faq-question">
-          <span class="faq-q-label">Q</span>
-          The to-be process map changed mid-project. Do I restart?
-        </div>
-        <div class="faq-answer">
-          Update the map. Process-mapper (in piloted or guided mode) flags drift between the updated map and existing slices — which slices no longer map to a process step, which new steps need coverage. Run a design-review round to surface the gaps. The project doesn't restart; the backlog gets realigned.
-          <div class="callout callout-teal">
-            <strong>A changed to-be map is normal.</strong> Discovery is iterative. The framework is designed to handle drift — the answer is always "update and realign," never "throw away and restart."
-          </div>
-        </div>
-      </div>
-    </section>
+  <h2>Workshop Questions</h2>
 
-    <!-- ── WORKSHOP QUESTIONS ── -->
-    <section id="workshop" class="faq-section sec-workshop">
-      <div class="section-header">
-        <div class="section-icon">🔬</div>
-        <div>
-          <div class="section-title">Workshop Questions</div>
-        </div>
-        <span class="section-count">3 questions</span>
-      </div>
+  <h3>How do I know if something is a spike or a product?</h3>
+  <p>Run /scope-check. It asks one question: <em>who is this for, and how long does it live?</em> If the answer is "for me, hours to days" — it's a spike. If the answer is "for others, indefinitely" — it's a product. The routing from there is automatic.</p>
+  <div class="callout"><strong>Don't guess.</strong> Starting a spike when you mean a product (or vice versa) sets the wrong expectations from session one. scope-check takes 60 seconds and gets you on the right track before you write a line.</div>
 
-      <div class="faq-card">
-        <div class="faq-question">
-          <span class="faq-q-label">Q</span>
-          How do I know if something is a spike or a product?
-        </div>
-        <div class="faq-answer">
-          Run <code>/scope-check</code>. It asks one question: <em>who is this for, and how long does it live?</em> If the answer is "for me, hours to days" — it's a spike. If the answer is "for others, indefinitely" — it's a product. The routing from there is automatic.
-          <div class="callout callout-blue">
-            <strong>Don't guess.</strong> Starting a spike when you mean a product (or vice versa) sets the wrong expectations from session one. scope-check takes 60 seconds and gets you on the right track before you write a line.
-          </div>
-        </div>
-      </div>
+  <h3>My spike is turning into something bigger. Do I keep spiking?</h3>
+  <p>No. Stop and run land with Promote intent.</p>
+  <div class="callout"><strong>Spike code is a prototype, not a foundation.</strong> Prepare a handoff brief: what was proved, what's in the code, what the graduation triggers revealed, known hacks. Hand it to the framework's start skill. The framework takes it from there with the right framing. Do not build on spike code as if it were production architecture.</div>
 
-      <div class="faq-card">
-        <div class="faq-question">
-          <span class="faq-q-label">Q</span>
-          My spike is turning into something bigger. Do I keep spiking?
-        </div>
-        <div class="faq-answer">
-          No. Stop and run <code>land</code> with Promote intent.
-          <div class="callout callout-rose">
-            <strong>Spike code is a prototype, not a foundation.</strong> Prepare a handoff brief: what was proved, what's in the code, what the graduation triggers revealed, known hacks. Hand it to SBF <code>start</code>. The framework takes it from there with the right framing. Do not build on spike code as if it were production architecture.
-          </div>
-        </div>
-      </div>
+  <h3>I landed a spike as Keep. Now I want to share it with others. What do I do?</h3>
+  <p>Run land again with Promote intent. The prior Keep decision is overridden by the new intent. The scope has changed — it's no longer a personal tool, it's a product — and that change needs to be explicit. Prepare the handoff brief and hand to the framework's start skill to begin the product build properly.</p>
 
-      <div class="faq-card">
-        <div class="faq-question">
-          <span class="faq-q-label">Q</span>
-          I landed a spike as Keep. Now I want to share it with others. What do I do?
-        </div>
-        <div class="faq-answer">
-          Run <code>land</code> again with Promote intent. The prior Keep decision is overridden by the new intent. The scope has changed — it's no longer a personal tool, it's a product — and that change needs to be explicit. Prepare the handoff brief and hand to SBF <code>start</code> to begin the product build properly.
-        </div>
-      </div>
-    </section>
-
-  </div><!-- /content -->
-</div><!-- /main -->
-
+</div>
 </body>
 </html>

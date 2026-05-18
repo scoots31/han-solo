@@ -1,1384 +1,357 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Data Scaffold + Design Review — SBF Phase Guide</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --navy: #1a1a1a;
-    --navy-mid: #2a2a2a;
-    --indigo: #49494b;
-    --indigo-light: rgba(73,73,75,0.12);
-    --purple: #bd8c7d;
-    --purple-light: rgba(189,140,125,0.12);
-    --teal: #8e8e90;
-    --teal-light: rgba(142,142,144,0.15);
-    --green: #8e8e90;
-    --green-light: rgba(142,142,144,0.12);
-    --amber: #d1bfa7;
-    --amber-light: rgba(209,191,167,0.15);
-    --rose: #bd8c7d;
-    --rose-light: rgba(189,140,125,0.12);
-    --orange: #bd8c7d;
-    --orange-light: rgba(189,140,125,0.12);
-    --gray-50: #faf8f5;
-    --gray-100: #e8ddd4;
-    --gray-200: #e8ddd4;
-    --gray-300: #DDD6CC;
-    --gray-500: #8e8e90;
-    --gray-700: #49494b;
-    --gray-900: #1a1a1a;
-  }
-
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    background: var(--gray-50);
-    color: var(--gray-900);
-    display: flex;
-    min-height: 100vh;
-  }
-
-  /* ── SIDEBAR ── */
-  .sidebar {
-    width: 240px;
-    flex-shrink: 0;
-    background: var(--navy);
-    position: fixed;
-    top: 0; left: 0; bottom: 0;
-    overflow-y: auto;
-    padding: 28px 0 40px;
-    z-index: 10;
-  }
-  .sidebar::-webkit-scrollbar { width: 4px; }
-  .sidebar::-webkit-scrollbar-track { background: transparent; }
-  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
-
-  .sidebar-header {
-    padding: 0 20px 24px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    margin-bottom: 16px;
-  }
-  .sidebar-header .sh-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: rgba(255,255,255,0.35);
-    margin-bottom: 6px;
-  }
-  .sidebar-header .sh-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: #fff;
-    line-height: 1.3;
-  }
-
-  .nav-group { margin-bottom: 6px; }
-  .nav-group-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    padding: 8px 20px 4px;
-    display: block;
-  }
-  .nav-link {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 20px;
-    font-size: 12px;
-    font-weight: 500;
-    color: rgba(255,255,255,0.55);
-    text-decoration: none;
-    transition: all 0.15s;
-    border-left: 2px solid transparent;
-  }
-  .nav-link:hover {
-    color: #fff;
-    background: rgba(255,255,255,0.06);
-  }
-  .nav-link.active {
-    color: #fff;
-    border-left-color: var(--indigo-light);
-    background: rgba(255,255,255,0.06);
-  }
-  .nav-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .nav-skill-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 20px;
-    font-size: 11.5px;
-    font-weight: 500;
-    color: rgba(255,255,255,0.55);
-    text-decoration: none;
-    transition: all 0.15s;
-    border-left: 2px solid transparent;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-  }
-  .nav-skill-label:hover {
-    color: #fff;
-    background: rgba(255,255,255,0.06);
-  }
-
-  /* ── MAIN ── */
-  .main {
-    margin-left: 240px;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .page-header {
-    background: var(--navy);
-    color: #fff;
-    padding: 48px 60px 40px;
-  }
-  .page-header .ph-eyebrow {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: rgba(255,255,255,0.4);
-    margin-bottom: 12px;
-  }
-  .page-header h1 {
-    font-size: 32px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    margin-bottom: 12px;
-    line-height: 1.1;
-  }
-  .page-header p {
-    font-size: 15px;
-    color: rgba(255,255,255,0.55);
-    max-width: 620px;
-    line-height: 1.6;
-  }
-  .header-stats {
-    display: flex;
-    gap: 32px;
-    margin-top: 28px;
-    padding-top: 28px;
-    border-top: 1px solid rgba(255,255,255,0.08);
-  }
-  .header-stat .hs-num {
-    font-size: 28px;
-    font-weight: 800;
-    color: #fff;
-    letter-spacing: -0.5px;
-  }
-  .header-stat .hs-label {
-    font-size: 12px;
-    color: rgba(255,255,255,0.4);
-    margin-top: 2px;
-  }
-
-  /* ── CONTENT ── */
-  .content {
-    padding: 48px 60px 80px;
-    max-width: 960px;
-  }
-
-  /* ── SECTION HEADERS ── */
-  .section {
-    margin-bottom: 56px;
-    scroll-margin-top: 24px;
-  }
-  .section-header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 2px solid var(--gray-200);
-  }
-  .section-icon {
-    width: 36px; height: 36px;
-    border-radius: 10px;
-    background: var(--indigo-light);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
-  }
-  .section-title {
-    font-size: 20px;
-    font-weight: 800;
-    color: var(--indigo);
-    letter-spacing: -0.3px;
-  }
-  .section-desc {
-    font-size: 13px;
-    color: var(--gray-500);
-    margin-top: 2px;
-  }
-
-  /* ── CARD ── */
-  .card {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    margin-bottom: 20px;
-    overflow: hidden;
-  }
-  .card-header {
-    padding: 20px 24px 16px;
-    border-bottom: 1px solid var(--gray-100);
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-  }
-  .card-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--gray-900);
-    flex: 1;
-    letter-spacing: -0.2px;
-  }
-  .card-title.mono {
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    color: var(--indigo);
-  }
-  .card-badge {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    padding: 3px 9px;
-    border-radius: 20px;
-    white-space: nowrap;
-    flex-shrink: 0;
-    margin-top: 2px;
-    background: var(--indigo-light);
-    color: var(--indigo);
-  }
-  .card-badge.purple {
-    background: var(--purple-light);
-    color: var(--purple);
-  }
-  .card-badge.teal {
-    background: var(--teal-light);
-    color: var(--teal);
-  }
-  .card-body {
-    padding: 20px 24px;
-    font-size: 14px;
-    color: var(--gray-700);
-    line-height: 1.7;
-  }
-  .card-body p + p { margin-top: 12px; }
-  .card-desc {
-    padding: 16px 24px;
-    font-size: 14px;
-    color: var(--gray-700);
-    line-height: 1.65;
-    border-bottom: 1px solid var(--gray-100);
-    background: var(--gray-50);
-  }
-
-  /* ── SKILL CARD (3-col) ── */
-  .skill-card {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    margin-bottom: 20px;
-    overflow: hidden;
-  }
-  .skill-card-header {
-    padding: 20px 24px 16px;
-    border-bottom: 1px solid var(--gray-100);
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-  }
-  .skill-name {
-    font-size: 16px;
-    font-weight: 700;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    color: var(--indigo);
-    letter-spacing: -0.3px;
-    flex: 1;
-  }
-  .skill-name.purple { color: var(--purple); }
-  .skill-name.teal { color: var(--teal); }
-  .skill-badge {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    padding: 3px 9px;
-    border-radius: 20px;
-    white-space: nowrap;
-    flex-shrink: 0;
-    margin-top: 2px;
-    background: var(--indigo-light);
-    color: var(--indigo);
-  }
-  .skill-badge.purple { background: var(--purple-light); color: var(--purple); }
-  .skill-badge.teal { background: var(--teal-light); color: var(--teal); }
-  .skill-description {
-    padding: 16px 24px;
-    font-size: 14px;
-    color: var(--gray-700);
-    line-height: 1.65;
-    border-bottom: 1px solid var(--gray-100);
-    background: var(--gray-50);
-  }
-  .skill-body {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 0;
-  }
-  .skill-section {
-    padding: 18px 22px;
-    border-right: 1px solid var(--gray-100);
-  }
-  .skill-section:last-child { border-right: none; }
-  .skill-section-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--indigo);
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .skill-section-label.purple { color: var(--purple); }
-  .skill-section-label.teal { color: var(--teal); }
-  .skill-section-label::before {
-    content: '';
-    width: 3px; height: 12px;
-    border-radius: 2px;
-    background: currentColor;
-    flex-shrink: 0;
-  }
-  .skill-section ul {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .skill-section ul li {
-    font-size: 12.5px;
-    color: var(--gray-700);
-    line-height: 1.5;
-    padding-left: 12px;
-    position: relative;
-  }
-  .skill-section ul li::before {
-    content: '›';
-    position: absolute;
-    left: 0;
-    color: var(--gray-300);
-    font-size: 14px;
-    line-height: 1.35;
-  }
-  .skill-section ul li strong { color: var(--gray-900); font-weight: 600; }
-
-  /* ── CODE TAG ── */
-  .output-tag {
-    display: inline-block;
-    font-size: 10.5px;
-    font-weight: 600;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    padding: 3px 8px;
-    border-radius: 4px;
-    background: var(--gray-100);
-    color: var(--gray-700);
-    margin: 2px 0;
-    line-height: 1.4;
-  }
-  .output-tag.indigo {
-    background: var(--indigo-light);
-    color: var(--indigo);
-  }
-
-  /* ── ROUND STEPS ── */
-  .round-steps {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-  .round-step {
-    display: flex;
-    gap: 20px;
-    position: relative;
-  }
-  .round-step:not(:last-child)::before {
-    content: '';
-    position: absolute;
-    left: 19px;
-    top: 44px;
-    bottom: -16px;
-    width: 2px;
-    background: var(--gray-200);
-  }
-  .round-step + .round-step {
-    margin-top: 16px;
-  }
-  .step-num {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--indigo-light);
-    color: var(--indigo);
-    font-size: 14px;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    z-index: 1;
-  }
-  .step-content {
-    flex: 1;
-    padding-bottom: 16px;
-  }
-  .step-title {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--gray-900);
-    margin-bottom: 6px;
-    padding-top: 8px;
-  }
-  .step-body {
-    font-size: 13.5px;
-    color: var(--gray-700);
-    line-height: 1.65;
-  }
-  .step-body p + p { margin-top: 8px; }
-  .step-body ul {
-    margin-top: 8px;
-    padding-left: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-  .step-body ul li {
-    font-size: 13px;
-    color: var(--gray-700);
-    line-height: 1.5;
-  }
-
-  /* ── SLICE STATE TABLE ── */
-  .state-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-  }
-  .state-cell {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 10px;
-    padding: 16px 18px;
-  }
-  .state-cell.ready { border-color: #DDD6CC; background: #faf8f5; }
-  .state-cell.in-review { border-color: #e8ddd4; background: #faf8f5; }
-  .state-cell.blocked { border-color: rgba(189,140,125,0.4); background: rgba(189,140,125,0.06); }
-  .state-cell.deferred { border-color: #e8ddd4; background: #faf8f5; }
-  .state-cell.in-build { border-color: rgba(209,191,167,0.4); background: rgba(209,191,167,0.08); }
-  .state-cell.done { border-color: #DDD6CC; background: rgba(189,140,125,0.08); }
-  .state-label {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 6px;
-  }
-  .state-cell.ready .state-label { color: var(--green); }
-  .state-cell.in-review .state-label { color: #8e8e90; }
-  .state-cell.blocked .state-label { color: #bd8c7d; }
-  .state-cell.deferred .state-label { color: var(--gray-500); }
-  .state-cell.in-build .state-label { color: #d1bfa7; }
-  .state-cell.done .state-label { color: var(--indigo); }
-  .state-emoji {
-    font-size: 18px;
-    margin-bottom: 8px;
-    display: block;
-  }
-  .state-meaning {
-    font-size: 12.5px;
-    color: var(--gray-700);
-    line-height: 1.55;
-  }
-  .state-transition {
-    font-size: 11.5px;
-    color: var(--gray-500);
-    line-height: 1.5;
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid rgba(0,0,0,0.06);
-  }
-  .state-transition strong {
-    color: var(--gray-700);
-    font-weight: 600;
-  }
-
-  /* ── READY CONDITIONS ── */
-  .ready-conditions {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .ready-condition {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-left: 4px solid var(--indigo);
-    border-radius: 0 10px 10px 0;
-    padding: 16px 20px;
-    display: flex;
-    gap: 14px;
-    align-items: flex-start;
-  }
-  .rc-num {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: var(--indigo-light);
-    color: var(--indigo);
-    font-size: 13px;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-  .rc-body { flex: 1; }
-  .rc-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--gray-900);
-    margin-bottom: 4px;
-  }
-  .rc-detail {
-    font-size: 13px;
-    color: var(--gray-700);
-    line-height: 1.6;
-  }
-
-  /* ── TWO-COL GRID ── */
-  .two-col {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-
-  /* ── ANTI-PATTERN TABLE ── */
-  .anti-table {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  .anti-table table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  .anti-table th {
-    background: var(--gray-100);
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--gray-500);
-    padding: 10px 18px;
-    text-align: left;
-  }
-  .anti-table td {
-    font-size: 13px;
-    color: var(--gray-700);
-    padding: 12px 18px;
-    vertical-align: top;
-    border-top: 1px solid var(--gray-100);
-    line-height: 1.55;
-  }
-  .anti-table td:first-child {
-    font-weight: 600;
-    color: var(--rose);
-    font-size: 12.5px;
-  }
-  .anti-table td strong {
-    color: var(--gray-900);
-    font-weight: 600;
-  }
-
-  /* ── GATE BOX ── */
-  .gate-box {
-    background: var(--indigo);
-    border-radius: 12px;
-    padding: 28px 32px;
-    color: #fff;
-  }
-  .gate-box .gate-eyebrow {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: rgba(255,255,255,0.5);
-    margin-bottom: 10px;
-  }
-  .gate-box .gate-title {
-    font-size: 20px;
-    font-weight: 800;
-    margin-bottom: 10px;
-    letter-spacing: -0.3px;
-  }
-  .gate-box .gate-body {
-    font-size: 14px;
-    color: rgba(255,255,255,0.75);
-    line-height: 1.65;
-  }
-  .gate-box .gate-condition {
-    margin-top: 16px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 8px;
-    padding: 14px 18px;
-    font-size: 13.5px;
-    color: rgba(255,255,255,0.9);
-    line-height: 1.6;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-  }
-
-  /* ── DOCUMENTS SECTION ── */
-  .doc-cards {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-  }
-  .doc-card {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 10px;
-    padding: 18px 20px;
-  }
-  .doc-card .doc-file {
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--indigo);
-    background: var(--indigo-light);
-    padding: 4px 8px;
-    border-radius: 4px;
-    display: inline-block;
-    margin-bottom: 10px;
-  }
-  .doc-card .doc-title {
-    font-size: 13.5px;
-    font-weight: 700;
-    color: var(--gray-900);
-    margin-bottom: 6px;
-  }
-  .doc-card .doc-desc {
-    font-size: 12.5px;
-    color: var(--gray-700);
-    line-height: 1.55;
-  }
-  .doc-card .doc-created {
-    font-size: 11px;
-    color: var(--gray-500);
-    margin-top: 10px;
-    font-style: italic;
-  }
-
-  /* ── HANDOFF BOX ── */
-  .handoff-box {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  .handoff-header {
-    background: var(--indigo-light);
-    padding: 16px 24px;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--indigo);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .handoff-body {
-    padding: 20px 24px;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 20px;
-  }
-  .handoff-item {}
-  .handoff-item-title {
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--gray-500);
-    margin-bottom: 8px;
-  }
-  .handoff-item-body {
-    font-size: 13px;
-    color: var(--gray-700);
-    line-height: 1.6;
-  }
-
-  /* ── CALLOUT ── */
-  .callout {
-    background: var(--indigo-light);
-    border-left: 4px solid var(--indigo);
-    border-radius: 0 8px 8px 0;
-    padding: 14px 18px;
-    font-size: 13.5px;
-    color: var(--indigo);
-    line-height: 1.6;
-    margin-bottom: 16px;
-  }
-  .callout strong { font-weight: 700; }
-
-  /* ── INLINE CODE ── */
-  code {
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    font-size: 12px;
-    background: var(--gray-100);
-    color: var(--gray-700);
-    padding: 1px 6px;
-    border-radius: 4px;
-  }
-
-  @media print {
-    .sidebar { display: none; }
-    .main { margin-left: 0; }
-    .page-header { padding: 32px 40px; }
-    .content { padding: 32px 40px 60px; }
-    .card { break-inside: avoid; }
-    .skill-card { break-inside: avoid; }
-    @page { size: A4; margin: 15mm; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Scaffold + Design Review — SBF Phase Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../_shared.css">
 </head>
 <body>
 
-<!-- ── SIDEBAR ── -->
-<aside class="sidebar">
-  <div class="sidebar-header">
-    <div class="sh-label">SBF Phase Guide</div>
-    <div class="sh-title">Data Scaffold + Design Review</div>
-  </div>
+<nav class="site-nav">
+  <span class="brand">Solo Builder</span>
+  <a class="nav-link" href="getting-started.html">Getting Started</a>
+  <a class="nav-link" href="process-map.html">Process Map</a>
+  <a class="nav-link" href="skills-reference.html">Skills</a>
+  <a class="nav-link" href="framework-architecture.html">Architecture</a>
+</nav>
 
-  <div class="nav-group">
-    <span class="nav-group-label" style="color:rgba(73,73,75,0.6)">On This Page</span>
-    <a href="#what-this-phase-is" class="nav-link"><span class="nav-dot" style="background:#49494b"></span>What this phase is</a>
-    <a href="#skills" class="nav-link"><span class="nav-dot" style="background:#49494b"></span>Skills in this phase</a>
-    <a href="#review-loop" class="nav-link"><span class="nav-dot" style="background:#49494b"></span>The design-review loop</a>
-    <a href="#slice-states" class="nav-link"><span class="nav-dot" style="background:#49494b"></span>Slice states</a>
-    <a href="#ready-means" class="nav-link"><span class="nav-dot" style="background:#49494b"></span>What "Ready" actually means</a>
-    <a href="#stakeholder-feedback" class="nav-link"><span class="nav-dot" style="background:#49494b"></span>Stakeholder feedback</a>
-    <a href="#documents" class="nav-link"><span class="nav-dot" style="background:#49494b"></span>Documents produced</a>
-    <a href="#gate" class="nav-link"><span class="nav-dot" style="background:#49494b"></span>The gate</a>
-    <a href="#handoff" class="nav-link"><span class="nav-dot" style="background:#49494b"></span>Handoff to Plan</a>
-    <a href="#watch-for" class="nav-link"><span class="nav-dot" style="background:#49494b"></span>What to watch for</a>
-  </div>
-
-  <div class="nav-group" style="margin-top: 16px;">
-    <span class="nav-group-label" style="color:rgba(73,73,75,0.6)">Phase Skills</span>
-    <a href="#skill-data-scaffold" class="nav-skill-label" style="color:rgba(73,73,75,0.8)"><span class="nav-dot" style="background:#49494b"></span>data-scaffold</a>
-    <a href="#skill-design-review" class="nav-skill-label" style="color:rgba(73,73,75,0.8)"><span class="nav-dot" style="background:#49494b"></span>design-review</a>
-    <a href="#skill-research-spike" class="nav-skill-label" style="color:rgba(142,142,144,0.8)"><span class="nav-dot" style="background:#8e8e90"></span>research-spike</a>
-  </div>
-
-  <div class="nav-group" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.08);">
-    <span class="nav-group-label" style="color:rgba(255,255,255,0.25)">In the Framework</span>
-    <a href="#" class="nav-link" style="color:rgba(255,255,255,0.3); font-size: 11px;">← Phase 2: Design Sprint</a>
-    <a href="#" class="nav-link" style="color:rgba(255,255,255,0.3); font-size: 11px;">→ Phase 3: Plan</a>
-  </div>
-</aside>
-
-<!-- ── MAIN ── -->
-<main class="main">
-
-  <!-- PAGE HEADER -->
-  <div class="page-header">
-    <div class="ph-eyebrow">Solo Builder Framework — Phase Guide</div>
+<div class="page">
+  <div class="hero">
+    <div class="hero-label">Solo Builder Framework — Phase Guide</div>
     <h1>Data Scaffold + Design Review</h1>
-    <p>The phase that converts design screens into a defined, executable backlog. Two skills run in parallel — one builds the data foundation, the other defines every unit of work. Build cannot start without it.</p>
-    <div class="header-stats">
-      <div class="header-stat">
-        <div class="hs-num">2</div>
-        <div class="hs-label">Phase skills</div>
-      </div>
-      <div class="header-stat">
-        <div class="hs-num">6</div>
-        <div class="hs-label">Slice states</div>
-      </div>
-      <div class="header-stat">
-        <div class="hs-num">5</div>
-        <div class="hs-label">Ready conditions</div>
-      </div>
-      <div class="header-stat">
-        <div class="hs-num">3</div>
-        <div class="hs-label">Specialist lenses</div>
-      </div>
+    <p class="hero-sub">The phase that converts design screens into a defined, executable backlog. Two skills run in parallel — one builds the data foundation, the other defines every unit of work. Build cannot start without it.</p>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat"><span class="stat-num">2</span><span class="stat-label">Phase skills</span></div>
+    <div class="stat"><span class="stat-num">6</span><span class="stat-label">Slice states</span></div>
+    <div class="stat"><span class="stat-num">5</span><span class="stat-label">Ready conditions</span></div>
+    <div class="stat"><span class="stat-num">3</span><span class="stat-label">Specialist lenses</span></div>
+  </div>
+
+  <h2>What This Phase Is</h2>
+  <p>This phase sits between the Design Sprint and Planning. Its job is to take the design artifact — the HTML screens that came out of the sprint — and do two things simultaneously: build a data foundation under them, and define every unit of work well enough to build.</p>
+  <p><strong>Data Scaffold</strong> (phase 2.5) generates realistic mock data for every piece of information that appears on a screen, before a single real API exists. The output is a <code>data/mock/</code> layer — one place where all fake data lives — and a <code>docs/data-mapping.md</code> document that maps every mock field to its eventual real source. That document is the first draft of the API contract. Design review that happens against real-looking data produces dramatically better decisions than design review against empty placeholders.</p>
+  <p><strong>Design Review</strong> (phase 2.6) is an iterative loop. Each round applies three specialist lenses — PM, Tech Lead, and Data — to every screen. Findings become slice definitions or spike triggers. Slices move through states. When enough slices have reached Ready, build can start. Review then continues in parallel on the remaining slices.</p>
+  <p>These two skills inform each other. The data-scaffold output is what the data lens in design-review reads. The design-review data lens surfaces fields that haven't been scaffolded yet. Running them separately, in sequence, defeats the value of both. Run them together.</p>
+  <div class="callout"><strong>The phase ends when there's enough to learn from, not when everything is defined.</strong> Build starts when the first coherent set of Ready slices exists — the thinnest path through the system that proves the core loop works. Design review continues on remaining slices while build is in progress.</div>
+
+  <h2>Skills in This Phase</h2>
+  <p>Two phase skills run in parallel; one supporting skill triggered on demand.</p>
+
+  <h3>data-scaffold — Phase skill 2.5</h3>
+  <p>Generates realistic fake data for screens that don't have real APIs yet. Makes design review actually useful — screens with real-looking data produce better decisions than screens with placeholder text. Fake data lives in one mock layer, not scattered through the UI, so swapping to real data later is a replacement, not a rewrite. The mapping document is the first draft of the API contract.</p>
+  <div class="card-grid">
+    <div class="card">
+      <div class="section-label">When to run</div>
+      <ul>
+        <li>Before or during first design review round</li>
+        <li>When a screen has placeholder text where data should be</li>
+        <li>When design review surfaces a field that doesn't exist yet</li>
+        <li>When build starts and real APIs aren't ready</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="section-label">Outputs</div>
+      <ul>
+        <li><code>data/mock/[entity].json</code> — one file per data entity</li>
+        <li><code>data/mock/mock-index.js</code> — exports all mock data</li>
+        <li><code>docs/data-mapping.md</code> — proto-API contract</li>
+        <li>Mock indicator badge on all screens</li>
+        <li>Single swap seam in UI code</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="section-label">Key rules</div>
+      <ul>
+        <li><strong>Domain-accurate values</strong> — realistic ranges, not arbitrary numbers</li>
+        <li><strong>Structurally honest</strong> — field names match plausible API shape</li>
+        <li><strong>Edge cases included</strong> — always: a zero score, a missing field, a bye week</li>
+        <li><strong>One seam</strong> — UI calls a function; mock or real lives underneath</li>
+        <li><strong>Labeled everywhere</strong> — mock badge + comment pattern, no ambiguity</li>
+      </ul>
     </div>
   </div>
 
-  <div class="content">
+  <h3>design-review — Phase skill 2.6 (iterative)</h3>
+  <p>Iterative review loop between the design artifact and the build decision. Each round adds knowledge, refines the design, defines slices, and updates the backlog. A slice reaches Ready when it's defined well enough to build. Build starts when enough slices are Ready. Review continues in parallel. The backlog is the persistent document that makes all of this visible.</p>
+  <div class="card-grid">
+    <div class="card">
+      <div class="section-label">Each round does</div>
+      <ul>
+        <li>Applies PM, Tech Lead, and Data lenses to every screen</li>
+        <li>Names and classifies each finding immediately</li>
+        <li>Runs process coverage check against to-be map</li>
+        <li>Defines or refines slices</li>
+        <li>Moves slices through states</li>
+        <li>Updates <code>docs/backlog.md</code> in real time</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="section-label">Gate inputs required</div>
+      <ul>
+        <li><code>docs/design/sprint-[id].html</code></li>
+        <li><code>docs/design/deferred-decisions.md</code></li>
+        <li><strong>To-be process map</strong> — non-negotiable. No to-be map means no slice review.</li>
+        <li><code>docs/data-mapping.md</code> (when available)</li>
+        <li>Any spike results in <code>docs/spikes/</code></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="section-label">Outputs</div>
+      <ul>
+        <li><code>docs/backlog.md</code> — created Round 1, updated every round</li>
+        <li>Slice definitions with IDs, process anchors, and done criteria</li>
+        <li>Process coverage map per round</li>
+        <li>Review log appended after each round</li>
+        <li>Spike triggers for knowledge gaps</li>
+      </ul>
+    </div>
+  </div>
 
-    <!-- ── WHAT THIS PHASE IS ── -->
-    <section class="section" id="what-this-phase-is">
-      <div class="section-header">
-        <div class="section-icon">◈</div>
-        <div>
-          <div class="section-title">What this phase is</div>
-          <div class="section-desc">Phases 2.5 and 2.6 run in parallel — not in sequence</div>
-        </div>
-      </div>
+  <h3>research-spike — Supporting skill (on demand)</h3>
+  <p>Timeboxed investigation of a specific unknown that's blocking a decision. Triggered when design-review finds a knowledge gap on a slice — a question that can't be answered from what's known, and where the answer changes what gets built. The output is a named, scoped answer that unblocks the slice.</p>
+  <div class="card-grid">
+    <div class="card">
+      <div class="section-label">When triggered</div>
+      <ul>
+        <li>Design review finds a field whose source is unknown</li>
+        <li>A slice depends on a technical approach that hasn't been validated</li>
+        <li>A process step is unclear and the design assumes it</li>
+        <li>An API's shape or availability is uncertain</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="section-label">How it integrates</div>
+      <ul>
+        <li>Slice moves to <strong>Blocked</strong> when spike is triggered</li>
+        <li>Spike result lives in <code>docs/spikes/</code></li>
+        <li>Next design-review round reads the result</li>
+        <li>Slice unblocks and can be promoted to Ready</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="section-label">Key constraints</div>
+      <ul>
+        <li><strong>Timeboxed</strong> — one focused session, specific question</li>
+        <li>Must produce a decision, not just more research</li>
+        <li>Every blocked slice must name the spike question explicitly — no vague blockers</li>
+        <li>Spikes are tracked in the backlog At a Glance</li>
+      </ul>
+    </div>
+  </div>
 
-      <div class="card">
-        <div class="card-body">
-          <p>This phase sits between the Design Sprint and Planning. Its job is to take the design artifact — the HTML screens that came out of the sprint — and do two things simultaneously: build a data foundation under them, and define every unit of work well enough to build.</p>
+  <h2>The Design-Review Loop</h2>
 
-          <p><strong>Data Scaffold</strong> (phase 2.5) generates realistic mock data for every piece of information that appears on a screen, before a single real API exists. The output is a <code>data/mock/</code> layer — one place where all fake data lives — and a <code>docs/data-mapping.md</code> document that maps every mock field to its eventual real source. That document is the first draft of the API contract. Design review that happens against real-looking data produces dramatically better decisions than design review against empty placeholders.</p>
+  <h3>Round 1 — Full first pass</h3>
+  <p>The first round reviews every screen. Every element gets all three specialist lenses applied. Nothing skips review. Nothing starts as Ready — slices need at least one round of review before they can be promoted.</p>
+  <p>The main job of Round 1: produce the full coverage map against the to-be process, trigger spikes for anything that blocks definition, and create <code>docs/backlog.md</code> with every slice named and in an initial state. No slice reaches Ready on Round 1 unless it has a clear design reference, defined done criteria, no open spike, and a confirmed process anchor. That's rare on a first pass.</p>
+  <p>End Round 1 with an explicit statement: what's In Review, what's Blocked (with named spikes), what's Deferred, and what the next round needs to resolve. The coverage map is a deliverable — every uncovered to-be step is a decision, not a silent gap.</p>
 
-          <p><strong>Design Review</strong> (phase 2.6) is an iterative loop. Each round applies three specialist lenses — PM, Tech Lead, and Data — to every screen. Findings become slice definitions or spike triggers. Slices move through states. When enough slices have reached Ready, build can start. Review then continues in parallel on the remaining slices.</p>
+  <h3>Round 2+ — Refine and promote</h3>
+  <p>Each round after the first is driven by what changed: spike results returned, design updates made, new screens added, stakeholder feedback received. Don't try to review everything equally every time — let the findings from the previous round drive the focus.</p>
+  <p>For each slice In Review: can it be promoted to Ready? Apply the five Ready conditions (see below). If yes, promote it. If not, name the specific blocker and carry it to the next round.</p>
+  <p>The process coverage check runs every round — not just Round 1. As slice definitions sharpen and process understanding deepens, gaps that weren't visible before may appear. Run the full coverage map every round and surface anything unresolved.</p>
 
-          <p>These two skills inform each other. The data-scaffold output is what the data lens in design-review reads. The design-review data lens surfaces fields that haven't been scaffolded yet. Running them separately, in sequence, defeats the value of both. Run them together.</p>
-        </div>
-      </div>
+  <h3>The three specialist lenses</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="section-label">PM Lens</div>
+      <p>Is this solving the right problem for the right person? Does the flow make sense from the user's perspective? What's missing from the story — what would a user hit that we haven't designed for? Does this screen earn its place in Phase 1?</p>
+    </div>
+    <div class="card">
+      <div class="section-label">Tech Lead Lens</div>
+      <p>Is this buildable with the stack we have? What are the real dependencies — not just the stated ones? What has to exist before this slice can start? Where is the complexity risk? Are we extending existing patterns or creating new ones?</p>
+    </div>
+    <div class="card">
+      <div class="section-label">Data Lens</div>
+      <p>Where does every visible field come from? Does the data model support what the design implies? What API calls are behind this screen? What doesn't exist yet that the design assumes? This lens connects design-review to data-scaffold — every un-scaffolded field found here should trigger a data-scaffold pass.</p>
+    </div>
+  </div>
 
-      <div class="callout">
-        <strong>The phase ends when there's enough to learn from, not when everything is defined.</strong> Build starts when the first coherent set of Ready slices exists — the thinnest path through the system that proves the core loop works. Design review continues on remaining slices while build is in progress.
-      </div>
-    </section>
+  <h3>The build signal</h3>
+  <p>Build starts when enough slices are Ready — not when everything is Ready. "Enough" means: is there a meaningful set of Ready slices that form a coherent starting point? Enough to learn something real from building them?</p>
+  <p>This is usually the first vertical slice through the system: the simplest path that produces something working end to end. Not the most feature-complete. Not the easiest. The one that proves the core loop works.</p>
+  <p>When that set exists, state it clearly: "These [N] slices are Ready and form a coherent Phase 1 starting point. Build can begin. Review continues on the remaining [N] slices in parallel." Build and review run in parallel from this point. The backlog is what keeps both tracks visible.</p>
 
-    <!-- ── SKILLS IN THIS PHASE ── -->
-    <section class="section" id="skills">
-      <div class="section-header">
-        <div class="section-icon">⚡</div>
-        <div>
-          <div class="section-title">Skills in this phase</div>
-          <div class="section-desc">Two phase skills run in parallel; one supporting skill triggered on demand</div>
-        </div>
-      </div>
+  <h2>Slice States</h2>
+  <p>Every slice in the backlog has one of these states at all times.</p>
+  <table>
+    <thead>
+      <tr><th>State</th><th>Meaning</th><th>Moves to</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Ready</strong></td>
+        <td>All five Ready conditions are met. Design reference is unambiguous, done criteria are defined, dependencies known, no open spike, process anchor confirmed. Can be built now.</td>
+        <td>In Build when work starts.</td>
+      </tr>
+      <tr>
+        <td><strong>In Review</strong></td>
+        <td>Identified — named and tracked in the backlog — but not yet fully defined. Needs more refinement: design clarity, missing done criteria, or unresolved questions that don't yet warrant a spike.</td>
+        <td>Ready when all five conditions are met. Blocked when a spike is triggered.</td>
+      </tr>
+      <tr>
+        <td><strong>Blocked</strong></td>
+        <td>Waiting on a specific spike result. The spike question must be named explicitly — "Blocked: spike on [question]" is the only valid format. Vague blockers are not allowed.</td>
+        <td>In Review (or Ready) when the spike result returns and the question is answered.</td>
+      </tr>
+      <tr>
+        <td><strong>Deferred</strong></td>
+        <td>Explicitly set aside — not in current scope. A trigger condition is noted (what would bring it back). This is a decision, not an oversight. Deferred slices appear in the backlog so nothing disappears silently.</td>
+        <td>In Review when the trigger condition is met and scope changes.</td>
+      </tr>
+      <tr>
+        <td><strong>In Build</strong></td>
+        <td>Currently being worked on by the builder. All four build anchors are confirmed before work starts: design anchor, data anchor, done anchor, and process anchor.</td>
+        <td>Done when QA passes and the solo confirms in the browser.</td>
+      </tr>
+      <tr>
+        <td><strong>Done</strong></td>
+        <td>Complete and verified. Code review passed, AI tested with evidence, solo confirmed in the browser. The slice's done criteria were verified — not assumed. Solo sign-off is required; code-complete alone is not Done.</td>
+        <td>Terminal state unless a regression is found, which routes through qa-triage.</td>
+      </tr>
+    </tbody>
+  </table>
 
-      <!-- data-scaffold -->
-      <div class="skill-card" id="skill-data-scaffold">
-        <div class="skill-card-header">
-          <div class="skill-name">data-scaffold</div>
-          <div class="skill-badge">Phase skill 2.5</div>
-        </div>
-        <div class="skill-description">
-          Generates realistic fake data for screens that don't have real APIs yet. Makes design review actually useful — screens with real-looking data produce better decisions than screens with placeholder text. Fake data lives in one mock layer, not scattered through the UI, so swapping to real data later is a replacement, not a rewrite. The mapping document is the first draft of the API contract.
-        </div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">When to run</div>
-            <ul>
-              <li>Before or during first design review round</li>
-              <li>When a screen has placeholder text where data should be</li>
-              <li>When design review surfaces a field that doesn't exist yet</li>
-              <li>When build starts and real APIs aren't ready</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Outputs</div>
-            <ul>
-              <li><span class="output-tag indigo">data/mock/[entity].json</span> one file per data entity</li>
-              <li><span class="output-tag indigo">data/mock/mock-index.js</span> exports all mock data</li>
-              <li><span class="output-tag indigo">docs/data-mapping.md</span> proto-API contract</li>
-              <li>Mock indicator badge on all screens</li>
-              <li>Single swap seam in UI code</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Key rules</div>
-            <ul>
-              <li><strong>Domain-accurate values</strong> — realistic ranges, not arbitrary numbers</li>
-              <li><strong>Structurally honest</strong> — field names match plausible API shape, not UI labels</li>
-              <li><strong>Edge cases included</strong> — always: a zero score, a missing field, a bye week</li>
-              <li><strong>One seam</strong> — UI calls a function; mock or real lives underneath</li>
-              <li><strong>Labeled everywhere</strong> — mock badge + comment pattern, no ambiguity</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+  <h2>What "Ready" Actually Means</h2>
+  <div class="callout">Ready is not "I think we can build this." It's a checklist. The solo confirms it's clear enough to build in a separate session, or to hand off to a collaborator, without any follow-up questions required.</div>
+  <p>Five conditions — all five must be true. No exceptions.</p>
+  <table>
+    <thead>
+      <tr><th>#</th><th>Condition</th><th>What it means</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>1</strong></td>
+        <td><strong>Design reference is unambiguous</strong></td>
+        <td>The slice points at a specific screen file and a specific element within it. "The player card on sprint-001.html — the weekly performance row" is a design reference. "The player screen" is not. If you can't point at the exact pixel, the slice isn't Ready.</td>
+      </tr>
+      <tr>
+        <td><strong>2</strong></td>
+        <td><strong>Done criteria are defined — 2 to 3 specific, verifiable statements</strong></td>
+        <td>"It works" is not a criterion. Each condition in "done looks like" should be something a person can check in a browser and give a yes/no answer to. Vague criteria produce failed QA and rework.</td>
+      </tr>
+      <tr>
+        <td><strong>3</strong></td>
+        <td><strong>Dependencies are identified and not blocking</strong></td>
+        <td>Every slice that must exist before this one is named. If a dependency isn't Done yet, the question is: does it block this slice from starting? If it does, the slice stays In Review until the dependency is in build or Done.</td>
+      </tr>
+      <tr>
+        <td><strong>4</strong></td>
+        <td><strong>No open spike on this slice</strong></td>
+        <td>If there's a spike open on a question that affects what gets built, the slice is Blocked, not Ready. A closed spike result that has been incorporated into the slice definition is fine. An active spike means the slice cannot be Ready.</td>
+      </tr>
+      <tr>
+        <td><strong>5</strong></td>
+        <td><strong>Process anchor is set</strong></td>
+        <td>The slice is connected to a specific step in the to-be process map — or explicitly documented as infrastructure or background logic that doesn't map to a user-facing step. A slice without a process anchor can't be Ready.</td>
+      </tr>
+    </tbody>
+  </table>
 
-      <!-- design-review -->
-      <div class="skill-card" id="skill-design-review">
-        <div class="skill-card-header">
-          <div class="skill-name">design-review</div>
-          <div class="skill-badge">Phase skill 2.6 — iterative</div>
-        </div>
-        <div class="skill-description">
-          Iterative review loop between the design artifact and the build decision. Each round adds knowledge, refines the design, defines slices, and updates the backlog. A slice reaches Ready when it's defined well enough to build. Build starts when enough slices are Ready. Review continues in parallel. The backlog is the persistent document that makes all of this visible.
-        </div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Each round does</div>
-            <ul>
-              <li>Applies PM, Tech Lead, and Data lenses to every screen</li>
-              <li>Names and classifies each finding immediately</li>
-              <li>Runs process coverage check against to-be map</li>
-              <li>Defines or refines slices</li>
-              <li>Moves slices through states</li>
-              <li>Updates <code>docs/backlog.md</code> in real time</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Gate inputs required</div>
-            <ul>
-              <li><code>docs/design/sprint-[id].html</code></li>
-              <li><code>docs/design/deferred-decisions.md</code></li>
-              <li><strong>To-be process map</strong> — non-negotiable. No to-be map means no slice review.</li>
-              <li><code>docs/data-mapping.md</code> (when available)</li>
-              <li>Any spike results in <code>docs/spikes/</code></li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Outputs</div>
-            <ul>
-              <li><span class="output-tag indigo">docs/backlog.md</span> created Round 1, updated every round</li>
-              <li>Slice definitions with IDs, process anchors, and done criteria</li>
-              <li>Process coverage map per round</li>
-              <li>Review log appended after each round</li>
-              <li>Spike triggers for knowledge gaps</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+  <h2>Stakeholder Feedback</h2>
+  <p>If files exist at <code>docs/stakeholder-feedback/*.md</code>, design-review reads each one before the review round begins and surfaces it explicitly. Every per-screen comment becomes a finding, classified using the same taxonomy as any other design-review finding: design gap, knowledge gap, slice definition, deferral confirmation, or ready signal.</p>
+  <p>Blockers listed by the stakeholder must be resolved before any affected slice can reach Ready — they function exactly like an open spike on that slice.</p>
+  <p>Approval status drives the next action:</p>
+  <div class="card-grid">
+    <div class="card">
+      <div class="section-label">Approved to build</div>
+      <p>Log the approval in the Review Log. If there are no per-screen changes, slices can proceed to Ready on their merits. Continue with the current round.</p>
+    </div>
+    <div class="card">
+      <div class="section-label">Needs another round</div>
+      <p>Work each per-screen comment as a finding. Apply changes. Schedule another handoff after this round's changes land. No slice that was flagged by the stakeholder reaches Ready until their feedback is addressed.</p>
+    </div>
+  </div>
+  <p>The Design Sprint phase can produce a shareable handoff package at <code>docs/design/handoff/[date]/</code> — an HTML artifact, PDF export, and a feedback template. When a stakeholder returns a completed feedback template, it lands in <code>docs/stakeholder-feedback/</code> and becomes available to the next design-review round. Stakeholder approval is a condition for a clean phase gate, not a nice-to-have.</p>
 
-      <!-- research-spike -->
-      <div class="skill-card" id="skill-research-spike">
-        <div class="skill-card-header">
-          <div class="skill-name teal">research-spike</div>
-          <div class="skill-badge teal">Supporting skill</div>
-        </div>
-        <div class="skill-description">
-          Timeboxed investigation of a specific unknown that's blocking a decision. Triggered when design-review finds a knowledge gap on a slice — a question that can't be answered from what's known, and where the answer changes what gets built. The output is a named, scoped answer that unblocks the slice.
-        </div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label teal">When triggered</div>
-            <ul>
-              <li>Design review finds a field whose source is unknown</li>
-              <li>A slice depends on a technical approach that hasn't been validated</li>
-              <li>A process step is unclear and the design assumes it</li>
-              <li>An API's shape or availability is uncertain</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label teal">How it integrates</div>
-            <ul>
-              <li>Slice moves to <strong>Blocked</strong> when spike is triggered</li>
-              <li>Spike result lives in <code>docs/spikes/</code></li>
-              <li>Next design-review round reads the result</li>
-              <li>Slice unblocks and can be promoted to Ready</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label teal">Key constraint</div>
-            <ul>
-              <li><strong>Timeboxed</strong> — one focused session, specific question</li>
-              <li>Must produce a decision, not just more research</li>
-              <li>Every blocked slice must name the spike question explicitly — no vague blockers</li>
-              <li>Spikes are tracked in the backlog At a Glance</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
+  <h2>Documents Produced</h2>
+  <div class="card-grid">
+    <div class="card">
+      <div class="section-label">data/mock/[entity].json</div>
+      <h3>Mock data layer</h3>
+      <p>One JSON file per data entity, with a <code>_mock: true</code> header. Contains domain-accurate values, enough records to show real list states, and at least one edge case per entity. The mock layer is a seam — UI code doesn't change when real data arrives, only the layer underneath it.</p>
+      <p><em>Created by data-scaffold. Updated when new entities are discovered during design review.</em></p>
+    </div>
+    <div class="card">
+      <div class="section-label">docs/data-mapping.md</div>
+      <h3>Data mapping / proto-API contract</h3>
+      <p>Every mock field mapped to its eventual real data source. Includes connection status per entity, field-level mapping table with mock example values and real field names, and instructions for swapping to real data when each source is ready.</p>
+      <p><em>Created by data-scaffold. Updated as real sources get connected or new fields are discovered.</em></p>
+    </div>
+    <div class="card">
+      <div class="section-label">docs/backlog.md</div>
+      <h3>Backlog</h3>
+      <p>Created Round 1, updated every round. At a Glance summary with counts by state. Full slice table with IDs, names, phases, and statuses. Slice detail per slice: design reference, description, process anchor, done criteria, dependencies, and notes. Review log appended each round.</p>
+      <p><em>Created Round 1 of design-review. Every subsequent round appends to — never recreates — this document.</em></p>
+    </div>
+  </div>
 
-    <!-- ── THE DESIGN-REVIEW LOOP ── -->
-    <section class="section" id="review-loop">
-      <div class="section-header">
-        <div class="section-icon">↺</div>
-        <div>
-          <div class="section-title">The design-review loop</div>
-          <div class="section-desc">How rounds work — from first pass to build signal</div>
-        </div>
-      </div>
+  <h2>The Gate</h2>
+  <div class="callout"><strong>Phase Gate 2.6 → 3: Build cannot start without a backlog.</strong> The gate is not "design is done" or "all slices are Ready." It's a specific document with a specific shape. Until this document exists and contains what's required, Plan cannot start and Build cannot start.<br><br><code>docs/backlog.md exists with a coherent set of Ready slices for Phase 1</code></div>
+  <p>"Coherent set" means the Ready slices form a meaningful starting point — they aren't random isolated slices, but enough of the system's core loop to build something that can actually be tested. The thinnest path through the full user journey, built as a tracer bullet, is the right mental model.</p>
+  <p>The process coverage check is part of gate readiness. Every step in the to-be process map must have a slice assigned to it, or an explicit documented decision that it's deferred, handled inside another slice, or outside scope. Silent gaps in process coverage are a gate hold condition.</p>
 
-      <div class="card" style="margin-bottom: 24px;">
-        <div class="card-header">
-          <div class="card-title">Round 1 — Full first pass</div>
-          <div class="card-badge" style="background: var(--indigo-light); color: var(--indigo);">Establish baseline</div>
-        </div>
-        <div class="card-body">
-          <p>The first round reviews every screen. Every element gets all three specialist lenses applied. Nothing skips review. Nothing starts as Ready — slices need at least one round of review before they can be promoted.</p>
-          <p>The main job of Round 1: produce the full coverage map against the to-be process, trigger spikes for anything that blocks definition, and create <code>docs/backlog.md</code> with every slice named and in an initial state. No slice reaches Ready on Round 1 unless it has a clear design reference, defined done criteria, no open spike, and a confirmed process anchor. That's rare on a first pass.</p>
-          <p>End Round 1 with an explicit statement: what's In Review, what's Blocked (with named spikes), what's Deferred, and what the next round needs to resolve. The coverage map is a deliverable — every uncovered to-be step is a decision, not a silent gap.</p>
-        </div>
-      </div>
+  <h2>Handoff to Plan</h2>
+  <p>The Plan phase reads three things when it starts:</p>
+  <div class="card-grid">
+    <div class="card">
+      <div class="section-label">The backlog</div>
+      <p><code>docs/backlog.md</code> — specifically the Ready slices for Phase 1. Each one has: a design reference, done criteria, dependencies, and a process anchor. These are the units the Plan phase sequences into a build order.</p>
+    </div>
+    <div class="card">
+      <div class="section-label">The deferred decisions log</div>
+      <p><code>docs/design/deferred-decisions.md</code> — the scope decisions made during the design sprint and carried through design review. The Plan phase uses this to sequence phases: Phase 1 is what's Ready now, later phases are what's Deferred with trigger conditions.</p>
+    </div>
+    <div class="card">
+      <div class="section-label">The design screens</div>
+      <p><code>docs/design/sprint-[id].html</code> — the build reference. Every slice's design reference points into this file. The Plan phase confirms that the HTML screens are accessible and that each slice's design reference is resolvable before GitHub issues are created.</p>
+    </div>
+  </div>
 
-      <div class="card" style="margin-bottom: 24px;">
-        <div class="card-header">
-          <div class="card-title">Round 2+ — Refine and promote</div>
-          <div class="card-badge" style="background: var(--purple-light); color: var(--purple);">Move slices forward</div>
-        </div>
-        <div class="card-body">
-          <p>Each round after the first is driven by what changed: spike results returned, design updates made, new screens added, stakeholder feedback received. Don't try to review everything equally every time — let the findings from the previous round drive the focus.</p>
-          <p>For each slice In Review: can it be promoted to Ready? Apply the five Ready conditions (see below). If yes, promote it. If not, name the specific blocker and carry it to the next round.</p>
-          <p>The process coverage check runs every round — not just Round 1. As slice definitions sharpen and process understanding deepens, gaps that weren't visible before may appear. Run the full coverage map every round and surface anything unresolved.</p>
-        </div>
-      </div>
+  <h2>What to Watch For</h2>
+  <table>
+    <thead>
+      <tr><th>Anti-pattern</th><th>Why it's a problem</th><th>Instead</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Waiting for ALL slices to be Ready before starting build</strong></td>
+        <td>Waterfall — the entire value of the iterative loop is lost. You end up doing all the work upfront that the process is designed to distribute over time. Build starts learning late, feedback arrives late.</td>
+        <td>Build starts when the first coherent set of Ready slices exists. Design review continues in parallel on the remaining slices. The backlog makes both tracks visible simultaneously.</td>
+      </tr>
+      <tr>
+        <td><strong>Vague done criteria — "it works," "it looks right"</strong></td>
+        <td>Nobody can verify these. They're not criteria — they're intentions. The QA phase will fail because there's nothing specific to check against. Rework happens after the fact.</td>
+        <td>2–3 specific, verifiable statements per slice. Each one answerable with yes or no from a browser. If you can't write it as a checkbox a person can check, it's not ready.</td>
+      </tr>
+      <tr>
+        <td><strong>Skipping the data lens</strong></td>
+        <td>Design implies data infrastructure that doesn't exist yet. Build starts, then discovers mid-build that a required API doesn't exist, a computed field has no source, or a data model doesn't support what the screen assumes.</td>
+        <td>Every field on every screen gets a "where does this come from" pass. Unknown sources become spikes or data-scaffold entries. No field is assumed — every one is either mapped or flagged.</td>
+      </tr>
+      <tr>
+        <td><strong>Skipping the process coverage check</strong></td>
+        <td>Slices pile up around screens and UI elements, but whole process steps go unbuilt. The system ships screens that look right but don't implement the actual business process.</td>
+        <td>Run the coverage map every round — every to-be process step must have a slice, or an explicit decision that it's deferred, handled inside another slice, or out of scope.</td>
+      </tr>
+      <tr>
+        <td><strong>Letting blocked slices sit without a named spike</strong></td>
+        <td>The blocker becomes invisible. Shows up in the backlog as "Blocked" with no context. The next session can't determine what's blocking it or how to unblock it.</td>
+        <td>Every blocked slice names the specific spike question. "Blocked: spike on whether MFL API returns historical scores by player" is valid. "Blocked: data question" is not.</td>
+      </tr>
+      <tr>
+        <td><strong>Running data-scaffold after design review instead of alongside it</strong></td>
+        <td>Design review happens against empty placeholders. The data lens can't evaluate whether the data model supports what the design assumes. Edge cases don't surface.</td>
+        <td>Run data-scaffold before or during first design review round. The value of data-scaffold is precisely that design review has real-looking data to react to.</td>
+      </tr>
+    </tbody>
+  </table>
 
-      <div class="card" style="margin-bottom: 24px;">
-        <div class="card-header">
-          <div class="card-title">The three specialist lenses</div>
-        </div>
-        <div class="card-body">
-          <div class="two-col" style="margin-top: 4px;">
-            <div style="background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 10px; padding: 16px 18px;">
-              <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--indigo); margin-bottom: 8px;">PM Lens</div>
-              <div style="font-size: 13px; color: var(--gray-700); line-height: 1.6;">Is this solving the right problem for the right person? Does the flow make sense from the user's perspective? What's missing from the story — what would a user hit that we haven't designed for? Does this screen earn its place in Phase 1?</div>
-            </div>
-            <div style="background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 10px; padding: 16px 18px;">
-              <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--indigo); margin-bottom: 8px;">Tech Lead Lens</div>
-              <div style="font-size: 13px; color: var(--gray-700); line-height: 1.6;">Is this buildable with the stack we have? What are the real dependencies — not just the stated ones? What has to exist before this slice can start? Where is the complexity risk? Are we extending existing patterns or creating new ones?</div>
-            </div>
-          </div>
-          <div style="margin-top: 12px; background: var(--indigo-light); border: 1px solid #DDD6CC; border-radius: 10px; padding: 16px 18px;">
-            <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--indigo); margin-bottom: 8px;">Data Lens</div>
-            <div style="font-size: 13px; color: var(--gray-700); line-height: 1.6;">Where does every visible field come from? Does the data model support what the design implies? What API calls are behind this screen? What doesn't exist yet that the design assumes? This is the lens that connects design-review to data-scaffold — every un-scaffolded field found here should trigger a data-scaffold pass.</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">The build signal</div>
-          <div class="card-badge" style="background: var(--green-light); color: var(--green);">Move to Plan</div>
-        </div>
-        <div class="card-body">
-          <p>Build starts when enough slices are Ready — not when everything is Ready. "Enough" means: is there a meaningful set of Ready slices that form a coherent starting point? Enough to learn something real from building them?</p>
-          <p>This is usually the first vertical slice through the system: the simplest path that produces something working end to end. Not the most feature-complete. Not the easiest. The one that proves the core loop works.</p>
-          <p>When that set exists, state it clearly: <em>"These [N] slices are Ready and form a coherent Phase 1 starting point. Build can begin. Review continues on the remaining [N] slices in parallel."</em> Build and review run in parallel from this point. The backlog is what keeps both tracks visible.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── SLICE STATES ── -->
-    <section class="section" id="slice-states">
-      <div class="section-header">
-        <div class="section-icon">⬡</div>
-        <div>
-          <div class="section-title">Slice states</div>
-          <div class="section-desc">Every slice in the backlog has one of these states at all times</div>
-        </div>
-      </div>
-
-      <div class="state-grid">
-        <div class="state-cell ready">
-          <span class="state-emoji">✅</span>
-          <div class="state-label">Ready</div>
-          <div class="state-meaning">All five Ready conditions are met. Design reference is unambiguous, done criteria are defined, dependencies known, no open spike, process anchor confirmed. Can be built now.</div>
-          <div class="state-transition"><strong>Moves to:</strong> In Build when work starts.</div>
-        </div>
-
-        <div class="state-cell in-review">
-          <span class="state-emoji">🔄</span>
-          <div class="state-label">In Review</div>
-          <div class="state-meaning">Identified — named and tracked in the backlog — but not yet fully defined. Needs more refinement: design clarity, missing done criteria, or unresolved questions that don't yet warrant a spike.</div>
-          <div class="state-transition"><strong>Moves to:</strong> Ready when all five conditions are met. Blocked when a spike is triggered.</div>
-        </div>
-
-        <div class="state-cell blocked">
-          <span class="state-emoji">🔬</span>
-          <div class="state-label">Blocked</div>
-          <div class="state-meaning">Waiting on a specific spike result. The spike question must be named explicitly in the backlog — "Blocked: spike on [question]" is the only valid format. Vague blockers are not allowed.</div>
-          <div class="state-transition"><strong>Moves to:</strong> In Review (or Ready) when the spike result returns and the question is answered.</div>
-        </div>
-
-        <div class="state-cell deferred">
-          <span class="state-emoji">⏸</span>
-          <div class="state-label">Deferred</div>
-          <div class="state-meaning">Explicitly set aside — not in current scope. A trigger condition is noted (what would bring it back). This is a decision, not an oversight. Deferred slices appear in the backlog so nothing disappears silently.</div>
-          <div class="state-transition"><strong>Moves to:</strong> In Review when the trigger condition is met and scope changes.</div>
-        </div>
-
-        <div class="state-cell in-build">
-          <span class="state-emoji">🔨</span>
-          <div class="state-label">In Build</div>
-          <div class="state-meaning">Currently being worked on by the builder (solo-build skill). All four build anchors are confirmed before work starts: design anchor, data anchor, done anchor, and process anchor.</div>
-          <div class="state-transition"><strong>Moves to:</strong> Done when QA passes and the solo confirms in the browser.</div>
-        </div>
-
-        <div class="state-cell done">
-          <span class="state-emoji">✓</span>
-          <div class="state-label">Done</div>
-          <div class="state-meaning">Complete and verified. Code review passed, AI tested with evidence, solo confirmed in the browser. The slice's done criteria were verified — not assumed. Solo sign-off is required; code-complete alone is not Done.</div>
-          <div class="state-transition"><strong>Terminal state</strong> unless a regression is found, which routes through qa-triage.</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── WHAT READY ACTUALLY MEANS ── -->
-    <section class="section" id="ready-means">
-      <div class="section-header">
-        <div class="section-icon">✅</div>
-        <div>
-          <div class="section-title">What "Ready" actually means</div>
-          <div class="section-desc">Five conditions — all five must be true. No exceptions.</div>
-        </div>
-      </div>
-
-      <div class="callout">
-        Ready is not "I think we can build this." It's a checklist. The solo confirms it's clear enough to hand to a builder — which in a solo context means: clear enough to build in a separate session, or to hand off to a collaborator, without any follow-up questions required.
-      </div>
-
-      <div class="ready-conditions">
-
-        <div class="ready-condition">
-          <div class="rc-num">1</div>
-          <div class="rc-body">
-            <div class="rc-title">Design reference is unambiguous</div>
-            <div class="rc-detail">The slice points at a specific screen file and a specific element within it. "The player card on <code>sprint-001.html</code> — the weekly performance row" is a design reference. "The player screen" is not. If you can't point at the exact pixel, the slice isn't Ready.</div>
-          </div>
-        </div>
-
-        <div class="ready-condition">
-          <div class="rc-num">2</div>
-          <div class="rc-body">
-            <div class="rc-title">Done criteria are defined — 2 to 3 specific, verifiable statements</div>
-            <div class="rc-detail">"It works" is not a criterion. "The weekly performance row renders the correct score for each week, including a zero for bye weeks, and the delta column shows positive/negative correctly" is a criterion. Each condition in "done looks like" should be something a person can check in a browser and give a yes/no answer to. Vague criteria produce failed QA and rework.</div>
-          </div>
-        </div>
-
-        <div class="ready-condition">
-          <div class="rc-num">3</div>
-          <div class="rc-body">
-            <div class="rc-title">Dependencies are identified and not blocking</div>
-            <div class="rc-detail">Every slice that must exist before this one is named. If a dependency isn't Done yet, the question is: does it block this slice from starting? If it does, the slice stays In Review until the dependency is in build or Done. If it doesn't block the start (only a specific later step), that's noted and the slice can be Ready.</div>
-          </div>
-        </div>
-
-        <div class="ready-condition">
-          <div class="rc-num">4</div>
-          <div class="rc-body">
-            <div class="rc-title">No open spike on this slice</div>
-            <div class="rc-detail">If there's a spike open on a question that affects what gets built, the slice is Blocked, not Ready. A closed spike result (in <code>docs/spikes/</code>) that has been incorporated into the slice definition is fine — the spike is closed. An active spike where the answer is still unknown means the slice cannot be Ready. Promote after the spike returns.</div>
-          </div>
-        </div>
-
-        <div class="ready-condition">
-          <div class="rc-num">5</div>
-          <div class="rc-body">
-            <div class="rc-title">Process anchor is set</div>
-            <div class="rc-detail">The slice is connected to a specific step in the to-be process map — or explicitly documented as infrastructure or background logic that doesn't map to a user-facing step. This is what allows the Plan phase to sequence slices by process order rather than just by dependency. A slice without a process anchor can't be Ready. Slices that don't map to any process step need an explicit decision: infrastructure, deferred feature, or scope creep.</div>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- ── STAKEHOLDER FEEDBACK ── -->
-    <section class="section" id="stakeholder-feedback">
-      <div class="section-header">
-        <div class="section-icon">◎</div>
-        <div>
-          <div class="section-title">Stakeholder feedback incorporation</div>
-          <div class="section-desc">When feedback files exist, they're first-class input to design review</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-body">
-          <p>If files exist at <code>docs/stakeholder-feedback/*.md</code>, design-review reads each one before the review round begins and surfaces it explicitly. The format for opening a round with stakeholder feedback: <em>"Stakeholder feedback from [reviewer, date] is in. Overall reaction: [summary]. Approval status: [status]. Let's work through each per-screen comment."</em></p>
-
-          <p>Every per-screen comment becomes a finding, classified using the same taxonomy as any other design-review finding: design gap, knowledge gap, slice definition, deferral confirmation, or ready signal. Blockers listed by the stakeholder must be resolved before any affected slice can reach Ready — they function exactly like an open spike on that slice.</p>
-
-          <p>Approval status drives the next action:</p>
-        </div>
-      </div>
-
-      <div class="two-col" style="margin-top: 16px; margin-bottom: 16px;">
-        <div style="background: var(--green-light); border: 1px solid #DDD6CC; border-radius: 10px; padding: 18px 20px;">
-          <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--green); margin-bottom: 8px;">Approved to build</div>
-          <div style="font-size: 13px; color: var(--gray-700); line-height: 1.6;">Log the approval in the Review Log. If there are no per-screen changes, slices can proceed to Ready on their merits. Continue with the current round.</div>
-        </div>
-        <div style="background: var(--amber-light); border: 1px solid rgba(209,191,167,0.4); border-radius: 10px; padding: 18px 20px;">
-          <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--amber); margin-bottom: 8px;">Needs another round</div>
-          <div style="font-size: 13px; color: var(--gray-700); line-height: 1.6;">Work each per-screen comment as a finding. Apply changes. Schedule another handoff after this round's changes land. No slice that was flagged by the stakeholder reaches Ready until their feedback is addressed.</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">The stakeholder handoff package</div>
-        </div>
-        <div class="card-body">
-          <p>The Design Sprint phase can produce a shareable handoff package at <code>docs/design/handoff/&lt;date&gt;/</code> — an HTML artifact, PDF export, and a feedback template. When a stakeholder returns a completed feedback template, it lands in <code>docs/stakeholder-feedback/</code> and becomes available to the next design-review round.</p>
-          <p>This is the loop: sprint produces the handoff package → stakeholder reviews and returns feedback → design-review reads the feedback as first-class input → slices are updated accordingly → another handoff cycle if needed. Stakeholder approval is a condition for a clean phase gate, not a nice-to-have.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── DOCUMENTS PRODUCED ── -->
-    <section class="section" id="documents">
-      <div class="section-header">
-        <div class="section-icon">⬒</div>
-        <div>
-          <div class="section-title">Documents produced</div>
-          <div class="section-desc">Three persistent artifacts created and maintained during this phase</div>
-        </div>
-      </div>
-
-      <div class="doc-cards">
-        <div class="doc-card">
-          <div class="doc-file">data/mock/[entity].json</div>
-          <div class="doc-title">Mock data layer</div>
-          <div class="doc-desc">One JSON file per data entity, with a <code>_mock: true</code> header and a reference to <code>docs/data-mapping.md</code>. Contains domain-accurate values, enough records to show real list states, and at least one edge case per entity. The mock layer is a seam — UI code doesn't change when real data arrives, only the layer underneath it.</div>
-          <div class="doc-created">Created by data-scaffold. Updated when new entities are discovered during design review.</div>
-        </div>
-
-        <div class="doc-card">
-          <div class="doc-file">docs/data-mapping.md</div>
-          <div class="doc-title">Data mapping / proto-API contract</div>
-          <div class="doc-desc">Every mock field mapped to its eventual real data source. Includes connection status per entity (Pending / Connected), field-level mapping table with mock example values and real field names, and the instructions for swapping to real data when each source is ready. This document is what makes the mock layer valuable beyond the immediate session.</div>
-          <div class="doc-created">Created by data-scaffold. Updated as real sources get connected or new fields are discovered.</div>
-        </div>
-
-        <div class="doc-card">
-          <div class="doc-file">docs/backlog.md</div>
-          <div class="doc-title">Backlog</div>
-          <div class="doc-desc">Created Round 1, updated every round. At a Glance summary with counts by state. Full slice table with IDs, names, phases, and statuses. Slice detail per slice: design reference, description, process anchor, done criteria, dependencies, and notes. Review log appended each round. Readable by anyone who wasn't in the room.</div>
-          <div class="doc-created">Created Round 1 of design-review. Every subsequent round appends to — never recreates — this document.</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── THE GATE ── -->
-    <section class="section" id="gate">
-      <div class="section-header">
-        <div class="section-icon">⬛</div>
-        <div>
-          <div class="section-title">The gate</div>
-          <div class="section-desc">What must be true before the Plan phase can begin</div>
-        </div>
-      </div>
-
-      <div class="gate-box">
-        <div class="gate-eyebrow">Phase Gate 2.6 → 3</div>
-        <div class="gate-title">Build cannot start without a backlog.</div>
-        <div class="gate-body">
-          The gate for this phase is not "design is done" or "all slices are Ready." It's a specific document with a specific shape. Until this document exists and contains what's required, Plan cannot start and Build cannot start.
-        </div>
-        <div class="gate-condition">docs/backlog.md exists with a coherent set of Ready slices for Phase 1</div>
-      </div>
-
-      <div class="card" style="margin-top: 20px;">
-        <div class="card-body">
-          <p>"Coherent set" means the Ready slices form a meaningful starting point — they aren't random isolated slices, but enough of the system's core loop to build something that can actually be tested. The thinnest path through the full user journey, built as a tracer bullet, is the right mental model.</p>
-          <p>The process coverage check is part of gate readiness. Every step in the to-be process map must have a slice assigned to it, or an explicit documented decision that it's deferred, handled inside another slice, or outside scope. Silent gaps in process coverage are a gate hold condition.</p>
-          <p>The framework-health skill checks this gate signal at session start. If <code>docs/backlog.md</code> doesn't exist and the project is past the design sprint phase, it will surface that as the recovery path.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── HANDOFF TO PLAN ── -->
-    <section class="section" id="handoff">
-      <div class="section-header">
-        <div class="section-icon">→</div>
-        <div>
-          <div class="section-title">Handoff to Plan</div>
-          <div class="section-desc">What the Plan phase reads when it starts</div>
-        </div>
-      </div>
-
-      <div class="handoff-box">
-        <div class="handoff-header">
-          Plan phase reads these three things when it starts
-        </div>
-        <div class="handoff-body">
-          <div class="handoff-item">
-            <div class="handoff-item-title">The backlog</div>
-            <div class="handoff-item-body">
-              <code>docs/backlog.md</code> — specifically the Ready slices for Phase 1. Each one has: a design reference, done criteria, dependencies, and a process anchor. These are the units the Plan phase sequences into a build order. The prd-to-plan skill reads the backlog and sequences by risk and process order, not by comfort or convenience.
-            </div>
-          </div>
-          <div class="handoff-item">
-            <div class="handoff-item-title">The deferred decisions log</div>
-            <div class="handoff-item-body">
-              <code>docs/design/deferred-decisions.md</code> — the scope decisions made during the design sprint and carried through design review. These are explicit choices about what's in and what's out of Phase 1. The Plan phase uses this to sequence phases: Phase 1 is what's Ready now, later phases are what's Deferred with trigger conditions.
-            </div>
-          </div>
-          <div class="handoff-item">
-            <div class="handoff-item-title">The design screens</div>
-            <div class="handoff-item-body">
-              <code>docs/design/sprint-[id].html</code> — the build reference. Every slice's design reference points into this file. The Plan phase confirms that the HTML screens are accessible and that each slice's design reference is resolvable before GitHub issues are created. The screens are what the builder uses during Build — the backlog references them, not descriptions of them.
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── WHAT TO WATCH FOR ── -->
-    <section class="section" id="watch-for">
-      <div class="section-header">
-        <div class="section-icon">⚠</div>
-        <div>
-          <div class="section-title">What to watch for</div>
-          <div class="section-desc">Failure modes that are common in this phase</div>
-        </div>
-      </div>
-
-      <div class="anti-table">
-        <table>
-          <thead>
-            <tr>
-              <th style="width: 28%">Anti-pattern</th>
-              <th style="width: 36%">Why it's a problem</th>
-              <th style="width: 36%">Instead</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Waiting for ALL slices to be Ready before starting build</td>
-              <td>Waterfall — the entire value of the iterative loop is lost. You end up doing all the work upfront that the process is designed to distribute over time. Build starts learning late, feedback arrives late.</td>
-              <td><strong>Build starts when the first coherent set of Ready slices exists.</strong> Design review continues in parallel on the remaining slices. The backlog makes both tracks visible simultaneously.</td>
-            </tr>
-            <tr>
-              <td>Vague done criteria — "it works," "it looks right," "it functions"</td>
-              <td>Nobody can verify these. They're not criteria — they're intentions. The QA phase will fail because there's nothing specific to check against. Rework happens after the fact.</td>
-              <td><strong>2–3 specific, verifiable statements</strong> per slice. Each one answerable with yes or no from a browser. If you can't write it as a checkbox a person can check, it's not ready.</td>
-            </tr>
-            <tr>
-              <td>Skipping the data lens</td>
-              <td>Design implies data infrastructure that doesn't exist yet. Build starts, then discovers mid-build that a required API doesn't exist, a computed field has no source, or a data model doesn't support what the screen assumes.</td>
-              <td><strong>Every field on every screen gets a "where does this come from" pass.</strong> Unknown sources become spikes or data-scaffold entries. No field is assumed — every one is either mapped or flagged.</td>
-            </tr>
-            <tr>
-              <td>Skipping the process coverage check</td>
-              <td>Slices pile up around screens and UI elements, but whole process steps go unbuilt. The system ships screens that look right but don't implement the actual business process. Phase test fails on use cases that should be basic.</td>
-              <td><strong>Run the coverage map every round</strong> — every to-be process step must have a slice, or an explicit decision that it's deferred, handled inside another slice, or out of scope. This check is not optional.</td>
-            </tr>
-            <tr>
-              <td>Letting blocked slices sit without a named spike</td>
-              <td>The blocker becomes invisible. It shows up in the backlog as "Blocked" with no context. The next session can't determine what's blocking it or how to unblock it. Blockers accumulate without resolution paths.</td>
-              <td><strong>Every blocked slice names the specific spike question.</strong> "Blocked: spike on whether MFL API returns historical scores by player" is a blocked slice. "Blocked: data question" is not. Name it or it will never get resolved.</td>
-            </tr>
-            <tr>
-              <td>Defining slices without checking for existing patterns in the codebase</td>
-              <td>Silent duplicates — two slices end up doing the same thing, neither done well. Or a new slice creates a naming collision with something the codebase already expresses. Build session is surprised by the divergence.</td>
-              <td><strong>Coherence check before every new slice definition.</strong> Is there already a pattern in the codebase for this? Are we extending or creating? If creating, name the divergence explicitly in the slice notes.</td>
-            </tr>
-            <tr>
-              <td>Running data-scaffold after design review instead of alongside it</td>
-              <td>Design review happens against empty placeholders. The data lens can't evaluate whether the data model supports what the design assumes. Edge cases don't surface. The screens that come out of review aren't grounded in realistic data shape.</td>
-              <td><strong>Run data-scaffold before or during first design review round.</strong> The value of data-scaffold is precisely that design review has real-looking data to react to. Scaffold first, review against populated screens.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-  </div><!-- /content -->
-
-</main>
-
+</div>
 </body>
 </html>

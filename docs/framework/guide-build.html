@@ -1,1957 +1,388 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Solo Builder Framework — Build Phase Guide</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --navy: #1a1a1a;
-    --navy-mid: #2a2a2a;
-    --green: #8e8e90;
-    --green-light: rgba(142,142,144,0.12);
-    --green-mid: #8e8e90;
-    --gray-50: #faf8f5;
-    --gray-100: #e8ddd4;
-    --gray-200: #e8ddd4;
-    --gray-300: #DDD6CC;
-    --gray-500: #8e8e90;
-    --gray-700: #49494b;
-    --gray-900: #1a1a1a;
-    --red: #bd8c7d;
-    --red-light: rgba(189,140,125,0.12);
-    --amber: #d1bfa7;
-    --amber-light: rgba(209,191,167,0.15);
-    --blue: #bd8c7d;
-    --blue-light: rgba(142,142,144,0.15);
-  }
-
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    background: var(--gray-50);
-    color: var(--gray-900);
-    display: flex;
-    min-height: 100vh;
-  }
-
-  /* ── SIDEBAR ── */
-  .sidebar {
-    width: 240px;
-    flex-shrink: 0;
-    background: var(--navy);
-    position: fixed;
-    top: 0; left: 0; bottom: 0;
-    overflow-y: auto;
-    padding: 28px 0 40px;
-    z-index: 10;
-  }
-  .sidebar::-webkit-scrollbar { width: 4px; }
-  .sidebar::-webkit-scrollbar-track { background: transparent; }
-  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
-
-  .sidebar-header {
-    padding: 0 20px 24px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    margin-bottom: 16px;
-  }
-  .sidebar-header .sh-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: rgba(255,255,255,0.35);
-    margin-bottom: 6px;
-  }
-  .sidebar-header .sh-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: #fff;
-    line-height: 1.3;
-  }
-
-  .nav-group { margin-bottom: 6px; }
-  .nav-group-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    padding: 8px 20px 4px;
-    display: block;
-    color: rgba(142,142,144,0.6);
-  }
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 20px;
-    font-size: 12px;
-    font-weight: 500;
-    color: rgba(255,255,255,0.55);
-    text-decoration: none;
-    transition: all 0.15s;
-    border-left: 2px solid transparent;
-  }
-  .nav-item:hover {
-    color: #fff;
-    background: rgba(255,255,255,0.06);
-  }
-  .nav-item.active {
-    color: #fff;
-    border-left-color: var(--green-mid);
-    background: rgba(255,255,255,0.06);
-  }
-  .nav-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    background: var(--green-mid);
-  }
-
-  .nav-phase-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    padding: 8px 20px 4px;
-    display: block;
-    color: rgba(255,255,255,0.25);
-    margin-top: 8px;
-  }
-  .nav-phase-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 5px 20px;
-    font-size: 11.5px;
-    color: rgba(255,255,255,0.3);
-    text-decoration: none;
-  }
-  .nav-phase-dot {
-    width: 5px; height: 5px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    background: rgba(255,255,255,0.2);
-  }
-  .nav-phase-item.current {
-    color: rgba(142,142,144,0.9);
-  }
-  .nav-phase-item.current .nav-phase-dot {
-    background: var(--green-mid);
-  }
-
-  /* ── MAIN ── */
-  .main {
-    margin-left: 240px;
-    flex: 1;
-    min-width: 0;
-  }
-
-  /* ── PAGE HEADER ── */
-  .page-header {
-    background: var(--navy);
-    color: #fff;
-    padding: 48px 60px 40px;
-  }
-  .ph-eyebrow {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: rgba(255,255,255,0.4);
-    margin-bottom: 12px;
-  }
-  .page-header h1 {
-    font-size: 36px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    margin-bottom: 14px;
-    line-height: 1.1;
-  }
-  .page-header h1 span {
-    color: #8e8e90;
-  }
-  .page-header .ph-desc {
-    font-size: 15px;
-    color: rgba(255,255,255,0.55);
-    max-width: 620px;
-    line-height: 1.65;
-  }
-  .header-stats {
-    display: flex;
-    gap: 40px;
-    margin-top: 32px;
-    padding-top: 28px;
-    border-top: 1px solid rgba(255,255,255,0.08);
-  }
-  .header-stat .hs-num {
-    font-size: 26px;
-    font-weight: 800;
-    color: #fff;
-    letter-spacing: -0.5px;
-  }
-  .header-stat .hs-label {
-    font-size: 12px;
-    color: rgba(255,255,255,0.4);
-    margin-top: 2px;
-  }
-
-  /* ── PHASE BADGE ── */
-  .phase-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--green-light);
-    color: var(--green);
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 6px 14px;
-    border-radius: 20px;
-    margin-bottom: 20px;
-  }
-  .phase-badge-dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--green);
-  }
-
-  /* ── CONTENT ── */
-  .content {
-    padding: 52px 60px 80px;
-    max-width: 960px;
-  }
-
-  /* ── SECTION HEADERS ── */
-  .section {
-    margin-bottom: 56px;
-  }
-  .section-header {
-    margin-bottom: 24px;
-  }
-  .section-eyebrow {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: var(--green);
-    margin-bottom: 6px;
-  }
-  .section-title {
-    font-size: 22px;
-    font-weight: 800;
-    color: var(--gray-900);
-    letter-spacing: -0.3px;
-    line-height: 1.2;
-  }
-  .section-desc {
-    font-size: 14px;
-    color: var(--gray-500);
-    margin-top: 6px;
-    line-height: 1.6;
-    max-width: 680px;
-  }
-
-  /* ── CARDS ── */
-  .card {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    margin-bottom: 20px;
-    overflow: hidden;
-  }
-
-  /* ── INTRO CARD ── */
-  .intro-card {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    padding: 28px 32px;
-    margin-bottom: 32px;
-  }
-  .intro-card p {
-    font-size: 15px;
-    color: var(--gray-700);
-    line-height: 1.7;
-    margin-bottom: 14px;
-  }
-  .intro-card p:last-child { margin-bottom: 0; }
-  .intro-card strong { color: var(--gray-900); font-weight: 600; }
-
-  /* ── SKILL CARDS ── */
-  .skill-card {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    margin-bottom: 16px;
-    overflow: hidden;
-  }
-  .skill-card-header {
-    padding: 18px 24px 14px;
-    border-bottom: 1px solid var(--gray-100);
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-  }
-  .skill-name {
-    font-size: 15px;
-    font-weight: 700;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    color: var(--green);
-    flex: 1;
-  }
-  .skill-badge {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    padding: 3px 10px;
-    border-radius: 20px;
-    white-space: nowrap;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-  .badge-phase { background: var(--green-light); color: var(--green); }
-  .badge-technique { background: var(--blue-light); color: var(--blue); }
-  .badge-ondemand { background: var(--gray-100); color: var(--gray-700); }
-
-  .skill-desc {
-    padding: 14px 24px;
-    font-size: 13.5px;
-    color: var(--gray-700);
-    line-height: 1.65;
-    border-bottom: 1px solid var(--gray-100);
-    background: var(--gray-50);
-  }
-  .skill-body {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-  }
-  .skill-section {
-    padding: 16px 22px;
-    border-right: 1px solid var(--gray-100);
-  }
-  .skill-section:last-child { border-right: none; }
-  .skill-section-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--green);
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .skill-section-label::before {
-    content: '';
-    width: 3px; height: 12px;
-    border-radius: 2px;
-    background: var(--green-light);
-    flex-shrink: 0;
-  }
-  .skill-section ul {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-  .skill-section ul li {
-    font-size: 12.5px;
-    color: var(--gray-700);
-    line-height: 1.5;
-    padding-left: 12px;
-    position: relative;
-  }
-  .skill-section ul li::before {
-    content: '›';
-    position: absolute;
-    left: 0;
-    color: var(--gray-300);
-    font-size: 14px;
-    line-height: 1.35;
-  }
-  .skill-section ul li strong { color: var(--gray-900); font-weight: 600; }
-
-  /* ── ANCHOR SECTION ── */
-  .anchor-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 24px;
-  }
-  .anchor-card {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  .anchor-card-header {
-    background: var(--green-light);
-    padding: 14px 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .anchor-num {
-    width: 24px; height: 24px;
-    border-radius: 50%;
-    background: var(--green);
-    color: #fff;
-    font-size: 12px;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-  .anchor-name {
-    font-size: 13px;
-    font-weight: 800;
-    color: var(--green);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .anchor-card-body {
-    padding: 18px 20px;
-  }
-  .anchor-card-body p {
-    font-size: 13.5px;
-    color: var(--gray-700);
-    line-height: 1.6;
-    margin-bottom: 12px;
-  }
-  .anchor-card-body p:last-child { margin-bottom: 0; }
-  .anchor-format {
-    background: var(--gray-50);
-    border: 1px solid var(--gray-200);
-    border-radius: 8px;
-    padding: 10px 14px;
-    margin-top: 10px;
-  }
-  .anchor-format .af-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--gray-500);
-    margin-bottom: 6px;
-  }
-  .anchor-format code {
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    font-size: 11.5px;
-    color: var(--green);
-    display: block;
-    line-height: 1.5;
-  }
-  .anchor-format .example {
-    font-size: 11px;
-    color: var(--gray-500);
-    margin-top: 5px;
-    font-style: italic;
-    line-height: 1.5;
-  }
-
-  .anchor-gate {
-    background: #fff;
-    border: 2px solid var(--green);
-    border-radius: 12px;
-    padding: 20px 24px;
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-  }
-  .gate-icon {
-    width: 36px; height: 36px;
-    border-radius: 10px;
-    background: var(--green);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    flex-shrink: 0;
-  }
-  .gate-text h4 {
-    font-size: 14px;
-    font-weight: 800;
-    color: var(--green);
-    margin-bottom: 6px;
-  }
-  .gate-text p {
-    font-size: 13.5px;
-    color: var(--gray-700);
-    line-height: 1.6;
-  }
-
-  /* ── JOURNEY ORDER ── */
-  .journey-diagram {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    padding: 28px 32px;
-    margin-bottom: 20px;
-  }
-  .journey-flow {
-    display: flex;
-    align-items: center;
-    gap: 0;
-    margin: 24px 0 20px;
-    overflow-x: auto;
-  }
-  .journey-step {
-    background: var(--green-light);
-    border: 1.5px solid var(--green);
-    border-radius: 8px;
-    padding: 10px 16px;
-    font-size: 12.5px;
-    font-weight: 700;
-    color: var(--green);
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-  .journey-arrow {
-    padding: 0 8px;
-    color: var(--gray-300);
-    font-size: 18px;
-    flex-shrink: 0;
-  }
-  .journey-step.blocked {
-    background: var(--gray-100);
-    border-color: var(--gray-300);
-    color: var(--gray-500);
-    opacity: 0.6;
-  }
-  .journey-blocked-note {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12.5px;
-    color: var(--amber);
-    background: var(--amber-light);
-    padding: 10px 16px;
-    border-radius: 8px;
-    margin-top: 4px;
-  }
-
-  .rules-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 20px;
-  }
-  .rule-item {
-    display: flex;
-    gap: 14px;
-    align-items: flex-start;
-    padding: 14px 18px;
-    background: var(--gray-50);
-    border: 1px solid var(--gray-200);
-    border-radius: 10px;
-  }
-  .rule-num {
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    background: var(--green);
-    color: #fff;
-    font-size: 11px;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-  .rule-content h4 {
-    font-size: 13.5px;
-    font-weight: 700;
-    color: var(--gray-900);
-    margin-bottom: 4px;
-  }
-  .rule-content p {
-    font-size: 13px;
-    color: var(--gray-700);
-    line-height: 1.6;
-  }
-
-  /* ── TRACER BULLET ── */
-  .tracer-card {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 20px;
-  }
-  .tracer-header {
-    background: var(--navy);
-    padding: 20px 28px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-  .tracer-icon {
-    font-size: 22px;
-  }
-  .tracer-header-text h3 {
-    font-size: 15px;
-    font-weight: 800;
-    color: #fff;
-    margin-bottom: 2px;
-  }
-  .tracer-header-text p {
-    font-size: 12.5px;
-    color: rgba(255,255,255,0.5);
-  }
-  .tracer-body {
-    padding: 24px 28px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-  }
-  .tracer-half h4 {
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--green);
-    margin-bottom: 10px;
-  }
-  .tracer-half p {
-    font-size: 13.5px;
-    color: var(--gray-700);
-    line-height: 1.65;
-  }
-  .tracer-half ul {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-    margin-top: 8px;
-  }
-  .tracer-half ul li {
-    font-size: 13px;
-    color: var(--gray-700);
-    line-height: 1.5;
-    padding-left: 14px;
-    position: relative;
-  }
-  .tracer-half ul li::before {
-    content: '→';
-    position: absolute;
-    left: 0;
-    color: var(--green);
-    font-size: 12px;
-    line-height: 1.5;
-  }
-
-  .tracer-vs {
-    background: var(--gray-50);
-    border-top: 1px solid var(--gray-200);
-    padding: 16px 28px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0;
-  }
-  .tracer-vs-col {
-    padding: 0 20px;
-  }
-  .tracer-vs-col:first-child {
-    border-right: 1px solid var(--gray-200);
-    padding-left: 0;
-  }
-  .tracer-vs-col:last-child {
-    padding-right: 0;
-  }
-  .vs-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 8px;
-  }
-  .vs-label.good { color: var(--green); }
-  .vs-label.bad { color: var(--red); }
-  .vs-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-  .vs-list li {
-    font-size: 12.5px;
-    color: var(--gray-700);
-    line-height: 1.5;
-    padding-left: 14px;
-    position: relative;
-  }
-  .vs-list li::before {
-    position: absolute;
-    left: 0;
-    font-size: 11px;
-    line-height: 1.5;
-  }
-  .vs-list.good li::before { content: '✓'; color: var(--green); }
-  .vs-list.bad li::before { content: '✗'; color: var(--red); }
-
-  /* ── MID-BUILD DISCOVERIES ── */
-  .discovery-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 20px;
-  }
-  .discovery-card {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  .discovery-card-header {
-    padding: 12px 18px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    border-bottom: 1px solid var(--gray-100);
-  }
-  .disc-severity {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    padding: 3px 10px;
-    border-radius: 12px;
-  }
-  .disc-minor { background: var(--green-light); color: var(--green); }
-  .disc-gap { background: var(--amber-light); color: var(--amber); }
-  .disc-affects { background: var(--blue-light); color: var(--blue); }
-  .disc-blocks { background: var(--red-light); color: var(--red); }
-  .disc-type {
-    font-size: 12.5px;
-    font-weight: 700;
-    color: var(--gray-900);
-  }
-  .discovery-card-body {
-    padding: 14px 18px;
-  }
-  .discovery-card-body p {
-    font-size: 13px;
-    color: var(--gray-700);
-    line-height: 1.6;
-    margin-bottom: 10px;
-  }
-  .discovery-card-body p:last-child { margin-bottom: 0; }
-  .discovery-action {
-    background: var(--gray-50);
-    border-radius: 6px;
-    padding: 8px 12px;
-    font-size: 12px;
-    color: var(--gray-700);
-    line-height: 1.5;
-    border: 1px solid var(--gray-200);
-  }
-  .discovery-action strong { color: var(--gray-900); font-weight: 600; }
-
-  .never-absorb {
-    background: var(--red-light);
-    border: 1.5px solid rgba(189,140,125,0.4);
-    border-radius: 10px;
-    padding: 16px 20px;
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-  }
-  .never-icon {
-    font-size: 16px;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-  .never-text {
-    font-size: 13.5px;
-    color: var(--red);
-    line-height: 1.6;
-    font-weight: 600;
-  }
-
-  /* ── QA CHAIN ── */
-  .chain-diagram {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 20px;
-  }
-  .chain-steps {
-    display: flex;
-    align-items: stretch;
-  }
-  .chain-step {
-    flex: 1;
-    padding: 20px 22px;
-    border-right: 1px solid var(--gray-200);
-    position: relative;
-  }
-  .chain-step:last-child { border-right: none; }
-  .chain-step::after {
-    content: '→';
-    position: absolute;
-    right: -11px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--gray-300);
-    font-size: 16px;
-    z-index: 1;
-  }
-  .chain-step:last-child::after { display: none; }
-  .chain-step-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--gray-500);
-    margin-bottom: 6px;
-  }
-  .chain-step-name {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--gray-900);
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    margin-bottom: 6px;
-  }
-  .chain-step.active .chain-step-name { color: var(--green); }
-  .chain-step-desc {
-    font-size: 12px;
-    color: var(--gray-500);
-    line-height: 1.5;
-  }
-  .chain-note {
-    padding: 14px 22px;
-    background: var(--gray-50);
-    border-top: 1px solid var(--gray-200);
-    font-size: 12.5px;
-    color: var(--gray-700);
-    line-height: 1.6;
-  }
-  .chain-note strong { color: var(--gray-900); font-weight: 600; }
-
-  /* ── STATEMENT BOX ── */
-  .statement-box {
-    background: var(--navy);
-    border-radius: 10px;
-    padding: 18px 22px;
-    margin: 16px 0;
-  }
-  .statement-box code {
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    font-size: 13px;
-    color: #8e8e90;
-    line-height: 1.7;
-  }
-  .statement-box .sb-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: rgba(255,255,255,0.3);
-    margin-bottom: 8px;
-  }
-
-  /* ── WATCH FOR ── */
-  .watchfor-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-  }
-  .watchfor-item {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 10px;
-    padding: 16px 20px;
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-  }
-  .watchfor-indicator {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--red);
-    flex-shrink: 0;
-    margin-top: 5px;
-  }
-  .watchfor-text h4 {
-    font-size: 13.5px;
-    font-weight: 700;
-    color: var(--gray-900);
-    margin-bottom: 5px;
-  }
-  .watchfor-text p {
-    font-size: 12.5px;
-    color: var(--gray-700);
-    line-height: 1.55;
-  }
-
-  /* ── SELECTION CHECKLIST ── */
-  .selection-card {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  .selection-header {
-    padding: 16px 24px;
-    border-bottom: 1px solid var(--gray-100);
-    background: var(--gray-50);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .selection-header h3 {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--gray-900);
-  }
-  .selection-body {
-    padding: 20px 24px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-  }
-  .check-item {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    font-size: 13px;
-    color: var(--gray-700);
-    line-height: 1.5;
-  }
-  .check-box {
-    width: 16px; height: 16px;
-    border-radius: 4px;
-    border: 1.5px solid var(--green);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-top: 1px;
-    font-size: 10px;
-    color: var(--green);
-  }
-  .selection-statement {
-    padding: 14px 24px;
-    border-top: 1px solid var(--gray-100);
-    background: var(--green-light);
-  }
-  .selection-statement p {
-    font-size: 13px;
-    color: var(--green);
-    line-height: 1.6;
-  }
-  .selection-statement code {
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    font-size: 12.5px;
-    font-weight: 600;
-  }
-
-  /* ── EXECUTION FLOW ── */
-  .exec-steps {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .exec-step {
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-    padding: 14px 18px;
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 10px;
-  }
-  .exec-num {
-    width: 26px; height: 26px;
-    border-radius: 50%;
-    background: var(--green-light);
-    color: var(--green);
-    font-size: 12px;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-  .exec-content h4 {
-    font-size: 13.5px;
-    font-weight: 700;
-    color: var(--gray-900);
-    margin-bottom: 4px;
-  }
-  .exec-content p {
-    font-size: 13px;
-    color: var(--gray-700);
-    line-height: 1.6;
-  }
-  .exec-content code {
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    font-size: 12px;
-    color: var(--green);
-    background: var(--green-light);
-    padding: 1px 6px;
-    border-radius: 4px;
-  }
-
-  /* ── DEPENDENCY TYPES ── */
-  .dep-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 10px;
-    overflow: hidden;
-    font-size: 13px;
-  }
-  .dep-table thead {
-    background: var(--gray-50);
-  }
-  .dep-table th {
-    padding: 10px 16px;
-    text-align: left;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--gray-500);
-    border-bottom: 1px solid var(--gray-200);
-  }
-  .dep-table td {
-    padding: 10px 16px;
-    border-bottom: 1px solid var(--gray-100);
-    color: var(--gray-700);
-    line-height: 1.5;
-  }
-  .dep-table tr:last-child td { border-bottom: none; }
-  .dep-type-badge {
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 4px;
-  }
-  .dep-slice { background: var(--green-light); color: var(--green); }
-  .dep-infra { background: var(--amber-light); color: var(--amber); }
-  .dep-data { background: var(--blue-light); color: var(--blue); }
-  .dep-design { background: rgba(189,140,125,0.12); color: #bd8c7d; }
-
-  @media print {
-    .sidebar { display: none; }
-    .main { margin-left: 0; }
-    .page-header { padding: 32px 40px; }
-    .content { padding: 32px 40px 60px; }
-    .card, .skill-card, .anchor-card, .tracer-card, .chain-diagram { break-inside: avoid; }
-    @page { size: A4; margin: 15mm; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Build — SBF Phase Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../_shared.css">
 </head>
 <body>
 
-<!-- ── SIDEBAR ── -->
-<aside class="sidebar">
-  <div class="sidebar-header">
-    <div class="sh-label">Solo Builder Framework</div>
-    <div class="sh-title">Build Phase Guide</div>
+<nav class="site-nav">
+  <span class="brand">Solo Builder</span>
+  <a class="nav-link" href="getting-started.html">Getting Started</a>
+  <a class="nav-link" href="process-map.html">Process Map</a>
+  <a class="nav-link" href="skills-reference.html">Skills</a>
+  <a class="nav-link" href="framework-architecture.html">Architecture</a>
+</nav>
+
+<div class="page">
+  <div class="hero">
+    <div class="hero-label">Solo Builder Framework — Phase Guide</div>
+    <h1>Build</h1>
+    <p class="hero-sub">Two modes: guided (solo present at every gate) or autonomous (simulator at every gate, solo reviews at phase test). Every slice is anchored before it starts. Code-complete is not Done — it hands off to QA automatically.</p>
   </div>
 
-  <div class="nav-group">
-    <span class="nav-group-label">On this page</span>
-    <a href="#what-this-phase-is" class="nav-item"><span class="nav-dot"></span>What this phase is</a>
-    <a href="#skills" class="nav-item"><span class="nav-dot"></span>Skills in this phase</a>
-    <a href="#four-anchors" class="nav-item"><span class="nav-dot"></span>The four anchors</a>
-    <a href="#journey-order" class="nav-item"><span class="nav-dot"></span>Journey order</a>
-    <a href="#tracer-bullet" class="nav-item"><span class="nav-dot"></span>The tracer bullet</a>
-    <a href="#mid-build" class="nav-item"><span class="nav-dot"></span>Mid-build discoveries</a>
-    <a href="#qa-chain" class="nav-item"><span class="nav-dot"></span>Auto-chain to QA</a>
-    <a href="#watch-for" class="nav-item"><span class="nav-dot"></span>What to watch for</a>
+  <div class="stat-grid">
+    <div class="stat"><span class="stat-num">4</span><span class="stat-label">Anchors required per slice</span></div>
+    <div class="stat"><span class="stat-num">1st</span><span class="stat-label">Tracer bullet goes first</span></div>
+    <div class="stat"><span class="stat-num">2</span><span class="stat-label">Build modes: guided or autopilot</span></div>
+    <div class="stat"><span class="stat-num">Auto</span><span class="stat-label">Hands off to QA on complete</span></div>
   </div>
 
-  <div class="nav-group" style="margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px;">
-    <span class="nav-phase-label">Framework phases</span>
-    <a href="#" class="nav-phase-item"><span class="nav-phase-dot"></span>Discover</a>
-    <a href="#" class="nav-phase-item"><span class="nav-phase-dot"></span>Design Sprint</a>
-    <a href="#" class="nav-phase-item"><span class="nav-phase-dot"></span>Design Review</a>
-    <a href="#" class="nav-phase-item"><span class="nav-phase-dot"></span>Plan</a>
-    <a href="#" class="nav-phase-item current"><span class="nav-phase-dot"></span>Build ← you are here</a>
-    <a href="#" class="nav-phase-item"><span class="nav-phase-dot"></span>QA</a>
-    <a href="#" class="nav-phase-item"><span class="nav-phase-dot"></span>Phase Test</a>
-    <a href="#" class="nav-phase-item"><span class="nav-phase-dot"></span>Deploy</a>
-  </div>
-</aside>
+  <h2>What This Phase Is</h2>
+  <p><strong>Every build session starts with a read, not a build.</strong> Before selecting any slice, the build skill reads six documents: the backlog, the discovery brief, the to-be process map, the tech context, the data mapping, and the design sprint artifact. This is not optional and is not replaced by conversation history. The first output is a context-loaded confirmation — what's in the backlog, what's Ready, what's next — before any slice work begins.</p>
+  <p>Build does not decide scope — that was settled in Design Review. It does not design — that was settled in the Design Sprint. Build executes what was decided, correctly, in the right order, with the right anchors confirmed before a single line is written.</p>
+  <p>The <strong>tracer bullet goes first</strong>: the thinnest path through the full user journey, end to end, before any individual screen is expanded. Once the core loop is proven to work, each step gets built out in full.</p>
+  <p>Before anchors are even checked, the slice must be in <strong>Ready status</strong>. Any other status — In Review, In QA, Deferred — means the slice does not enter build. Ready is the gate before the gate. If there are no Ready slices, build reaches <strong>Build Active, no Ready slices</strong> status and routes to whatever skill will unblock them.</p>
+  <p>Once status is confirmed, every slice requires <strong>four anchors confirmed</strong> before code starts: a design anchor, a data anchor, a done anchor, and a process anchor. Any missing anchor means the slice doesn't start. This is the gate, not a checklist.</p>
+  <p>When a slice reaches code-complete, solo-build declares it and hands off to <strong>code-review-and-quality</strong> automatically. That skill chains to <strong>solo-qa</strong> on pass. Build does not declare Done. QA does.</p>
+  <div class="callout">Before starting any slice, state it out loud: "Building SL-[ID] — [Name]. It's next in journey order, dependencies are clear, and it has all four anchors." The skill reads the plan and states the next slice — it does not ask. If the solo wants to divert from priority order, they say so. The skill confirms the diversion explicitly before proceeding.</div>
 
-<!-- ── MAIN CONTENT ── -->
-<main class="main">
+  <h2>Skills in This Phase</h2>
 
-  <!-- PAGE HEADER -->
-  <header class="page-header">
-    <div class="ph-eyebrow">Solo Builder Framework — Phase Guide</div>
-    <h1>Phase 4: <span>Build</span></h1>
-    <p class="ph-desc">Two modes: guided (solo present at every gate) or autonomous (simulator at every gate, solo reviews at phase test). Every slice is anchored before it starts. Code-complete is not Done — it hands off to QA automatically.</p>
-    <div class="header-stats">
-      <div class="header-stat">
-        <div class="hs-num">4</div>
-        <div class="hs-label">Anchors required per slice</div>
-      </div>
-      <div class="header-stat">
-        <div class="hs-num">1st</div>
-        <div class="hs-label">Tracer bullet goes first</div>
-      </div>
-      <div class="header-stat">
-        <div class="hs-num">2</div>
-        <div class="hs-label">Build modes: guided or autopilot</div>
-      </div>
-      <div class="header-stat">
-        <div class="hs-num">Auto</div>
-        <div class="hs-label">Hands off to QA on complete</div>
-      </div>
+  <h3>solo-build — Phase skill</h3>
+  <p>The execution layer of the Build phase. Selects the right slice based on journey order and dependency state, confirms all four anchors before writing code, tracks discoveries, and hands off to code-review-and-quality when code-complete is declared.</p>
+  <div class="card-grid">
+    <div class="card">
+      <div class="section-label">Slice selection</div>
+      <ul>
+        <li>Tracer bullet rule — thinnest path first</li>
+        <li>Journey order — first screen before second</li>
+        <li>Dependencies block — hard gate, not suggestion</li>
+        <li>Parallel exceptions named explicitly</li>
+      </ul>
     </div>
-  </header>
-
-  <!-- CONTENT -->
-  <div class="content">
-
-    <!-- WHAT THIS PHASE IS -->
-    <section class="section" id="what-this-phase-is">
-      <div class="section-header">
-        <div class="section-eyebrow">Overview</div>
-        <h2 class="section-title">What this phase is</h2>
-        <p class="section-desc">Build executes the backlog, slice by slice, in the order a user actually travels through the product.</p>
-      </div>
-
-      <div class="intro-card">
-        <p><strong>Every build session starts with a read, not a build.</strong> Before selecting any slice, the build skill reads the current state of six documents: the backlog (status and priority), the discovery brief (the agreed problem), the to-be process map (the agreed process), the tech context (stack and conventions), the data mapping (field sources), and the design sprint artifact (the visual contract). This is not optional and is not replaced by conversation history from a prior session. The first output is a context-loaded confirmation — what's in the backlog, what's Ready, what's next — before any slice work begins.</p>
-        <p>Build does not decide scope — that was settled in Design Review. It does not design — that was settled in the Design Sprint. Build executes what was decided, correctly, in the right order, with the right anchors confirmed before a single line is written.</p>
-        <p>The <strong>tracer bullet goes first</strong>: the thinnest path through the full user journey, end to end, before any individual screen is expanded. Once the core loop is proven to work, each step gets built out in full.</p>
-        <p>Before anchors are even checked, the slice must be in <strong>Ready status</strong>. Any other status — In Review, In QA, Deferred — means the slice does not enter build. No discussion, no partial starts, no "we can work on the design while we build." Ready is the gate before the gate. If there are no Ready slices, build reaches <strong>Build Active, no Ready slices</strong> status and routes to whatever skill will unblock them — it does not find workarounds.</p>
-        <p>Once status is confirmed, every slice requires <strong>four anchors confirmed</strong> before code starts: a design anchor, a data anchor, a done anchor, and a process anchor. Any missing anchor means the slice doesn't start. This is the gate, not a checklist.</p>
-        <p>When something surfaces mid-build — a design conflict, a missing data field, a dependency that wasn't fully resolved — it comes up immediately. It is never silently absorbed into the implementation and never resolved by quietly simplifying the design without a decision being made.</p>
-        <p>When a slice reaches code-complete, solo-build declares it and hands off to <strong>code-review-and-quality</strong> automatically. That skill chains to <strong>solo-qa</strong> on pass. Build does not declare Done. QA does.</p>
-      </div>
-
-      <div class="selection-card">
-        <div class="selection-header">
-          <h3>Before starting any slice — the selection statement</h3>
-        </div>
-        <div class="selection-body">
-          <div class="check-item">
-            <div class="check-box">✓</div>
-            <span>Slice is Ready in the backlog</span>
-          </div>
-          <div class="check-item">
-            <div class="check-box">✓</div>
-            <span>All dependencies are Done</span>
-          </div>
-          <div class="check-item">
-            <div class="check-box">✓</div>
-            <span>Next in journey order (or explicitly parallel)</span>
-          </div>
-          <div class="check-item">
-            <div class="check-box">✓</div>
-            <span>All four anchors confirmed</span>
-          </div>
-        </div>
-        <div class="selection-statement">
-          <p>State it out loud before starting: <code>"Building SL-[ID] — [Name]. It's next in journey order, dependencies are clear, and it has all four anchors."</code></p>
-          <p style="margin-top:12px;font-size:13px;color:var(--gray-700);"><strong>The skill reads the plan and states the next slice — it does not ask.</strong> If the solo wants to divert from priority order, they say so. The skill confirms the diversion explicitly before proceeding.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- SKILLS IN THIS PHASE -->
-    <section class="section" id="skills">
-      <div class="section-header">
-        <div class="section-eyebrow">Skills</div>
-        <h2 class="section-title">Skills in this phase</h2>
-        <p class="section-desc">Build has two mode skills — guided (solo-build) or autonomous (autopilot) — plus on-demand skills invoked at specific moments.</p>
-      </div>
-
-      <!-- solo-build -->
-      <div class="skill-card">
-        <div class="skill-card-header">
-          <div class="skill-name">solo-build</div>
-          <div class="skill-badge badge-phase">Phase skill</div>
-        </div>
-        <div class="skill-desc">
-          The execution layer of the Build phase. Selects the right slice based on journey order and dependency state, confirms all four anchors before writing code, tracks discoveries, and hands off to code-review-and-quality when code-complete is declared. This skill runs the entire build phase — not a support tool, the primary driver.
-        </div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">Slice selection</div>
-            <ul>
-              <li>Tracer bullet rule — thinnest path first</li>
-              <li>Journey order — first screen before second</li>
-              <li>Dependencies block — hard gate, not suggestion</li>
-              <li>Parallel exceptions named explicitly</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">During build</div>
-            <ul>
-              <li>Build against the design screen directly</li>
-              <li>Pull data from mock layer — never hardcode</li>
-              <li>Surface conflicts immediately, don't absorb</li>
-              <li>Flag cross-slice impacts in the backlog</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">On code-complete</div>
-            <ul>
-              <li>If CI/CD configured: generate <code>tests/test_SL-[ID].py</code> from done criteria, run full suite — green proceeds, red regression blocks commit</li>
-              <li>Commit: <strong>SL-[ID] code-complete — [name]</strong> (include test file if generated)</li>
-              <li>Update backlog: status → In QA, write test file path</li>
-              <li>Auto-invoke code-review-and-quality</li>
-              <li>Do not wait for solo to trigger the handoff</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <!-- autopilot -->
-      <div class="skill-card">
-        <div class="skill-card-header">
-          <div class="skill-name">autopilot</div>
-          <div class="skill-badge badge-phase">Phase skill — autonomous mode</div>
-        </div>
-        <div class="skill-desc">
-          Alternative to solo-build. Builds the full product without solo participation after discovery or design sprint. Solo-simulator plays every gate. First human touch point is phase test. Refinement cycles handle delta iteration after phase test.
-        </div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">When to choose autopilot vs. solo-build</div>
-            <ul>
-              <li><strong>solo-build</strong> — solo wants to participate at every gate, catch drift in real time, and shape output slice by slice</li>
-              <li><strong>autopilot</strong> — solo wants to reach a finished product fast and iterate on the whole rather than the slice. Accepts that first-pass output is spec-compliant, not preference-validated — Refinement closes that gap.</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Entry points</div>
-            <ul>
-              <li><strong>Post-discover</strong> — leaner design anchor, more simulator judgment calls, higher Refinement likelihood</li>
-              <li><strong>Post-design-review</strong> — richer anchor, fewer judgment calls, tighter first-pass output. Recommended for UI-heavy products.</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Pre-flight check</div>
-            <ul>
-              <li>Simulator reads all discovery docs before build begins</li>
-              <li>Surfaces judgment gaps — places where the spec doesn't decide</li>
-              <li>Solo answers each gap. Brief is locked. Build begins only when gate is clean.</li>
-              <li>Discovery quality check: thin to-be map flagged before gap questions</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Refinement cycles</div>
-            <ul>
-              <li>After phase test, issues classified: implementation (Refinement handles) or structural (guided re-entry required)</li>
-              <li>Delta build only — changed slices, not full product rebuild</li>
-              <li>Exit ramp to guided mode surfaced at every Refinement cycle completion</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <!-- tdd -->
-      <div class="skill-card">
-        <div class="skill-card-header">
-          <div class="skill-name">tdd</div>
-          <div class="skill-badge badge-technique">Technique skill</div>
-        </div>
-        <div class="skill-desc">
-          Test-driven development with a red-green-refactor loop. Invoked from solo-build when test-first development is the right approach for a slice. Tests verify behavior through public interfaces, not implementation details — so they survive refactors. One test, one implementation, one cycle at a time.
-        </div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">The loop</div>
-            <ul>
-              <li><strong>Red</strong> — write one failing test for one behavior</li>
-              <li><strong>Green</strong> — minimal code to pass it</li>
-              <li><strong>Refactor</strong> — clean up, tests must still pass</li>
-              <li>Never refactor while red</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Good tests</div>
-            <ul>
-              <li>Test behavior, not implementation</li>
-              <li>Use public interfaces only</li>
-              <li>Survive internal refactors</li>
-              <li>Read like a specification</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Anti-patterns</div>
-            <ul>
-              <li>Writing all tests first — horizontal slicing</li>
-              <li>Mocking internal collaborators</li>
-              <li>Testing private methods</li>
-              <li>Speculative tests for future behavior</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <!-- principal-engineer -->
-      <div class="skill-card">
-        <div class="skill-card-header">
-          <div class="skill-name">principal-engineer</div>
-          <div class="skill-badge badge-ondemand">On demand</div>
-        </div>
-        <div class="skill-desc">
-          Architecture review lens for consequential decisions. Not always-on. Not a code reviewer. Not a design reviewer. Called when a mid-build discovery is structural — when the approach itself needs to change, not just the implementation. The PE makes one recommendation, explains the reasoning, names the tradeoff, and holds the position under preference pushback.
-        </div>
-        <div class="skill-body">
-          <div class="skill-section">
-            <div class="skill-section-label">When to invoke</div>
-            <ul>
-              <li>Mid-build discovery is architectural</li>
-              <li>Decision is hard to reverse</li>
-              <li>Blast radius if wrong is large</li>
-              <li>Solo feels uncertain about an approach</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">The four questions</div>
-            <ul>
-              <li>Does this fit the platform?</li>
-              <li>What's the blast radius if wrong?</li>
-              <li>What debt does this create?</li>
-              <li>Is this built to expand to Phase 2?</li>
-            </ul>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">Output format</div>
-            <ul>
-              <li>One recommendation — not a menu</li>
-              <li>Reasoning grounded in tech-context</li>
-              <li>Named risks and named debt</li>
-              <li>Watch-for signals logged in backlog</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-    </section>
-
-    <!-- THE FOUR ANCHORS -->
-    <section class="section" id="four-anchors">
-      <div class="section-header">
-        <div class="section-eyebrow">Pre-build gate</div>
-        <h2 class="section-title">The four anchors</h2>
-        <p class="section-desc">Before any slice starts, all four anchors must be confirmed. If any anchor is missing, the slice doesn't start. This is the gate, not a checklist to be completed during build.</p>
-      </div>
-
-      <div class="anchor-grid">
-
-        <div class="anchor-card">
-          <div class="anchor-card-header">
-            <div class="anchor-num">1</div>
-            <div class="anchor-name">Design Anchor</div>
-          </div>
-          <div class="anchor-card-body">
-            <p>The exact screen and specific element this slice builds. Not just the file — the exact component within it, and where it lives on the screen. Open the file. Look at the element. The implementation target must be unambiguous before a line is written.</p>
-            <div class="anchor-format">
-              <div class="af-label">Format</div>
-              <code>[screen-file] → [element name] → [location on screen]</code>
-              <div class="example">Example: sprint-p1.html → Slot context card → top of overview body, below player tabs</div>
-            </div>
-            <p><strong>When the design source is a Figma file:</strong> before writing any code, extract the exact node properties (spacing, color, typography) for every element in scope from Figma Dev Mode or MCP — not visual estimates. Then verify the interactive element inventory in the Notes field: every element classified Functional must have its logic wired; every element classified Deferred must render as an explicit non-interactive placeholder. If the inventory is missing, stop — the slice returns to design review before build continues.</p>
-          </div>
-        </div>
-
-        <div class="anchor-card">
-          <div class="anchor-card-header">
-            <div class="anchor-num">2</div>
-            <div class="anchor-name">Data Anchor</div>
-          </div>
-          <div class="anchor-card-body">
-            <p>The specific mock data fields this slice consumes and where they live in the mock layer. The mock data layer is the data source during build — never hardcode values that should come from data. The data mapping doc shows where each field eventually comes from in production.</p>
-            <div class="anchor-format">
-              <div class="af-label">Format</div>
-              <code>[mock-file] → [field names] → eventual source per data-mapping.md</code>
-              <div class="example">Example: data/mock/players.json → slot_tag, slot_target → MFL Rosters API</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="anchor-card">
-          <div class="anchor-card-header">
-            <div class="anchor-num">3</div>
-            <div class="anchor-name">Done Anchor</div>
-          </div>
-          <div class="anchor-card-body">
-            <p>The 2–3 criteria from the backlog that close this slice. These are what get handed to solo-qa. Vague criteria — "it works," "it looks right" — are not criteria. Sharpen them before starting. Every criterion must be specific and verifiable in a browser.</p>
-            <div class="anchor-format">
-              <div class="af-label">Format</div>
-              <code>Criteria listed exactly as they appear in the backlog</code>
-              <div class="example">Example: WR2 slot tag renders from mock data / Slot target displays with correct formatting (14.2 pts) / Toggle is visible but non-functional in Phase 1</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="anchor-card">
-          <div class="anchor-card-header">
-            <div class="anchor-num">4</div>
-            <div class="anchor-name">Process Anchor</div>
-          </div>
-          <div class="anchor-card-body">
-            <p>The step in the to-be process map this slice implements. Read the to-be map and identify the step. If the slice doesn't map to any step in the agreed process, stop — this slice may be implementing something outside the agreed scope. That requires a decision, not silent build.</p>
-            <div class="anchor-format">
-              <div class="af-label">Format</div>
-              <code>[to-be map file] → [step name] → [position in flow]</code>
-              <div class="example">Example: to-be-player-evaluation.md → Step 3: system displays slot context → main path, after player lookup</div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <div class="anchor-gate">
-        <div class="gate-icon">⛔</div>
-        <div class="gate-text">
-          <h4>No anchor = slice doesn't start</h4>
-          <p>This is not a formality. Each anchor exists because building without it produces a specific failure: building the wrong thing (design), building against hardcoded data (data), not knowing when done (done), or building outside the agreed process (process). Any missing anchor is a signal that the slice isn't ready — resolve it before building, not during.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- JOURNEY ORDER -->
-    <section class="section" id="journey-order">
-      <div class="section-header">
-        <div class="section-eyebrow">Sequencing</div>
-        <h2 class="section-title">Journey order</h2>
-        <p class="section-desc">Build in the order a user travels through the product. First screen before second. Never build a screen that depends on state from an unbuilt screen.</p>
-      </div>
-
-      <div class="journey-diagram">
-        <p style="font-size: 14px; color: var(--gray-700); line-height: 1.6; margin-bottom: 16px;">Journey order means the sequence of screens as a real user experiences them — not as they appear in the backlog, not by technical complexity, not by personal preference. The first screen a user lands on gets built before the second. The second before the third.</p>
-
-        <div class="journey-flow">
-          <div class="journey-step">Screen 1<br><small style="font-weight:400;font-size:10px;">First user action</small></div>
-          <div class="journey-arrow">→</div>
-          <div class="journey-step">Screen 2<br><small style="font-weight:400;font-size:10px;">Core interaction</small></div>
-          <div class="journey-arrow">→</div>
-          <div class="journey-step">Screen 3<br><small style="font-weight:400;font-size:10px;">Value moment</small></div>
-          <div class="journey-arrow">→</div>
-          <div class="journey-step blocked">Screen 4<br><small style="font-weight:400;font-size:10px;">Depends on Screen 3</small></div>
-        </div>
-        <div class="journey-blocked-note">
-          ⚠ Screen 4 is blocked until Screen 3 is Done. State this explicitly: "SL-007 depends on SL-005 which is still In Build. Building SL-005 first."
-        </div>
-      </div>
-
-      <div class="rules-list">
-        <div class="rule-item">
-          <div class="rule-num">1</div>
-          <div class="rule-content">
-            <h4>Journey order, not parallel</h4>
-            <p>This is not about sequencing features for efficiency — it's about discovering integration problems while the codebase is still small enough to fix them cheaply. A problem found at Screen 2 costs far less to fix than one discovered after all five screens are built.</p>
-          </div>
-        </div>
-        <div class="rule-item">
-          <div class="rule-num">2</div>
-          <div class="rule-content">
-            <h4>Dependencies block — hard gate, not suggestion</h4>
-            <p>The backlog dependency field is enforced here. If SL-003 depends on SL-001, SL-001 must be Done before SL-003 can enter In Build. Surface it clearly rather than finding a workaround that creates hidden coupling.</p>
-          </div>
-        </div>
-        <div class="rule-item">
-          <div class="rule-num">3</div>
-          <div class="rule-content">
-            <h4>Parallel exceptions — named explicitly</h4>
-            <p>Screens with no shared infrastructure and no journey dependencies — settings, auth, help screens — can run alongside the main journey if they're Ready. Name them explicitly as parallel rather than letting them blur into the main sequence. "This is a parallel track, not next in journey order."</p>
-          </div>
-        </div>
-        <div class="rule-item">
-          <div class="rule-num">4</div>
-          <div class="rule-content">
-            <h4>Dependency types matter</h4>
-            <p>Not all dependencies are the same. Name the type when flagging a block: <strong>Slice</strong> (another slice must be Done), <strong>Infrastructure</strong> (service or DB must exist), <strong>Data</strong> (mock entity must be available), or <strong>Design</strong> (decision still open). The type determines what resolves the block.</p>
-          </div>
-        </div>
-      </div>
-
-      <div style="margin-top: 20px;">
-        <table class="dep-table">
-          <thead>
-            <tr>
-              <th>Dependency type</th>
-              <th>What it means</th>
-              <th>What resolves it</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><span class="dep-type-badge dep-slice">Slice</span></td>
-              <td>Another slice must be Done — shared component or shared state</td>
-              <td>The blocking slice passes QA and reaches Done status</td>
-            </tr>
-            <tr>
-              <td><span class="dep-type-badge dep-infra">Infrastructure</span></td>
-              <td>A backend service, API endpoint, or DB table must exist</td>
-              <td>Infrastructure slice is built and verified</td>
-            </tr>
-            <tr>
-              <td><span class="dep-type-badge dep-data">Data</span></td>
-              <td>A specific mock entity or real data source must be available</td>
-              <td>Mock data added to the data layer; data-scaffold updated</td>
-            </tr>
-            <tr>
-              <td><span class="dep-type-badge dep-design">Design</span></td>
-              <td>A design decision is still open — spike or review needed first</td>
-              <td>Design review round closes the open decision; backlog updated</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- TRACER BULLET -->
-    <section class="section" id="tracer-bullet">
-      <div class="section-header">
-        <div class="section-eyebrow">First slice</div>
-        <h2 class="section-title">The tracer bullet</h2>
-        <p class="section-desc">Before building any individual screen in full, build the thinnest path all the way through the user journey. Prove the core loop works end to end — even if every step is minimal.</p>
-      </div>
-
-      <div class="tracer-card">
-        <div class="tracer-header">
-          <div class="tracer-icon">⚡</div>
-          <div class="tracer-header-text">
-            <h3>Thinnest path. Full journey. Before expanding anything.</h3>
-            <p>The tracer bullet is not a prototype. It's the first real code in the project.</p>
-          </div>
-        </div>
-        <div class="tracer-body">
-          <div class="tracer-half">
-            <h4>What it is</h4>
-            <p>The minimum that proves the core loop works end to end. Not the minimum that proves one screen works — the minimum that proves the user can travel from the first action to the moment of value, even if every step is minimal. Thin everywhere before deep anywhere.</p>
-            <ul>
-              <li>Can the user reach the core interaction?</li>
-              <li>Does navigation between screens work?</li>
-              <li>Does data flow from source through the UI?</li>
-              <li>Does the journey reach the value moment?</li>
-            </ul>
-          </div>
-          <div class="tracer-half">
-            <h4>Why it goes first</h4>
-            <p>Building one screen to completion before touching the next hides integration problems until late. The tracer bullet forces every screen to exist in minimal form before any screen is expanded — so integration problems surface when the codebase is still small, not after five complete screens need to be rewired.</p>
-            <ul>
-              <li>Integration failures surface early, cheaply</li>
-              <li>Core loop validated before building depth</li>
-              <li>Navigation and state flow proven before expansion</li>
-              <li>Something real to hand off to QA from day one</li>
-            </ul>
-          </div>
-        </div>
-        <div class="tracer-vs">
-          <div class="tracer-vs-col">
-            <div class="vs-label good">Tracer bullet approach</div>
-            <ul class="vs-list good">
-              <li>Screen 1 (thin) → Screen 2 (thin) → Screen 3 (thin)</li>
-              <li>Then Screen 1 full → Screen 2 full → Screen 3 full</li>
-              <li>Integration problems surface at Screen 2, not Screen 5</li>
-              <li>End-to-end verified before feature depth is added</li>
-            </ul>
-          </div>
-          <div class="tracer-vs-col">
-            <div class="vs-label bad">Screen-by-screen approach</div>
-            <ul class="vs-list bad">
-              <li>Screen 1 (full) → Screen 2 (full) → Screen 3 (full)</li>
-              <li>Integration tested for the first time at Screen 3</li>
-              <li>Rewrite risk is highest when the codebase is largest</li>
-              <li>Three complete screens may need rewiring when they meet</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="card" style="padding: 20px 24px; background: #fff;">
-        <h4 style="font-size: 13px; font-weight: 700; color: var(--gray-900); margin-bottom: 8px;">What "end-to-end" means in this context</h4>
-        <p style="font-size: 13.5px; color: var(--gray-700); line-height: 1.65;">End-to-end means from the first action a user takes — opening the app, landing on the first screen, triggering the first interaction — to the moment of value: the screen, result, or state the user came for. For a player evaluation tool, that might mean: user opens app → searches for a player → sees the player's core evaluation. Thin at every step, but all the way through.</p>
-      </div>
-    </section>
-
-    <!-- MID-BUILD DISCOVERIES -->
-    <section class="section" id="mid-build">
-      <div class="section-header">
-        <div class="section-eyebrow">During build</div>
-        <h2 class="section-title">Mid-build discoveries</h2>
-        <p class="section-desc">Build reveals things the design review didn't. How a discovery gets handled depends on its nature and scope — but it is always surfaced, never silently absorbed.</p>
-      </div>
-
-      <div class="discovery-grid">
-
-        <div class="discovery-card">
-          <div class="discovery-card-header">
-            <span class="disc-severity disc-minor">Minor</span>
-            <span class="disc-type">Implementation detail</span>
-          </div>
-          <div class="discovery-card-body">
-            <p>An implementation detail that doesn't affect the design, the agreed process, or any other slice. The kind of thing that comes up during build and has an obvious solution.</p>
-            <div class="discovery-action">
-              <strong>Action:</strong> Resolve it, note it in the slice detail in the backlog, continue building. No need to surface it or pause.
-            </div>
-          </div>
-        </div>
-
-        <div class="discovery-card">
-          <div class="discovery-card-header">
-            <span class="disc-severity disc-gap">Design Gap</span>
-            <span class="disc-type">Screen isn't buildable as shown</span>
-          </div>
-          <div class="discovery-card-body">
-            <p>Something on the design screen can't be built as shown — missing state, an interaction that requires data that doesn't exist in the model, or a visual that implies logic not captured in the design.</p>
-            <div class="discovery-action">
-              <strong>Action:</strong> Stop. Surface it specifically with options. Return to design-review for a decision. Do not silently simplify the implementation.
-            </div>
-          </div>
-        </div>
-
-        <div class="discovery-card">
-          <div class="discovery-card-header">
-            <span class="disc-severity disc-affects">Affects other slices</span>
-            <span class="disc-type">Upstream or downstream impact</span>
-          </div>
-          <div class="discovery-card-body">
-            <p>Building the current slice reveals something that will change how an upstream or downstream slice needs to be built — a shared component, a state assumption, a data model implication.</p>
-            <div class="discovery-action">
-              <strong>Action:</strong> Flag in the backlog immediately. Note which slices are affected and why. Continue current slice if possible — but make the impact visible before the next slice starts.
-            </div>
-          </div>
-        </div>
-
-        <div class="discovery-card">
-          <div class="discovery-card-header">
-            <span class="disc-severity disc-blocks">Blocks current slice</span>
-            <span class="disc-type">Dependency not resolved</span>
-          </div>
-          <div class="discovery-card-body">
-            <p>A dependency that was marked as resolved turns out to not be resolved — the service doesn't work as expected, the data isn't available, or a design decision that was supposed to be settled still isn't.</p>
-            <div class="discovery-action">
-              <strong>Action:</strong> Stop the current slice. Move it back to In Review with a note explaining the block. Pick the next appropriate slice while the blocker is resolved.
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <div class="never-absorb">
-        <div class="never-icon">🚫</div>
-        <div class="never-text">Never silently absorb a discovery into the code. If the implementation diverges from the design — for any reason — that divergence is a decision that needs to be made explicitly. Surfacing it takes one message. Silent absorption creates technical debt that won't be visible until QA, the phase test, or a solo two months later who wonders why the code doesn't match the design.</div>
-      </div>
-    </section>
-
-    <!-- QA CHAIN -->
-    <section class="section" id="qa-chain">
-      <div class="section-header">
-        <div class="section-eyebrow">Handoff</div>
-        <h2 class="section-title">The auto-chain to QA</h2>
-        <p class="section-desc">Code-complete is not Done. It is the start of QA. The handoff from Build to QA is automatic — solo-build triggers it, the solo doesn't manage it.</p>
-      </div>
-
-      <div class="chain-diagram">
-        <div class="chain-steps">
-          <div class="chain-step active">
-            <div class="chain-step-label">Build declares</div>
-            <div class="chain-step-name">Code-complete</div>
-            <div class="chain-step-desc">Slice renders correctly against mock data and matches design. Committed. Backlog updated to In QA.</div>
-          </div>
-          <div class="chain-step">
-            <div class="chain-step-label">Auto-invoked by solo-build</div>
-            <div class="chain-step-name">code-review-and-quality</div>
-            <div class="chain-step-desc">7 checks: pattern, data sourcing, expandability, cleanliness, scope, docs, stack compliance.</div>
-          </div>
-          <div class="chain-step">
-            <div class="chain-step-label">Auto-invoked on pass</div>
-            <div class="chain-step-name">solo-qa</div>
-            <div class="chain-step-desc">Part 1: AI active testing with evidence. Part 2: solo browser sign-off. After sign-off: status → In Test.</div>
-          </div>
-        </div>
-        <div class="chain-note">
-          <strong>On pass:</strong> solo-qa logs confirmation in backlog, status updates to <strong>In Test</strong>. The slice reaches <strong>Done</strong> when phase-test completes and the gate opens. <strong>On fail:</strong> code-review returns the slice to In Build with specific notes — fix the issues and resubmit. The solo does not manage this handoff — it runs automatically when code-complete is declared.
-        </div>
-      </div>
-
-      <div class="statement-box">
-        <div class="sb-label">Exact wording when code-complete is reached</div>
-        <code>"SL-[ID] is code-complete. Committing and running code-review-and-quality."</code>
-      </div>
-
-      <div class="card" style="padding: 0; margin-top: 16px;">
-        <div style="padding: 18px 24px; border-bottom: 1px solid var(--gray-100); background: var(--gray-50);">
-          <h4 style="font-size: 13.5px; font-weight: 700; color: var(--gray-900);">What "code-complete" means precisely</h4>
-        </div>
-        <div style="padding: 18px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-          <div>
-            <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--green); margin-bottom: 8px;">Code-complete means</div>
-            <ul style="list-style: none; display: flex; flex-direction: column; gap: 6px;">
-              <li style="font-size: 13px; color: var(--gray-700); padding-left: 14px; position: relative;"><span style="position:absolute;left:0;color:var(--green)">✓</span> Self-verification checklist run — builder confirmation populated with ✓/✗ results</li>
-              <li style="font-size: 13px; color: var(--gray-700); padding-left: 14px; position: relative;"><span style="position:absolute;left:0;color:var(--green)">✓</span> Slice renders correctly against mock data</li>
-              <li style="font-size: 13px; color: var(--gray-700); padding-left: 14px; position: relative;"><span style="position:absolute;left:0;color:var(--green)">✓</span> Visual matches the design screen</li>
-              <li style="font-size: 13px; color: var(--gray-700); padding-left: 14px; position: relative;"><span style="position:absolute;left:0;color:var(--green)">✓</span> No hardcoded values where data should be</li>
-              <li style="font-size: 13px; color: var(--gray-700); padding-left: 14px; position: relative;"><span style="position:absolute;left:0;color:var(--green)">✓</span> Committed with a traceable commit message</li>
-            </ul>
-          </div>
-          <div>
-            <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--red); margin-bottom: 8px;">Code-complete does NOT mean</div>
-            <ul style="list-style: none; display: flex; flex-direction: column; gap: 6px;">
-              <li style="font-size: 13px; color: var(--gray-700); padding-left: 14px; position: relative;"><span style="position:absolute;left:0;color:var(--red)">✗</span> Done — QA hasn't run yet</li>
-              <li style="font-size: 13px; color: var(--gray-700); padding-left: 14px; position: relative;"><span style="position:absolute;left:0;color:var(--red)">✗</span> Verified — AI testing hasn't happened yet</li>
-              <li style="font-size: 13px; color: var(--gray-700); padding-left: 14px; position: relative;"><span style="position:absolute;left:0;color:var(--red)">✗</span> Accepted — solo browser sign-off hasn't happened yet</li>
-              <li style="font-size: 13px; color: var(--gray-700); padding-left: 14px; position: relative;"><span style="position:absolute;left:0;color:var(--red)">✗</span> Deployable — phase test gate not yet open</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div style="margin-top: 20px;">
-        <div class="exec-steps">
-          <div class="exec-step">
-            <div class="exec-num">1</div>
-            <div class="exec-content">
-              <h4>Run the self-verification checklist</h4>
-              <p>Before declaring code-complete, the builder runs the slice's self-verification checklist from the backlog record and populates the builder confirmation field with ✓/✗ results and observations. This is not optional — solo-qa reads the builder confirmation on arrival. An empty confirmation means the builder did not complete their self-check.</p>
-            </div>
-          </div>
-          <div class="exec-step">
-            <div class="exec-num">2</div>
-            <div class="exec-content">
-              <h4>Commit the work</h4>
-              <p>The build skill executes the commit directly — it is never handed to the solo to run. Commit message format: <code>SL-[ID] code-complete — [slice name]</code>. The slice ID makes every commit traceable in git history. Never use vague messages ("wip", "updates", "fix").</p>
-            </div>
-          </div>
-          <div class="exec-step">
-            <div class="exec-num">3</div>
-            <div class="exec-content">
-              <h4>Update the backlog</h4>
-              <p>Move the slice status from <code>In Build</code> to <code>In QA</code>. The backlog is a live document — if it's stale, the next session starts from the wrong place.</p>
-            </div>
-          </div>
-          <div class="exec-step">
-            <div class="exec-num">4</div>
-            <div class="exec-content">
-              <h4>Invoke code-review-and-quality immediately</h4>
-              <p>Do not wait for the solo to trigger it. The handoff is automatic. State code-complete, declare the invocation, and run the review. The solo manages the product — not the QA handoff chain.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- WHAT TO WATCH FOR -->
-    <section class="section" id="watch-for">
-      <div class="section-header">
-        <div class="section-eyebrow">Failure modes</div>
-        <h2 class="section-title">What to watch for</h2>
-        <p class="section-desc">The most common ways Build goes wrong. Each one is preventable — they fail because a constraint was relaxed once, not because the constraint is unworkable.</p>
-      </div>
-
-      <div class="watchfor-grid">
-
-        <div class="watchfor-item">
-          <div class="watchfor-indicator"></div>
-          <div class="watchfor-text">
-            <h4>Starting build on a slice that isn't Ready</h4>
-            <p>A slice in "In Review" has open design decisions. Starting build before those close means the code will contradict a decision made later — producing work that needs to be redone. When there are no Ready slices, build reaches <strong>Build Active, no Ready slices</strong> status — the right move is finishing design review and promoting slices, not finding a way to start build anyway. "We can work on the design while we build" is not an option.</p>
-          </div>
-        </div>
-
-        <div class="watchfor-item">
-          <div class="watchfor-indicator"></div>
-          <div class="watchfor-text">
-            <h4>Asking the solo what to work on next</h4>
-            <p>The plan and priority already exist in the backlog. Asking "what would you like to work on?" hands a decision back to the solo that the framework already made. Read the backlog, identify the next Ready slice in priority order, and state it.</p>
-          </div>
-        </div>
-
-        <div class="watchfor-item">
-          <div class="watchfor-indicator"></div>
-          <div class="watchfor-text">
-            <h4>Building without all four anchors confirmed</h4>
-            <p>The most common build failure. Starting with three anchors and resolving the fourth "as you go" means the fourth anchor gets resolved under time pressure, often incorrectly. Any missing anchor is a stop signal, not a caution.</p>
-          </div>
-        </div>
-
-        <div class="watchfor-item">
-          <div class="watchfor-indicator"></div>
-          <div class="watchfor-text">
-            <h4>Building out of journey order</h4>
-            <p>Jumping ahead to a screen that looks easier, or building in parallel without naming it as parallel, hides integration problems. They surface later — after multiple screens are complete and rewiring is expensive.</p>
-          </div>
-        </div>
-
-        <div class="watchfor-item">
-          <div class="watchfor-indicator"></div>
-          <div class="watchfor-text">
-            <h4>Silently absorbing mid-build discoveries</h4>
-            <p>When the implementation diverges from the design and nobody says anything, the design and the code are now different documents. QA checks against the design. The phase test checks against the discovery brief. Silent absorption always surfaces later — as a bug, a failed QA check, or a confused solo reading code that doesn't match the screens.</p>
-          </div>
-        </div>
-
-        <div class="watchfor-item">
-          <div class="watchfor-indicator"></div>
-          <div class="watchfor-text">
-            <h4>Skipping the tracer bullet</h4>
-            <p>Going straight to full feature implementation on Screen 1 before touching Screen 2. The tracer bullet's job is to surface integration problems early. Skipping it trades a cheap early fix for an expensive late one.</p>
-          </div>
-        </div>
-
-        <div class="watchfor-item">
-          <div class="watchfor-indicator"></div>
-          <div class="watchfor-text">
-            <h4>Hardcoding values that should come from data</h4>
-            <p>Any value that should eventually come from a real data source must come from the mock data layer during build — not from a hardcoded string in the UI. Hardcoded values break the data anchor and make the mock-to-real swap unreliable.</p>
-          </div>
-        </div>
-
-        <div class="watchfor-item">
-          <div class="watchfor-indicator"></div>
-          <div class="watchfor-text">
-            <h4>Treating code-complete as Done</h4>
-            <p>Marking a slice Done before code review and solo QA sign-off bypasses the two checks that actually confirm the slice is complete. Code-complete is a state transition, not a destination. Done requires passing both stages of QA.</p>
-          </div>
-        </div>
-
-        <div class="watchfor-item">
-          <div class="watchfor-indicator"></div>
-          <div class="watchfor-text">
-            <h4>Vague done criteria accepted at anchor time</h4>
-            <p>"It should look right" and "it should work" are not done criteria. If the done anchor is accepted with vague criteria, QA has nothing concrete to verify against. Sharpen every criterion to something that can be checked in a browser — specific, observable, pass/fail.</p>
-          </div>
-        </div>
-
-        <div class="watchfor-item">
-          <div class="watchfor-indicator"></div>
-          <div class="watchfor-text">
-            <h4>Stale backlog during a build session</h4>
-            <p>The backlog is the solo's persistent context across sessions. Every status change is written immediately — before moving to the next action. Not at session end. Ready → In Build before the first line of code. In Build → In QA before triggering code review. In QA → In Test after solo sign-off. In Test → Done when phase-test gate opens. If it's stale at any point mid-session, the next session starts from the wrong place.</p>
-          </div>
-        </div>
-
-        <div class="watchfor-item">
-          <div class="watchfor-indicator"></div>
-          <div class="watchfor-text">
-            <h4>Starting a visual slice without re-reading the design file</h4>
-            <p>The design anchor names the file — "design anchor check" means actually opening and reading that file before writing code, not recalling it from memory or a prior read. The required output is a verbatim quote: the exact string from the file, word for word. A paraphrase does not qualify — it's indistinguishable from recall. A design file that has changed since the last session, or one the builder remembers slightly wrong, produces implementation drift that compounds across slices. The verbatim quote makes the read verifiable.</p>
-          </div>
-        </div>
-
-        <div class="watchfor-item">
-          <div class="watchfor-indicator"></div>
-          <div class="watchfor-text">
-            <h4>Self-verification that skips quality contract items</h4>
-            <p>Self-verification covers more than the happy path. Before declaring code-complete, the builder must walk every observable quality contract item in the running app: simulate a failure and confirm the error state renders, submit empty or invalid input and confirm validation fires at the right point with the right message, and for any security contract line, confirm user-supplied content is not rendered raw. A self-verification that only confirms the happy path will pass — and then fail at code review Check 8, which checks the same contract line by line with the same adversarial standard.</p>
-          </div>
-        </div>
-
-        <div class="watchfor-item">
-          <div class="watchfor-indicator"></div>
-          <div class="watchfor-text">
-            <h4>Self-verification that asserts instead of observes</h4>
-            <p>"Data renders correctly" is a code assertion — it tells you what the code is supposed to do, not what the solo will actually see. Self-verification must be done against the running app. Every checklist item requires a statement of what was observed in the rendered output. The standard is identical to QA: named evidence only. If the builder cannot state what was seen on screen, the check has not been run.</p>
-          </div>
-        </div>
-
-        <div class="watchfor-item">
-          <div class="watchfor-indicator"></div>
-          <div class="watchfor-text">
-            <h4>Continuing past two failed attempts without stopping</h4>
-            <p>After two attempts with no progress on the same problem, the builder stops and re-reads the full slice spec and design file from scratch before touching any code. Confidence that the next attempt will work is not a reason to continue — it's the same confidence that produced the two failed attempts. And if the solo asks to step back, that is an immediate directive, not a suggestion to evaluate.</p>
-          </div>
-        </div>
-
-        <div class="watchfor-item">
-          <div class="watchfor-indicator"></div>
-          <div class="watchfor-text">
-            <h4>Running past a deliverable boundary without updating the handoff</h4>
-            <p>When a deliverable completes, the handoff should reflect it — what was just accepted, what's next. When a deliverable has more than four slices, the mid-deliverable checkpoint at slice 4 updates the handoff automatically. But context compression can still degrade build coherence in long sessions. The deliverable completion recommendation is a signal worth taking seriously: the work is coherent, the seam is clean, and the next deliverable starts fresher in a new session than it would continuing here.</p>
-          </div>
-        </div>
-
-        <div class="watchfor-item">
-          <div class="watchfor-indicator"></div>
-          <div class="watchfor-text">
-            <h4>Treating interactive Figma elements as window dressing</h4>
-            <p>Filters, search boxes, pagination, and toggles visible in a Figma design are not decorative by default. Before build starts, each must be classified: Functional (logic wired in this slice), Deferred (logic in a future slice — companion slice created now), or Out of scope. There is no fourth option. A builder who silently decides an element is decorative during coding has made a product decision without the solo. An element rendered as a working-looking interactive component that accepts input and does nothing is a code review failure — it will fail Check 10c regardless of whether it "looks right" in the browser.</p>
-          </div>
-        </div>
-
-        <div class="watchfor-item">
-          <div class="watchfor-indicator"></div>
-          <div class="watchfor-text">
-            <h4>Ignoring a rising rework rate</h4>
-            <p>The framework tracks rework automatically — every time a slice is returned to build after reaching In QA, the counter increments. A high rework rate across multiple slices is a signal the quality gates are catching things too late. The place to look: were the done criteria specific enough? Was the quality contract walked before presenting? A rework rate that keeps climbing without a response means the gates aren't changing the behavior that's causing the rework.</p>
-          </div>
-        </div>
-
-        <div class="watchfor-item">
-          <div class="watchfor-indicator"></div>
-          <div class="watchfor-text">
-            <h4>Rebuilding a completed slice without the rollback protocol</h4>
-            <p>When a slice that has passed QA (In Test or Done) needs to be rebuilt, it is a rollback — not a continuation of active build work. The builder proposes the scope (targeted fix or full rebuild), explains why, and waits for solo confirmation before touching any status or discarding any code. Nothing changes before that confirmation. Skipping the protocol means the deliverable and phase records become inconsistent, the log entry is missing, and the solo has no visibility into what changed and why.</p>
-          </div>
-        </div>
-
-        <div class="watchfor-item">
-          <div class="watchfor-indicator"></div>
-          <div class="watchfor-text">
-            <h4>Treating code review findings as unexpected failures</h4>
-            <p>Code review now runs as an isolated sub-agent with no access to the build context — it sees only the code, the slice spec, and the quality contract. This is intentional: the reviewer has no knowledge of the reasoning or decisions made during implementation. If code review surfaces something the build pass didn't flag, that's not a malfunction. The isolation removes the bias that comes from knowing why the code was written a certain way. Expect it to be more thorough than a review that shared build context.</p>
-          </div>
-        </div>
-
-        <div class="watchfor-item">
-          <div class="watchfor-indicator"></div>
-          <div class="watchfor-text">
-            <h4>Starting build on a core architecture slice without PE review</h4>
-            <p>Any slice classified as Core architecture triggers a principal engineer review automatically before the branch opens — this is not optional and cannot be skipped. If the review didn't happen, the branch should not exist yet. The PE assesses whether the approach is right before a line of code is written. Outcome goes in the Notes field. A core architecture slice that enters build without a recorded PE outcome has bypassed a gate that exists because these changes ripple — catching a structural problem at review is cheap; catching it after three slices are built on top of it is not.</p>
-          </div>
-        </div>
-
-        <div class="watchfor-item">
-          <div class="watchfor-indicator"></div>
-          <div class="watchfor-text">
-            <h4>Invoking a comms cascade sub-agent without a complete brief</h4>
-            <p>The comms cascade sub-agent requires a structured brief — version, date, summary, skills affected, watchfor items, and guide sections affected. This brief is the sub-agent's entire specification. A vague brief ("it's a big update, figure it out") produces vague docs: missing watchfor entries, shallow blog copy, skipped guide sections. The curator must provide every field before invoking. If a field genuinely doesn't apply, state that explicitly — "none" is a valid answer. Blank is not.</p>
-          </div>
-        </div>
-
-        <div class="watchfor-item">
-          <div class="watchfor-indicator"></div>
-          <div class="watchfor-text">
-            <h4>Using a static ANTHROPIC_API_KEY on a cloud-deployed project</h4>
-            <p>If your project is deployed to a cloud platform (Railway, Render, AWS, GCP, Azure, Fly.io, Cloudflare) and you're currently authenticating to the Claude API with a static <code>ANTHROPIC_API_KEY</code> stored in an env var or secret manager, consider migrating to Workload Identity Federation. WIF uses the workload's existing cloud identity — an IAM role, service account, managed identity, or GitHub Actions OIDC token — to get a short-lived access token on demand. No static secret to store, rotate, or leak. Set it up at platform.claude.com → Settings → Workload identity. The deploy step handles the wiring at deploy time. Local Mac projects are unaffected.</p>
-          </div>
-        </div>
-
-        <div class="watchfor-item">
-          <div class="watchfor-indicator"></div>
-          <div class="watchfor-text">
-            <h4>Treating the preview check as a separate step after self-verification</h4>
-            <p>The preview check is part of self-verification — not a step that runs after it. In Claude Code, after the quality contract walk and before declaring code-complete, the framework starts the app server, navigates to the review URL, takes a screenshot, checks console logs, checks for failed network requests, clicks through main interactive elements, and checks the mobile viewport. Console errors or failed network requests directly caused by the slice are ✗ items in builder confirmation and must be fixed before commit. This is not an optional check and it is not a post-commit review — it runs before the commit, inside the existing self-verification flow. Non-visual slices (review URL is None) and Cursor sessions skip silently with no change to behavior.</p>
-          </div>
-        </div>
-
-        <div class="watchfor-item">
-          <div class="watchfor-indicator"></div>
-          <div class="watchfor-text">
-            <h4>Check 9 running baseline-only on a project that handles personal, financial, or multi-tenant data</h4>
-            <p>Check 9 reads <code>docs/tech-context.md</code> before it runs. If the Security Classification section is missing, it defaults to Standard — baseline checks only (9a–9e). That means class-specific checks for Personal, Financial, Authentication, Multi-tenant, Confidential, and Regulated never fire, even if the project clearly handles that kind of data. If your project stores PII, processes transactions, manages user credentials, or serves multiple tenants from shared infrastructure, add the Security Classification section to <code>docs/tech-context.md</code> now. The section is short — one to three lines stating the class or classes that apply. Once it's there, code review picks up the right checks automatically on the next slice.</p>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-  </div><!-- /content -->
-
-</main>
+    <div class="card">
+      <div class="section-label">During build</div>
+      <ul>
+        <li>Build against the design screen directly</li>
+        <li>Pull data from mock layer — never hardcode</li>
+        <li>Surface conflicts immediately, don't absorb</li>
+        <li>Flag cross-slice impacts in the backlog</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="section-label">On code-complete</div>
+      <ul>
+        <li>Commit: SL-[ID] code-complete — [name]</li>
+        <li>Update backlog: status → In QA</li>
+        <li>Auto-invoke code-review-and-quality</li>
+        <li>Do not wait for solo to trigger the handoff</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>autopilot — Phase skill (autonomous mode)</h3>
+  <p>Alternative to solo-build. Builds the full product without solo participation after discovery or design sprint. Solo-simulator plays every gate. First human touch point is phase test. Refinement cycles handle delta iteration after phase test.</p>
+  <div class="card-grid">
+    <div class="card">
+      <div class="section-label">solo-build vs. autopilot</div>
+      <ul>
+        <li><strong>solo-build</strong> — solo wants to participate at every gate, catch drift in real time, and shape output slice by slice</li>
+        <li><strong>autopilot</strong> — solo wants to reach a finished product fast and iterate on the whole rather than the slice. Accepts that first-pass output is spec-compliant, not preference-validated.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="section-label">Entry points</div>
+      <ul>
+        <li><strong>Post-discover</strong> — leaner design anchor, more simulator judgment calls, higher Refinement likelihood</li>
+        <li><strong>Post-design-review</strong> — richer anchor, fewer judgment calls, tighter first-pass output. Recommended for UI-heavy products.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="section-label">Refinement cycles</div>
+      <ul>
+        <li>After phase test, issues classified: implementation (Refinement handles) or structural (guided re-entry required)</li>
+        <li>Delta build only — changed slices, not full product rebuild</li>
+        <li>Exit ramp to guided mode surfaced at every Refinement cycle completion</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>tdd — Technique skill</h3>
+  <p>Test-driven development with a red-green-refactor loop. Invoked from solo-build when test-first development is the right approach for a slice. Tests verify behavior through public interfaces, not implementation details — so they survive refactors. One test, one implementation, one cycle at a time.</p>
+  <div class="card-grid">
+    <div class="card">
+      <div class="section-label">The loop</div>
+      <ul>
+        <li><strong>Red</strong> — write one failing test for one behavior</li>
+        <li><strong>Green</strong> — minimal code to pass it</li>
+        <li><strong>Refactor</strong> — clean up, tests must still pass</li>
+        <li>Never refactor while red</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="section-label">Good tests</div>
+      <ul>
+        <li>Test behavior, not implementation</li>
+        <li>Use public interfaces only</li>
+        <li>Survive internal refactors</li>
+        <li>Read like a specification</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="section-label">Anti-patterns</div>
+      <ul>
+        <li>Writing all tests first — horizontal slicing</li>
+        <li>Mocking internal collaborators</li>
+        <li>Testing private methods</li>
+        <li>Speculative tests for future behavior</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>principal-engineer — On demand</h3>
+  <p>Architecture review lens for consequential decisions. Not always-on. Not a code reviewer. Called when a mid-build discovery is structural — when the approach itself needs to change, not just the implementation. Makes one recommendation, explains the reasoning, names the tradeoff, and holds the position under preference pushback.</p>
+  <div class="card-grid">
+    <div class="card">
+      <div class="section-label">When to invoke</div>
+      <ul>
+        <li>Mid-build discovery is architectural</li>
+        <li>Decision is hard to reverse</li>
+        <li>Blast radius if wrong is large</li>
+        <li>Solo feels uncertain about an approach</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="section-label">The four questions</div>
+      <ul>
+        <li>Does this fit the platform?</li>
+        <li>What's the blast radius if wrong?</li>
+        <li>What debt does this create?</li>
+        <li>Is this built to expand to Phase 2?</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="section-label">Output format</div>
+      <ul>
+        <li>One recommendation — not a menu</li>
+        <li>Reasoning grounded in tech-context</li>
+        <li>Named risks and named debt</li>
+        <li>Watch-for signals logged in backlog</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>The Four Anchors</h2>
+  <p>Before any slice starts, all four anchors must be confirmed. If any anchor is missing, the slice doesn't start. This is the gate, not a checklist to be completed during build.</p>
+  <div class="card-grid">
+    <div class="card">
+      <div class="section-label">1 — Design Anchor</div>
+      <p>The exact screen and specific element this slice builds. Not just the file — the exact component within it, and where it lives on the screen. Open the file. Look at the element. The implementation target must be unambiguous before a line is written.</p>
+      <p><strong>Format:</strong> <code>[screen-file] → [element name] → [location on screen]</code></p>
+    </div>
+    <div class="card">
+      <div class="section-label">2 — Data Anchor</div>
+      <p>The specific mock data fields this slice consumes and where they live in the mock layer. The mock data layer is the data source during build — never hardcode values that should come from data.</p>
+      <p><strong>Format:</strong> <code>[mock-file] → [field names] → eventual source per data-mapping.md</code></p>
+    </div>
+    <div class="card">
+      <div class="section-label">3 — Done Anchor</div>
+      <p>The 2–3 criteria from the backlog that close this slice. These are what get handed to solo-qa. Vague criteria — "it works," "it looks right" — are not criteria. Every criterion must be specific and verifiable in a browser.</p>
+      <p><strong>Format:</strong> Criteria listed exactly as they appear in the backlog</p>
+    </div>
+    <div class="card">
+      <div class="section-label">4 — Process Anchor</div>
+      <p>The step in the to-be process map this slice implements. If the slice doesn't map to any step in the agreed process, stop — this may be implementing something outside the agreed scope. That requires a decision, not silent build.</p>
+      <p><strong>Format:</strong> <code>[to-be map file] → [step name] → [position in flow]</code></p>
+    </div>
+  </div>
+  <div class="callout"><strong>No anchor = slice doesn't start.</strong> Each anchor exists because building without it produces a specific failure: building the wrong thing (design), building against hardcoded data (data), not knowing when done (done), or building outside the agreed process (process). Any missing anchor is a signal that the slice isn't ready — resolve it before building, not during.</div>
+
+  <h2>Journey Order</h2>
+  <p>Build in the order a user travels through the product. First screen before second. Never build a screen that depends on state from an unbuilt screen.</p>
+  <table>
+    <thead>
+      <tr><th>Rule</th><th>What it means</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Journey order, not parallel</strong></td>
+        <td>Build in the sequence a real user experiences them. A problem found at Screen 2 costs far less to fix than one discovered after all five screens are built.</td>
+      </tr>
+      <tr>
+        <td><strong>Dependencies block — hard gate</strong></td>
+        <td>The backlog dependency field is enforced. If SL-003 depends on SL-001, SL-001 must be Done before SL-003 can enter In Build. Surface it clearly rather than finding a workaround that creates hidden coupling.</td>
+      </tr>
+      <tr>
+        <td><strong>Parallel exceptions named explicitly</strong></td>
+        <td>Screens with no shared infrastructure and no journey dependencies can run alongside the main journey if they're Ready. Name them explicitly as parallel — not next in journey order.</td>
+      </tr>
+      <tr>
+        <td><strong>Dependency types matter</strong></td>
+        <td>Slice (another slice must be Done), Infrastructure (service or DB must exist), Data (mock entity must be available), or Design (decision still open). The type determines what resolves the block.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>The Tracer Bullet</h2>
+  <p>Before building any individual screen in full, build the thinnest path all the way through the user journey. Prove the core loop works end to end — even if every step is minimal.</p>
+  <div class="card-grid">
+    <div class="card">
+      <div class="section-label">What it is</div>
+      <p>The minimum that proves the core loop works end to end. Not the minimum that proves one screen works — the minimum that proves the user can travel from the first action to the moment of value, even if every step is minimal. Thin everywhere before deep anywhere.</p>
+      <ul>
+        <li>Can the user reach the core interaction?</li>
+        <li>Does navigation between screens work?</li>
+        <li>Does data flow from source through the UI?</li>
+        <li>Does the journey reach the value moment?</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="section-label">Why it goes first</div>
+      <p>Building one screen to completion before touching the next hides integration problems until late. The tracer bullet forces every screen to exist in minimal form before any screen is expanded — so integration problems surface when the codebase is still small.</p>
+      <ul>
+        <li>Integration failures surface early, cheaply</li>
+        <li>Core loop validated before building depth</li>
+        <li>Navigation and state flow proven before expansion</li>
+        <li>Something real to hand off to QA from day one</li>
+      </ul>
+    </div>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Tracer bullet approach</th><th>Screen-by-screen approach</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Screen 1 (thin) → Screen 2 (thin) → Screen 3 (thin), then expand each</td>
+        <td>Screen 1 (full) → Screen 2 (full) → Screen 3 (full)</td>
+      </tr>
+      <tr>
+        <td>Integration problems surface at Screen 2, not Screen 5</td>
+        <td>Integration tested for the first time at Screen 3</td>
+      </tr>
+      <tr>
+        <td>End-to-end verified before feature depth is added</td>
+        <td>Three complete screens may need rewiring when they meet</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Mid-Build Discoveries</h2>
+  <p>Build reveals things the design review didn't. How a discovery gets handled depends on its nature and scope — but it is always surfaced, never silently absorbed.</p>
+  <table>
+    <thead>
+      <tr><th>Type</th><th>What it is</th><th>Action</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Minor — implementation detail</strong></td>
+        <td>Doesn't affect the design, the agreed process, or any other slice. Has an obvious solution.</td>
+        <td>Resolve it, note it in the slice detail in the backlog, continue building.</td>
+      </tr>
+      <tr>
+        <td><strong>Design gap</strong></td>
+        <td>Something on the design screen can't be built as shown — missing state, an interaction that requires data that doesn't exist, or a visual that implies logic not captured.</td>
+        <td>Stop. Surface it specifically with options. Return to design-review for a decision. Do not silently simplify the implementation.</td>
+      </tr>
+      <tr>
+        <td><strong>Affects other slices</strong></td>
+        <td>Building the current slice reveals something that will change how an upstream or downstream slice needs to be built — a shared component, a state assumption, a data model implication.</td>
+        <td>Flag in the backlog immediately. Note which slices are affected and why. Continue current slice if possible.</td>
+      </tr>
+      <tr>
+        <td><strong>Blocks current slice</strong></td>
+        <td>A dependency that was marked as resolved turns out to not be resolved — the service doesn't work as expected, the data isn't available, or a design decision still isn't settled.</td>
+        <td>Stop the current slice. Move it back to In Review with a note explaining the block. Pick the next appropriate slice while the blocker is resolved.</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout"><strong>Never silently absorb a discovery into the code.</strong> If the implementation diverges from the design — for any reason — that divergence is a decision that needs to be made explicitly. Silent absorption creates technical debt that won't be visible until QA, the phase test, or a solo two months later who wonders why the code doesn't match the design.</div>
+
+  <h2>The Auto-Chain to QA</h2>
+  <p>Code-complete is not Done. It is the start of QA. The handoff from Build to QA is automatic — solo-build triggers it, the solo doesn't manage it.</p>
+  <div class="workflow-steps">
+    <div class="workflow-step">Code-complete declared<br><small>Commit + backlog → In QA</small></div>
+    <div class="workflow-step">code-review-and-quality<br><small>7 checks auto-run</small></div>
+    <div class="workflow-step">solo-qa Part 1<br><small>AI active testing with evidence</small></div>
+    <div class="workflow-step">solo-qa Part 2<br><small>Solo browser sign-off</small></div>
+    <div class="workflow-step">In Test<br><small>Backlog updated</small></div>
+    <div class="workflow-step">Done<br><small>Via phase-test gate</small></div>
+  </div>
+  <div class="callout"><strong>Exact wording when code-complete is reached:</strong> "SL-[ID] is code-complete. Committing and running code-review-and-quality."</div>
+  <div class="card-grid">
+    <div class="card">
+      <div class="section-label">Code-complete means</div>
+      <ul>
+        <li>Self-verification checklist run with ✓/✗ results</li>
+        <li>Slice renders correctly against mock data</li>
+        <li>Visual matches the design screen</li>
+        <li>No hardcoded values where data should be</li>
+        <li>Committed with a traceable commit message</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="section-label">Code-complete does NOT mean</div>
+      <ul>
+        <li>Done — QA hasn't run yet</li>
+        <li>Verified — AI testing hasn't happened yet</li>
+        <li>Accepted — solo browser sign-off hasn't happened yet</li>
+        <li>Deployable — phase test gate not yet open</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>What to Watch For</h2>
+  <table>
+    <thead>
+      <tr><th>Failure mode</th><th>Why it matters</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Starting build on a slice that isn't Ready</strong></td>
+        <td>A slice in "In Review" has open design decisions. Starting build before those close means the code will contradict a decision made later. When there are no Ready slices, the right move is finishing design review — not finding a way to start build anyway.</td>
+      </tr>
+      <tr>
+        <td><strong>Asking the solo what to work on next</strong></td>
+        <td>The plan and priority already exist in the backlog. Read the backlog, identify the next Ready slice in priority order, and state it.</td>
+      </tr>
+      <tr>
+        <td><strong>Building without all four anchors confirmed</strong></td>
+        <td>Starting with three anchors and resolving the fourth "as you go" means the fourth anchor gets resolved under time pressure, often incorrectly. Any missing anchor is a stop signal, not a caution.</td>
+      </tr>
+      <tr>
+        <td><strong>Building out of journey order</strong></td>
+        <td>Jumping ahead to a screen that looks easier hides integration problems. They surface later — after multiple screens are complete and rewiring is expensive.</td>
+      </tr>
+      <tr>
+        <td><strong>Silently absorbing mid-build discoveries</strong></td>
+        <td>When the implementation diverges from the design and nobody says anything, QA checks against the design, the phase test checks against the discovery brief, and the mismatch surfaces late.</td>
+      </tr>
+      <tr>
+        <td><strong>Skipping the tracer bullet</strong></td>
+        <td>Going straight to full feature implementation on Screen 1 before touching Screen 2 trades a cheap early integration fix for an expensive late one.</td>
+      </tr>
+      <tr>
+        <td><strong>Hardcoding values that should come from data</strong></td>
+        <td>Any value that should come from a real data source must come from the mock data layer during build — not from a hardcoded string. Hardcoded values break the data anchor and make the mock-to-real swap unreliable.</td>
+      </tr>
+      <tr>
+        <td><strong>Treating code-complete as Done</strong></td>
+        <td>Marking a slice Done before code review and solo QA sign-off bypasses the two checks that actually confirm the slice is complete.</td>
+      </tr>
+      <tr>
+        <td><strong>Vague done criteria accepted at anchor time</strong></td>
+        <td>"It should look right" is not a done criterion. If the done anchor is accepted with vague criteria, QA has nothing concrete to verify against. Sharpen every criterion to something observable and pass/fail.</td>
+      </tr>
+      <tr>
+        <td><strong>Starting a visual slice without re-reading the design file</strong></td>
+        <td>The design anchor means actually opening and reading the file before writing code. A design file that has changed since the last session, or one the builder remembers slightly wrong, produces implementation drift that compounds across slices.</td>
+      </tr>
+      <tr>
+        <td><strong>Continuing past two failed attempts without stopping</strong></td>
+        <td>After two attempts with no progress, stop and re-read the full slice spec and design file from scratch before touching any code. Confidence that the next attempt will work is not a reason to continue.</td>
+      </tr>
+      <tr>
+        <td><strong>Ignoring a rising rework rate</strong></td>
+        <td>When multiple slices are returning to In Build after QA fails, or multiple mid-build discoveries surface in sequence, it's a signal that something earlier wasn't settled correctly. Stop and diagnose before continuing.</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
 </body>
 </html>

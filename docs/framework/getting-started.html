@@ -1,937 +1,232 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Solo Builder Framework — Getting Started</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --navy: #1a1a1a;
-    --navy-mid: #2a2a2a;
-    --blue: #bd8c7d;
-    --blue-light: rgba(142,142,144,0.15);
-    --teal: #8e8e90;
-    --teal-light: rgba(142,142,144,0.15);
-    --purple: #bd8c7d;
-    --purple-light: rgba(189,140,125,0.12);
-    --indigo: #49494b;
-    --indigo-light: rgba(73,73,75,0.12);
-    --orange: #bd8c7d;
-    --orange-light: rgba(189,140,125,0.12);
-    --green: #8e8e90;
-    --green-light: rgba(142,142,144,0.12);
-    --rose: #bd8c7d;
-    --rose-light: rgba(189,140,125,0.12);
-    --amber: #d1bfa7;
-    --amber-light: rgba(209,191,167,0.15);
-    --gold: #d1bfa7;
-    --gold-light: rgba(209,191,167,0.15);
-    --gray-50: #faf8f5;
-    --gray-100: #e8ddd4;
-    --gray-200: #e8ddd4;
-    --gray-300: #DDD6CC;
-    --gray-500: #8e8e90;
-    --gray-700: #49494b;
-    --gray-900: #1a1a1a;
-  }
-
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    background: var(--gray-50);
-    color: var(--gray-900);
-    display: flex;
-    min-height: 100vh;
-  }
-
-  /* ── SIDEBAR ── */
-  .sidebar {
-    width: 240px;
-    flex-shrink: 0;
-    background: var(--navy);
-    position: fixed;
-    top: 0; left: 0; bottom: 0;
-    overflow-y: auto;
-    padding: 28px 0 40px;
-    z-index: 10;
-  }
-  .sidebar::-webkit-scrollbar { width: 4px; }
-  .sidebar::-webkit-scrollbar-track { background: transparent; }
-  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
-
-  .sidebar-header {
-    padding: 0 20px 24px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    margin-bottom: 16px;
-  }
-  .sidebar-header .sh-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: rgba(255,255,255,0.35);
-    margin-bottom: 6px;
-  }
-  .sidebar-header .sh-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: #fff;
-    line-height: 1.3;
-  }
-
-  .toc-section {
-    padding: 0 0 8px;
-  }
-  .toc-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: rgba(255,255,255,0.3);
-    padding: 8px 20px 6px;
-    display: block;
-  }
-  .toc-link {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 5px 20px;
-    font-size: 12px;
-    font-weight: 500;
-    color: rgba(255,255,255,0.5);
-    text-decoration: none;
-    transition: all 0.15s;
-    border-left: 2px solid transparent;
-    line-height: 1.4;
-  }
-  .toc-link:hover {
-    color: #fff;
-    background: rgba(255,255,255,0.06);
-  }
-  .toc-link .toc-num {
-    font-size: 10px;
-    font-weight: 700;
-    color: rgba(255,255,255,0.25);
-    flex-shrink: 0;
-    margin-top: 1px;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-  }
-
-  /* ── MAIN ── */
-  .main {
-    margin-left: 240px;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .page-header {
-    background: var(--navy);
-    color: #fff;
-    padding: 48px 60px 40px;
-  }
-  .page-header .ph-eyebrow {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: rgba(255,255,255,0.4);
-    margin-bottom: 12px;
-  }
-  .page-header h1 {
-    font-size: 32px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    margin-bottom: 12px;
-    line-height: 1.1;
-  }
-  .page-header p {
-    font-size: 15px;
-    color: rgba(255,255,255,0.55);
-    max-width: 600px;
-    line-height: 1.6;
-  }
-
-  /* ── CONTENT ── */
-  .content {
-    padding: 48px 60px 80px;
-    max-width: 960px;
-  }
-
-  .section {
-    margin-bottom: 56px;
-    scroll-margin-top: 24px;
-  }
-
-  .section-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 2px solid var(--gray-200);
-  }
-  .section-num {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    background: var(--navy);
-    color: rgba(255,255,255,0.7);
-    font-size: 12px;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-  }
-  .section-title {
-    font-size: 20px;
-    font-weight: 800;
-    color: var(--gray-900);
-    letter-spacing: -0.3px;
-  }
-
-  /* ── CARDS ── */
-  .card {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    padding: 24px 28px;
-    margin-bottom: 16px;
-  }
-  .card-title {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--gray-900);
-    margin-bottom: 8px;
-  }
-  .card-body {
-    font-size: 14px;
-    color: var(--gray-700);
-    line-height: 1.65;
-  }
-  .card-body p { margin-bottom: 8px; }
-  .card-body p:last-child { margin-bottom: 0; }
-
-  /* ── CALLOUT ── */
-  .callout {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    border-left: 4px solid var(--blue);
-    padding: 18px 22px;
-    margin-bottom: 16px;
-    font-size: 14px;
-    color: var(--gray-700);
-    line-height: 1.65;
-  }
-  .callout.callout-teal { border-left-color: var(--teal); }
-  .callout.callout-orange { border-left-color: var(--orange); }
-  .callout.callout-green { border-left-color: var(--green); }
-  .callout.callout-amber { border-left-color: var(--amber); }
-  .callout.callout-purple { border-left-color: var(--purple); }
-  .callout-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: var(--blue);
-    margin-bottom: 6px;
-  }
-  .callout.callout-teal .callout-label { color: var(--teal); }
-  .callout.callout-orange .callout-label { color: var(--orange); }
-  .callout.callout-green .callout-label { color: var(--green); }
-  .callout.callout-amber .callout-label { color: var(--amber); }
-  .callout.callout-purple .callout-label { color: var(--purple); }
-
-  /* ── TWO-COL GRID ── */
-  .two-col {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 16px;
-  }
-  .three-col {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 16px;
-  }
-
-  .path-card {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    padding: 24px;
-    position: relative;
-  }
-  .path-card-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    margin-bottom: 8px;
-  }
-  .path-card-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--gray-900);
-    margin-bottom: 10px;
-  }
-  .path-card-body {
-    font-size: 13.5px;
-    color: var(--gray-700);
-    line-height: 1.6;
-  }
-  .path-card-arrow {
-    position: absolute;
-    top: 24px;
-    right: 20px;
-    font-size: 20px;
-    color: var(--gray-300);
-  }
-  .path-card.path-product {
-    border-color: #e8ddd4;
-    background: #faf8f5;
-  }
-  .path-card.path-product .path-card-label { color: var(--blue); }
-  .path-card.path-spike {
-    border-color: var(--gray-200);
-  }
-  .path-card.path-spike .path-card-label { color: var(--gray-500); }
-
-  .mode-card {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    padding: 20px 22px;
-    position: relative;
-  }
-  .mode-card-name {
-    font-size: 13px;
-    font-weight: 700;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    color: var(--gray-900);
-    margin-bottom: 4px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .mode-default-badge {
-    font-size: 9px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    background: var(--gray-100);
-    color: var(--gray-500);
-    padding: 2px 7px;
-    border-radius: 10px;
-  }
-  .mode-card-body {
-    font-size: 13px;
-    color: var(--gray-700);
-    line-height: 1.6;
-  }
-  .mode-card-when {
-    font-size: 11.5px;
-    color: var(--gray-500);
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid var(--gray-100);
-    line-height: 1.5;
-  }
-  .mode-card-when strong { color: var(--gray-700); font-weight: 600; }
-
-  /* ── ENTRY CARD ── */
-  .entry-card {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    padding: 20px 24px;
-    margin-bottom: 12px;
-    display: flex;
-    gap: 18px;
-    align-items: flex-start;
-  }
-  .entry-num {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: var(--blue-light);
-    color: var(--blue);
-    font-size: 13px;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-  .entry-content { flex: 1; min-width: 0; }
-  .entry-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--gray-900);
-    margin-bottom: 6px;
-  }
-  .entry-body {
-    font-size: 13.5px;
-    color: var(--gray-700);
-    line-height: 1.6;
-  }
-  .entry-skill {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 600;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    padding: 2px 8px;
-    border-radius: 4px;
-    background: var(--blue-light);
-    color: var(--blue);
-    margin-top: 8px;
-  }
-
-  /* ── STEPS ── */
-  .step-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  .step-item {
-    display: flex;
-    gap: 0;
-    border-bottom: 1px solid var(--gray-100);
-  }
-  .step-item:last-child { border-bottom: none; }
-  .step-num-col {
-    width: 52px;
-    flex-shrink: 0;
-    padding: 18px 0;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    border-right: 1px solid var(--gray-100);
-    padding-top: 20px;
-  }
-  .step-num {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: var(--navy);
-    color: rgba(255,255,255,0.8);
-    font-size: 11px;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-  }
-  .step-content {
-    padding: 18px 24px;
-    flex: 1;
-  }
-  .step-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--gray-900);
-    margin-bottom: 4px;
-  }
-  .step-body {
-    font-size: 13.5px;
-    color: var(--gray-700);
-    line-height: 1.6;
-  }
-  .step-output {
-    display: inline-block;
-    font-size: 10.5px;
-    font-weight: 600;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    padding: 2px 8px;
-    border-radius: 4px;
-    background: var(--gray-100);
-    color: var(--gray-700);
-    margin-top: 6px;
-  }
-
-  /* ── PHASE CHAIN ── */
-  .phase-table {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    overflow: hidden;
-    width: 100%;
-    border-collapse: collapse;
-  }
-  .phase-table thead tr {
-    background: var(--gray-50);
-    border-bottom: 2px solid var(--gray-200);
-  }
-  .phase-table th {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--gray-500);
-    padding: 12px 18px;
-    text-align: left;
-    white-space: nowrap;
-  }
-  .phase-table td {
-    padding: 14px 18px;
-    font-size: 13.5px;
-    color: var(--gray-700);
-    line-height: 1.5;
-    vertical-align: top;
-    border-bottom: 1px solid var(--gray-100);
-  }
-  .phase-table tr:last-child td { border-bottom: none; }
-  .phase-table tr:hover td { background: var(--gray-50); }
-  .phase-name {
-    font-weight: 700;
-    color: var(--gray-900);
-    font-size: 13px;
-    white-space: nowrap;
-  }
-  .phase-optional {
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--gray-400);
-    margin-left: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-  }
-  .phase-output-tag {
-    display: inline-block;
-    font-size: 10.5px;
-    font-weight: 600;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    padding: 2px 7px;
-    border-radius: 4px;
-    background: var(--gray-100);
-    color: var(--gray-700);
-    white-space: nowrap;
-  }
-  .gate-text {
-    font-size: 12.5px;
-    color: var(--gray-500);
-  }
-  .gate-text strong { color: var(--gray-700); font-weight: 600; }
-
-  code {
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    font-size: 12px;
-    background: var(--gray-100);
-    color: var(--gray-700);
-    padding: 1px 6px;
-    border-radius: 4px;
-  }
-
-  @media print {
-    .sidebar { display: none; }
-    .main { margin-left: 0; }
-    .page-header { padding: 32px 40px; }
-    .content { padding: 32px 40px 60px; }
-    .card { break-inside: avoid; }
-    @page { size: A4; margin: 15mm; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solo Builder Framework — Getting Started</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../_shared.css">
 </head>
 <body>
 
-<!-- ── SIDEBAR ── -->
-<aside class="sidebar">
-  <div class="sidebar-header">
-    <div class="sh-label">Solo Builder Framework</div>
-    <div class="sh-title">Getting Started</div>
-  </div>
+<nav class="site-nav">
+  <span class="brand">Solo Builder</span>
+  <a class="nav-link" href="getting-started.html">Getting Started</a>
+  <a class="nav-link" href="process-map.html">Process Map</a>
+  <a class="nav-link" href="skills-reference.html">Skills</a>
+  <a class="nav-link" href="framework-architecture.html">Architecture</a>
+</nav>
 
-  <div class="toc-section">
-    <span class="toc-label">On This Page</span>
-    <a href="#product-or-spike" class="toc-link"><span class="toc-num">01</span>Product or spike?</a>
-    <a href="#three-ways-in" class="toc-link"><span class="toc-num">02</span>Three ways to enter</a>
-    <a href="#session-modes" class="toc-link"><span class="toc-num">03</span>Session modes</a>
-    <a href="#first-session" class="toc-link"><span class="toc-num">04</span>What a first session looks like</a>
-    <a href="#phase-sequence" class="toc-link"><span class="toc-num">05</span>The phase sequence</a>
-    <a href="#session-hygiene" class="toc-link"><span class="toc-num">06</span>Session hygiene</a>
-    <a href="#workshop" class="toc-link"><span class="toc-num">07</span>Workshop</a>
-  </div>
-</aside>
-
-<!-- ── MAIN ── -->
-<main class="main">
-  <div class="page-header">
-    <div class="ph-eyebrow">Solo Builder Framework</div>
+<div class="page">
+  <div class="hero">
+    <div class="hero-label">Solo Builder Framework</div>
     <h1>Getting Started</h1>
-    <p>Everything you need to know to start your first project — which path to take, how to enter the framework, and what a working session looks like.</p>
+    <p class="hero-sub">Everything you need to know to start your first project — which path to take, how to enter the framework, and what a working session looks like.</p>
   </div>
 
-  <div class="content">
+  <h2>Is This a Product or a Spike?</h2>
+  <p>Before you pick a mode or invoke anything, answer one question: will other people use this, or is it just for you? That answer routes you to one of two systems.</p>
+  <div class="card-grid">
+    <div class="card">
+      <div class="section-label">Use the Framework</div>
+      <h3>Product</h3>
+      <p>Other people will use this. Lifespan is indefinite. There are real users, real requirements, and decisions made now that will matter later.</p>
+      <p><strong>Say "let's start" or describe what you're building.</strong></p>
+    </div>
+    <div class="card">
+      <div class="section-label">Use Workshop</div>
+      <h3>Spike or personal tool</h3>
+      <p>Exploratory work, a script for yourself, or something timeboxed to hours or days. Outcome is learning or a small artifact — not a shipped product.</p>
+      <p><strong>Invoke /scope-check to enter Workshop.</strong></p>
+    </div>
+  </div>
+  <div class="callout">Spikes can graduate. If a personal tool turns into something you want to ship, Workshop's Promote outcome hands it to the framework at the right phase. You don't have to decide forever today.</div>
 
-    <!-- ── SECTION 1 ── -->
-    <section class="section" id="product-or-spike">
-      <div class="section-header">
-        <div class="section-num">01</div>
-        <div class="section-title">Is this a product or a spike?</div>
-      </div>
+  <h2>Three Ways to Enter</h2>
+  <p>All three paths start the same way — say "let's start" or describe what you have. The routing skill reads what you brought and routes you automatically. No flags, no setup.</p>
+  <div class="card-grid">
+    <div class="card">
+      <div class="section-label">Entry 1</div>
+      <h3>You know what you want to build</h3>
+      <p>Describe the idea, even briefly. You'll go through a full narrative conversation — what it does, who it's for, what you're explicitly not building — and come out with a discovery brief and a to-be process map.</p>
+      <p><strong>Route:</strong> start → discover</p>
+    </div>
+    <div class="card">
+      <div class="section-label">Entry 2</div>
+      <h3>You're exploring an idea</h3>
+      <p>Something isn't fully formed yet. Say "let's start" or "I'm thinking about…" and you're routed to Brainstorming first — a genuine collaborative exploration that produces directional clarity and a rough sketch before committing to Discover.</p>
+      <p><strong>Route:</strong> start → brainstorming → discover</p>
+    </div>
+    <div class="card">
+      <div class="section-label">Entry 3</div>
+      <h3>You have prior work</h3>
+      <p>Notes, decisions, maybe some code already written. Describe what you have. The onboard skill reads your project directory, maps prior work to framework artifacts, identifies gaps, and places you at the right phase — without making you re-do work you've already done.</p>
+      <p><strong>Route:</strong> start → onboard → [correct phase]</p>
+    </div>
+  </div>
+  <div class="callout"><strong>The front door:</strong> Always start with "let's start" or just describe what you're working on. The routing skill reads your opening message and routes you — you don't need to know which path you're on before you begin.</div>
 
-      <p style="font-size:14px;color:var(--gray-700);line-height:1.65;margin-bottom:20px;">
-        Before you pick a mode or invoke anything, answer one question: will other people use this, or is it just for you? That answer routes you to one of two systems.
-      </p>
+  <h2>Choose a Session Mode</h2>
+  <p>Modes control which skills load automatically. Set your mode at the start of a session by saying "guided mode" or "piloted mode." Default is bare. You can change modes mid-project.</p>
+  <div class="card-grid">
+    <div class="card">
+      <div class="section-label">Default</div>
+      <h3>Bare</h3>
+      <p>Nothing loads until you invoke a skill. Zero overhead.</p>
+      <p><strong>Right for:</strong> focused work, single-skill sessions, builders who want full control over what runs.</p>
+    </div>
+    <div class="card">
+      <div class="section-label">Active</div>
+      <h3>Piloted</h3>
+      <p>You're flying it. The four always-on skills load at session start — memory, continuity, process accountability, and health stay active. You choose which phase to run next.</p>
+      <p><strong>Right for:</strong> builders who know the framework and want the instruments live while staying in control of the course.</p>
+    </div>
+    <div class="card">
+      <div class="section-label">Guided</div>
+      <h3>Guided</h3>
+      <p>The framework leads, you decide. Always-on skills plus the full phase chain — phases flow forward automatically. You're in every conversation and every sign-off, but not managing the navigation.</p>
+      <p><strong>Right for:</strong> new projects, unfamiliar phases, or when you want to stay in the work rather than managing the framework.</p>
+    </div>
+  </div>
+  <div class="callout"><strong>When in doubt:</strong> Start bare. If you find yourself invoking the same skills every session, switch to piloted. Guided pays for itself on new projects — it costs more context but the framework carries you through the phase sequence automatically.</div>
 
-      <div class="two-col">
-        <div class="path-card path-product">
-          <div class="path-card-label">Use the Solo Builder Framework</div>
-          <div class="path-card-title">Product</div>
-          <div class="path-card-body">
-            Other people will use this. Lifespan is indefinite. There are real users, real requirements, and decisions made now that will matter later.
-            <br><br>
-            <strong style="color:var(--blue);">→ Start here. Say "let's start" or describe what you're building.</strong>
-          </div>
-        </div>
-        <div class="path-card path-spike">
-          <div class="path-card-label">Use Workshop</div>
-          <div class="path-card-title">Spike or personal tool</div>
-          <div class="path-card-body">
-            Exploratory work, a script for yourself, or something timeboxed to hours or days. Outcome is learning or a small artifact — not a shipped product.
-            <br><br>
-            <strong style="color:var(--gray-500);">→ Invoke <code>/scope-check</code> to enter Workshop.</strong>
-          </div>
-        </div>
-      </div>
+  <h2>What a First Session Looks Like</h2>
+  <p>For a brand-new product idea, here's the practical sequence from open to close.</p>
+  <table>
+    <thead>
+      <tr><th>Step</th><th>What happens</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>1. Open Claude Code or Cursor</strong></td>
+        <td>Navigate to an empty directory or create one. This becomes your project root — all framework artifacts live here.</td>
+      </tr>
+      <tr>
+        <td><strong>2. Say "let's start" and describe what you want to build</strong></td>
+        <td>It doesn't have to be polished. A sentence or a paragraph. If you want a specific mode, say it here: "guided mode, let's start."</td>
+      </tr>
+      <tr>
+        <td><strong>3. Routing reads your opening and routes you</strong></td>
+        <td>You'll see a brief orientation — which phase you're entering and why — and then the Discovery conversation begins. No setup, no files to create manually.</td>
+      </tr>
+      <tr>
+        <td><strong>4. Discovery conversation runs</strong></td>
+        <td>You'll walk through the idea from beginning to end: who it's for, key moments in the experience, what success looks like, and what you're explicitly not building. Expect it to surface things you hadn't articulated yet.</td>
+      </tr>
+      <tr>
+        <td><strong>5. Gate outputs are written</strong></td>
+        <td>Discover writes two artifacts: a discovery brief (<code>docs/discovery-brief.md</code>) and a to-be process map (<code>docs/process/</code>).</td>
+      </tr>
+      <tr>
+        <td><strong>6. Gate check: both artifacts must exist</strong></td>
+        <td>Before the Design Sprint begins, both outputs must be present. The gate exists because Design Sprint reads them. If you close out before they're written, the next session can resume from this phase.</td>
+      </tr>
+    </tbody>
+  </table>
 
-      <div class="callout">
-        <div class="callout-label">Note</div>
-        Spikes can graduate. If a personal tool turns into something you want to ship, Workshop's <em>Promote</em> outcome hands it to SBF at the right phase. You don't have to decide forever today.
-      </div>
-    </section>
+  <h2>The Phase Sequence</h2>
+  <p>The framework moves through phases in order. Each phase has a required output and a gate that the next phase checks before starting. You can't skip gates — but you can pause at any gate and resume cleanly.</p>
+  <table>
+    <thead>
+      <tr><th>Phase</th><th>Produces</th><th>Gate (next phase requires)</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Brainstorming</strong> <em>(optional)</em></td>
+        <td>Directional clarity, rough sketch, a defined idea worth discovering</td>
+        <td>Decision to proceed to Discover</td>
+      </tr>
+      <tr>
+        <td><strong>Discover</strong></td>
+        <td>discovery-brief.md · process maps</td>
+        <td>Both files exist and are complete</td>
+      </tr>
+      <tr>
+        <td><strong>Tech Context</strong></td>
+        <td>tech-context.md</td>
+        <td>Stack, constraints, and infra decisions documented</td>
+      </tr>
+      <tr>
+        <td><strong>Design Sprint</strong></td>
+        <td>HTML screen artifacts for every screen before any code is written</td>
+        <td>All screens reviewed and approved</td>
+      </tr>
+      <tr>
+        <td><strong>Data Scaffold + Design Review</strong></td>
+        <td>Realistic fake data wired to screens; design review passed</td>
+        <td>Screens match approved designs with real-shaped data</td>
+      </tr>
+      <tr>
+        <td><strong>Plan</strong></td>
+        <td>prd.md sequenced into slices with acceptance criteria</td>
+        <td>Plan reviewed; slices are independently buildable</td>
+      </tr>
+      <tr>
+        <td><strong>Build</strong></td>
+        <td>Working code, slice by slice. Say "show progress" for the active deliverable · "show plan" for the full build.</td>
+        <td>All slices complete; QA can run end-to-end</td>
+      </tr>
+      <tr>
+        <td><strong>QA</strong></td>
+        <td>Verified behavior, triage log for anything unexpected</td>
+        <td>No open critical issues; phase-test can run</td>
+      </tr>
+      <tr>
+        <td><strong>Phase Test</strong></td>
+        <td>Full-phase test run against acceptance criteria</td>
+        <td>All phase criteria pass</td>
+      </tr>
+      <tr>
+        <td><strong>Deploy</strong></td>
+        <td>Production deployment, launch checklist complete</td>
+        <td>App live; retrospective captured</td>
+      </tr>
+    </tbody>
+  </table>
 
-    <!-- ── SECTION 2 ── -->
-    <section class="section" id="three-ways-in">
-      <div class="section-header">
-        <div class="section-num">02</div>
-        <div class="section-title">Three ways to enter SBF</div>
-      </div>
+  <h2>Session Hygiene</h2>
+  <p>The framework is designed so sessions are self-contained. Gates are the natural close points. A fresh session that starts with gate output has full context — you don't lose anything by stopping at a gate.</p>
+  <div class="card-grid">
+    <div class="card">
+      <h3>End at gates, not mid-phase</h3>
+      <p>Each gate output is a complete, readable artifact. The next phase reads it cold and picks up with full context. Stopping mid-phase means the next session has to reconstruct partial work.</p>
+    </div>
+    <div class="card">
+      <h3>One phase per session — roughly</h3>
+      <p>Short phases (Discover, Tech Context, Plan) each fit in a session. Long phases like Build should be broken into sprint slices — complete one slice per session, commit at the end.</p>
+    </div>
+    <div class="card">
+      <h3>To close out: say "let's close out"</h3>
+      <p>The continuity skill captures current state, updates the handoff document, and generates a resume prompt. Copy the resume prompt — paste it to start the next session.</p>
+    </div>
+    <div class="card">
+      <h3>To resume: paste the prompt or say the name</h3>
+      <p><strong>Option 1 — Resume prompt:</strong> Open a new session, paste the resume prompt. The framework reads it and continues from exactly where you left off.</p>
+      <p><strong>Option 2 — Named resume:</strong> Add your project to projects.md in the playbook root. Then say "guided on [project name]" — no saved prompt needed.</p>
+    </div>
+  </div>
+  <div class="callout"><strong>The pattern that works:</strong> Open session → "guided on [project]" or paste resume prompt → work to the next gate → say "let's close out" → close. Repeat. The framework carries state between sessions so you don't have to.</div>
 
-      <p style="font-size:14px;color:var(--gray-700);line-height:1.65;margin-bottom:20px;">
-        All three paths start the same way — say "let's start" or describe what you have. <code>start</code> reads what you brought and routes you automatically. No flags, no setup.
-      </p>
+  <h2>Workshop — For Non-Product Work</h2>
+  <p>Workshop is the companion system for spikes, personal tools, and exploratory builds. It's lighter, faster, and designed for work that has a clear endpoint. Enter with /scope-check.</p>
+  <div class="callout">Invoke /scope-check. It asks one question: who is this for and how long will it live? The answer routes you into the right Workshop track.</div>
+  <div class="card-grid">
+    <div class="card">
+      <h3>Toss</h3>
+      <p>The work is done and doesn't need to live on. Workshop captures the key learning as a concise note and archives the artifact. You leave with something worth keeping, without a codebase to maintain.</p>
+    </div>
+    <div class="card">
+      <h3>Keep</h3>
+      <p>The tool works and you'll keep using it — just not as a product. Workshop marks it as a personal tool: no framework gates, no shipping requirements. It lives in your local environment.</p>
+    </div>
+    <div class="card">
+      <h3>Promote</h3>
+      <p>The spike graduated into something real — other people will use it, or you want to build it properly. Workshop hands off to the framework at the correct phase, carrying over what's already been done so you don't re-run discovery on something you already understand.</p>
+    </div>
+  </div>
+  <div class="callout"><strong>Don't force things.</strong> Not every good idea needs to be a product. If you find yourself in Workshop, take the Toss or Keep outcome seriously. The cost of prematurely promoting a spike into the full framework is real — you get all the overhead before you're sure the idea is worth it.</div>
 
-      <div class="entry-card">
-        <div class="entry-num">1</div>
-        <div class="entry-content">
-          <div class="entry-title">You know what you want to build</div>
-          <div class="entry-body">
-            Describe the idea, even briefly. <code>start</code> routes you to Discover. You'll go through a full narrative conversation — what it does, who it's for, what you're explicitly not building — and come out with a discovery brief and a to-be process map.
-          </div>
-          <span class="entry-skill">→ start → discover</span>
-        </div>
-      </div>
-
-      <div class="entry-card">
-        <div class="entry-num">2</div>
-        <div class="entry-content">
-          <div class="entry-title">You're exploring an idea</div>
-          <div class="entry-body">
-            Something isn't fully formed yet. You have a direction but not a definition. Say "let's start" or "I'm thinking about…" and <code>start</code> routes you to Brainstorming first. That skill is a genuine collaborative exploration — not a requirements dump — and produces directional clarity and a rough sketch before you commit to Discover.
-          </div>
-          <span class="entry-skill">→ start → brainstorming → discover</span>
-        </div>
-      </div>
-
-      <div class="entry-card">
-        <div class="entry-num">3</div>
-        <div class="entry-content">
-          <div class="entry-title">You have prior work</div>
-          <div class="entry-body">
-            Notes, decisions, maybe some code already written. Describe what you have. <code>start</code> routes to <code>onboard</code>, which reads your project directory, maps prior work to framework artifacts, identifies gaps, and places you at the right phase — without making you re-do work you've already done.
-          </div>
-          <span class="entry-skill">→ start → onboard → [correct phase]</span>
-        </div>
-      </div>
-
-      <div class="callout callout-teal">
-        <div class="callout-label">The front door</div>
-        Always start with "let's start" or just describe what you're working on. <code>start</code> reads your opening message and routes you — you don't need to know which path you're on before you begin.
-      </div>
-    </section>
-
-    <!-- ── SECTION 3 ── -->
-    <section class="section" id="session-modes">
-      <div class="section-header">
-        <div class="section-num">03</div>
-        <div class="section-title">Choose a session mode</div>
-      </div>
-
-      <p style="font-size:14px;color:var(--gray-700);line-height:1.65;margin-bottom:20px;">
-        Modes control which skills load automatically. Set your mode at the start of a session by saying "guided mode" or "piloted mode." Default is bare. You can change modes mid-project.
-      </p>
-
-      <div class="three-col">
-        <div class="mode-card">
-          <div class="mode-card-name">
-            bare
-            <span class="mode-default-badge">default</span>
-          </div>
-          <div class="mode-card-body">Nothing loads until you invoke a skill. Zero overhead.</div>
-          <div class="mode-card-when"><strong>Right for:</strong> focused work, single-skill sessions, builders who want full control over what runs.</div>
-        </div>
-        <div class="mode-card">
-          <div class="mode-card-name">piloted</div>
-          <div class="mode-card-body">You're flying it. The four always-on skills load at session start — memory, continuity, process accountability, and health stay active. You choose which phase to run next.</div>
-          <div class="mode-card-when"><strong>Right for:</strong> builders who know the framework and want the instruments live while staying in control of the course.</div>
-        </div>
-        <div class="mode-card">
-          <div class="mode-card-name">guided</div>
-          <div class="mode-card-body">The framework leads, you decide. Always-on skills plus the full phase chain — phases flow forward automatically. You're in every conversation and every sign-off, but you're not managing the navigation.</div>
-          <div class="mode-card-when"><strong>Right for:</strong> new projects, unfamiliar phases, or when you want to stay in the work rather than managing the framework.</div>
-        </div>
-      </div>
-
-      <div class="callout callout-amber">
-        <div class="callout-label">When in doubt</div>
-        Start bare. If you find yourself invoking the same skills every session, switch to piloted. Guided pays for itself on new projects — it costs more context but the framework carries you through the phase sequence automatically.
-      </div>
-    </section>
-
-    <!-- ── SECTION 4 ── -->
-    <section class="section" id="first-session">
-      <div class="section-header">
-        <div class="section-num">04</div>
-        <div class="section-title">What a first session looks like</div>
-      </div>
-
-      <p style="font-size:14px;color:var(--gray-700);line-height:1.65;margin-bottom:20px;">
-        For a brand-new product idea, here's the practical sequence from open to close.
-      </p>
-
-      <div class="step-list">
-        <div class="step-item">
-          <div class="step-num-col"><div class="step-num">1</div></div>
-          <div class="step-content">
-            <div class="step-title">Open Claude Code or Cursor</div>
-            <div class="step-body">Navigate to an empty directory or create one. This becomes your project root — all framework artifacts live here.</div>
-          </div>
-        </div>
-        <div class="step-item">
-          <div class="step-num-col"><div class="step-num">2</div></div>
-          <div class="step-content">
-            <div class="step-title">Say "let's start" and describe what you want to build</div>
-            <div class="step-body">It doesn't have to be polished. A sentence or a paragraph. <code>start</code> reads it and routes you — no configuration required. If you want a specific mode, say it here: "guided mode, let's start."</div>
-          </div>
-        </div>
-        <div class="step-item">
-          <div class="step-num-col"><div class="step-num">3</div></div>
-          <div class="step-content">
-            <div class="step-title"><code>start</code> reads your opening and routes you</div>
-            <div class="step-body">You'll see a brief orientation — which phase you're entering and why — and then the Discovery conversation begins. No setup, no files to create manually.</div>
-          </div>
-        </div>
-        <div class="step-item">
-          <div class="step-num-col"><div class="step-num">4</div></div>
-          <div class="step-content">
-            <div class="step-title">Discovery conversation runs</div>
-            <div class="step-body">You'll walk through the idea from beginning to end: who it's for, key moments in the experience, what success looks like, and — just as importantly — what you're explicitly not building. This conversation is generative, not an interview. Expect it to surface things you hadn't articulated yet.</div>
-          </div>
-        </div>
-        <div class="step-item">
-          <div class="step-num-col"><div class="step-num">5</div></div>
-          <div class="step-content">
-            <div class="step-title">Gate outputs are written</div>
-            <div class="step-body">Discover writes two artifacts: a discovery brief and a to-be process map.</div>
-            <div>
-              <span class="step-output">docs/discovery-brief.md</span>
-              <span class="step-output" style="margin-left:6px;">docs/process/</span>
-            </div>
-          </div>
-        </div>
-        <div class="step-item">
-          <div class="step-num-col"><div class="step-num">6</div></div>
-          <div class="step-content">
-            <div class="step-title">Gate check: both artifacts must exist</div>
-            <div class="step-body">Before the Design Sprint begins, both outputs must be present. The gate exists because Design Sprint reads them. If you close out before they're written, the next session can resume from this phase using the resume prompt.</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── SECTION 5 ── -->
-    <section class="section" id="phase-sequence">
-      <div class="section-header">
-        <div class="section-num">05</div>
-        <div class="section-title">The phase sequence</div>
-      </div>
-
-      <p style="font-size:14px;color:var(--gray-700);line-height:1.65;margin-bottom:20px;">
-        SBF moves through phases in order. Each phase has a required output and a gate that the next phase checks before starting. You can't skip gates — but you can pause at any gate and resume cleanly.
-      </p>
-
-      <table class="phase-table">
-        <thead>
-          <tr>
-            <th style="width:180px;">Phase</th>
-            <th>Produces</th>
-            <th style="width:280px;">Gate (next phase requires)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><span class="phase-name">Brainstorming <span class="phase-optional">optional</span></span></td>
-            <td>Directional clarity, rough sketch, a defined idea worth discovering</td>
-            <td><span class="gate-text">Decision to proceed to Discover</span></td>
-          </tr>
-          <tr>
-            <td><span class="phase-name">Discover</span></td>
-            <td>
-              <span class="phase-output-tag">docs/discovery-brief.md</span><br>
-              <span class="phase-output-tag" style="margin-top:4px;display:inline-block;">docs/process/</span>
-            </td>
-            <td><span class="gate-text">Both files exist and are complete</span></td>
-          </tr>
-          <tr>
-            <td><span class="phase-name">Tech Context</span></td>
-            <td>
-              <span class="phase-output-tag">docs/tech-context.md</span>
-            </td>
-            <td><span class="gate-text">Stack, constraints, and infra decisions documented</span></td>
-          </tr>
-          <tr>
-            <td><span class="phase-name">Design Sprint</span></td>
-            <td>HTML screen artifacts for every screen before any code is written</td>
-            <td><span class="gate-text">All screens reviewed and approved</span></td>
-          </tr>
-          <tr>
-            <td><span class="phase-name">Data Scaffold + Design Review</span></td>
-            <td>Realistic fake data wired to screens; design review passed</td>
-            <td><span class="gate-text">Screens match approved designs with real-shaped data</span></td>
-          </tr>
-          <tr>
-            <td><span class="phase-name">Plan</span></td>
-            <td>
-              <span class="phase-output-tag">docs/prd.md</span>
-              sequenced into slices with acceptance criteria
-            </td>
-            <td><span class="gate-text">Plan reviewed; slices are independently buildable</span></td>
-          </tr>
-          <tr>
-            <td><span class="phase-name">Build</span></td>
-            <td>Working code, slice by slice, with tests per slice. Two views available at any time — say <strong>"show progress"</strong> for the active deliverable, <strong>"show plan"</strong> for the full build.</td>
-            <td><span class="gate-text">All slices complete; QA can run end-to-end</span></td>
-          </tr>
-          <tr>
-            <td><span class="phase-name">QA</span></td>
-            <td>Verified behavior, triage log for anything unexpected</td>
-            <td><span class="gate-text">No open critical issues; phase-test can run</span></td>
-          </tr>
-          <tr>
-            <td><span class="phase-name">Phase Test</span></td>
-            <td>Full-phase test run against acceptance criteria</td>
-            <td><span class="gate-text">All phase criteria pass</span></td>
-          </tr>
-          <tr>
-            <td><span class="phase-name">Deploy</span></td>
-            <td>Production deployment, launch checklist complete</td>
-            <td><span class="gate-text">App live; retrospective captured</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-
-    <!-- ── SECTION 6 ── -->
-    <section class="section" id="session-hygiene">
-      <div class="section-header">
-        <div class="section-num">06</div>
-        <div class="section-title">Session hygiene</div>
-      </div>
-
-      <p style="font-size:14px;color:var(--gray-700);line-height:1.65;margin-bottom:20px;">
-        The framework is designed so that sessions are self-contained. Gates are the natural close points. A fresh session that starts with gate output has full context — you don't lose anything by stopping at a gate.
-      </p>
-
-      <div class="card" style="margin-bottom:16px;">
-        <div class="card-title">End at gates, not mid-phase</div>
-        <div class="card-body">
-          Each gate output is a complete, readable artifact. The next phase reads it cold and picks up with full context. Stopping mid-phase means the next session has to reconstruct partial work. Stop at gates.
-        </div>
-      </div>
-
-      <div class="card" style="margin-bottom:16px;">
-        <div class="card-title">One phase per session — roughly</div>
-        <div class="card-body">
-          Short phases (Discover, Tech Context, Plan) each fit in a session. Long phases like Build should be broken into sprint slices — complete one slice per session, commit at the end.
-        </div>
-      </div>
-
-      <div class="card" style="margin-bottom:16px;">
-        <div class="card-title">To close out: say "let's close out"</div>
-        <div class="card-body">
-          <code>product-continuity</code> captures current state, updates the handoff document, and generates a resume prompt. Copy the resume prompt — you'll paste it to start the next session.
-        </div>
-      </div>
-
-      <div class="card" style="margin-bottom:16px;">
-        <div class="card-title">To resume: paste the resume prompt — or just say the name</div>
-        <div class="card-body">
-          <strong>Option 1 — Resume prompt:</strong> Open a new session, paste the resume prompt. The framework reads it and continues from exactly where you left off.<br><br>
-          <strong>Option 2 — Named resume:</strong> Add your project to <code>projects.md</code> in the playbook root (one line: name → path). Then say "guided on [project name]" — no saved prompt needed. The framework finds the project, reads the handoff, and picks up from there.
-        </div>
-      </div>
-
-      <div class="callout callout-green">
-        <div class="callout-label">The pattern that works</div>
-        Open session → "guided on [project]" or paste resume prompt → work to the next gate → say "let's close out" → close. Repeat. The framework carries state between sessions so you don't have to.
-      </div>
-    </section>
-
-    <!-- ── SECTION 7 ── -->
-    <section class="section" id="workshop">
-      <div class="section-header">
-        <div class="section-num">07</div>
-        <div class="section-title">Workshop — for non-product work</div>
-      </div>
-
-      <p style="font-size:14px;color:var(--gray-700);line-height:1.65;margin-bottom:20px;">
-        Workshop is SBF's companion system for spikes, personal tools, and exploratory builds. It's lighter, faster, and designed for work that has a clear endpoint. Enter with <code>/scope-check</code>.
-      </p>
-
-      <div class="callout callout-purple" style="margin-bottom:20px;">
-        <div class="callout-label">Entry</div>
-        Invoke <code>/scope-check</code>. It asks one question: who is this for and how long will it live? The answer routes you into the right Workshop track.
-      </div>
-
-      <div class="card" style="margin-bottom:12px;">
-        <div class="card-title" style="color:var(--rose);">Toss</div>
-        <div class="card-body">
-          The work is done and doesn't need to live on. Workshop captures the key learning as a concise note and archives the artifact. You leave with something worth keeping, without a codebase to maintain.
-        </div>
-      </div>
-
-      <div class="card" style="margin-bottom:12px;">
-        <div class="card-title" style="color:var(--amber);">Keep</div>
-        <div class="card-body">
-          The tool works and you'll keep using it — just not as a product. Workshop marks it as a personal tool: no SBF gates, no shipping requirements. It lives in your local environment.
-        </div>
-      </div>
-
-      <div class="card" style="margin-bottom:20px;">
-        <div class="card-title" style="color:var(--green);">Promote</div>
-        <div class="card-body">
-          The spike graduated into something real — other people will use it, or you want to build it properly. Workshop hands off to SBF at the correct phase, carrying over what's already been done so you don't re-run discovery on something you already understand.
-        </div>
-      </div>
-
-      <div class="callout callout-orange">
-        <div class="callout-label">Don't force things</div>
-        Not every good idea needs to be a product. If you find yourself in Workshop, take the Toss or Keep outcome seriously. The cost of prematurely promoting a spike into SBF is real — you get all the overhead before you're sure the idea is worth it.
-      </div>
-    </section>
-
-  </div><!-- /content -->
-</main>
-
+</div>
 </body>
 </html>
