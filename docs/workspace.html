@@ -410,6 +410,14 @@
     .backlog-name { flex:1; font-size:13px; color:var(--text-primary); }
     body.editorial .backlog-name { font-weight:300; }
 
+    /* ── BACKLOG THREE-AREA LAYOUT ── */
+    .backlog-section { margin-bottom:4px; }
+    .backlog-section-header {
+      font-size:9.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+      background:#3a3a3b; color:#ffffff; padding:6px 20px;
+    }
+    .backlog-empty { padding:12px 20px; font-size:13px; color:var(--text-meta); }
+
     .materials-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:8px; }
     .material-item { background:var(--card-bg); border:1px solid var(--card-border); border-radius:7px; padding:12px 14px; cursor:pointer; transition:all .13s; display:flex; align-items:center; gap:10px; }
     .material-item:hover { border-color:var(--accent); }
@@ -2539,7 +2547,27 @@
     }
 
     function renderPdBacklog() {
-      const rows = _pdSlices.map(s => {
+      const phasesHtml = _pdPhases.map(ph => {
+        const p = parseT4(ph.content);
+        const idx = _ovItems.push(ph) - 1;
+        return `<div class="pd-row" onclick="openPhaseOverlay(_ovItems[${idx}])">
+          <span class="pd-row-id">${escHtml(ph.entry_id)}</span>
+          <span class="pd-row-name">${escHtml(p.title.replace(/^PHASE\s*—\s*/i,''))}</span>
+          ${statusBadge(p.status)}
+        </div>`;
+      }).join('');
+
+      const delsHtml = _pdDeliverables.map(d => {
+        const p = parseT4(d.content);
+        const idx = _ovItems.push(d) - 1;
+        return `<div class="pd-row" onclick="openDeliverableOverlay(_ovItems[${idx}])">
+          <span class="pd-row-id">${escHtml(d.entry_id)}</span>
+          <span class="pd-row-name">${escHtml(p.title.replace(/^DELIVERABLE\s*—\s*/i,''))}</span>
+          ${statusBadge(p.status)}
+        </div>`;
+      }).join('');
+
+      const slicesHtml = _pdSlices.map(s => {
         const p = parseT4(s.content);
         const idx = _ovItems.push(s) - 1;
         return `<div class="pd-row" onclick="openSliceOverlay(_ovItems[${idx}])">
@@ -2548,7 +2576,21 @@
           ${statusBadge(p.status)}
         </div>`;
       }).join('');
-      document.getElementById('tab-pd-backlog').innerHTML = rows || '<div style="padding:24px;color:var(--text-meta);font-size:13px">No slices found.</div>';
+
+      document.getElementById('tab-pd-backlog').innerHTML = `
+        <div class="backlog-section">
+          <div class="backlog-section-header">Phases (${_pdPhases.length})</div>
+          ${phasesHtml || '<div class="backlog-empty">No phases.</div>'}
+        </div>
+        <div class="backlog-section">
+          <div class="backlog-section-header">Deliverables (${_pdDeliverables.length})</div>
+          ${delsHtml || '<div class="backlog-empty">No deliverables.</div>'}
+        </div>
+        <div class="backlog-section">
+          <div class="backlog-section-header">Slices (${_pdSlices.length})</div>
+          ${slicesHtml || '<div class="backlog-empty">No slices.</div>'}
+        </div>
+      `;
     }
 
     const DOC_LABELS = {
