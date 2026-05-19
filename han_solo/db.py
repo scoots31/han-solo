@@ -77,6 +77,17 @@ CREATE TABLE IF NOT EXISTS t4_entries (
 );
 CREATE INDEX IF NOT EXISTS idx_t4_project
     ON t4_entries(project_slug, entry_type);
+CREATE TABLE IF NOT EXISTS signals (
+    id           SERIAL PRIMARY KEY,
+    signal_type  TEXT        NOT NULL,
+    subject      TEXT        NOT NULL,
+    content      TEXT        NOT NULL,
+    session_date DATE        NOT NULL,
+    author       TEXT        NOT NULL DEFAULT 'synthesis',
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_signals_type
+    ON signals(signal_type, created_at DESC);
 """
 
 # Health tracking — last successful write timestamp
@@ -622,6 +633,48 @@ async def update_notecard_status(notecard_id: int, status: str) -> bool:
     except Exception as e:
         logger.error("Failed to update notecard %d: %s", notecard_id, e)
         return False
+
+
+async def create_signal(signal_type: str, subject: str, content: str, session_date: str, author: str = "synthesis") -> dict | None:
+    """Insert a signal. Returns the new row as a dict."""
+    if not _pool:
+        return None
+    try:
+        async with _pool.acquire() as conn:
+            row = await conn.fetchrow(
+                """
+                INSERT INTO signals (signal_type, subject, content, session_date, author)
+                VALUES ($1, $2, $3, $4::date, $5)
+                RETURNING id, signal_type, subject, content, session_date, author, created_at
+                """,
+                signal_type, subject, content, session_date, author,
+            )
+        return dict(row) if row else None
+    except Exception as e:
+        logger.error("Failed to create signal: %s", e)
+        return None
+
+
+async def list_signals(signal_type: str | None = None, limit: int = 200) -> list[dict]:
+    """List signals newest first, optionally filtered by type."""
+    if not _pool:
+        return []
+    try:
+        async with _pool.acquire() as conn:
+            if signal_type:
+                rows = await conn.fetch(
+                    "SELECT id, signal_type, subject, content, session_date, author, created_at FROM signals WHERE signal_type = $1 ORDER BY created_at DESC LIMIT $2",
+                    signal_type, limit,
+                )
+            else:
+                rows = await conn.fetch(
+                    "SELECT id, signal_type, subject, content, session_date, author, created_at FROM signals ORDER BY created_at DESC LIMIT $1",
+                    limit,
+                )
+        return [dict(r) for r in rows]
+    except Exception as e:
+        logger.error("Failed to list signals: %s", e)
+        return []
 
 
 async def get_failed_transitions(hours: int = 24) -> list[dict]:

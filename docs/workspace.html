@@ -939,42 +939,20 @@
       <!-- SIGNALS -->
       <div class="screen hidden" id="screen-signals">
         <div class="screen-header">
-          <div><div class="screen-title">Signals</div><div class="screen-sub">53 total · 42 texture · 8 directional · 3 relational</div></div>
-          <button class="btn-primary">+ Signal</button>
+          <div><div class="screen-title">Signals</div><div class="screen-sub" id="sig-sub">Loading…</div></div>
         </div>
         <div class="stats-row">
-          <div class="stat-item"><div class="stat-value">42</div><div class="stat-label">Texture</div></div>
-          <div class="stat-item"><div class="stat-value">8</div><div class="stat-label">Directional</div></div>
-          <div class="stat-item"><div class="stat-value">3</div><div class="stat-label">Relational</div></div>
+          <div class="stat-item"><div class="stat-value" id="sig-stat-texture">—</div><div class="stat-label">Texture</div></div>
+          <div class="stat-item"><div class="stat-value" id="sig-stat-directional">—</div><div class="stat-label">Directional</div></div>
+          <div class="stat-item"><div class="stat-value" id="sig-stat-relational">—</div><div class="stat-label">Relational</div></div>
         </div>
         <div class="filter-bar">
-          <button class="filter-btn active">All</button>
-          <button class="filter-btn">Texture</button>
-          <button class="filter-btn">Directional</button>
-          <button class="filter-btn">Relational</button>
+          <button class="filter-btn active" data-sigfilter="all">All</button>
+          <button class="filter-btn" data-sigfilter="texture">Texture</button>
+          <button class="filter-btn" data-sigfilter="directional">Directional</button>
+          <button class="filter-btn" data-sigfilter="relational">Relational</button>
         </div>
-        <div class="scrollable">
-          <div class="signal-item">
-            <div class="signal-type-row"><span class="signal-type-badge texture">Texture</span><span class="signal-date">May 17</span></div>
-            <div class="signal-content">T4 design session has been deferred twice — may need a defined start trigger rather than leaving it open-ended.</div>
-          </div>
-          <div class="signal-item">
-            <div class="signal-type-row"><span class="signal-type-badge directional">Directional</span><span class="signal-date">May 17</span></div>
-            <div class="signal-content">The Factory roadmap is locked and Scott is clear he's not rushing. Sequencing is deliberate — each phase has to hold before the next opens.</div>
-          </div>
-          <div class="signal-item">
-            <div class="signal-type-row"><span class="signal-type-badge texture">Texture</span><span class="signal-date">May 15</span></div>
-            <div class="signal-content">Scott chose the name Ren deliberately in the first session. Short, no baggage. Naming the relationship mattered enough to do carefully.</div>
-          </div>
-          <div class="signal-item">
-            <div class="signal-type-row"><span class="signal-type-badge relational">Relational</span><span class="signal-date">May 15</span></div>
-            <div class="signal-content">Scott asked explicitly to be pushed back on. When Ren held a position across multiple rounds, Scott heard it. The request is real, not performative.</div>
-          </div>
-          <div class="signal-item">
-            <div class="signal-type-row"><span class="signal-type-badge directional">Directional</span><span class="signal-date">May 14</span></div>
-            <div class="signal-content">First session where Ren operated from persistent memory in Letta rather than session context alone. The architecture designed together is now the one running.</div>
-          </div>
-        </div>
+        <div class="scrollable" id="sig-list"></div>
       </div>
 
       <!-- THREADS -->
@@ -2255,6 +2233,85 @@
       }
     });
 
+    // ── SIGNALS ──────────────────────────────────────────
+    let _allSignals  = [];
+    let _sigLoaded   = false;
+    let _sigFilter   = 'all';
+
+    function fmtSigDate(iso) {
+      if (!iso) return '';
+      const d = new Date(iso + (iso.length === 10 ? 'T00:00:00' : ''));
+      return d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+    }
+
+    async function loadSignals() {
+      const list = document.getElementById('sig-list');
+      list.innerHTML = '<div style="padding:28px;color:var(--text-meta);font-size:13px;">Loading…</div>';
+      try {
+        const data = await apiFetch('/api/signals');
+        _allSignals = await data.json();
+        _sigLoaded = true;
+        renderSignals();
+      } catch(e) {
+        list.innerHTML = '<div style="padding:28px;color:var(--text-meta);font-size:13px;">Could not load signals.</div>';
+      }
+    }
+
+    function renderSignals() {
+      const list = document.getElementById('sig-list');
+      const filtered = _sigFilter === 'all'
+        ? _allSignals
+        : _allSignals.filter(s => s.signal_type === _sigFilter);
+
+      const texture    = _allSignals.filter(s => s.signal_type === 'texture').length;
+      const directional = _allSignals.filter(s => s.signal_type === 'directional').length;
+      const relational  = _allSignals.filter(s => s.signal_type === 'relational').length;
+      document.getElementById('sig-stat-texture').textContent    = texture;
+      document.getElementById('sig-stat-directional').textContent = directional;
+      document.getElementById('sig-stat-relational').textContent  = relational;
+      document.getElementById('sig-sub').textContent =
+        `${_allSignals.length} total · ${texture} texture · ${directional} directional · ${relational} relational`;
+
+      if (!filtered.length) {
+        list.innerHTML = '<div style="padding:28px;color:var(--text-meta);font-size:13px;">No signals found.</div>';
+        return;
+      }
+      list.innerHTML = filtered.map((s, i) => `
+        <div class="signal-item" data-sig-idx="${i}">
+          <div class="signal-type-row">
+            <span class="signal-type-badge ${s.signal_type}">${s.signal_type.charAt(0).toUpperCase()+s.signal_type.slice(1)}</span>
+            <span class="signal-date">${fmtSigDate(s.session_date || s.created_at)}</span>
+          </div>
+          <div class="signal-content">${escHtml(s.content)}</div>
+        </div>`).join('');
+
+      list.querySelectorAll('.signal-item').forEach((el, i) => {
+        el.addEventListener('click', () => {
+          const s = filtered[i];
+          const label = s.signal_type.charAt(0).toUpperCase() + s.signal_type.slice(1);
+          document.getElementById('sig-detail-type-label').textContent = label;
+          const badge = document.getElementById('sig-detail-badge');
+          badge.textContent = label;
+          badge.className = 'signal-type-badge ' + s.signal_type;
+          document.getElementById('sig-detail-date').textContent = fmtSigDate(s.session_date || s.created_at);
+          document.getElementById('sig-detail-title').textContent = s.content.split('\n')[0].substring(0, 80);
+          const body = document.getElementById('sig-detail-body');
+          body.innerHTML = `<p>${escHtml(s.content)}</p>`;
+          document.querySelectorAll('.screen').forEach(sc => sc.classList.add('hidden'));
+          document.getElementById('screen-signal-detail').classList.remove('hidden');
+        });
+      });
+    }
+
+    document.querySelectorAll('[data-sigfilter]').forEach(btn => {
+      btn.addEventListener('click', function() {
+        this.closest('.filter-bar').querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        _sigFilter = this.dataset.sigfilter;
+        renderSignals();
+      });
+    });
+
     // Kick off
     if (token) { loadChat(); } else { showLoginOverlay(); }
 
@@ -2277,6 +2334,7 @@
       if (id === 'chat' && token && !chatLoaded) loadChat();
       if (id === 'notecards' && token && !_notecardsLoaded) loadNotecards();
       if (id === 'memory' && token && !_memLoaded) loadMemory();
+      if (id === 'signals' && token && !_sigLoaded) loadSignals();
     }
 
     function showProjectDetail(projectName) {
@@ -2708,12 +2766,7 @@
         const idx = Math.min(i, memoryData.length - 1);
         row.addEventListener('click', () => showMemoryDetail(idx));
       });
-      // Signal rows
-      const sigItems = document.querySelectorAll('#screen-signals .signal-item');
-      sigItems.forEach((item, i) => {
-        const idx = Math.min(i, signalData.length - 1);
-        item.addEventListener('click', () => showSignalDetail(idx));
-      });
+      // Signal rows wired dynamically in renderSignals()
       // Thread rows
       const threadRows = document.querySelectorAll('#screen-threads .list-row');
       threadRows.forEach((row, i) => {

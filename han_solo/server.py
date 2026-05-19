@@ -114,6 +114,25 @@ async def api_write_core_block(request: Request) -> JSONResponse:
         return JSONResponse({"error": str(exc)}, status_code=502)
 
 
+async def api_list_signals(request: Request) -> JSONResponse:
+    """GET /api/signals?type=texture|directional|relational"""
+    get_current_user()
+    signal_type = request.query_params.get("type", "").strip() or None
+    signals = await db.list_signals(signal_type=signal_type)
+    return JSONResponse([
+        {
+            "id": s["id"],
+            "signal_type": s["signal_type"],
+            "subject": s["subject"],
+            "content": s["content"],
+            "session_date": s["session_date"].isoformat() if s.get("session_date") else None,
+            "author": s["author"],
+            "created_at": s["created_at"].isoformat() if s.get("created_at") else None,
+        }
+        for s in signals
+    ])
+
+
 async def api_write_signal_rest(request: Request) -> JSONResponse:
     """REST endpoint for synthesis script to write an archival signal."""
     from datetime import date as _date
@@ -133,8 +152,9 @@ async def api_write_signal_rest(request: Request) -> JSONResponse:
 
     try:
         tags = ["signal", signal_type, subject, session_date, "author:synthesis"]
-        result = await letta.insert_passage(content=content, tags=tags)
-        return JSONResponse({"written": True, "id": result.get("id")})
+        letta_result = await letta.insert_passage(content=content, tags=tags)
+        await db.create_signal(signal_type=signal_type, subject=subject, content=content, session_date=session_date)
+        return JSONResponse({"written": True, "id": letta_result.get("id")})
     except Exception as exc:
         return JSONResponse({"error": str(exc)}, status_code=502)
 
@@ -274,6 +294,7 @@ _chat_routes = [
     Route("/api/memory-panel", chat_api.api_memory_panel),
     Route("/api/memory-health", api_memory_health),
     Route("/api/write-core-block", api_write_core_block, methods=["POST"]),
+    Route("/api/signals", api_list_signals),
     Route("/api/write-signal", api_write_signal_rest, methods=["POST"]),
     Route("/api/archival-passages", api_list_archival_passages),
     Route("/api/archival-passage/delete", api_delete_archival_passage, methods=["POST"]),
