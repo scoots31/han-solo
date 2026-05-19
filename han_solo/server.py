@@ -123,7 +123,7 @@ async def api_create_core_block(request: Request) -> JSONResponse:
     if not label:
         return JSONResponse({"error": "label required"}, status_code=400)
     try:
-        result = await letta.create_and_attach_core_block(label, value, limit)
+        result = await letta.create_core_block(label, value, limit)
         return JSONResponse({"created": True, "label": label, "id": result.get("id")})
     except Exception as exc:
         return JSONResponse({"error": str(exc)}, status_code=502)
