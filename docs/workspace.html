@@ -1367,10 +1367,12 @@
           <button class="tab-btn active" onclick="showTab('pd-action',this)">Action</button>
           <button class="tab-btn" onclick="showTab('pd-progress',this)">Progress</button>
           <button class="tab-btn" onclick="showTab('pd-backlog',this)">Backlog</button>
+          <button class="tab-btn" onclick="showTab('pd-docs',this)">Docs</button>
         </div>
         <div class="tab-panel scrollable" id="tab-pd-action"></div>
         <div class="tab-panel hidden scrollable" id="tab-pd-progress"></div>
         <div class="tab-panel hidden scrollable" id="tab-pd-backlog"></div>
+        <div class="tab-panel hidden scrollable" id="tab-pd-docs"></div>
       </div><!-- /project-detail -->
 
       <!-- NOTECARDS -->
@@ -2422,7 +2424,7 @@
     }
 
     // ── PROJECT DETAIL ────────────────────────────────────────────────
-    let _currentPdSlug = '', _pdSlices = [], _pdDeliverables = [], _pdPhases = [];
+    let _currentPdSlug = '', _pdSlices = [], _pdDeliverables = [], _pdPhases = [], _pdDocs = [];
 
     async function loadProjectDetail(slug) {
       _currentPdSlug = slug;
@@ -2438,18 +2440,23 @@
       if (navProjects) navProjects.classList.add('active');
       // Reset tabs
       showTab('pd-action', document.querySelector('#pd-tabs-bar .tab-btn'));
-      ['tab-pd-action','tab-pd-progress','tab-pd-backlog'].forEach(id => {
+      ['tab-pd-action','tab-pd-progress','tab-pd-backlog','tab-pd-docs'].forEach(id => {
         document.getElementById(id).innerHTML = '<div style="padding:20px;color:var(--text-meta);font-size:13px">Loading…</div>';
       });
+      const DOC_TYPES = ['discovery_brief','brainstorm','tech_context','data_mapping','design_identity',
+        'as_is_map','to_be_map','handoff','deferred_decisions','decisions_log','current_phase',
+        'metrics','research_gaps','retro','sprint_screen'];
       try {
-        const [phases, dels, slices] = await Promise.all([
+        const [phases, dels, slices, ...docResults] = await Promise.all([
           apiFetch(`/api/t4/${slug}/entries?type=phase`).then(r=>r.json()),
           apiFetch(`/api/t4/${slug}/entries?type=deliverable`).then(r=>r.json()),
           apiFetch(`/api/t4/${slug}/entries?type=slice`).then(r=>r.json()),
+          ...DOC_TYPES.map(t => apiFetch(`/api/t4/${slug}/entries?type=${t}`).then(r=>r.json()).catch(()=>[])),
         ]);
         _pdPhases       = phases.map(e => ({...e, project_slug: slug}));
         _pdDeliverables = dels.map(e => ({...e, project_slug: slug}));
         _pdSlices       = slices.map(e => ({...e, project_slug: slug}));
+        _pdDocs = docResults.flatMap((rows, i) => rows.map(e => ({...e, project_slug: slug, _docType: DOC_TYPES[i]})));
         // Phase badge: last non-done phase or first
         const activePhase = _pdPhases.find(ph => !ph.content.includes('**Status:** Done')) || _pdPhases[0];
         if (activePhase) {
@@ -2459,11 +2466,17 @@
         renderPdAction();
         renderPdProgress();
         renderPdBacklog();
+        renderPdDocs();
       } catch(e) {
-        ['tab-pd-action','tab-pd-progress','tab-pd-backlog'].forEach(id => {
+        ['tab-pd-action','tab-pd-progress','tab-pd-backlog','tab-pd-docs'].forEach(id => {
           document.getElementById(id).innerHTML = '<div style="padding:20px;color:var(--text-meta);font-size:13px">Could not load project.</div>';
         });
       }
+    }
+
+    function sliceName(s) {
+      const p = parseT4(s.content);
+      return (p.sections['Plain language'] || '').split('\n')[0].trim() || s.entry_id;
     }
 
     function renderPdAction() {
@@ -2471,10 +2484,9 @@
       const html = blocked.length
         ? `<div style="padding:14px 0 8px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-meta)">Blocked (${blocked.length})</div>` +
           blocked.map(s => {
-            const p = parseT4(s.content);
             return `<div class="pd-row" onclick='openSliceOverlay(${JSON.stringify(s)})'>
               <span class="pd-row-id">${escHtml(s.entry_id)}</span>
-              <span class="pd-row-name">${escHtml(p.title.replace(/^SLICE\s*—\s*/i,''))}</span>
+              <span class="pd-row-name">${escHtml(sliceName(s))}</span>
               ${statusBadge('Blocked')}
             </div>`;
           }).join('')
@@ -2518,11 +2530,58 @@
         const p = parseT4(s.content);
         return `<div class="pd-row" onclick='openSliceOverlay(${JSON.stringify(s)})'>
           <span class="pd-row-id">${escHtml(s.entry_id)}</span>
-          <span class="pd-row-name">${escHtml(p.title.replace(/^SLICE\s*—\s*/i,''))}</span>
+          <span class="pd-row-name">${escHtml(sliceName(s))}</span>
           ${statusBadge(p.status)}
         </div>`;
       }).join('');
       document.getElementById('tab-pd-backlog').innerHTML = rows || '<div style="padding:24px;color:var(--text-meta);font-size:13px">No slices found.</div>';
+    }
+
+    const DOC_LABELS = {
+      discovery_brief: 'Discovery Brief', brainstorm: 'Brainstorm', tech_context: 'Tech Context',
+      data_mapping: 'Data Mapping', design_identity: 'Design Identity', as_is_map: 'As-Is Map',
+      to_be_map: 'To-Be Map', handoff: 'Handoff', deferred_decisions: 'Deferred Decisions',
+      decisions_log: 'Decisions Log', current_phase: 'Current Phase', metrics: 'Metrics',
+      research_gaps: 'Research Gaps', retro: 'Retro', sprint_screen: 'Sprint Screen',
+    };
+
+    function renderPdDocs() {
+      if (!_pdDocs.length) {
+        document.getElementById('tab-pd-docs').innerHTML = '<div style="padding:24px;color:var(--text-meta);font-size:13px">No documents found.</div>';
+        return;
+      }
+      const grouped = {};
+      _pdDocs.forEach(d => {
+        if (!grouped[d._docType]) grouped[d._docType] = [];
+        grouped[d._docType].push(d);
+      });
+      const html = Object.entries(grouped).map(([type, entries]) => {
+        const label = DOC_LABELS[type] || type;
+        const rows = entries.map(e => `
+          <div class="pd-row" onclick='openDocOverlay(${JSON.stringify(e)})' style="cursor:pointer">
+            <span class="pd-row-id">${escHtml(label)}</span>
+            <span class="pd-row-name" style="color:var(--text-meta);font-size:12px">${escHtml(e.entry_id !== type ? e.entry_id : '')}</span>
+          </div>`).join('');
+        return rows;
+      }).join('');
+      document.getElementById('tab-pd-docs').innerHTML = html;
+    }
+
+    function openDocOverlay(entry) {
+      const label = DOC_LABELS[entry._docType] || entry._docType;
+      const bd = document.getElementById('overlay-backdrop');
+      const panel = document.getElementById('overlay-slice');
+      document.querySelectorAll('.overlay-panel').forEach(p => p.style.display = 'none');
+      panel.style.display = 'flex';
+      document.getElementById('ov-slice-type').textContent = label;
+      document.getElementById('ov-slice-type').className = 'overlay-type-badge deliverable';
+      document.getElementById('ov-slice-title').textContent = label;
+      document.getElementById('ov-slice-status').textContent = '';
+      const body = document.getElementById('ov-slice-body');
+      body.innerHTML = `<div style="white-space:pre-wrap;font-size:13px;line-height:1.7;color:var(--text-primary)">${escHtml(entry.content)}</div>`;
+      document.getElementById('ov-slice-footer').innerHTML = '';
+      _ovProjectSlug = entry.project_slug || _currentPdSlug;
+      bd.classList.add('open');
     }
 
     // Kick off
