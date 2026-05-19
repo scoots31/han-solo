@@ -2545,26 +2545,52 @@
       research_gaps: 'Research Gaps', retro: 'Retro', sprint_screen: 'Sprint Screen',
     };
 
+    const DOC_ICONS = {
+      discovery_brief: '📋', brainstorm: '💡', tech_context: '⚙', data_mapping: '⇄',
+      design_identity: '🎨', as_is_map: '↔', to_be_map: '→', handoff: '↪',
+      deferred_decisions: '⊘', decisions_log: '📝', current_phase: '⟳',
+      metrics: '▦', research_gaps: '🔍', retro: '◎', sprint_screen: '🖥',
+    };
+
+    const DOC_GROUPS = {
+      DISCOVER:    ['discovery_brief','brainstorm','as_is_map','to_be_map','research_gaps'],
+      BUILD:       ['tech_context','data_mapping','design_identity','metrics'],
+      DESIGN:      ['sprint_screen','deferred_decisions'],
+      CONTINUITY:  ['current_phase','handoff','decisions_log','retro'],
+    };
+
     function renderPdDocs() {
       if (!_pdDocs.length) {
         document.getElementById('tab-pd-docs').innerHTML = '<div style="padding:24px;color:var(--text-meta);font-size:13px">No documents found.</div>';
         return;
       }
-      const grouped = {};
+      const byType = {};
       _pdDocs.forEach(d => {
-        if (!grouped[d._docType]) grouped[d._docType] = [];
-        grouped[d._docType].push(d);
+        if (!byType[d._docType]) byType[d._docType] = [];
+        byType[d._docType].push(d);
       });
-      const html = Object.entries(grouped).map(([type, entries]) => {
-        const label = DOC_LABELS[type] || type;
-        const rows = entries.map(e => `
-          <div class="pd-row" onclick='openDocOverlay(${JSON.stringify(e)})' style="cursor:pointer">
-            <span class="pd-row-id">${escHtml(label)}</span>
-            <span class="pd-row-name" style="color:var(--text-meta);font-size:12px">${escHtml(e.entry_id !== type ? e.entry_id : '')}</span>
-          </div>`).join('');
-        return rows;
+
+      const html = Object.entries(DOC_GROUPS).map(([group, types]) => {
+        const cards = types.flatMap(type => (byType[type] || []).map(e => {
+          const icon = DOC_ICONS[type] || '📄';
+          const label = DOC_LABELS[type] || type;
+          const subtitle = type === 'sprint_screen' && e.entry_id !== type ? e.entry_id : label.toUpperCase();
+          return `<div onclick='openDocOverlay(${JSON.stringify(e)})' style="cursor:pointer;display:flex;align-items:center;gap:12px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:9px;padding:12px 14px;transition:background .15s" onmouseenter="this.style.background='var(--accent-light)'" onmouseleave="this.style.background='var(--card-bg)'">
+            <div style="font-size:16px;width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--accent-light)">${icon}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(label)}</div>
+              <div style="font-size:10px;color:var(--text-meta);text-transform:uppercase;letter-spacing:.8px">MARKDOWN</div>
+            </div>
+          </div>`;
+        })).join('');
+        if (!cards) return '';
+        return `<div style="margin-bottom:28px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-meta);padding:10px 0;margin-bottom:10px;border-bottom:1px solid var(--divider)">${group}</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">${cards}</div>
+        </div>`;
       }).join('');
-      document.getElementById('tab-pd-docs').innerHTML = html;
+
+      document.getElementById('tab-pd-docs').innerHTML = html || '<div style="padding:24px;color:var(--text-meta);font-size:13px">No documents found.</div>';
     }
 
     function openDocOverlay(entry) {
