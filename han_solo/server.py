@@ -249,8 +249,16 @@ async def api_memory_health(request: Request) -> JSONResponse:
 
 
 _docs_dir = os.path.join(os.path.dirname(__file__), "..", "docs")
+
+
+async def workspace_index(request: Request) -> HTMLResponse:
+    with open(os.path.join(_docs_dir, "workspace.html"), "r") as f:
+        return HTMLResponse(f.read())
+
+
 _chat_routes = [
     Mount("/docs", app=StaticFiles(directory=_docs_dir, html=True)),
+    Route("/workspace", workspace_index),
     Route("/", chat_api.chat_index),
     Route("/chat", chat_api.chat_legacy),
     Route("/api/notecards", api_list_notecards),

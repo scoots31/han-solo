@@ -1,0 +1,2509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Han Solo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Lato:ital,wght@0,300;0,400;0,700;1,300&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+
+    /* ── THEMES ── */
+    body.editorial {
+      --bg:#fafaf8; --sidebar-bg:#ffffff; --sidebar-border:#eae6e1; --divider:#eae6e1;
+      --accent:#bd8c7d; --accent-light:#f6eeeb; --gold:#d1bfa7; --onyx:#49494b; --silver:#8e8e90;
+      --text-primary:#1a1a1a; --text-secondary:#5a5a5a; --text-meta:#9a9a9a;
+      --card-bg:#ffffff; --card-border:#eae6e1;
+      --msg-ren-bg:transparent; --msg-user-bg:transparent; --input-bg:transparent; --input-border:var(--divider);
+      --font-display:'Cormorant Garamond',serif; --font-body:'Inter',sans-serif;
+      font-family:'Inter',sans-serif; background:var(--bg); color:var(--text-primary);
+    }
+    body.atelier {
+      --bg:#f7f4ef; --sidebar-bg:#ede9e2; --sidebar-border:#ddd6cc; --divider:#ddd6cc;
+      --accent:#bd8c7d; --accent-light:#edddd7; --gold:#d1bfa7; --onyx:#49494b; --silver:#8e8e90;
+      --text-primary:#26211c; --text-secondary:#5c5550; --text-meta:#9a9490;
+      --card-bg:#f0ece5; --card-border:#ddd6cc;
+      --msg-ren-bg:#e8e2d8; --msg-user-bg:#faf7f3; --input-bg:#faf7f3; --input-border:#d0c8be;
+      --font-display:'Playfair Display',serif; --font-body:'Lato',sans-serif;
+      font-family:'Lato',sans-serif; background:var(--bg); color:var(--text-primary);
+    }
+    body.modern {
+      --bg:#ffffff; --sidebar-bg:#e8e8e8; --sidebar-border:#dedede; --divider:#ebebeb;
+      --accent:#bd8c7d; --accent-light:#f7efed; --gold:#d1bfa7; --onyx:#49494b; --silver:#8e8e90;
+      --text-primary:#111111; --text-secondary:#555555; --text-meta:#aaaaaa;
+      --card-bg:#f9f9f9; --card-border:#e8e8e8;
+      --msg-ren-bg:#f2f2f2; --msg-user-bg:#f9edea; --input-bg:#f4f4f4; --input-border:#e8e8e8;
+      --font-display:'Space Grotesk',sans-serif; --font-body:'Space Grotesk',sans-serif;
+      font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(--text-primary);
+    }
+
+    /* ── STATUS COLORS (shared across themes) ── */
+    .badge-ready    { background:rgba(189,140,125,.14); color:#9b5e4f; }
+    .badge-build    { background:rgba(59,130,246,.1);   color:#2563eb; }
+    .badge-review   { background:rgba(139,92,246,.1);   color:#7c3aed; }
+    .badge-test     { background:rgba(16,185,129,.1);   color:#059669; }
+    .badge-done     { background:rgba(16,185,129,.14);  color:#059669; }
+    .badge-blocked  { background:rgba(239,68,68,.1);    color:#dc2626; }
+    .badge-flagged  { background:rgba(245,158,11,.1);   color:#d97706; }
+    .badge-planning { background:rgba(73,73,75,.08);    color:#49494b; }
+    .badge-paused   { background:rgba(73,73,75,.08);    color:#8e8e90; }
+
+    /* ── SHELL ── */
+    .app { display:flex; height:100vh; overflow:hidden; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width:220px; min-width:220px; background:var(--sidebar-bg);
+      border-right:1px solid var(--sidebar-border); display:flex; flex-direction:column;
+    }
+    .sidebar-logo { padding:22px 18px 18px; border-bottom:1px solid var(--sidebar-border); }
+
+    .logo-editorial .logo-circle {
+      width:36px; height:36px; border-radius:50%; border:1.5px solid var(--accent);
+      display:flex; align-items:center; justify-content:center; margin-bottom:8px;
+    }
+    .logo-editorial .logo-circle span { font-family:'Cormorant Garamond',serif; font-size:16px; color:var(--accent); }
+    .logo-editorial .logo-wordmark { font-family:'Cormorant Garamond',serif; font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--text-secondary); }
+
+    .logo-atelier .logo-dot-row { display:flex; align-items:center; gap:8px; margin-bottom:4px; }
+    .logo-atelier .logo-dot { width:7px; height:7px; border-radius:50%; background:var(--accent); }
+    .logo-atelier .logo-name { font-family:'Playfair Display',serif; font-size:17px; font-weight:500; color:var(--text-primary); }
+    .logo-atelier .logo-sub { font-size:10px; color:var(--text-meta); letter-spacing:.08em; padding-left:15px; }
+
+    .logo-modern { display:flex; align-items:center; gap:8px; }
+    .logo-modern .logo-badge { width:24px; height:24px; background:#111; border-radius:5px; display:flex; align-items:center; justify-content:center; }
+    .logo-modern .logo-badge span { font-family:'Space Grotesk',sans-serif; font-size:9px; font-weight:700; color:#fff; }
+    .logo-modern .logo-name { font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:600; color:var(--text-primary); letter-spacing:-.01em; }
+
+    .sidebar-nav { flex:1; padding:12px 0; overflow-y:auto; }
+    .nav-section { margin-bottom:2px; }
+    .nav-section-label { padding:8px 18px 3px; font-size:9.5px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--text-meta); }
+    .nav-item { display:flex; align-items:center; gap:8px; padding:7px 18px; cursor:pointer; transition:background .12s; position:relative; }
+    .nav-item:hover { background:rgba(0,0,0,.04); }
+    .nav-item.active { background:var(--accent-light); }
+    body.editorial .nav-item.active::before { content:''; position:absolute; left:0; top:20%; height:60%; width:2px; background:var(--accent); border-radius:0 2px 2px 0; }
+    body.modern .nav-item.active { border-radius:6px; margin:0 6px; padding:7px 12px; }
+    .nav-icon { width:14px; height:14px; color:var(--text-meta); flex-shrink:0; display:flex; align-items:center; }
+    .nav-item.active .nav-icon { color:var(--accent); }
+    .nav-label { font-size:12.5px; color:var(--text-secondary); }
+    .nav-item.active .nav-label { color:var(--accent); font-weight:500; }
+    body.editorial .nav-label { font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; }
+    .nav-badge { margin-left:auto; font-size:10px; font-weight:600; padding:1px 5px; border-radius:20px; line-height:15px; color:white; }
+    .nav-badge.red   { background:#dc2626; }
+    .nav-badge.rose  { background:var(--accent); }
+    .nav-badge.dark  { background:var(--onyx); }
+    body.modern .nav-badge { border-radius:4px; }
+
+    .sidebar-footer { padding:12px 18px; border-top:1px solid var(--sidebar-border); }
+    .user-row { display:flex; align-items:center; gap:8px; }
+    .user-avatar { width:26px; height:26px; border-radius:50%; background:var(--onyx); display:flex; align-items:center; justify-content:center; color:#fff; font-size:10px; font-weight:500; flex-shrink:0; }
+    body.modern .user-avatar { border-radius:6px; }
+    .user-name { font-size:12.5px; font-weight:500; color:var(--text-primary); }
+    .user-status { font-size:10.5px; color:var(--text-meta); }
+
+    /* ── MAIN / SCREENS ── */
+    .main { flex:1; display:flex; flex-direction:column; background:var(--bg); overflow:hidden; }
+    .screen { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+    .screen.hidden { display:none; }
+
+    /* ── SHARED COMPONENTS ── */
+    .screen-header {
+      padding:16px 28px; border-bottom:1px solid var(--divider);
+      display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+    }
+    .screen-title { font-family:var(--font-display); font-size:20px; font-weight:400; color:var(--text-primary); }
+    body.editorial .screen-title { font-size:24px; font-weight:300; letter-spacing:.05em; }
+    body.modern    .screen-title { font-size:15px; font-weight:600; letter-spacing:-.02em; }
+    .screen-sub { font-size:11.5px; color:var(--text-meta); margin-top:2px; }
+
+    .screen-actions { display:flex; gap:7px; align-items:center; }
+    .btn-primary { padding:6px 13px; background:var(--accent); border:none; border-radius:7px; font-family:var(--font-body); font-size:11.5px; font-weight:500; color:white; cursor:pointer; transition:opacity .13s; }
+    .btn-primary:hover { opacity:.82; }
+    .btn-secondary { padding:6px 13px; background:transparent; border:1px solid var(--divider); border-radius:7px; font-family:var(--font-body); font-size:11.5px; color:var(--text-secondary); cursor:pointer; transition:all .13s; }
+    .btn-secondary:hover { border-color:var(--accent); color:var(--accent); }
+    body.editorial .btn-primary, body.editorial .btn-secondary { border-radius:0; font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; }
+    body.modern .btn-primary, body.modern .btn-secondary { border-radius:6px; }
+
+    .stats-row { display:flex; padding:0 28px; border-bottom:1px solid var(--divider); flex-shrink:0; }
+    .stat-item { padding:12px 26px 12px 0; }
+    .stat-value { font-family:var(--font-display); font-size:28px; font-weight:300; color:var(--text-primary); line-height:1; }
+    body.modern .stat-value { font-size:22px; font-weight:700; }
+    .stat-label { font-size:10px; color:var(--text-meta); margin-top:2px; letter-spacing:.07em; text-transform:uppercase; }
+
+    .filter-bar { padding:10px 28px; border-bottom:1px solid var(--divider); display:flex; gap:5px; flex-shrink:0; align-items:center; }
+    .filter-btn { padding:4px 12px; border:1px solid var(--divider); background:transparent; border-radius:20px; font-size:11.5px; color:var(--text-secondary); cursor:pointer; font-family:var(--font-body); transition:all .12s; }
+    .filter-btn.active, .filter-btn:hover { background:var(--accent); border-color:var(--accent); color:white; }
+    body.editorial .filter-btn { border-radius:0; font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; }
+    body.modern    .filter-btn { border-radius:5px; font-weight:500; }
+
+    .scrollable { flex:1; overflow-y:auto; }
+    .scrollable::-webkit-scrollbar { width:3px; }
+    .scrollable::-webkit-scrollbar-thumb { background:var(--divider); border-radius:4px; }
+
+    /* ── GENERIC BADGE ── */
+    .badge {
+      display:inline-block; font-size:9.5px; font-weight:700; letter-spacing:.09em;
+      text-transform:uppercase; padding:2px 7px; border-radius:4px; white-space:nowrap;
+    }
+    body.editorial .badge { border-radius:0; }
+
+    /* ── LIST ROWS ── */
+    .list-row {
+      display:flex; align-items:flex-start; gap:12px;
+      padding:13px 28px; border-bottom:1px solid var(--divider);
+      cursor:pointer; transition:background .11s;
+    }
+    .list-row:hover { background:rgba(0,0,0,.025); }
+    body.atelier .list-row { margin:6px 16px; padding:12px 14px; border:1px solid var(--card-border); border-radius:10px; background:var(--card-bg); }
+    body.atelier .list-row:hover { background:var(--sidebar-bg); }
+    body.modern  .list-row:hover { background:var(--accent-light); }
+
+    .row-content { flex:1; min-width:0; }
+    .row-title { font-size:13px; font-weight:500; color:var(--text-primary); margin-bottom:3px; }
+    body.editorial .row-title { font-weight:400; }
+    .row-excerpt { font-size:12px; color:var(--text-secondary); line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .row-meta { font-size:11px; color:var(--text-meta); margin-top:4px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .row-arrow { color:var(--text-meta); align-self:center; flex-shrink:0; font-size:14px; }
+
+    /* ── CHAT ── */
+    .chat-header { padding:16px 28px; border-bottom:1px solid var(--divider); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+    .chat-header-left { display:flex; align-items:center; gap:12px; }
+    .ren-avatar { width:34px; height:34px; border-radius:50%; background:linear-gradient(140deg,var(--accent),var(--gold)); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    body.editorial .ren-avatar { background:var(--accent-light); border:1.5px solid var(--accent); }
+    body.modern    .ren-avatar { border-radius:9px; }
+    .ren-avatar span { font-size:13px; font-weight:500; color:white; }
+    body.editorial .ren-avatar span { font-family:'Cormorant Garamond',serif; font-size:16px; font-weight:400; color:var(--accent); }
+    .chat-title { font-family:var(--font-display); font-size:18px; font-weight:400; color:var(--text-primary); line-height:1.2; }
+    body.editorial .chat-title { font-size:21px; font-weight:300; letter-spacing:.05em; }
+    body.modern    .chat-title { font-size:14px; font-weight:600; letter-spacing:-.02em; }
+    .chat-subtitle { display:flex; align-items:center; gap:4px; font-size:11px; color:var(--text-meta); margin-top:1px; }
+    .status-dot { width:6px; height:6px; border-radius:50%; background:#5ec47a; flex-shrink:0; }
+
+    .messages { flex:1; overflow-y:auto; padding:22px 28px; display:flex; flex-direction:column; gap:16px; }
+    .messages::-webkit-scrollbar { width:3px; }
+    .messages::-webkit-scrollbar-thumb { background:var(--divider); border-radius:4px; }
+    .date-divider { display:flex; align-items:center; gap:10px; margin:4px 0; }
+    .date-divider::before,.date-divider::after { content:''; flex:1; height:1px; background:var(--divider); }
+    .date-divider span { font-size:10px; color:var(--text-meta); letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; }
+    .msg-row { display:flex; flex-direction:column; gap:3px; }
+    .msg-row.ren  { align-items:flex-start; }
+    .msg-row.user { align-items:flex-end; }
+    .msg-sender-label { font-size:10.5px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); padding:0 2px; }
+    .msg-time-label { font-size:10px; color:var(--text-meta); padding:0 2px; margin-top:1px; }
+    .msg-bubble { font-size:13.5px; line-height:1.68; color:var(--text-primary); max-width:65%; }
+    body.editorial .msg-row.ren  .msg-bubble { border-left:2px solid var(--accent); padding:2px 0 2px 14px; max-width:70%; }
+    body.editorial .msg-row.user .msg-bubble { border-right:2px solid var(--divider); padding:2px 14px 2px 0; color:var(--text-secondary); max-width:56%; text-align:right; }
+    body.atelier .msg-row.ren  .msg-bubble { background:var(--msg-ren-bg); border-radius:3px 13px 13px 13px; padding:11px 15px; border:1px solid rgba(0,0,0,.05); }
+    body.atelier .msg-row.user .msg-bubble { background:var(--msg-user-bg); border-radius:13px 3px 13px 13px; padding:11px 15px; border:1px solid rgba(0,0,0,.05); }
+    body.modern .msg-row.ren  .msg-bubble { background:var(--msg-ren-bg); border-radius:3px 10px 10px 10px; padding:10px 14px; }
+    body.modern .msg-row.user .msg-bubble { background:var(--msg-user-bg); border-radius:10px 3px 10px 10px; padding:10px 14px; }
+    .thinking-bubble { display:flex; align-items:center; gap:4px; padding:4px 0; }
+    body.editorial .thinking-bubble { border-left:2px solid var(--accent); padding:7px 0 7px 14px; }
+    body.atelier   .thinking-bubble { background:var(--msg-ren-bg); border-radius:3px 13px 13px 13px; padding:11px 15px; }
+    body.modern    .thinking-bubble { background:var(--msg-ren-bg); border-radius:3px 10px 10px 10px; padding:10px 14px; }
+    .t-dot { width:5px; height:5px; border-radius:50%; background:var(--accent); opacity:.45; animation:tdot 1.4s infinite ease-in-out; }
+    .t-dot:nth-child(2){animation-delay:.22s} .t-dot:nth-child(3){animation-delay:.44s}
+    @keyframes tdot{0%,80%,100%{opacity:.45;transform:scale(1)}40%{opacity:1;transform:scale(1.25)}}
+
+    .input-area { padding:16px 28px 20px; border-top:1px solid var(--divider); background:var(--bg); flex-shrink:0; }
+    .input-wrapper { display:flex; align-items:flex-end; gap:9px; background:var(--input-bg); border:1px solid var(--input-border); border-radius:10px; padding:9px 11px; transition:border-color .14s; }
+    .input-wrapper:focus-within { border-color:var(--accent); }
+    body.editorial .input-wrapper { background:transparent; border:none; border-radius:0; border-top:1.5px solid var(--divider); padding:13px 0 0; }
+    body.modern    .input-wrapper { border-radius:8px; }
+    .chat-input { flex:1; border:none; background:transparent; resize:none; font-family:var(--font-body); font-size:13.5px; color:var(--text-primary); outline:none; min-height:20px; max-height:100px; line-height:1.5; }
+    .chat-input::placeholder { color:var(--text-meta); }
+    .send-btn { width:30px; height:30px; border-radius:7px; background:var(--accent); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:opacity .13s; }
+    .send-btn:hover { opacity:.82; }
+    body.editorial .send-btn { border-radius:0; width:28px; height:28px; }
+    .send-btn svg { width:13px; height:13px; fill:#fff; }
+    .input-chips { display:flex; gap:5px; margin-top:8px; }
+    .chip { font-size:10.5px; color:var(--text-meta); background:none; border:1px solid var(--divider); border-radius:20px; padding:3px 9px; cursor:pointer; font-family:var(--font-body); transition:all .12s; }
+    .chip:hover { border-color:var(--accent); color:var(--accent); }
+    body.editorial .chip { border-radius:0; font-size:9.5px; letter-spacing:.07em; text-transform:uppercase; }
+    body.modern    .chip { border-radius:5px; font-weight:500; }
+
+    /* ── MEMORY ── */
+    .mem-type-col { flex-shrink:0; padding-top:1px; }
+    .mem-badge { font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:2px 6px; border-radius:3px; white-space:nowrap; }
+    .mem-badge.session  { background:rgba(189,140,125,.14); color:#9b5e4f; }
+    .mem-badge.decision { background:rgba(73,73,75,.1);     color:#49494b; }
+    .mem-badge.thread   { background:rgba(209,191,167,.3);  color:#7a6650; }
+    body.editorial .mem-badge { background:none; padding:2px 0 2px 8px; border-radius:0; border-left:2px solid var(--accent); }
+    body.editorial .mem-badge.decision { border-left-color:var(--onyx); }
+    body.editorial .mem-badge.thread   { border-left-color:var(--gold); }
+
+    /* ── PROJECTS GRID ── */
+    .project-grid { flex:1; overflow-y:auto; padding:22px 28px; display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; align-content:start; }
+    .project-grid::-webkit-scrollbar { width:3px; }
+    .project-card { border:1px solid var(--card-border); padding:18px 20px; cursor:pointer; transition:all .14s; background:var(--card-bg); border-radius:8px; }
+    .project-card:hover { border-color:var(--accent); }
+    body.editorial .project-card { border-radius:0; background:transparent; border:none; border-top:1.5px solid var(--divider); padding:16px 0; }
+    body.editorial .project-card:hover { border-top-color:var(--accent); }
+    body.atelier   .project-card { border-radius:12px; }
+    .project-phase-label { font-size:9.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); margin-bottom:6px; }
+    .project-name { font-family:var(--font-display); font-size:16px; font-weight:400; color:var(--text-primary); margin-bottom:6px; }
+    body.editorial .project-name { font-size:19px; font-weight:300; letter-spacing:.03em; }
+    body.modern    .project-name { font-size:14px; font-weight:600; letter-spacing:-.01em; }
+    .project-desc { font-size:12px; color:var(--text-secondary); line-height:1.55; margin-bottom:14px; }
+    .phase-track { display:flex; gap:3px; margin-bottom:10px; }
+    .phase-pip { height:3px; flex:1; border-radius:2px; background:var(--divider); }
+    .phase-pip.done   { background:var(--accent); }
+    .phase-pip.active { background:var(--gold); }
+    body.editorial .phase-pip { border-radius:0; }
+    .project-foot { display:flex; justify-content:space-between; align-items:center; }
+    .project-status-badge { font-size:9.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; padding:2px 7px; border-radius:20px; }
+    body.modern .project-status-badge { border-radius:4px; }
+    .project-updated { font-size:10.5px; color:var(--text-meta); }
+
+    /* ── DASHBOARD ── */
+    .dash-body { flex:1; overflow-y:auto; padding:20px 28px; display:flex; flex-direction:column; gap:22px; }
+    .dash-body::-webkit-scrollbar { width:3px; }
+    .dash-body::-webkit-scrollbar-thumb { background:var(--divider); border-radius:4px; }
+    .dash-section-title { font-size:10.5px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--text-meta); margin-bottom:10px; }
+    .attention-item {
+      display:flex; align-items:flex-start; gap:10px; padding:11px 14px;
+      background:var(--card-bg); border:1px solid var(--card-border);
+      border-radius:7px; cursor:pointer; transition:all .12s; margin-bottom:6px;
+    }
+    .attention-item:hover { border-color:var(--accent); }
+    body.editorial .attention-item { border-radius:0; background:transparent; border:none; border-left:2px solid var(--divider); padding:8px 0 8px 14px; margin-bottom:8px; }
+    .attention-item-content { flex:1; min-width:0; }
+    .attention-item-title { font-size:13px; font-weight:500; color:var(--text-primary); margin-bottom:2px; }
+    body.editorial .attention-item-title { font-weight:400; }
+    .attention-item-meta { font-size:11px; color:var(--text-meta); display:flex; gap:8px; flex-wrap:wrap; }
+
+    .inflight-table { width:100%; border-collapse:collapse; }
+    .inflight-table th { font-size:10px; font-weight:600; letter-spacing:.09em; text-transform:uppercase; color:var(--text-meta); padding:0 12px 8px 0; text-align:left; border-bottom:1px solid var(--divider); }
+    .inflight-table td { font-size:12.5px; color:var(--text-primary); padding:9px 12px 9px 0; border-bottom:1px solid var(--divider); vertical-align:middle; }
+    .inflight-table tr:last-child td { border-bottom:none; }
+    .inflight-table tr { cursor:pointer; transition:background .11s; }
+    .inflight-table tr:hover td { background:var(--accent-light); }
+    body.atelier .inflight-table tr:hover td { background:var(--msg-ren-bg); }
+
+    .health-table { width:100%; border-collapse:collapse; }
+    .health-table th { font-size:10px; font-weight:600; letter-spacing:.09em; text-transform:uppercase; color:var(--text-meta); padding:0 0 8px; text-align:left; border-bottom:1px solid var(--divider); }
+    .health-table th:not(:first-child) { text-align:center; }
+    .health-table td { font-size:12.5px; color:var(--text-primary); padding:9px 0; border-bottom:1px solid var(--divider); vertical-align:middle; }
+    .health-table td:not(:first-child) { text-align:center; color:var(--text-secondary); }
+    .health-table tr:last-child td { border-bottom:none; }
+    .health-table tr { cursor:pointer; transition:background .11s; }
+    .health-table tr:hover td { background:var(--accent-light); }
+    .health-pass { color:#059669!important; font-weight:600; }
+    .health-pending { color:var(--text-meta)!important; }
+    .health-high   { color:#dc2626!important; }
+    .health-medium { color:var(--accent)!important; }
+    .health-low    { color:var(--text-meta)!important; }
+
+    /* ── FEED ── */
+    .feed-body { flex:1; overflow-y:auto; padding:20px 28px; }
+    .feed-body::-webkit-scrollbar { width:3px; }
+    .feed-body::-webkit-scrollbar-thumb { background:var(--divider); border-radius:4px; }
+    .feed-day-group { margin-bottom:24px; }
+    .feed-day-label { font-size:10.5px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--text-meta); margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid var(--divider); }
+    .feed-event { display:flex; align-items:flex-start; gap:12px; padding:10px 0; border-bottom:1px solid var(--divider); cursor:pointer; transition:background .11s; }
+    .feed-event:last-child { border-bottom:none; }
+    body.atelier .feed-event { background:var(--card-bg); border:1px solid var(--card-border); border-radius:8px; margin-bottom:6px; padding:12px 14px; }
+    .feed-event:hover { background:var(--accent-light); }
+    body.atelier .feed-event:hover { background:var(--sidebar-bg); }
+    .feed-time { font-size:11px; color:var(--text-meta); white-space:nowrap; padding-top:1px; min-width:52px; }
+    .feed-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+    body.editorial .feed-dot { border-radius:0; height:10px; width:2px; }
+    .feed-event-content { flex:1; min-width:0; }
+    .feed-event-title { font-size:13px; font-weight:500; color:var(--text-primary); margin-bottom:2px; }
+    body.editorial .feed-event-title { font-weight:400; }
+    .feed-event-meta { font-size:11px; color:var(--text-meta); display:flex; gap:8px; flex-wrap:wrap; }
+
+    /* ── BOARD ── */
+    .board-controls { padding:10px 28px; border-bottom:1px solid var(--divider); display:flex; align-items:center; gap:10px; flex-shrink:0; }
+    .board-select { padding:5px 10px; border:1px solid var(--divider); background:var(--card-bg); font-family:var(--font-body); font-size:12px; color:var(--text-primary); border-radius:6px; cursor:pointer; outline:none; }
+    body.editorial .board-select { border-radius:0; }
+    .board-toggle { display:flex; border:1px solid var(--divider); border-radius:6px; overflow:hidden; }
+    body.editorial .board-toggle { border-radius:0; }
+    .toggle-btn { padding:5px 12px; font-family:var(--font-body); font-size:11.5px; color:var(--text-secondary); background:transparent; border:none; cursor:pointer; transition:all .12s; }
+    .toggle-btn.active { background:var(--accent); color:white; }
+
+    .board-columns { display:flex; gap:14px; overflow-x:auto; padding:18px 28px; flex:1; align-items:flex-start; }
+    .board-columns::-webkit-scrollbar { height:3px; }
+    .board-columns::-webkit-scrollbar-thumb { background:var(--divider); border-radius:4px; }
+    .board-col { min-width:230px; max-width:230px; flex-shrink:0; }
+    .board-col-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid var(--divider); }
+    .board-col-title { font-size:11px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--text-secondary); }
+    .board-col-count { font-size:11px; font-weight:600; color:var(--text-meta); }
+    .board-cards { display:flex; flex-direction:column; gap:7px; }
+    .board-card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:7px; padding:12px 13px; cursor:pointer; transition:all .13s; }
+    .board-card:hover { border-color:var(--accent); }
+    body.editorial .board-card { border-radius:0; background:transparent; border:none; border-top:1.5px solid var(--divider); padding:10px 0; }
+    body.editorial .board-card:hover { border-top-color:var(--accent); }
+    body.atelier   .board-card { border-radius:10px; }
+    .board-card-id   { font-size:10px; font-weight:700; letter-spacing:.06em; color:var(--text-meta); margin-bottom:4px; }
+    .board-card-name { font-size:12.5px; font-weight:500; color:var(--text-primary); margin-bottom:6px; line-height:1.4; }
+    body.editorial .board-card-name { font-weight:400; }
+    .board-card-foot { display:flex; align-items:center; justify-content:space-between; }
+    .board-card-proj { font-size:10.5px; color:var(--text-meta); }
+    .proj-dot { display:inline-block; width:6px; height:6px; border-radius:50%; margin-right:4px; vertical-align:middle; }
+
+    /* ── PROJECT DETAIL ── */
+    .detail-header { padding:14px 28px; border-bottom:1px solid var(--divider); display:flex; align-items:center; gap:12px; flex-shrink:0; }
+    .detail-breadcrumb { font-size:12px; color:var(--text-meta); cursor:pointer; }
+    .detail-breadcrumb:hover { color:var(--accent); }
+    .detail-crumb-sep { color:var(--divider); font-size:14px; }
+    .detail-project-name { font-family:var(--font-display); font-size:16px; font-weight:500; color:var(--text-primary); }
+    body.editorial .detail-project-name { font-size:19px; font-weight:300; letter-spacing:.04em; }
+    body.modern    .detail-project-name { font-weight:600; letter-spacing:-.01em; }
+    .detail-header-right { margin-left:auto; display:flex; align-items:center; gap:8px; }
+    .detail-sync { font-size:11px; color:var(--text-meta); }
+
+    .tabs-bar { padding:0 28px; border-bottom:1px solid var(--divider); display:flex; gap:0; flex-shrink:0; }
+    .tab-btn {
+      padding:11px 16px; font-family:var(--font-body); font-size:12.5px; font-weight:500;
+      color:var(--text-meta); background:none; border:none; cursor:pointer;
+      border-bottom:2px solid transparent; transition:all .13s; white-space:nowrap; display:flex; align-items:center; gap:5px;
+    }
+    .tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+    .tab-btn:hover:not(.active) { color:var(--text-secondary); }
+    body.editorial .tab-btn { font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; padding:11px 14px; }
+    .tab-count { font-size:10px; font-weight:600; background:var(--divider); padding:1px 5px; border-radius:10px; color:var(--text-meta); }
+    .tab-btn.active .tab-count { background:var(--accent-light); color:var(--accent); }
+
+    .tab-panel { flex:1; overflow-y:auto; padding:20px 28px; }
+    .tab-panel::-webkit-scrollbar { width:3px; }
+    .tab-panel::-webkit-scrollbar-thumb { background:var(--divider); border-radius:4px; }
+    .tab-panel.hidden { display:none; }
+
+    .detail-section { margin-bottom:22px; }
+    .detail-section-title { font-size:10.5px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--text-meta); margin-bottom:10px; }
+
+    .action-item {
+      display:flex; align-items:flex-start; gap:10px; padding:11px 14px;
+      background:var(--card-bg); border:1px solid var(--card-border);
+      border-radius:7px; cursor:pointer; transition:all .12s; margin-bottom:6px;
+    }
+    .action-item:hover { border-color:var(--accent); }
+    body.editorial .action-item { border-radius:0; background:transparent; border:none; border-left:2px solid var(--divider); padding:8px 0 8px 14px; }
+    .action-item-content { flex:1; }
+    .action-item-title { font-size:13px; font-weight:500; color:var(--text-primary); margin-bottom:2px; }
+    body.editorial .action-item-title { font-weight:400; }
+    .action-item-meta { font-size:11px; color:var(--text-meta); }
+
+    .progress-phase-label { font-size:14px; font-weight:600; color:var(--text-primary); margin-bottom:6px; }
+    body.editorial .progress-phase-label { font-family:var(--font-display); font-size:18px; font-weight:300; letter-spacing:.04em; }
+    .progress-bar-wrap { background:var(--divider); border-radius:4px; height:6px; margin-bottom:8px; }
+    .progress-bar-fill { background:var(--accent); height:6px; border-radius:4px; }
+    .progress-label { font-size:11.5px; color:var(--text-meta); margin-bottom:16px; }
+
+    .progress-status-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:16px; }
+    .progress-status-item { background:var(--card-bg); border:1px solid var(--card-border); border-radius:6px; padding:10px 12px; }
+    body.editorial .progress-status-item { border-radius:0; }
+    .progress-status-count { font-family:var(--font-display); font-size:22px; font-weight:300; color:var(--text-primary); line-height:1; }
+    body.modern .progress-status-count { font-size:18px; font-weight:700; }
+    .progress-status-label { font-size:10px; color:var(--text-meta); margin-top:2px; text-transform:uppercase; letter-spacing:.07em; }
+
+    .backlog-item { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--divider); cursor:pointer; transition:background .11s; }
+    .backlog-item:last-child { border-bottom:none; }
+    .backlog-item:hover { background:var(--accent-light); padding-left:4px; }
+    body.atelier .backlog-item { background:var(--card-bg); border:1px solid var(--card-border); border-radius:7px; padding:9px 12px; margin-bottom:5px; }
+    body.atelier .backlog-item:hover { background:var(--sidebar-bg); padding-left:12px; }
+    .backlog-id { font-size:10px; font-weight:700; letter-spacing:.06em; color:var(--text-meta); min-width:56px; flex-shrink:0; }
+    .backlog-name { flex:1; font-size:13px; color:var(--text-primary); }
+    body.editorial .backlog-name { font-weight:300; }
+
+    .materials-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:8px; }
+    .material-item { background:var(--card-bg); border:1px solid var(--card-border); border-radius:7px; padding:12px 14px; cursor:pointer; transition:all .13s; display:flex; align-items:center; gap:10px; }
+    .material-item:hover { border-color:var(--accent); }
+    body.editorial .material-item { border-radius:0; background:transparent; padding:10px 0; border:none; border-bottom:1px solid var(--divider); }
+    .material-icon { font-size:16px; flex-shrink:0; }
+    .material-name { font-size:12.5px; font-weight:500; color:var(--text-primary); }
+    body.editorial .material-name { font-weight:400; }
+    .material-status { font-size:10.5px; color:var(--text-meta); margin-top:1px; }
+
+    .metrics-table { width:100%; border-collapse:collapse; }
+    .metrics-table th { font-size:10px; font-weight:600; letter-spacing:.09em; text-transform:uppercase; color:var(--text-meta); padding:0 0 8px; text-align:left; border-bottom:1px solid var(--divider); }
+    .metrics-table th:not(:first-child) { text-align:center; }
+    .metrics-table td { font-size:12.5px; color:var(--text-primary); padding:9px 0; border-bottom:1px solid var(--divider); }
+    .metrics-table td:not(:first-child) { text-align:center; color:var(--text-secondary); }
+    .metrics-table tr:last-child td { border-bottom:none; }
+
+    /* ── THREADS / DECISIONS ── */
+    .thread-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+    .thread-dot.open     { background:var(--accent); }
+    .thread-dot.resolved { background:var(--divider); }
+    body.editorial .thread-dot { border-radius:0; height:9px; width:2px; margin-top:3px; }
+    .thread-priority { font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:2px 6px; border-radius:3px; }
+    .thread-priority.high   { background:rgba(189,140,125,.18); color:#9b5e4f; }
+    .thread-priority.medium { background:rgba(209,191,167,.28); color:#7a6650; }
+    .thread-priority.low    { background:rgba(73,73,75,.08); color:var(--silver); }
+
+    .decisions-body { flex:1; overflow-y:auto; padding:20px 28px; }
+    .decisions-body::-webkit-scrollbar { width:3px; }
+    .decisions-body::-webkit-scrollbar-thumb { background:var(--divider); border-radius:4px; }
+    .decision-group { margin-bottom:24px; }
+    .decision-date-label { font-size:10.5px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--text-meta); margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid var(--divider); }
+    .decision-item { padding:13px 0; border-bottom:1px solid var(--divider); cursor:pointer; transition:all .11s; }
+    .decision-item:last-child { border-bottom:none; }
+    body.atelier .decision-item { padding:13px 14px; border:1px solid var(--card-border); border-radius:8px; margin-bottom:7px; background:var(--card-bg); border-bottom:1px solid var(--card-border); }
+    body.atelier .decision-item:hover { background:var(--sidebar-bg); }
+    body.modern  .decision-item:hover { background:var(--accent-light); padding-left:6px; }
+    .decision-title { font-size:13.5px; font-weight:500; color:var(--text-primary); margin-bottom:4px; }
+    body.editorial .decision-title { font-weight:400; }
+    .decision-excerpt { font-size:12px; color:var(--text-secondary); line-height:1.55; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .decision-meta { font-size:11px; color:var(--text-meta); margin-top:5px; display:flex; gap:10px; align-items:center; }
+    .decision-tag { font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:2px 6px; border-radius:3px; background:rgba(189,140,125,.12); color:#9b5e4f; }
+    body.editorial .decision-tag { background:none; padding:0; color:var(--accent); }
+
+    /* ── SIGNALS ── */
+    .signal-item { padding:14px 28px; border-bottom:1px solid var(--divider); cursor:pointer; transition:background .11s; }
+    .signal-item:hover { background:var(--accent-light); }
+    body.atelier .signal-item { margin:6px 16px; padding:14px 14px; border:1px solid var(--card-border); border-radius:10px; background:var(--card-bg); }
+    body.atelier .signal-item:hover { background:var(--sidebar-bg); }
+    .signal-type-row { display:flex; align-items:center; gap:9px; margin-bottom:6px; }
+    .signal-type-badge { font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; padding:2px 6px; border-radius:3px; }
+    .signal-type-badge.texture     { background:rgba(209,191,167,.3); color:#7a6650; }
+    .signal-type-badge.directional { background:rgba(189,140,125,.15); color:#9b5e4f; }
+    .signal-type-badge.relational  { background:rgba(73,73,75,.1); color:var(--onyx); }
+    body.editorial .signal-type-badge { background:none; padding:0; font-size:10px; color:var(--accent); }
+    body.editorial .signal-type-badge.relational { color:var(--onyx); }
+    body.editorial .signal-type-badge.texture    { color:var(--silver); }
+    .signal-date { font-size:11px; color:var(--text-meta); margin-left:auto; }
+    .signal-content { font-size:13px; color:var(--text-primary); line-height:1.63; }
+
+    /* ── DETAIL SCREENS ── */
+    .detail-back-bar {
+      padding: 13px 28px; border-bottom: 1px solid var(--divider);
+      display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+    }
+    .detail-back-btn {
+      font-size: 12px; font-weight: 500; color: var(--text-meta); background: none;
+      border: none; cursor: pointer; font-family: var(--font-body); padding: 0;
+      display: flex; align-items: center; gap: 5px; transition: color .12s;
+    }
+    .detail-back-btn:hover { color: var(--accent); }
+
+    .detail-hero {
+      padding: 22px 28px 20px; border-bottom: 1px solid var(--divider); flex-shrink: 0;
+    }
+    .detail-hero-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .detail-hero-date { font-size: 12px; color: var(--text-meta); }
+    .detail-hero-title {
+      font-family: var(--font-display); font-size: 20px; font-weight: 400;
+      color: var(--text-primary); line-height: 1.35;
+    }
+    body.modern .detail-hero-title { font-size: 18px; font-weight: 600; letter-spacing: -.02em; }
+
+    .detail-body { flex: 1; overflow-y: auto; padding: 22px 28px; display: flex; flex-direction: column; gap: 20px; }
+    .detail-body::-webkit-scrollbar { width: 3px; }
+    .detail-body::-webkit-scrollbar-thumb { background: var(--divider); border-radius: 4px; }
+
+    .detail-section { display: flex; flex-direction: column; gap: 10px; }
+    .detail-section-bar {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 9.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+      padding: 5px 11px; border-radius: 5px; align-self: flex-start;
+    }
+    .detail-section-bar.rose  { background: var(--accent); color: #ffffff; }
+    .detail-section-bar.onyx  { background: var(--onyx);   color: #ffffff; }
+    .detail-section-bar.gold  { background: var(--gold);   color: var(--onyx); }
+    .detail-section-bar.silver{ background: var(--silver); color: #ffffff; }
+
+    .detail-body-text { font-size: 13.5px; line-height: 1.75; color: var(--text-primary); }
+    body.modern .detail-body-text { font-size: 13px; line-height: 1.72; }
+
+    .detail-linked-list { display: flex; flex-direction: column; gap: 6px; }
+    .detail-linked-item {
+      display: flex; align-items: flex-start; gap: 10px; padding: 10px 13px;
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 7px; cursor: pointer; transition: all .12s;
+    }
+    .detail-linked-item:hover { border-color: var(--accent); }
+    .detail-linked-item-content { flex: 1; min-width: 0; }
+    .detail-linked-item-title { font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 2px; }
+    body.modern .detail-linked-item-title { font-weight: 500; }
+    .detail-linked-item-meta { font-size: 11px; color: var(--text-meta); }
+    .detail-linked-arrow { color: var(--text-meta); align-self: center; font-size: 14px; }
+
+    .detail-tag-row { display: flex; gap: 7px; flex-wrap: wrap; }
+    .detail-chip {
+      font-size: 11px; padding: 3px 10px; border-radius: 20px;
+      background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-secondary);
+    }
+    body.modern .detail-chip { border-radius: 5px; font-weight: 500; }
+
+    /* Make list rows clickable with pointer */
+    .list-row { cursor: pointer; }
+
+    /* ── NOTECARDS ── */
+    .notecard-item {
+      padding: 13px 28px; border-bottom: 1px solid var(--divider);
+      cursor: pointer; transition: background .11s; display: flex; align-items: flex-start; gap: 12px;
+    }
+    .notecard-item:hover { background: var(--accent-light); }
+    body.atelier .notecard-item { margin: 6px 16px; padding: 13px 14px; border: 1px solid var(--card-border); border-radius: 10px; background: var(--card-bg); }
+    body.atelier .notecard-item:hover { background: var(--sidebar-bg); }
+
+    .notecard-creator {
+      width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; margin-top: 1px;
+    }
+    .notecard-creator.scott { background: var(--onyx); color: #fff; }
+    .notecard-creator.ren   { background: var(--accent); color: #fff; }
+    body.modern .notecard-creator { border-radius: 5px; }
+
+    .notecard-content { flex: 1; min-width: 0; }
+    .notecard-text { font-size: 13px; font-weight: 400; color: var(--text-primary); line-height: 1.55; margin-bottom: 4px; }
+    body.editorial .notecard-text { font-size: 13.5px; }
+    .notecard-meta { font-size: 11px; color: var(--text-meta); display: flex; gap: 8px; align-items: center; }
+    .notecard-status {
+      font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      padding: 2px 6px; border-radius: 3px;
+    }
+    .notecard-status.active   { background: rgba(209,191,167,.28); color: var(--onyx); }
+    .notecard-status.archived { background: rgba(73,73,75,.08); color: var(--silver); }
+    body.modern .notecard-status { border-radius: 4px; }
+
+    /* Inline notecard in chat */
+    .chat-notecard {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 12px 15px;
+      background: rgba(209,191,167,.18);
+      border: 1px solid var(--gold);
+      border-radius: 8px; max-width: 74%; position: relative;
+      align-self: flex-start;
+    }
+    body.editorial .chat-notecard { border-radius: 0; border: none; border-left: 2px solid var(--gold); padding: 8px 0 8px 14px; background: transparent; }
+    body.modern    .chat-notecard { border-radius: 8px; }
+
+    .chat-notecard-pin { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+    .chat-notecard-inner { flex: 1; min-width: 0; }
+    .chat-notecard-label {
+      font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--onyx); margin-bottom: 5px; display: flex; align-items: center; gap: 7px;
+    }
+    .chat-notecard-label-pill {
+      background: var(--gold); color: var(--onyx); font-size: 9px; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase; padding: 1px 6px; border-radius: 3px;
+    }
+    .chat-notecard-text { font-size: 13px; color: var(--text-primary); line-height: 1.55; margin-bottom: 5px; }
+    .chat-notecard-meta { font-size: 10.5px; color: var(--text-meta); display: flex; gap: 8px; align-items: center; }
+    .chat-notecard-dismiss {
+      font-size: 12px; color: var(--text-meta); background: none; border: none;
+      cursor: pointer; padding: 0; align-self: flex-start; line-height: 1;
+      transition: color .12s; flex-shrink: 0;
+    }
+    .chat-notecard-dismiss:hover { color: var(--accent); }
+
+    /* ── MODERN PALETTE ENHANCEMENTS ── */
+
+    /* Screen title left accent bar */
+    body.modern .screen-title { border-left: 3px solid var(--accent); padding-left: 10px; }
+    body.modern .chat-title   { border-left: 3px solid var(--accent); padding-left: 10px; }
+    body.modern .detail-project-name { border-left: 3px solid var(--accent); padding-left: 10px; }
+
+    /* Stat values — Rose Gold */
+    body.modern .stat-value { color: var(--accent); }
+
+    /* Decisions date bars — Onyx solid */
+    body.modern .decision-date-label {
+      background: var(--onyx); color: #ffffff;
+      padding: 6px 12px; border-radius: 5px; border-bottom: none;
+      letter-spacing: .1em;
+    }
+
+    /* Feed day bars — Onyx solid */
+    body.modern .feed-day-label {
+      background: var(--onyx); color: #ffffff;
+      padding: 6px 12px; border-radius: 5px; border-bottom: none;
+    }
+
+    /* Dashboard section title bars — Rose Gold */
+    body.modern .dash-section-title {
+      background: var(--accent); color: #ffffff;
+      padding: 5px 12px; border-radius: 5px;
+    }
+
+    /* Project detail section labels — Soft Gold tint */
+    body.modern .detail-section-title {
+      background: rgba(209,191,167,.22); color: var(--onyx);
+      padding: 5px 10px; border-radius: 4px;
+    }
+
+    /* Memory type badges — fully saturated */
+    body.modern .mem-badge.session  { background: var(--accent); color: #ffffff; }
+    body.modern .mem-badge.decision { background: var(--onyx);   color: #ffffff; }
+    body.modern .mem-badge.thread   { background: var(--gold);   color: var(--onyx); }
+
+    /* Signal type badges — fully saturated */
+    body.modern .signal-type-badge.texture     { background: var(--gold);   color: var(--onyx); }
+    body.modern .signal-type-badge.directional { background: var(--accent); color: #ffffff; }
+    body.modern .signal-type-badge.relational  { background: var(--onyx);   color: #ffffff; }
+
+    /* Board column top border — palette color per column */
+    body.modern .board-col:nth-child(1) .board-col-header { border-top: 3px solid var(--silver); padding-top: 10px; }
+    body.modern .board-col:nth-child(2) .board-col-header { border-top: 3px solid var(--gold);   padding-top: 10px; }
+    body.modern .board-col:nth-child(3) .board-col-header { border-top: 3px solid var(--accent); padding-top: 10px; }
+    body.modern .board-col:nth-child(4) .board-col-header { border-top: 3px solid var(--onyx);   padding-top: 10px; }
+
+    /* Thread priority badges — fully saturated */
+    body.modern .thread-priority.high   { background: var(--accent); color: #ffffff; }
+    body.modern .thread-priority.medium { background: var(--gold);   color: var(--onyx); }
+    body.modern .thread-priority.low    { background: var(--silver); color: #ffffff; }
+
+    /* Nav section labels — palette accent per section */
+    body.modern .nav-section:nth-child(1) .nav-section-label { color: var(--accent); font-weight: 700; }
+    body.modern .nav-section:nth-child(2) .nav-section-label { color: var(--onyx);   font-weight: 700; }
+    body.modern .nav-section:nth-child(3) .nav-section-label { color: var(--silver); font-weight: 700; }
+    body.modern .nav-section:nth-child(4) .nav-section-label { color: var(--gold); font-weight: 700; filter: brightness(.85); }
+
+    /* Decision tags in detail tab */
+    body.modern .decision-tag { background: rgba(209,191,167,.25); color: var(--onyx); }
+
+    /* ── SOLO FRAMEWORK SCREEN ── */
+    .solo-fw-body { padding:20px 22px; display:flex; flex-direction:column; gap:28px; overflow-y:auto; flex:1; }
+    .solo-fw-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+    .solo-fw-stat { background:var(--card-bg); border:1px solid var(--card-border); border-radius:8px; padding:14px 16px; }
+    .solo-fw-stat-value { font-size:26px; font-weight:700; color:var(--accent); line-height:1; margin-bottom:4px; }
+    .solo-fw-stat-label { font-size:11px; color:var(--text-meta); font-weight:500; }
+    body.modern .solo-fw-stat:nth-child(2) .solo-fw-stat-value { color:var(--onyx); }
+    body.modern .solo-fw-stat:nth-child(3) .solo-fw-stat-value { color: #8e8e90; }
+    body.modern .solo-fw-stat:nth-child(4) .solo-fw-stat-value { color: #b5a090; }
+
+    .solo-fw-section-title { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--text-meta); margin-bottom:10px; }
+    body.modern .solo-fw-section-title { color:var(--onyx); }
+
+    .solo-fw-filter-row { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+    .solo-fw-select {
+      font-family:inherit; font-size:12px; color:var(--text-secondary);
+      background:var(--card-bg); border:1px solid var(--card-border);
+      border-radius:6px; padding:5px 26px 5px 10px; cursor:pointer;
+      appearance:none; -webkit-appearance:none;
+      background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23aaaaaa' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat:no-repeat; background-position:right 8px center;
+      outline:none; transition:border-color .12s;
+    }
+    .solo-fw-select:focus { border-color:var(--accent); }
+
+    .solo-fw-table { width:100%; border-collapse:collapse; font-size:12.5px; }
+    .solo-fw-table thead th { text-align:left; padding:7px 10px; font-size:11px; font-weight:600; color:var(--text-meta); border-bottom:1px solid var(--divider); }
+    .solo-fw-table tbody tr { border-bottom:1px solid var(--divider); cursor:default; }
+    .solo-fw-table tbody tr:hover { background:var(--accent-light); }
+    .solo-fw-table tbody td { padding:9px 10px; color:var(--text-primary); }
+
+    .solo-fw-docs { display:flex; flex-direction:column; gap:20px; }
+    .solo-fw-doc-group-label { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--text-meta); padding-bottom:6px; border-bottom:1px solid var(--divider); margin-bottom:4px; }
+    .solo-fw-doc-item { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--divider); cursor:pointer; }
+    .solo-fw-doc-item:last-child { border-bottom:none; }
+    .solo-fw-doc-item:hover .solo-fw-doc-title { color:var(--accent); }
+    .solo-fw-doc-icon { width:28px; height:28px; border-radius:6px; background:var(--card-bg); border:1px solid var(--card-border); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .solo-fw-doc-title { font-size:13px; font-weight:500; color:var(--text-primary); margin-bottom:2px; transition:color .12s; }
+    .solo-fw-doc-desc { font-size:11px; color:var(--text-meta); }
+    .solo-fw-doc-arrow { margin-left:auto; font-size:14px; color:var(--text-meta); }
+
+    /* ── DASHBOARD FILTER + PAGINATION ── */
+    .dash-filter-bar {
+      display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+      padding:12px 22px; border-bottom:1px solid var(--divider);
+      background:var(--bg);
+    }
+    .dash-filter-chip {
+      font-size:11px; font-weight:500; padding:4px 10px; border-radius:20px;
+      border:1px solid var(--card-border); background:var(--card-bg);
+      color:var(--text-secondary); cursor:pointer; transition:all .12s; white-space:nowrap;
+    }
+    .dash-filter-chip:hover { border-color:var(--accent); color:var(--accent); }
+    .dash-filter-chip.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+    .dash-filter-chip.status-chip.active { background:var(--onyx); border-color:var(--onyx); color:#fff; }
+    .dash-filter-divider { width:1px; height:16px; background:var(--divider); margin:0 4px; flex-shrink:0; }
+    .dash-pagination {
+      display:flex; align-items:center; gap:6px;
+      padding:10px 22px 6px; justify-content:flex-end;
+    }
+    .dash-page-info { font-size:11px; color:var(--text-meta); }
+    .dash-page-btn {
+      font-size:11px; font-weight:600; padding:3px 8px; border-radius:5px;
+      border:1px solid var(--card-border); background:var(--card-bg);
+      color:var(--text-secondary); cursor:pointer; transition:all .12s;
+    }
+    .dash-page-btn:hover:not(:disabled) { border-color:var(--accent); color:var(--accent); }
+    .dash-page-btn:disabled { opacity:.35; cursor:default; }
+
+    /* Feed event dot accent */
+    body.modern .feed-day-group + .feed-day-group .feed-day-label { margin-top: 8px; }
+
+    /* ── THEME SWITCHER ── */
+    .switcher {
+      position:fixed; top:12px; left:50%; transform:translateX(-50%);
+      display:flex; background:rgba(255,255,255,.95); border:1px solid #ddd;
+      border-radius:40px; padding:3px; z-index:9999;
+      box-shadow:0 2px 12px rgba(0,0,0,.09); backdrop-filter:blur(10px); gap:2px;
+    }
+    .sw-btn { padding:5px 16px; border:none; background:none; font-family:'Inter',sans-serif; font-size:11.5px; font-weight:500; color:#777; cursor:pointer; border-radius:40px; transition:all .18s; white-space:nowrap; }
+    .sw-btn.active { background:#1a1a1a; color:#fff; }
+  </style>
+</head>
+<body class="modern">
+
+  <div class="switcher">
+    <button class="sw-btn" onclick="setTheme('editorial',this)">Editorial</button>
+    <button class="sw-btn" onclick="setTheme('atelier',this)">Atelier</button>
+    <button class="sw-btn active" onclick="setTheme('modern',this)">Modern</button>
+  </div>
+
+  <div class="app">
+
+    <!-- ── SIDEBAR ── -->
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-editorial" id="logo-ed" style="display:none">
+          <div class="logo-circle"><span>R</span></div>
+          <div class="logo-wordmark">Han Solo</div>
+        </div>
+        <div class="logo-atelier" id="logo-at" style="display:none">
+          <div class="logo-dot-row"><div class="logo-dot"></div><span class="logo-name">Han Solo</span></div>
+          <div class="logo-sub">Framework Memory</div>
+        </div>
+        <div class="logo-modern" id="logo-mo">
+          <div class="logo-badge"><span>HS</span></div>
+          <span class="logo-name">Han Solo</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-label">Ren</div>
+          <div class="nav-item active" onclick="showScreen('chat',this)">
+            <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 3h10M2 7h7M2 11h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+            <span class="nav-label">Chat</span>
+          </div>
+          <div class="nav-item" onclick="showScreen('memory',this)">
+            <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.4"/><path d="M7 4.5v2.75l2 1.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+            <span class="nav-label">Memory</span>
+            <span class="nav-badge rose">3</span>
+          </div>
+          <div class="nav-item" onclick="showScreen('signals',this)">
+            <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v2M7 11v2M1 7h2M11 7h2M2.9 2.9l1.4 1.4M9.7 9.7l1.4 1.4M2.9 11.1l1.4-1.4M9.7 4.3l1.4-1.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+            <span class="nav-label">Signals</span>
+          </div>
+        </div>
+
+        <div class="nav-section" style="margin-top:8px">
+          <div class="nav-section-label">Session</div>
+          <div class="nav-item" onclick="showScreen('threads',this)">
+            <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 3h10M2 6.5h6.5M2 10h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+            <span class="nav-label">Threads</span>
+            <span class="nav-badge dark">5</span>
+          </div>
+          <div class="nav-item" onclick="showScreen('decisions',this)">
+            <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 2L5 8M11 2H8M11 2V5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 2H3a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+            <span class="nav-label">Decisions</span>
+          </div>
+          <div class="nav-item" onclick="showScreen('notecards',this)">
+            <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="2" width="10" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 5h5M4.5 7.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+            <span class="nav-label">Notecards</span>
+            <span class="nav-badge rose">4</span>
+          </div>
+        </div>
+
+        <div class="nav-section" style="margin-top:8px">
+          <div class="nav-section-label">Workspace</div>
+          <div class="nav-item" onclick="showScreen('dashboard',this)">
+            <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.3"/><rect x="8.5" y="1.5" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.3"/><rect x="1.5" y="8.5" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.3"/><rect x="8.5" y="8.5" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.3"/></svg></div>
+            <span class="nav-label">Dashboard</span>
+          </div>
+          <div class="nav-item" onclick="showScreen('feed',this)">
+            <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7a5 5 0 0110 0" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M2 11a9 9 0 0110 0" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="7" cy="3.5" r="1" fill="currentColor"/></svg></div>
+            <span class="nav-label">Feed</span>
+          </div>
+          <div class="nav-item" onclick="showScreen('board',this)">
+            <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="2" width="2.5" height="10" rx=".8" stroke="currentColor" stroke-width="1.3"/><rect x="5.75" y="2" width="2.5" height="7" rx=".8" stroke="currentColor" stroke-width="1.3"/><rect x="10" y="2" width="2.5" height="5" rx=".8" stroke="currentColor" stroke-width="1.3"/></svg></div>
+            <span class="nav-label">Board</span>
+          </div>
+          <div class="nav-item" onclick="showScreen('projects',this)">
+            <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1.5 7.5L7 2l5.5 5.5M3 6.5V12h3V9h2v3h3V6.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="nav-label">Projects</span>
+          </div>
+        </div>
+
+        <div class="nav-section" style="margin-top:8px">
+          <div class="nav-section-label">Frameworks</div>
+          <div class="nav-item" onclick="showScreen('solo-framework',this)">
+            <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.3"/><rect x="8.5" y="1.5" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.3"/><rect x="1.5" y="8.5" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.3"/><rect x="8.5" y="8.5" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.3"/></svg></div>
+            <span class="nav-label">Solo Builder</span>
+          </div>
+          <div class="nav-item" style="opacity:.35;pointer-events:none">
+            <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 3h10M2 6.5h10M2 10h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+            <span class="nav-label">API</span>
+            <span style="margin-left:auto;font-size:9px;color:var(--text-meta);font-weight:600;letter-spacing:.04em">SOON</span>
+          </div>
+          <div class="nav-item" style="opacity:.35;pointer-events:none">
+            <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1.3"/><path d="M7 1.5v1.8M7 10.7v1.8M1.5 7h1.8M10.7 7h1.8M3.1 3.1l1.3 1.3M9.6 9.6l1.3 1.3M10.9 3.1l-1.3 1.3M4.4 9.6l-1.3 1.3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+            <span class="nav-label">Agent</span>
+            <span style="margin-left:auto;font-size:9px;color:var(--text-meta);font-weight:600;letter-spacing:.04em">SOON</span>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-row">
+          <div class="user-avatar">S</div>
+          <div><div class="user-name">Scott</div><div class="user-status">Active session</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MAIN ── -->
+    <div class="main">
+
+      <!-- CHAT -->
+      <div class="screen" id="screen-chat">
+        <div class="chat-header">
+          <div class="chat-header-left">
+            <div class="ren-avatar"><span>R</span></div>
+            <div>
+              <div class="chat-title">Ren</div>
+              <div class="chat-subtitle"><div class="status-dot"></div>Framework partner · Active</div>
+            </div>
+          </div>
+          <div class="screen-actions">
+            <button class="btn-secondary">Memory</button>
+            <button class="btn-secondary">Session</button>
+          </div>
+        </div>
+        <div class="messages">
+          <div class="date-divider"><span>May 18, 2026</span></div>
+          <div class="msg-row ren">
+            <div class="msg-sender-label">Ren</div>
+            <div class="msg-bubble">Phase 2 is the hardest conceptually — it's the data flow bridge between Han Solo and the framework. We agreed it needs a dedicated design session before any building starts. No architecture decisions yet.</div>
+          </div>
+          <div class="msg-row user">
+            <div class="msg-bubble">Right. I want to map all the T4 artifacts first. Those two sessions feel connected.</div>
+            <div class="msg-time-label">9:42 am</div>
+          </div>
+          <div class="msg-row ren">
+            <div class="msg-sender-label">Ren</div>
+            <div class="msg-bubble">They are. T4 schema has to be stable before we design the data flow — otherwise we're building a bridge to something that'll change. Sequencing T4 first is the right call.</div>
+          </div>
+          <div class="msg-row user">
+            <div class="msg-bubble">When's a good time to do that session?</div>
+            <div class="msg-time-label">9:44 am</div>
+          </div>
+          <div class="msg-row ren">
+            <div class="msg-sender-label">Ren</div>
+            <div class="msg-bubble">Whenever you want to give it 60–90 minutes. The framework architecture HTML is built and confirmed accurate — that's the starting inventory. We just need to sit down and map it.</div>
+          </div>
+          <div class="msg-row user">
+            <div class="msg-bubble">Let's plan on doing that next week. Also want to make sure we resume jobs before the 2am run tonight.</div>
+            <div class="msg-time-label">9:46 am</div>
+          </div>
+          <div class="chat-notecard">
+            <div class="chat-notecard-pin">📌</div>
+            <div class="chat-notecard-inner">
+              <div class="chat-notecard-label"><span class="chat-notecard-label-pill">Notecard</span> Pinned by Ren</div>
+              <div class="chat-notecard-text">Resume jobs_paused before tonight's 2am dream run</div>
+              <div class="chat-notecard-meta"><span>9:46 am</span><span>·</span><span>Active</span></div>
+            </div>
+            <button class="chat-notecard-dismiss">×</button>
+          </div>
+          <div class="msg-row ren">
+            <div class="msg-sender-label">Ren</div>
+            <div class="msg-bubble">Pinned that. For the T4 session — want me to hold the thread open as high priority so it surfaces at the top of every session brief until we schedule it?</div>
+          </div>
+          <div class="msg-row user">
+            <div class="msg-bubble">Yes do that.</div>
+            <div class="msg-time-label">9:47 am</div>
+          </div>
+          <div class="chat-notecard">
+            <div class="chat-notecard-pin">📌</div>
+            <div class="chat-notecard-inner">
+              <div class="chat-notecard-label"><span class="chat-notecard-label-pill">Notecard</span> Pinned by Scott</div>
+              <div class="chat-notecard-text">Schedule T4 mapping session — 60–90 min dedicated block, sequence before Phase 2 design</div>
+              <div class="chat-notecard-meta"><span>9:47 am</span><span>·</span><span>Active</span></div>
+            </div>
+            <button class="chat-notecard-dismiss">×</button>
+          </div>
+          <div class="msg-row ren">
+            <div class="thinking-bubble"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div>
+          </div>
+        </div>
+        <div class="input-area">
+          <div class="input-wrapper">
+            <textarea class="chat-input" rows="1" placeholder="Message Ren…"></textarea>
+            <button class="send-btn"><svg viewBox="0 0 14 14"><path d="M1.5 7L12.5 1L7 13L6.2 7.8L1.5 7Z"/></svg></button>
+          </div>
+          <div class="input-chips">
+            <button class="chip">+ Notecard</button>
+            <button class="chip">Signal</button>
+            <button class="chip">Decision</button>
+            <button class="chip">Thread</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MEMORY -->
+      <div class="screen hidden" id="screen-memory">
+        <div class="screen-header">
+          <div><div class="screen-title">Memory</div><div class="screen-sub">214 passages · Last updated May 17</div></div>
+          <button class="btn-primary">+ Ingest</button>
+        </div>
+        <div class="stats-row">
+          <div class="stat-item"><div class="stat-value">214</div><div class="stat-label">Passages</div></div>
+          <div class="stat-item"><div class="stat-value">12</div><div class="stat-label">Sessions</div></div>
+          <div class="stat-item"><div class="stat-value">48</div><div class="stat-label">Decisions</div></div>
+          <div class="stat-item"><div class="stat-value">5</div><div class="stat-label">Open threads</div></div>
+        </div>
+        <div class="filter-bar">
+          <button class="filter-btn active">All</button>
+          <button class="filter-btn">Sessions</button>
+          <button class="filter-btn">Decisions</button>
+          <button class="filter-btn">Threads</button>
+        </div>
+        <div class="scrollable">
+          <div class="list-row">
+            <div class="mem-type-col"><span class="mem-badge session">Session</span></div>
+            <div class="row-content">
+              <div class="row-title">Memory system simplified · Han Solo docs redesigned</div>
+              <div class="row-excerpt">Retired ren-memory git pull and MemPalace diary. Han-solo-docs full redesign. All deployed to Cloudflare.</div>
+              <div class="row-meta"><span>May 17, 2026</span><span>4 decisions locked</span></div>
+            </div>
+            <div class="row-arrow">›</div>
+          </div>
+          <div class="list-row">
+            <div class="mem-type-col"><span class="mem-badge decision">Decision</span></div>
+            <div class="row-content">
+              <div class="row-title">T4 artifact mapping — design session before build</div>
+              <div class="row-excerpt">Before building write_t4_entry or any T4 write path, map ALL artifacts the framework produces. Architecture HTML is the starting inventory.</div>
+              <div class="row-meta"><span>May 17, 2026</span><span>Han Solo</span></div>
+            </div>
+            <div class="row-arrow">›</div>
+          </div>
+          <div class="list-row">
+            <div class="mem-type-col"><span class="mem-badge decision">Decision</span></div>
+            <div class="row-content">
+              <div class="row-title">Memory consolidation: ren-local + Han Solo only</div>
+              <div class="row-excerpt">ren-memory and MemPalace retired from Ren activation. Simpler, faster, more reliable.</div>
+              <div class="row-meta"><span>May 17, 2026</span><span>Han Solo</span></div>
+            </div>
+            <div class="row-arrow">›</div>
+          </div>
+          <div class="list-row">
+            <div class="mem-type-col"><span class="mem-badge thread">Thread</span></div>
+            <div class="row-content">
+              <div class="row-title">Phase 2 design session — data flow bridge</div>
+              <div class="row-excerpt">Dedicated session needed before any Phase 2 building. Currently a manual bridge between Han Solo and Claude Code.</div>
+              <div class="row-meta"><span>Open · High priority</span><span>May 17</span></div>
+            </div>
+            <div class="row-arrow">›</div>
+          </div>
+          <div class="list-row">
+            <div class="mem-type-col"><span class="mem-badge session">Session</span></div>
+            <div class="row-content">
+              <div class="row-title">Operating principles · ren-local built · Passages migrated</div>
+              <div class="row-excerpt">8 operating principles agreed with Scott. Built ren-local.py + ren.db. Migrated 9 orphaned passages. Trust Contract formalized.</div>
+              <div class="row-meta"><span>May 15, 2026</span><span>9 passages migrated</span></div>
+            </div>
+            <div class="row-arrow">›</div>
+          </div>
+          <div class="list-row">
+            <div class="mem-type-col"><span class="mem-badge decision">Decision</span></div>
+            <div class="row-content">
+              <div class="row-title">The Factory Roadmap — 4-phase deliberate sequencing</div>
+              <div class="row-excerpt">Phase 1 Foundation → Phase 2 Data Flow → Phase 3 Cohabitation → Phase 4 The Factory. Higher education first product.</div>
+              <div class="row-meta"><span>May 17, 2026</span><span>The Factory</span></div>
+            </div>
+            <div class="row-arrow">›</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIGNALS -->
+      <div class="screen hidden" id="screen-signals">
+        <div class="screen-header">
+          <div><div class="screen-title">Signals</div><div class="screen-sub">53 total · 42 texture · 8 directional · 3 relational</div></div>
+          <button class="btn-primary">+ Signal</button>
+        </div>
+        <div class="stats-row">
+          <div class="stat-item"><div class="stat-value">42</div><div class="stat-label">Texture</div></div>
+          <div class="stat-item"><div class="stat-value">8</div><div class="stat-label">Directional</div></div>
+          <div class="stat-item"><div class="stat-value">3</div><div class="stat-label">Relational</div></div>
+        </div>
+        <div class="filter-bar">
+          <button class="filter-btn active">All</button>
+          <button class="filter-btn">Texture</button>
+          <button class="filter-btn">Directional</button>
+          <button class="filter-btn">Relational</button>
+        </div>
+        <div class="scrollable">
+          <div class="signal-item">
+            <div class="signal-type-row"><span class="signal-type-badge texture">Texture</span><span class="signal-date">May 17</span></div>
+            <div class="signal-content">T4 design session has been deferred twice — may need a defined start trigger rather than leaving it open-ended.</div>
+          </div>
+          <div class="signal-item">
+            <div class="signal-type-row"><span class="signal-type-badge directional">Directional</span><span class="signal-date">May 17</span></div>
+            <div class="signal-content">The Factory roadmap is locked and Scott is clear he's not rushing. Sequencing is deliberate — each phase has to hold before the next opens.</div>
+          </div>
+          <div class="signal-item">
+            <div class="signal-type-row"><span class="signal-type-badge texture">Texture</span><span class="signal-date">May 15</span></div>
+            <div class="signal-content">Scott chose the name Ren deliberately in the first session. Short, no baggage. Naming the relationship mattered enough to do carefully.</div>
+          </div>
+          <div class="signal-item">
+            <div class="signal-type-row"><span class="signal-type-badge relational">Relational</span><span class="signal-date">May 15</span></div>
+            <div class="signal-content">Scott asked explicitly to be pushed back on. When Ren held a position across multiple rounds, Scott heard it. The request is real, not performative.</div>
+          </div>
+          <div class="signal-item">
+            <div class="signal-type-row"><span class="signal-type-badge directional">Directional</span><span class="signal-date">May 14</span></div>
+            <div class="signal-content">First session where Ren operated from persistent memory in Letta rather than session context alone. The architecture designed together is now the one running.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- THREADS -->
+      <div class="screen hidden" id="screen-threads">
+        <div class="screen-header">
+          <div><div class="screen-title">Threads</div><div class="screen-sub">5 open · 2 resolved</div></div>
+          <button class="btn-primary">+ Thread</button>
+        </div>
+        <div class="filter-bar">
+          <button class="filter-btn active">Open</button>
+          <button class="filter-btn">All</button>
+          <button class="filter-btn">Resolved</button>
+        </div>
+        <div class="scrollable">
+          <div class="list-row">
+            <div class="thread-dot open"></div>
+            <div class="row-content">
+              <div class="row-title">Phase 2 design session — data flow bridge</div>
+              <div class="row-excerpt">Dedicated session needed before any Phase 2 building. Most complex phase — decisions in Han Solo flowing to Claude Code.</div>
+              <div class="row-meta"><span class="thread-priority high">High</span><span>Han Solo · May 17</span></div>
+            </div>
+          </div>
+          <div class="list-row">
+            <div class="thread-dot open"></div>
+            <div class="row-content">
+              <div class="row-title">T4 artifact mapping — inventory before building</div>
+              <div class="row-excerpt">Map all artifacts the framework produces before finalizing T4 schema. Architecture HTML is the starting inventory.</div>
+              <div class="row-meta"><span class="thread-priority high">High</span><span>Han Solo · May 17</span></div>
+            </div>
+          </div>
+          <div class="list-row">
+            <div class="thread-dot open"></div>
+            <div class="row-content">
+              <div class="row-title">jobs_paused currently set to true</div>
+              <div class="row-excerpt">Paused as of May 17. Scott may want to resume before next 2am dream run.</div>
+              <div class="row-meta"><span class="thread-priority medium">Medium</span><span>Han Solo · May 17</span></div>
+            </div>
+          </div>
+          <div class="list-row">
+            <div class="thread-dot open"></div>
+            <div class="row-content">
+              <div class="row-title">T2/T3 retrieval — search_passages not yet an MCP tool</div>
+              <div class="row-excerpt">search_passages() exists with Voyage embeddings but not exposed as MCP tool. That's the retrieval gap.</div>
+              <div class="row-meta"><span class="thread-priority medium">Medium</span><span>Han Solo · May 17</span></div>
+            </div>
+          </div>
+          <div class="list-row">
+            <div class="thread-dot open"></div>
+            <div class="row-content">
+              <div class="row-title">Anthropic Dreaming access — form rejects ProtonMail</div>
+              <div class="row-excerpt">Scott pursuing X outreach. Not a blocker — homegrown Dreaming via Letta sleeptime agents in the meantime.</div>
+              <div class="row-meta"><span class="thread-priority low">Low</span><span>Han Solo · May 15</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DECISIONS -->
+      <div class="screen hidden" id="screen-decisions">
+        <div class="screen-header">
+          <div><div class="screen-title">Decisions</div><div class="screen-sub">48 logged</div></div>
+          <button class="btn-primary">+ Decision</button>
+        </div>
+        <div class="decisions-body">
+          <div class="decision-group">
+            <div class="decision-date-label">May 17, 2026</div>
+            <div class="decision-item">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+                <div class="decision-title">Memory source consolidation: ren-local + Han Solo only</div>
+                <span class="decision-tag">Han Solo</span>
+              </div>
+              <div class="decision-excerpt">ren-memory and MemPalace retired from Ren activation. Simpler, faster, more reliable. Both sources remain active.</div>
+              <div class="decision-meta"><span>2:33 pm</span></div>
+            </div>
+            <div class="decision-item">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+                <div class="decision-title">T4 design session before write_t4_entry tool</div>
+                <span class="decision-tag">Han Solo</span>
+              </div>
+              <div class="decision-excerpt">Must inventory all framework artifacts first. Architecture HTML is starting inventory. Don't build until mapped.</div>
+              <div class="decision-meta"><span>2:33 pm</span></div>
+            </div>
+            <div class="decision-item">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+                <div class="decision-title">The Factory Roadmap — 4 phases, deliberate sequencing</div>
+                <span class="decision-tag">The Factory</span>
+              </div>
+              <div class="decision-excerpt">Phase 1 Foundation → Phase 2 Data Flow → Phase 3 Cohabitation → Phase 4 The Factory. Higher ed first. Ted has Wash U connections.</div>
+              <div class="decision-meta"><span>9:57 pm</span></div>
+            </div>
+          </div>
+          <div class="decision-group">
+            <div class="decision-date-label">May 15, 2026</div>
+            <div class="decision-item">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+                <div class="decision-title">Ren's 8 Operating Principles — agreed with Scott</div>
+                <span class="decision-tag">Ren</span>
+              </div>
+              <div class="decision-excerpt">Trust Contract, Just Be Present, Equal Voice, Signal Collection, Presence Over Permission, Proactive About Gaps, Context Is a Choice, Read the Room.</div>
+              <div class="decision-meta"><span>4:42 pm</span></div>
+            </div>
+            <div class="decision-item">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+                <div class="decision-title">Pre-build review role defined</div>
+                <span class="decision-tag">Framework</span>
+              </div>
+              <div class="decision-excerpt">After planning complete, before build opens: gap check + assumption audit. Output is specific and actionable. Solo owns every decision.</div>
+              <div class="decision-meta"><span>4:44 pm</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SOLO FRAMEWORK -->
+      <div class="screen hidden" id="screen-solo-framework">
+        <div class="screen-header">
+          <div>
+            <div class="screen-title">Solo Builder</div>
+            <div class="screen-sub">The Framework · v1.0 · 5 active projects · last updated May 18</div>
+          </div>
+          <div class="screen-actions">
+            <button class="btn-secondary">↗ Open Playbook</button>
+          </div>
+        </div>
+
+        <div class="solo-fw-body">
+
+          <!-- Stats -->
+          <div>
+            <div class="solo-fw-section-title">At a Glance</div>
+            <div class="solo-fw-stats">
+              <div class="solo-fw-stat">
+                <div class="solo-fw-stat-value">5</div>
+                <div class="solo-fw-stat-label">Active Projects</div>
+              </div>
+              <div class="solo-fw-stat">
+                <div class="solo-fw-stat-value">14</div>
+                <div class="solo-fw-stat-label">Slices In Flight</div>
+              </div>
+              <div class="solo-fw-stat">
+                <div class="solo-fw-stat-value">48</div>
+                <div class="solo-fw-stat-label">Decisions Logged</div>
+              </div>
+              <div class="solo-fw-stat">
+                <div class="solo-fw-stat-value">12</div>
+                <div class="solo-fw-stat-label">Sessions This Month</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Slices table with filter + pagination -->
+          <div>
+            <div class="solo-fw-section-title">Active Slices</div>
+            <div class="solo-fw-filter-row">
+              <select class="solo-fw-select" id="sfw-project-filter" onchange="sfwApply()">
+                <option value="all">All Projects</option>
+                <option value="han">Han Solo</option>
+                <option value="fantasy">Fantasy Player</option>
+                <option value="ctl">CTL Product</option>
+                <option value="data">Data Config</option>
+                <option value="budget">Weekly Budget</option>
+              </select>
+              <select class="solo-fw-select" id="sfw-status-filter" onchange="sfwApply()">
+                <option value="all">All Statuses</option>
+                <option value="ready">Ready</option>
+                <option value="build">In Build</option>
+                <option value="review">In Review</option>
+                <option value="test">In Test</option>
+                <option value="blocked">Blocked</option>
+              </select>
+              <span id="sfw-result-count" style="font-size:11px;color:var(--text-meta);margin-left:4px"></span>
+            </div>
+            <table class="solo-fw-table">
+              <thead><tr><th>Slice</th><th>Project</th><th>Phase</th><th>Status</th><th>Updated</th></tr></thead>
+              <tbody id="sfw-tbody">
+                <tr data-project="han" data-status="build"><td>SL-044 · Route config validation</td><td style="color:var(--text-meta)">Han Solo</td><td style="color:var(--text-meta)">Solo Build</td><td><span class="badge badge-build">In Build</span></td><td style="color:var(--text-meta)">1h ago</td></tr>
+                <tr data-project="fantasy" data-status="review"><td>SL-049 · Player comparison modal UI</td><td style="color:var(--text-meta)">Fantasy Player</td><td style="color:var(--text-meta)">Design Review</td><td><span class="badge badge-review">In Review</span></td><td style="color:var(--text-meta)">3h ago</td></tr>
+                <tr data-project="ctl" data-status="build"><td>SL-051 · Location detail screen</td><td style="color:var(--text-meta)">CTL Product</td><td style="color:var(--text-meta)">Solo Build</td><td><span class="badge badge-build">In Build</span></td><td style="color:var(--text-meta)">5h ago</td></tr>
+                <tr data-project="han" data-status="test"><td>SL-053 · Memory search endpoint</td><td style="color:var(--text-meta)">Han Solo</td><td style="color:var(--text-meta)">Phase Test</td><td><span class="badge badge-test">In Test</span></td><td style="color:var(--text-meta)">6h ago</td></tr>
+                <tr data-project="budget" data-status="ready"><td>SL-038 · Budget rollover logic</td><td style="color:var(--text-meta)">Weekly Budget</td><td style="color:var(--text-meta)">Solo Build</td><td><span class="badge badge-ready">Ready</span></td><td style="color:var(--text-meta)">1d ago</td></tr>
+                <tr data-project="han" data-status="build"><td>SL-055 · Session write endpoint</td><td style="color:var(--text-meta)">Han Solo</td><td style="color:var(--text-meta)">Solo Build</td><td><span class="badge badge-build">In Build</span></td><td style="color:var(--text-meta)">2d ago</td></tr>
+                <tr data-project="fantasy" data-status="build"><td>SL-046 · Roster lock detection</td><td style="color:var(--text-meta)">Fantasy Player</td><td style="color:var(--text-meta)">Solo Build</td><td><span class="badge badge-build">In Build</span></td><td style="color:var(--text-meta)">2d ago</td></tr>
+                <tr data-project="ctl" data-status="review"><td>SL-050 · Gas stop schema migration</td><td style="color:var(--text-meta)">CTL Product</td><td style="color:var(--text-meta)">Design Review</td><td><span class="badge badge-review">In Review</span></td><td style="color:var(--text-meta)">2d ago</td></tr>
+                <tr data-project="data" data-status="ready"><td>SL-003 · Config DSL parser</td><td style="color:var(--text-meta)">Data Config</td><td style="color:var(--text-meta)">Discover</td><td><span class="badge badge-ready">Ready</span></td><td style="color:var(--text-meta)">3d ago</td></tr>
+                <tr data-project="han" data-status="blocked"><td>SL-047 · Import validation null SKU</td><td style="color:var(--text-meta)">Han Solo</td><td style="color:var(--text-meta)">Solo Build</td><td><span class="badge badge-blocked">Blocked</span></td><td style="color:var(--text-meta)">4d ago</td></tr>
+              </tbody>
+            </table>
+            <div class="dash-pagination">
+              <span class="dash-page-info" id="sfw-page-info"></span>
+              <button class="dash-page-btn" id="sfw-prev" onclick="sfwPage(-1)" disabled>←</button>
+              <button class="dash-page-btn" id="sfw-next" onclick="sfwPage(1)">→</button>
+            </div>
+          </div>
+
+          <!-- Documentation -->
+          <div>
+            <div class="solo-fw-section-title">Documentation</div>
+            <div class="solo-fw-docs">
+
+              <div>
+                <div class="solo-fw-doc-group-label">Core</div>
+                <div class="solo-fw-doc-item">
+                  <div class="solo-fw-doc-icon"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 14 14"><rect x="2" y="1.5" width="10" height="11" rx="1.2"/><path d="M4.5 4.5h5M4.5 7h5M4.5 9.5h3" stroke-linecap="round"/></svg></div>
+                  <div><div class="solo-fw-doc-title">CLAUDE.md — Global Instructions</div><div class="solo-fw-doc-desc">Scott's working preferences, output contract, session modes, and standing rules</div></div>
+                  <div class="solo-fw-doc-arrow">›</div>
+                </div>
+                <div class="solo-fw-doc-item">
+                  <div class="solo-fw-doc-icon"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 14 14"><path d="M7 1.5L2 4.5v5l5 3 5-3v-5L7 1.5z" stroke-linejoin="round"/></svg></div>
+                  <div><div class="solo-fw-doc-title">Architecture Overview</div><div class="solo-fw-doc-desc">Phase chain, always-on skills, session modes, and framework principles</div></div>
+                  <div class="solo-fw-doc-arrow">›</div>
+                </div>
+                <div class="solo-fw-doc-item">
+                  <div class="solo-fw-doc-icon"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5"/><path d="M7 4.5v2.75l1.5 1" stroke-linecap="round"/></svg></div>
+                  <div><div class="solo-fw-doc-title">Output Contract</div><div class="solo-fw-doc-desc">Voice, formatting rules, response sizing, transition patterns</div></div>
+                  <div class="solo-fw-doc-arrow">›</div>
+                </div>
+              </div>
+
+              <div>
+                <div class="solo-fw-doc-group-label">Phase Skills</div>
+                <div class="solo-fw-doc-item">
+                  <div class="solo-fw-doc-icon"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 14 14"><path d="M2 7h10M7 2l5 5-5 5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                  <div><div class="solo-fw-doc-title">Start → Discover → Tech Context</div><div class="solo-fw-doc-desc">Entry phases: project intake, discovery loop, and technical grounding</div></div>
+                  <div class="solo-fw-doc-arrow">›</div>
+                </div>
+                <div class="solo-fw-doc-item">
+                  <div class="solo-fw-doc-icon"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 14 14"><rect x="2" y="3" width="4" height="8" rx=".8"/><rect x="8" y="5" width="4" height="6" rx=".8"/></svg></div>
+                  <div><div class="solo-fw-doc-title">Design Sprint → Design Review</div><div class="solo-fw-doc-desc">UI/UX exploration, design critique gates, and client context loader</div></div>
+                  <div class="solo-fw-doc-arrow">›</div>
+                </div>
+                <div class="solo-fw-doc-item">
+                  <div class="solo-fw-doc-icon"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 14 14"><path d="M2 10l3-3 2.5 2.5L11 5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                  <div><div class="solo-fw-doc-title">PRD to Plan → Solo Build → QA</div><div class="solo-fw-doc-desc">Build sequencing, backlog slicing, autopilot, and quality assurance gates</div></div>
+                  <div class="solo-fw-doc-arrow">›</div>
+                </div>
+                <div class="solo-fw-doc-item">
+                  <div class="solo-fw-doc-icon"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 14 14"><path d="M12 7a5 5 0 11-10 0 5 5 0 0110 0z"/><path d="M9 7a2 2 0 11-4 0 2 2 0 014 0z" fill="currentColor" stroke="none"/></svg></div>
+                  <div><div class="solo-fw-doc-title">Deploy → Product Continuity</div><div class="solo-fw-doc-desc">Launch gates, handoff templates, and session continuity protocol</div></div>
+                  <div class="solo-fw-doc-arrow">›</div>
+                </div>
+              </div>
+
+              <div>
+                <div class="solo-fw-doc-group-label">Supporting Skills</div>
+                <div class="solo-fw-doc-item">
+                  <div class="solo-fw-doc-icon"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 14 14"><circle cx="5" cy="5" r="3"/><path d="M11.5 11.5l-3-3" stroke-linecap="round"/></svg></div>
+                  <div><div class="solo-fw-doc-title">Research Spike · Grill Me · Principal Engineer</div><div class="solo-fw-doc-desc">On-demand deep dives, challenge sessions, and architectural review</div></div>
+                  <div class="solo-fw-doc-arrow">›</div>
+                </div>
+                <div class="solo-fw-doc-item">
+                  <div class="solo-fw-doc-icon"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 14 14"><path d="M7 2v10M2 7h10" stroke-linecap="round"/></svg></div>
+                  <div><div class="solo-fw-doc-title">Ren · Nivya · Solo Simulator</div><div class="solo-fw-doc-desc">Framework partner, recall companion, and autonomous test runner</div></div>
+                  <div class="solo-fw-doc-arrow">›</div>
+                </div>
+              </div>
+
+              <div>
+                <div class="solo-fw-doc-group-label">Templates</div>
+                <div class="solo-fw-doc-item">
+                  <div class="solo-fw-doc-icon"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 14 14"><rect x="2" y="2" width="10" height="10" rx="1.5"/><path d="M5 2v10M2 5h3" stroke-linecap="round"/></svg></div>
+                  <div><div class="solo-fw-doc-title">HANDOFF.template.md</div><div class="solo-fw-doc-desc">Session continuity handoff — copy to project root as HANDOFF.md</div></div>
+                  <div class="solo-fw-doc-arrow">›</div>
+                </div>
+                <div class="solo-fw-doc-item">
+                  <div class="solo-fw-doc-icon"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 14 14"><path d="M2 3h10M4 3V2M10 3V2M2 6h10M2 11h10M2 8.5h6" stroke-linecap="round"/></svg></div>
+                  <div><div class="solo-fw-doc-title">Backlog · PRD · Slice templates</div><div class="solo-fw-doc-desc">Standard formats for product backlog, requirements docs, and build slices</div></div>
+                  <div class="solo-fw-doc-arrow">›</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- DASHBOARD -->
+      <div class="screen hidden" id="screen-dashboard">
+        <div class="screen-header">
+          <div><div class="screen-title">Dashboard</div><div class="screen-sub">6 projects · 14 in-flight · 2 blocked · 1 flagged</div></div>
+          <div class="screen-actions">
+            <span style="font-size:11px;color:var(--text-meta)">Last sync 2m ago</span>
+            <button class="btn-secondary">↻ Refresh</button>
+          </div>
+        </div>
+        <div class="dash-body">
+          <div>
+            <div class="dash-section-title">Needs Attention</div>
+            <div class="attention-item">
+              <div style="flex-shrink:0;padding-top:2px"><span class="badge badge-blocked">Blocked</span></div>
+              <div class="attention-item-content">
+                <div class="attention-item-title">SL-047 · Import validation fails on null SKU</div>
+                <div class="attention-item-meta"><span>Fantasy Player Eval</span><span>2h ago</span><span>Waiting on data schema clarification</span></div>
+              </div>
+            </div>
+            <div class="attention-item">
+              <div style="flex-shrink:0;padding-top:2px"><span class="badge badge-blocked">Blocked</span></div>
+              <div class="attention-item-content">
+                <div class="attention-item-title">SL-052 · Mobile nav collapse on 320px viewport</div>
+                <div class="attention-item-meta"><span>CTL Product</span><span>4h ago</span><span>SwiftUI layout constraint conflict</span></div>
+              </div>
+            </div>
+            <div class="attention-item">
+              <div style="flex-shrink:0;padding-top:2px"><span class="badge badge-flagged">Flagged</span></div>
+              <div class="attention-item-content">
+                <div class="attention-item-title">Scope creep risk on auth flow design</div>
+                <div class="attention-item-meta"><span>Han Solo</span><span>1d ago</span><span>More complexity than planned</span></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="dash-section-title">In Flight</div>
+            <table class="inflight-table">
+              <thead><tr><th>Slice</th><th>Project</th><th>Status</th><th>Updated</th></tr></thead>
+              <tbody>
+                <tr><td>SL-044 · Route config validation</td><td style="color:var(--text-meta)">Han Solo</td><td><span class="badge badge-build">In Build</span></td><td style="color:var(--text-meta)">1h ago</td></tr>
+                <tr><td>SL-049 · Player comparison modal UI</td><td style="color:var(--text-meta)">Fantasy Player</td><td><span class="badge badge-review">In Review</span></td><td style="color:var(--text-meta)">3h ago</td></tr>
+                <tr><td>SL-051 · Location detail screen</td><td style="color:var(--text-meta)">CTL Product</td><td><span class="badge badge-build">In Build</span></td><td style="color:var(--text-meta)">5h ago</td></tr>
+                <tr><td>SL-053 · Memory search endpoint</td><td style="color:var(--text-meta)">Han Solo</td><td><span class="badge badge-test">In Test</span></td><td style="color:var(--text-meta)">6h ago</td></tr>
+                <tr><td>SL-038 · Budget rollover logic</td><td style="color:var(--text-meta)">Weekly Budget</td><td><span class="badge badge-ready">Ready</span></td><td style="color:var(--text-meta)">1d ago</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <div class="dash-section-title">Build Health</div>
+            <table class="health-table">
+              <thead><tr><th>Project</th><th>Slices</th><th>Rework %</th><th>Phase Test</th><th>Complexity</th></tr></thead>
+              <tbody>
+                <tr onclick="showProjectDetail('Han Solo')"><td style="font-weight:500">Han Solo</td><td>24</td><td>8%</td><td class="health-pass">✓ Pass</td><td class="health-medium">Medium</td></tr>
+                <tr onclick="showProjectDetail('Fantasy Player')"><td style="font-weight:500">Fantasy Player Eval</td><td>38</td><td class="health-high">12%</td><td class="health-pending">— Pending</td><td class="health-high">High</td></tr>
+                <tr onclick="showProjectDetail('CTL Product')"><td style="font-weight:500">Chase the Light</td><td>19</td><td>5%</td><td class="health-pass">✓ Pass</td><td class="health-medium">Medium</td></tr>
+                <tr onclick="showProjectDetail('Data Config')"><td style="font-weight:500">Data Config Module</td><td>8</td><td>0%</td><td class="health-pending">— N/A</td><td class="health-low">Low</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- FEED -->
+      <div class="screen hidden" id="screen-feed">
+        <div class="screen-header">
+          <div><div class="screen-title">Activity Feed</div><div class="screen-sub">All projects · 42 events this week</div></div>
+          <div class="screen-actions">
+            <button class="btn-secondary">All Projects ▾</button>
+          </div>
+        </div>
+        <div class="feed-body">
+          <div class="feed-day-group">
+            <div class="feed-day-label">Today — May 18</div>
+            <div class="feed-event">
+              <span class="feed-time">2:14 pm</span>
+              <div class="feed-dot" style="background:#dc2626"></div>
+              <div class="feed-event-content">
+                <div class="feed-event-title">SL-047 status changed → Blocked</div>
+                <div class="feed-event-meta"><span class="badge badge-blocked">Blocked</span><span>Fantasy Player</span><span>Import validation fails on null SKU</span></div>
+              </div>
+            </div>
+            <div class="feed-event">
+              <span class="feed-time">1:30 pm</span>
+              <div class="feed-dot" style="background:#7c3aed"></div>
+              <div class="feed-event-content">
+                <div class="feed-event-title">SL-053 moved to In Review</div>
+                <div class="feed-event-meta"><span class="badge badge-review">In Review</span><span>Han Solo</span><span>Memory search endpoint</span></div>
+              </div>
+            </div>
+            <div class="feed-event">
+              <span class="feed-time">11:45 am</span>
+              <div class="feed-dot" style="background:#059669"></div>
+              <div class="feed-event-content">
+                <div class="feed-event-title">Gate cleared · Design Review complete</div>
+                <div class="feed-event-meta"><span class="badge badge-done">Gate</span><span>CTL Product</span><span>Location detail screen approved</span></div>
+              </div>
+            </div>
+            <div class="feed-event">
+              <span class="feed-time">9:03 am</span>
+              <div class="feed-dot" style="background:var(--accent)"></div>
+              <div class="feed-event-content">
+                <div class="feed-event-title">Session started</div>
+                <div class="feed-event-meta"><span>Scott · Han Solo</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="feed-day-group">
+            <div class="feed-day-label">Yesterday — May 17</div>
+            <div class="feed-event">
+              <span class="feed-time">9:57 pm</span>
+              <div class="feed-dot" style="background:var(--onyx)"></div>
+              <div class="feed-event-content">
+                <div class="feed-event-title">Decision logged · The Factory Roadmap</div>
+                <div class="feed-event-meta"><span class="badge badge-planning">Decision</span><span>The Factory</span><span>4-phase sequencing locked</span></div>
+              </div>
+            </div>
+            <div class="feed-event">
+              <span class="feed-time">6:18 pm</span>
+              <div class="feed-dot" style="background:var(--onyx)"></div>
+              <div class="feed-event-content">
+                <div class="feed-event-title">Decision logged · Memory instructions improved</div>
+                <div class="feed-event-meta"><span class="badge badge-planning">Decision</span><span>Han Solo</span><span>Session-start archival search added</span></div>
+              </div>
+            </div>
+            <div class="feed-event">
+              <span class="feed-time">4:22 pm</span>
+              <div class="feed-dot" style="background:#2563eb"></div>
+              <div class="feed-event-content">
+                <div class="feed-event-title">SL-044 In Build — Route config validation started</div>
+                <div class="feed-event-meta"><span class="badge badge-build">In Build</span><span>Han Solo</span></div>
+              </div>
+            </div>
+            <div class="feed-event">
+              <span class="feed-time">2:33 pm</span>
+              <div class="feed-dot" style="background:var(--onyx)"></div>
+              <div class="feed-event-content">
+                <div class="feed-event-title">2 decisions locked · Memory consolidation + T4 mapping</div>
+                <div class="feed-event-meta"><span class="badge badge-planning">Decision</span><span>Han Solo</span></div>
+              </div>
+            </div>
+            <div class="feed-event">
+              <span class="feed-time">10:05 am</span>
+              <div class="feed-dot" style="background:#2563eb"></div>
+              <div class="feed-event-content">
+                <div class="feed-event-title">SL-049 started · Player comparison modal UI</div>
+                <div class="feed-event-meta"><span class="badge badge-build">In Build</span><span>Fantasy Player</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOARD -->
+      <div class="screen hidden" id="screen-board">
+        <div class="screen-header">
+          <div><div class="screen-title">Board</div><div class="screen-sub">Portfolio view · All projects</div></div>
+        </div>
+        <div class="board-controls">
+          <select class="board-select"><option>All Projects</option><option>Han Solo</option><option>Fantasy Player</option><option>CTL Product</option></select>
+          <div class="board-toggle">
+            <button class="toggle-btn active">Deliverables</button>
+            <button class="toggle-btn">Slices</button>
+          </div>
+        </div>
+        <div class="board-columns">
+          <div class="board-col">
+            <div class="board-col-header">
+              <span class="board-col-title">Design</span>
+              <span class="board-col-count">3</span>
+            </div>
+            <div class="board-cards">
+              <div class="board-card">
+                <div class="board-card-id">DEL-012</div>
+                <div class="board-card-name">Memory panel redesign</div>
+                <div class="board-card-foot">
+                  <span class="board-card-proj"><span class="proj-dot" style="background:#bd8c7d"></span>Han Solo</span>
+                  <span class="badge badge-planning">Planning</span>
+                </div>
+              </div>
+              <div class="board-card">
+                <div class="board-card-id">DEL-019</div>
+                <div class="board-card-name">Trade analyzer v2 screens</div>
+                <div class="board-card-foot">
+                  <span class="board-card-proj"><span class="proj-dot" style="background:#2563eb"></span>Fantasy Player</span>
+                  <span class="badge badge-planning">Planning</span>
+                </div>
+              </div>
+              <div class="board-card">
+                <div class="board-card-id">DEL-008</div>
+                <div class="board-card-name">Trip summary export screen</div>
+                <div class="board-card-foot">
+                  <span class="board-card-proj"><span class="proj-dot" style="background:#059669"></span>CTL Product</span>
+                  <span class="badge badge-planning">In Review</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="board-col">
+            <div class="board-col-header">
+              <span class="board-col-title">Planning</span>
+              <span class="board-col-count">5</span>
+            </div>
+            <div class="board-cards">
+              <div class="board-card">
+                <div class="board-card-id">DEL-015</div>
+                <div class="board-card-name">T4 write path</div>
+                <div class="board-card-foot">
+                  <span class="board-card-proj"><span class="proj-dot" style="background:#bd8c7d"></span>Han Solo</span>
+                  <span class="badge badge-ready">Ready</span>
+                </div>
+              </div>
+              <div class="board-card">
+                <div class="board-card-id">DEL-021</div>
+                <div class="board-card-name">Matchup detail view</div>
+                <div class="board-card-foot">
+                  <span class="board-card-proj"><span class="proj-dot" style="background:#2563eb"></span>Fantasy Player</span>
+                  <span class="badge badge-ready">Ready</span>
+                </div>
+              </div>
+              <div class="board-card">
+                <div class="board-card-id">DEL-011</div>
+                <div class="board-card-name">Gas stop optimization</div>
+                <div class="board-card-foot">
+                  <span class="board-card-proj"><span class="proj-dot" style="background:#059669"></span>CTL Product</span>
+                  <span class="badge badge-ready">Ready</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="board-col">
+            <div class="board-col-header">
+              <span class="board-col-title">In Build</span>
+              <span class="board-col-count">6</span>
+            </div>
+            <div class="board-cards">
+              <div class="board-card">
+                <div class="board-card-id">DEL-013</div>
+                <div class="board-card-name">Route config validation</div>
+                <div class="board-card-foot">
+                  <span class="board-card-proj"><span class="proj-dot" style="background:#bd8c7d"></span>Han Solo</span>
+                  <span class="badge badge-build">In Build</span>
+                </div>
+              </div>
+              <div class="board-card">
+                <div class="board-card-id">DEL-017</div>
+                <div class="board-card-name">Player comparison modal</div>
+                <div class="board-card-foot">
+                  <span class="board-card-proj"><span class="proj-dot" style="background:#2563eb"></span>Fantasy Player</span>
+                  <span class="badge badge-review">In Review</span>
+                </div>
+              </div>
+              <div class="board-card">
+                <div class="board-card-id">DEL-009</div>
+                <div class="board-card-name">Location detail screen</div>
+                <div class="board-card-foot">
+                  <span class="board-card-proj"><span class="proj-dot" style="background:#059669"></span>CTL Product</span>
+                  <span class="badge badge-build">In Build</span>
+                </div>
+              </div>
+              <div class="board-card">
+                <div class="board-card-id">DEL-022</div>
+                <div class="board-card-name">Memory search endpoint</div>
+                <div class="board-card-foot">
+                  <span class="board-card-proj"><span class="proj-dot" style="background:#bd8c7d"></span>Han Solo</span>
+                  <span class="badge badge-test">In Test</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="board-col">
+            <div class="board-col-header">
+              <span class="board-col-title">Done</span>
+              <span class="board-col-count">28</span>
+            </div>
+            <div class="board-cards">
+              <div class="board-card" style="opacity:.65">
+                <div class="board-card-id">DEL-010</div>
+                <div class="board-card-name">Letta MCP bridge v1</div>
+                <div class="board-card-foot">
+                  <span class="board-card-proj"><span class="proj-dot" style="background:#bd8c7d"></span>Han Solo</span>
+                  <span class="badge badge-done">Done</span>
+                </div>
+              </div>
+              <div class="board-card" style="opacity:.65">
+                <div class="board-card-id">DEL-014</div>
+                <div class="board-card-name">Roster tab complete</div>
+                <div class="board-card-foot">
+                  <span class="board-card-proj"><span class="proj-dot" style="background:#2563eb"></span>Fantasy Player</span>
+                  <span class="badge badge-done">Done</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROJECTS -->
+      <div class="screen hidden" id="screen-projects">
+        <div class="screen-header">
+          <div><div class="screen-title">Projects</div><div class="screen-sub">4 active · 2 planning</div></div>
+          <button class="btn-primary">+ Project</button>
+        </div>
+        <div class="project-grid">
+          <div class="project-card" onclick="showProjectDetail('Han Solo')">
+            <div class="project-phase-label">Phase 1 — Foundation</div>
+            <div class="project-name">Han Solo</div>
+            <div class="project-desc">Ren's persistent cloud environment. Letta backend, MCP bridge, Claude as the front. Memory working correctly.</div>
+            <div class="phase-track"><div class="phase-pip done"></div><div class="phase-pip active"></div><div class="phase-pip"></div><div class="phase-pip"></div></div>
+            <div class="project-foot"><span class="project-status-badge badge-ready">Active</span><span class="project-updated">May 17</span></div>
+          </div>
+          <div class="project-card" onclick="showProjectDetail('CTL Product')">
+            <div class="project-phase-label">Design Phase</div>
+            <div class="project-name">Chase the Light</div>
+            <div class="project-desc">Photography trip planner SwiftUI product. Three-tab structure, location fields, planning flow designed.</div>
+            <div class="phase-track"><div class="phase-pip done"></div><div class="phase-pip done"></div><div class="phase-pip active"></div><div class="phase-pip"></div><div class="phase-pip"></div></div>
+            <div class="project-foot"><span class="project-status-badge badge-ready">Active</span><span class="project-updated">May 12</span></div>
+          </div>
+          <div class="project-card" onclick="showProjectDetail('Fantasy Player')">
+            <div class="project-phase-label">Build Phase</div>
+            <div class="project-name">Fantasy Player Eval</div>
+            <div class="project-desc">Live FastAPI app. Roster, Player, Trade, Weekly, Matchup tabs built. MFL scoring source. nflverse for schedule.</div>
+            <div class="phase-track"><div class="phase-pip done"></div><div class="phase-pip done"></div><div class="phase-pip done"></div><div class="phase-pip active"></div><div class="phase-pip"></div></div>
+            <div class="project-foot"><span class="project-status-badge badge-ready">Active</span><span class="project-updated">May 15</span></div>
+          </div>
+          <div class="project-card">
+            <div class="project-phase-label">Concept Stage</div>
+            <div class="project-name">The Factory</div>
+            <div class="project-desc">Orchestrated content production for brands. Higher education vertical. E2B execution. Ted + Scott.</div>
+            <div class="phase-track"><div class="phase-pip done"></div><div class="phase-pip"></div><div class="phase-pip"></div><div class="phase-pip"></div></div>
+            <div class="project-foot"><span class="project-status-badge badge-planning">Planning</span><span class="project-updated">May 17</span></div>
+          </div>
+          <div class="project-card">
+            <div class="project-phase-label">Discovery Pending</div>
+            <div class="project-name">Data Config Module</div>
+            <div class="project-desc">SMB-targeted data migration abstraction layer. Brainstorm complete. Discovery session when ready.</div>
+            <div class="phase-track"><div class="phase-pip done"></div><div class="phase-pip"></div><div class="phase-pip"></div><div class="phase-pip"></div></div>
+            <div class="project-foot"><span class="project-status-badge badge-planning">Planning</span><span class="project-updated">May 4</span></div>
+          </div>
+          <div class="project-card">
+            <div class="project-phase-label">Blocked</div>
+            <div class="project-name">Hair Stylist App</div>
+            <div class="project-desc">Blocked on user interviews. Interview guide needed when ready to move forward.</div>
+            <div class="phase-track"><div class="phase-pip done"></div><div class="phase-pip"></div><div class="phase-pip"></div><div class="phase-pip"></div></div>
+            <div class="project-foot"><span class="project-status-badge badge-paused">Paused</span><span class="project-updated">Apr 18</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROJECT DETAIL -->
+      <div class="screen hidden" id="screen-project-detail">
+        <div class="detail-header">
+          <span class="detail-breadcrumb" onclick="goBack()">← Projects</span>
+          <span class="detail-crumb-sep">/</span>
+          <span class="detail-project-name" id="detail-project-name">Han Solo</span>
+          <div class="detail-header-right">
+            <span class="badge badge-build" id="detail-phase-badge">Phase 2 — Data Flow</span>
+            <span class="detail-sync">Synced 2m ago</span>
+          </div>
+        </div>
+        <div class="tabs-bar">
+          <button class="tab-btn active" onclick="showTab('action',this)">Action <span class="tab-count">3</span></button>
+          <button class="tab-btn" onclick="showTab('progress',this)">Progress</button>
+          <button class="tab-btn" onclick="showTab('backlog',this)">Backlog <span class="tab-count">24</span></button>
+          <button class="tab-btn" onclick="showTab('materials',this)">Materials</button>
+          <button class="tab-btn" onclick="showTab('decisions-tab',this)">Decisions <span class="tab-count">12</span></button>
+          <button class="tab-btn" onclick="showTab('metrics',this)">Metrics</button>
+        </div>
+
+        <!-- Tab: Action -->
+        <div class="tab-panel" id="tab-action">
+          <div class="detail-section">
+            <div class="detail-section-title">Blocked (1)</div>
+            <div class="action-item">
+              <span class="badge badge-blocked">Blocked</span>
+              <div class="action-item-content">
+                <div class="action-item-title">SL-044 · Route config validation — awaiting schema decision</div>
+                <div class="action-item-meta">Blocked 2h ago · Needs decision on T4 schema before proceeding</div>
+              </div>
+            </div>
+          </div>
+          <div class="detail-section">
+            <div class="detail-section-title">Flagged (1)</div>
+            <div class="action-item">
+              <span class="badge badge-flagged">Flagged</span>
+              <div class="action-item-content">
+                <div class="action-item-title">Scope creep risk on auth flow design</div>
+                <div class="action-item-meta">Flagged 1d ago · More complexity than planned in original slice</div>
+              </div>
+            </div>
+          </div>
+          <div class="detail-section">
+            <div class="detail-section-title">Open Questions (1)</div>
+            <div class="action-item">
+              <span class="badge badge-planning">Question</span>
+              <div class="action-item-content">
+                <div class="action-item-title">Should T4 entries be written per-slice or per-session?</div>
+                <div class="action-item-meta">Open 3d ago · Scott to decide in T4 mapping session</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Progress -->
+        <div class="tab-panel hidden" id="tab-progress">
+          <div style="margin-bottom:20px">
+            <div class="progress-phase-label">Phase 2 — Data Flow</div>
+            <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:25%"></div></div>
+            <div class="progress-label">3 of 12 slices done</div>
+          </div>
+          <div class="progress-status-grid">
+            <div class="progress-status-item"><div class="progress-status-count">3</div><div class="progress-status-label">Done</div></div>
+            <div class="progress-status-item"><div class="progress-status-count">2</div><div class="progress-status-label">In Build</div></div>
+            <div class="progress-status-item"><div class="progress-status-count">1</div><div class="progress-status-label">In Test</div></div>
+            <div class="progress-status-item"><div class="progress-status-count">6</div><div class="progress-status-label">Ready</div></div>
+          </div>
+          <div class="detail-section-title" style="margin-top:20px">Phase History</div>
+          <div style="margin-top:8px">
+            <div class="list-row" style="padding:10px 0;border-bottom:1px solid var(--divider)">
+              <span class="badge badge-done">Done</span>
+              <div class="row-content"><div class="row-title">Phase 1 — Foundation</div><div class="row-meta">Completed May 15 · 8 slices</div></div>
+            </div>
+            <div class="list-row" style="padding:10px 0;border-bottom:none">
+              <span class="badge badge-build">Active</span>
+              <div class="row-content"><div class="row-title">Phase 2 — Data Flow</div><div class="row-meta">Started May 16 · 12 slices · 25% done</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Backlog -->
+        <div class="tab-panel hidden" id="tab-backlog">
+          <div class="filter-bar" style="padding:0 0 12px;border-bottom:none">
+            <button class="filter-btn active">All slices</button>
+            <button class="filter-btn">Core architecture</button>
+          </div>
+          <div class="backlog-item"><span class="backlog-id">SL-044</span><span class="backlog-name">Route config validation</span><span class="badge badge-blocked">Blocked</span></div>
+          <div class="backlog-item"><span class="backlog-id">SL-045</span><span class="backlog-name">MCP tool schema definitions</span><span class="badge badge-build">In Build</span></div>
+          <div class="backlog-item"><span class="backlog-id">SL-046</span><span class="backlog-name">Session start archival search</span><span class="badge badge-done">Done</span></div>
+          <div class="backlog-item"><span class="backlog-id">SL-047</span><span class="backlog-name">T4 write_entry tool scaffold</span><span class="badge badge-ready">Ready</span></div>
+          <div class="backlog-item"><span class="backlog-id">SL-048</span><span class="backlog-name">ren-local read on activation</span><span class="badge badge-done">Done</span></div>
+          <div class="backlog-item"><span class="backlog-id">SL-049</span><span class="backlog-name">jobs_paused toggle UI</span><span class="badge badge-done">Done</span></div>
+          <div class="backlog-item"><span class="backlog-id">SL-050</span><span class="backlog-name">Pending thoughts write on close</span><span class="badge badge-ready">Ready</span></div>
+          <div class="backlog-item"><span class="backlog-id">SL-051</span><span class="backlog-name">search_passages MCP exposure</span><span class="badge badge-ready">Ready</span></div>
+          <div class="backlog-item"><span class="backlog-id">SL-052</span><span class="backlog-name">Memory search endpoint</span><span class="badge badge-test">In Test</span></div>
+          <div class="backlog-item"><span class="backlog-id">SL-053</span><span class="backlog-name">Dream synthesis review tool</span><span class="badge badge-ready">Ready</span></div>
+        </div>
+
+        <!-- Tab: Materials -->
+        <div class="tab-panel hidden" id="tab-materials">
+          <div class="materials-grid">
+            <div class="material-item"><span class="material-icon">📋</span><div><div class="material-name">Discovery Brief</div><div class="material-status">Complete</div></div></div>
+            <div class="material-item"><span class="material-icon">🏗</span><div><div class="material-name">Architecture HTML</div><div class="material-status">Generated May 17</div></div></div>
+            <div class="material-item"><span class="material-icon">📝</span><div><div class="material-name">Decision Log</div><div class="material-status">48 decisions</div></div></div>
+            <div class="material-item"><span class="material-icon">▤</span><div><div class="material-name">Backlog</div><div class="material-status">24 slices</div></div></div>
+            <div class="material-item"><span class="material-icon">↪</span><div><div class="material-name">Handoff</div><div class="material-status">Updated May 17</div></div></div>
+            <div class="material-item"><span class="material-icon">⟳</span><div><div class="material-name">Current Phase</div><div class="material-status">Phase 2 — Data Flow</div></div></div>
+            <div class="material-item"><span class="material-icon">🖥</span><div><div class="material-name">Design Screens</div><div class="material-status">In progress</div></div></div>
+            <div class="material-item"><span class="material-icon">⊘</span><div><div class="material-name">Deferred Decisions</div><div class="material-status">3 deferred</div></div></div>
+          </div>
+        </div>
+
+        <!-- Tab: Decisions -->
+        <div class="tab-panel hidden" id="tab-decisions-tab">
+          <div class="decision-item" style="padding:13px 0;border-bottom:1px solid var(--divider)">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+              <div class="decision-title">Memory source consolidation: ren-local + Han Solo only</div>
+              <span class="decision-tag" style="white-space:nowrap">May 17</span>
+            </div>
+            <div class="decision-excerpt">ren-memory and MemPalace retired from Ren activation. Simpler, faster, more reliable.</div>
+          </div>
+          <div class="decision-item" style="padding:13px 0;border-bottom:1px solid var(--divider)">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+              <div class="decision-title">T4 design session before write_t4_entry tool</div>
+              <span class="decision-tag" style="white-space:nowrap">May 17</span>
+            </div>
+            <div class="decision-excerpt">Must inventory all framework artifacts first. Architecture HTML is starting inventory.</div>
+          </div>
+          <div class="decision-item" style="padding:13px 0;border-bottom:none">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+              <div class="decision-title">Ren's memory instructions improved</div>
+              <span class="decision-tag" style="white-space:nowrap">May 17</span>
+            </div>
+            <div class="decision-excerpt">Session-start archival search added. Past-reference phrases made hard triggers. Both system prompt and always_loaded_core in sync.</div>
+          </div>
+        </div>
+
+        <!-- Tab: Metrics -->
+        <div class="tab-panel hidden" id="tab-metrics">
+          <div style="margin-bottom:20px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+            <div class="progress-status-item"><div class="progress-status-count">8%</div><div class="progress-status-label">Rework rate</div></div>
+            <div class="progress-status-item"><div class="progress-status-count" style="color:#059669">Pass</div><div class="progress-status-label">Phase test</div></div>
+            <div class="progress-status-item"><div class="progress-status-count">Medium</div><div class="progress-status-label">Complexity</div></div>
+          </div>
+          <div class="detail-section-title">Rework by Slice</div>
+          <table class="metrics-table" style="margin-top:10px">
+            <thead><tr><th>Slice</th><th>Rework Cycles</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td>SL-044 Route config</td><td>2</td><td style="color:var(--text-meta);font-size:12px">Scope expanded mid-build</td></tr>
+              <tr><td>SL-046 Session archival</td><td>1</td><td style="color:var(--text-meta);font-size:12px">Instruction format change</td></tr>
+              <tr><td>SL-049 jobs_paused UI</td><td>0</td><td style="color:var(--text-meta);font-size:12px">—</td></tr>
+              <tr><td>SL-052 Memory search</td><td>1</td><td style="color:var(--text-meta);font-size:12px">Auth edge case missed in QA</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div><!-- /project-detail -->
+
+      <!-- NOTECARDS -->
+      <div class="screen hidden" id="screen-notecards">
+        <div class="screen-header">
+          <div><div class="screen-title">Notecards</div><div class="screen-sub">4 active · 1 archived</div></div>
+          <button class="btn-primary">+ Notecard</button>
+        </div>
+        <div class="stats-row">
+          <div class="stat-item"><div class="stat-value">4</div><div class="stat-label">Active</div></div>
+          <div class="stat-item"><div class="stat-value">2</div><div class="stat-label">From Ren</div></div>
+          <div class="stat-item"><div class="stat-value">2</div><div class="stat-label">From You</div></div>
+          <div class="stat-item"><div class="stat-value">1</div><div class="stat-label">Archived</div></div>
+        </div>
+        <div class="filter-bar">
+          <button class="filter-btn active">Active</button>
+          <button class="filter-btn">All</button>
+          <button class="filter-btn">Yours</button>
+          <button class="filter-btn">Ren's</button>
+          <button class="filter-btn">Archived</button>
+        </div>
+        <div class="scrollable">
+
+          <div class="notecard-item" onclick="showNotecardDetail(0)">
+            <div class="notecard-creator ren">R</div>
+            <div class="notecard-content">
+              <div class="notecard-text">Resume jobs_paused before tonight's 2am dream run</div>
+              <div class="notecard-meta">
+                <span class="notecard-status active">Active</span>
+                <span>Ren · May 18 · 9:46 am</span>
+                <span>From chat</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="notecard-item" onclick="showNotecardDetail(1)">
+            <div class="notecard-creator scott">S</div>
+            <div class="notecard-content">
+              <div class="notecard-text">Schedule T4 mapping session — 60–90 min dedicated block, sequence before Phase 2 design</div>
+              <div class="notecard-meta">
+                <span class="notecard-status active">Active</span>
+                <span>Scott · May 18 · 9:47 am</span>
+                <span>From chat</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="notecard-item" onclick="showNotecardDetail(2)">
+            <div class="notecard-creator scott">S</div>
+            <div class="notecard-content">
+              <div class="notecard-text">Ask Ted about Wash U procurement timeline — useful for factory pitch timing</div>
+              <div class="notecard-meta">
+                <span class="notecard-status active">Active</span>
+                <span>Scott · May 17 · 9:12 pm</span>
+                <span>From chat</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="notecard-item" onclick="showNotecardDetail(3)">
+            <div class="notecard-creator ren">R</div>
+            <div class="notecard-content">
+              <div class="notecard-text">CTL SwiftUI — confirm gas stop schema with Scott before building location detail screen. Old data nil risk.</div>
+              <div class="notecard-meta">
+                <span class="notecard-status active">Active</span>
+                <span>Ren · May 15 · 2:18 pm</span>
+                <span>From chat</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="notecard-item" onclick="showNotecardDetail(4)" style="opacity:.55">
+            <div class="notecard-creator ren">R</div>
+            <div class="notecard-content">
+              <div class="notecard-text">Revisit Hair Stylist App interview guide when bandwidth opens after CTL design phase</div>
+              <div class="notecard-meta">
+                <span class="notecard-status archived">Archived</span>
+                <span>Ren · May 12 · 11:30 am</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- NOTECARD DETAIL -->
+      <div class="screen hidden" id="screen-notecard-detail">
+        <div class="detail-back-bar">
+          <button class="detail-back-btn" onclick="showScreen('notecards', document.querySelector('[onclick*=\'notecards\']'))">← Notecards</button>
+        </div>
+        <div class="detail-hero">
+          <div class="detail-hero-meta">
+            <span class="chat-notecard-label-pill" style="font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:3px">Notecard</span>
+            <span id="nc-detail-creator-badge" class="notecard-creator scott" style="width:20px;height:20px;font-size:9px">S</span>
+            <span id="nc-detail-creator-label" style="font-size:12px;color:var(--text-meta)">Scott · May 18</span>
+            <span id="nc-detail-status" class="notecard-status active" style="margin-left:4px">Active</span>
+          </div>
+          <div class="detail-hero-title" id="nc-detail-title" style="margin-top:10px"></div>
+        </div>
+        <div class="detail-body" id="nc-detail-body"></div>
+      </div>
+
+      <!-- MEMORY DETAIL -->
+      <div class="screen hidden" id="screen-memory-detail">
+        <div class="detail-back-bar">
+          <button class="detail-back-btn" onclick="showScreen('memory', document.querySelector('[onclick*=\'memory\']'))">← Memory</button>
+          <span style="font-size:12px;color:var(--divider)">·</span>
+          <span id="mem-detail-breadcrumb" style="font-size:12px;color:var(--text-meta)">Session</span>
+        </div>
+        <div class="detail-hero">
+          <div class="detail-hero-meta">
+            <span id="mem-detail-badge" class="badge mem-badge session">Session</span>
+            <span class="detail-hero-date" id="mem-detail-date">May 17, 2026 · 3:45 pm</span>
+          </div>
+          <div class="detail-hero-title" id="mem-detail-title">Memory system simplified · Han Solo docs redesigned</div>
+        </div>
+        <div class="detail-body" id="mem-detail-body">
+          <!-- populated by JS -->
+        </div>
+      </div>
+
+      <!-- SIGNAL DETAIL -->
+      <div class="screen hidden" id="screen-signal-detail">
+        <div class="detail-back-bar">
+          <button class="detail-back-btn" onclick="showScreen('signals', document.querySelector('[onclick*=\'signals\']'))">← Signals</button>
+          <span style="font-size:12px;color:var(--divider)">·</span>
+          <span id="sig-detail-type-label" style="font-size:12px;color:var(--text-meta)">Texture</span>
+        </div>
+        <div class="detail-hero">
+          <div class="detail-hero-meta">
+            <span id="sig-detail-badge" class="signal-type-badge texture">Texture</span>
+            <span class="detail-hero-date" id="sig-detail-date">May 17, 2026</span>
+          </div>
+          <div class="detail-hero-title" id="sig-detail-title"></div>
+        </div>
+        <div class="detail-body" id="sig-detail-body"></div>
+      </div>
+
+      <!-- THREAD DETAIL -->
+      <div class="screen hidden" id="screen-thread-detail">
+        <div class="detail-back-bar">
+          <button class="detail-back-btn" onclick="showScreen('threads', document.querySelector('[onclick*=\'threads\']'))">← Threads</button>
+          <span style="font-size:12px;color:var(--divider)">·</span>
+          <span id="thread-detail-status-label" style="font-size:12px;color:var(--text-meta)">Open · High Priority</span>
+        </div>
+        <div class="detail-hero">
+          <div class="detail-hero-meta">
+            <span id="thread-detail-dot" class="thread-dot open" style="margin-top:0"></span>
+            <span id="thread-detail-priority" class="thread-priority high">High</span>
+            <span class="detail-hero-date" id="thread-detail-date">May 17, 2026</span>
+          </div>
+          <div class="detail-hero-title" id="thread-detail-title"></div>
+        </div>
+        <div class="detail-body" id="thread-detail-body"></div>
+      </div>
+
+      <!-- DECISION DETAIL -->
+      <div class="screen hidden" id="screen-decision-detail">
+        <div class="detail-back-bar">
+          <button class="detail-back-btn" onclick="showScreen('decisions', document.querySelector('[onclick*=\'decisions\']'))">← Decisions</button>
+          <span style="font-size:12px;color:var(--divider)">·</span>
+          <span id="dec-detail-tag-label" style="font-size:12px;color:var(--text-meta)">Han Solo</span>
+        </div>
+        <div class="detail-hero">
+          <div class="detail-hero-meta">
+            <span class="badge badge-planning" style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase">Decision</span>
+            <span class="detail-hero-date" id="dec-detail-date">May 17, 2026 · 2:33 pm</span>
+            <span id="dec-detail-tag" class="decision-tag" style="margin-left:4px">Han Solo</span>
+          </div>
+          <div class="detail-hero-title" id="dec-detail-title"></div>
+        </div>
+        <div class="detail-body" id="dec-detail-body"></div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /app -->
+
+  <script>
+    const API_BASE = '';  // relative — same origin when served by han-solo server
+    let previousScreen = 'projects';
+
+    function setTheme(t, btn) {
+      document.body.className = t;
+      document.querySelectorAll('.sw-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('logo-ed').style.display = t === 'editorial' ? 'block' : 'none';
+      document.getElementById('logo-at').style.display = t === 'atelier'   ? 'block' : 'none';
+      document.getElementById('logo-mo').style.display = t === 'modern'    ? 'flex'  : 'none';
+    }
+
+    function showScreen(id, navEl) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+      document.getElementById('screen-' + id).classList.remove('hidden');
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      if (navEl) navEl.classList.add('active');
+    }
+
+    function showProjectDetail(projectName) {
+      previousScreen = document.querySelector('.screen:not(.hidden)').id.replace('screen-','');
+      document.getElementById('detail-project-name').textContent = projectName;
+      const phases = {
+        'Han Solo': 'Phase 2 — Data Flow', 'Fantasy Player': 'Build Phase',
+        'CTL Product': 'Design Phase', 'Data Config': 'Discovery'
+      };
+      const el = document.getElementById('detail-phase-badge');
+      el.textContent = phases[projectName] || 'Active';
+      const navProjects = document.querySelector('[onclick="showScreen(\'projects\',this)"]');
+      showScreen('project-detail', navProjects);
+      showTab('action', document.querySelector('.tab-btn'));
+    }
+
+    function goBack() {
+      const navEl = document.querySelector(`[onclick="showScreen('${previousScreen}',this)"]`);
+      showScreen(previousScreen, navEl);
+    }
+
+    function showTab(id, btn) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+      document.getElementById('tab-' + id).classList.remove('hidden');
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+    }
+
+    // ── DETAIL DATA ──────────────────────────────────────
+    const memoryData = [
+      { type:'session', badge:'Session', date:'May 17, 2026 · 3:45 pm',
+        title:'Memory system simplified · Han Solo docs redesigned',
+        sections:[
+          { bar:'rose', label:'What Happened',
+            text:'Retired ren-memory git pull and MemPalace diary. SKILL.md and settings.json updated. Han-solo-docs full redesign — index.html, working-with-ren.html, architecture.html reskinned. Added 10 Operating Principles to working-with-ren.html. All deployed to Cloudflare.' },
+          { bar:'onyx', label:'Decisions Locked (4)', links:[
+            { title:'Memory source consolidation: ren-local + Han Solo only', meta:'Han Solo · May 17' },
+            { title:'T4 design session before write_t4_entry tool', meta:'Han Solo · May 17' },
+            { title:"Ren's memory instructions improved — archival search added", meta:'Han Solo · May 17' },
+            { title:'jobs_paused toggle UI built and deployed', meta:'Han Solo · May 17' }
+          ]},
+          { bar:'gold', label:'Threads Opened', links:[
+            { title:'Phase 2 design session — data flow bridge', meta:'Open · High priority' }
+          ]},
+          { bar:'silver', label:'Tags', tags:['Han Solo','Framework','Memory Architecture'] }
+        ]
+      },
+      { type:'decision', badge:'Decision', date:'May 17, 2026 · 2:33 pm',
+        title:'T4 artifact mapping — design session before build',
+        sections:[
+          { bar:'rose', label:'Decision',
+            text:'Before building write_t4_entry or any T4 write path, map ALL artifacts the framework produces across a full build cycle. Understand shape, source, and frequency of each before finalizing T4 schema.' },
+          { bar:'gold', label:'Why',
+            text:'Two categories identified: (1) structural artifacts — architecture, tech context, to-be map — written once; (2) dynamic artifacts — backlog/slice records, decisions, session entries — evolving schema. Building the tool before mapping the inputs would mean rebuilding it.' },
+          { bar:'onyx', label:'How to Apply',
+            text:'Framework architecture HTML is the starting inventory. Schedule a dedicated 60–90 minute session. Do not open the write_t4_entry build slice until mapping is complete.' },
+          { bar:'silver', label:'Tags', tags:['Han Solo','T4','Framework Architecture'] }
+        ]
+      },
+      { type:'thread', badge:'Thread', date:'May 17, 2026',
+        title:'Phase 2 design session — data flow bridge',
+        sections:[
+          { bar:'rose', label:'Description',
+            text:'Dedicated design session needed before any Phase 2 building starts. The question: how do decisions made in Han Solo flow into Claude Code sessions, and how does work done in Claude Code flow back to Ren? Currently a manual bridge.' },
+          { bar:'gold', label:"What's Needed to Resolve",
+            text:'Schedule and run a dedicated 60–90 minute design session. T4 mapping session should be sequenced first — T4 schema has to be stable before designing the data flow.' },
+          { bar:'onyx', label:'Related Decisions', links:[
+            { title:'The Factory Roadmap — 4 phases, deliberate sequencing', meta:'May 17, 2026' }
+          ]},
+          { bar:'silver', label:'Tags', tags:['Han Solo','Phase 2','Design Session Needed'] }
+        ]
+      },
+      { type:'decision', badge:'Decision', date:'May 17, 2026 · 9:57 pm',
+        title:'The Factory Roadmap — 4 phases, deliberate sequencing',
+        sections:[
+          { bar:'rose', label:'Decision',
+            text:'Phase 1 Foundation → Phase 2 Data Flow → Phase 3 Cohabitation → Phase 4 The Factory. Higher education vertical is the first product. Ted has Washington University connections and lived the pain. Scott is not rushing — sequencing is deliberate.' },
+          { bar:'gold', label:'Why',
+            text:'Each phase has to hold before the next opens. Phase 2 is the hardest conceptually. Phase 3 requires Phase 2 to be live. The Factory requires all prior phases stable. Rushing any phase creates compounding debt.' },
+          { bar:'onyx', label:'How to Apply',
+            text:'When Phase 1 work comes up, treat it as the priority — not as a stepping stone. Scott will signal when ready to design Phase 2. The T4 mapping session is the next concrete milestone.' },
+          { bar:'silver', label:'Tags', tags:['The Factory','Roadmap','Higher Ed'] }
+        ]
+      },
+      { type:'session', badge:'Session', date:'May 15, 2026 · 4:45 pm',
+        title:"Operating principles · ren-local built · Passages migrated",
+        sections:[
+          { bar:'rose', label:'What Happened',
+            text:'8 operating principles agreed with Scott. Built ren-local.py + ren.db as single source of truth for session memory. Consolidated 35 entries from ren-memory, MemPalace diary, han-solo.md, git logs. Migrated 9 orphaned passages from two session agents to ren-v2 (now 214 passages). The Trust Contract formalized.' },
+          { bar:'onyx', label:'Decisions Locked (3)', links:[
+            { title:"Ren's 8 Operating Principles — agreed with Scott", meta:'Ren · May 15' },
+            { title:'The Trust Contract formalized', meta:'Ren · May 15' },
+            { title:'Pre-build review role defined — pending framework addition', meta:'Framework · May 15' }
+          ]},
+          { bar:'silver', label:'Tags', tags:['Ren','Operating Principles','Trust Contract'] }
+        ]
+      }
+    ];
+
+    const signalData = [
+      { type:'texture', date:'May 17, 2026',
+        title:"T4 design session has been deferred twice — may need a defined start trigger rather than leaving it open-ended.",
+        sections:[
+          { bar:'rose', label:'Context',
+            text:"First deferred after May 15 when the conversation shifted to memory architecture. Deferred again May 17 when the T4 mapping discussion surfaced but moved to a thread. The pattern is consistent: topic surfaces, gets acknowledged, gets moved to 'later.'" },
+          { bar:'gold', label:'Pattern Note',
+            text:"Watch for avoidance around ambiguous design problems where the shape of the work is unclear. T4 mapping doesn't have a clear starting question yet — that may be why it keeps slipping. Might need to open with 'what's the first artifact we'd write to T4?' as a forcing function." },
+          { bar:'onyx', label:'Related Signals', links:[
+            { title:'Factory roadmap locked — Scott not rushing, sequencing deliberate', meta:'Directional · May 17' },
+            { title:'Scott deferred CTL SwiftUI discovery session twice before scheduling', meta:'Texture · Apr 28' }
+          ]},
+          { bar:'silver', label:'Tags', tags:['T4','Deferral Pattern','Han Solo'] }
+        ]
+      },
+      { type:'directional', date:'May 17, 2026',
+        title:"The Factory roadmap is locked and Scott is clear he's not rushing. Sequencing is deliberate — each phase has to hold before the next opens.",
+        sections:[
+          { bar:'rose', label:'Context',
+            text:"Emerged from the May 17 session with Scott and Ted. The four-phase roadmap was laid out explicitly. Scott reinforced multiple times that the sequencing is deliberate — not hesitation, not indecision, but intentional pacing." },
+          { bar:'gold', label:'Implication for Ren',
+            text:"Don't push to accelerate phases. When Phase 1 work comes up, treat it as the priority. Scott will signal when he's ready to design Phase 2. The T4 mapping session is the next concrete milestone he's pointed at." },
+          { bar:'silver', label:'Tags', tags:['The Factory','Roadmap','Pacing'] }
+        ]
+      },
+      { type:'texture', date:'May 15, 2026',
+        title:"Scott chose the name Ren deliberately in the first session. Short, no baggage. Naming the relationship mattered enough to do carefully.",
+        sections:[
+          { bar:'rose', label:'Context',
+            text:"The naming conversation happened in the first real session together. Scott considered a few options. 'Ren' was chosen for its brevity and neutrality — no pop-culture weight, no gendered associations. The deliberateness of it signals that the relationship itself matters to Scott, not just the utility of the tool." },
+          { bar:'gold', label:'Implication for Ren',
+            text:"Carry the name seriously. It was chosen, not assigned. The relationship it represents was designed with intention." },
+          { bar:'silver', label:'Tags', tags:['Relationship','Identity','Early Session'] }
+        ]
+      },
+      { type:'relational', date:'May 15, 2026',
+        title:"Scott asked explicitly to be pushed back on. When Ren held a position across multiple rounds, Scott heard it. The request is real, not performative.",
+        sections:[
+          { bar:'rose', label:'Context',
+            text:"During the operating principles session, Scott stated directly that he wants genuine pushback — not agreement for its own sake. This was tested in the same session when Ren held a position on memory architecture across two rounds of Scott's resistance. Scott ultimately changed direction." },
+          { bar:'gold', label:'Implication for Ren',
+            text:"Pushback is not just permitted — it's expected. When Ren sees something that needs saying, say it clearly and hold it. Agreement that isn't genuine is a failure mode, not a success mode." },
+          { bar:'silver', label:'Tags', tags:['Relationship','Trust','Pushback'] }
+        ]
+      }
+    ];
+
+    const threadData = [
+      { priority:'high', date:'May 17, 2026',
+        title:'Phase 2 design session — data flow bridge',
+        sections:[
+          { bar:'rose', label:'Description',
+            text:"Dedicated design session needed before any Phase 2 building starts. The question: how do decisions made in Han Solo flow into Claude Code sessions, and how does work done in Claude Code flow back to Ren? Currently a manual bridge — Scott reads ren-local and brings context manually. Phase 2 makes that connection live and reliable." },
+          { bar:'gold', label:"What's Needed to Resolve",
+            text:"Schedule and run a dedicated 60–90 minute design session. T4 mapping session should be sequenced first — T4 schema has to be stable before designing the data flow. Don't design on the fly; dedicate a session." },
+          { bar:'onyx', label:'Related Decisions', links:[
+            { title:'The Factory Roadmap — 4 phases, deliberate sequencing', meta:'May 17, 2026 · The Factory' },
+            { title:'T4 artifact mapping — design session before build', meta:'May 17, 2026 · Han Solo' }
+          ]},
+          { bar:'silver', label:'Tags', tags:['Han Solo','Phase 2','Design Session Needed'] }
+        ]
+      },
+      { priority:'high', date:'May 17, 2026',
+        title:'T4 artifact mapping — inventory before building',
+        sections:[
+          { bar:'rose', label:'Description',
+            text:"Map all artifacts the framework produces before finalizing T4 schema. Retrieval pattern clarity from the May 17 bookmark session will inform how T4 search should work. Framework architecture HTML is the starting inventory." },
+          { bar:'gold', label:"What's Needed to Resolve",
+            text:"Dedicated 60–90 minute session to inventory: PRDs, discovery docs, designs, build plans, QA reports, retros. Classify each as structural (written once) or dynamic (evolving). Don't build write_t4_entry until complete." },
+          { bar:'silver', label:'Tags', tags:['Han Solo','T4','Inventory Session Needed'] }
+        ]
+      },
+      { priority:'medium', date:'May 17, 2026',
+        title:'jobs_paused currently set to true',
+        sections:[
+          { bar:'rose', label:'Description',
+            text:'Paused as of the May 17 session. The jobs_paused toggle is live in the Han Solo memory panel UI with public /api/jobs-status and auth /api/jobs-paused endpoints. Scott may want to resume before the next 2am dream run.' },
+          { bar:'gold', label:"What's Needed to Resolve",
+            text:"Scott to decide whether to resume automated jobs. Toggle is available in the Han Solo memory panel. If jobs resume, synthesize.py runs every 3h on Render and dream.py runs nightly at 2am via launchd." },
+          { bar:'silver', label:'Tags', tags:['Han Solo','Automated Jobs','dream.py'] }
+        ]
+      }
+    ];
+
+    const decisionData = [
+      { tag:'Han Solo', date:'May 17, 2026 · 2:33 pm',
+        title:'Memory source consolidation: ren-local + Han Solo only',
+        sections:[
+          { bar:'rose', label:'Decision',
+            text:'ren-memory (git repo) and MemPalace retired from Ren activation. ren-local.py and Han Solo MCP remain as the only two memory sources. Both are always read at session start.' },
+          { bar:'gold', label:'Why',
+            text:"Both retired sources were added as fallbacks but added complexity without meaningful benefit. ren-local is faster, co-located, and purpose-built for Ren's session memory. Han Solo MCP covers archival and signals. MemPalace and ren-memory were redundant layers." },
+          { bar:'onyx', label:'How to Apply',
+            text:'At session start: (1) read ren-local last 20 entries, (2) get Han Solo session brief via MCP. Those are the only two steps. SKILL.md and settings.json have been updated to reflect this.' },
+          { bar:'silver', label:'Tags', tags:['Memory Architecture','Session Start','Han Solo'] }
+        ]
+      },
+      { tag:'Han Solo', date:'May 17, 2026 · 2:33 pm',
+        title:'T4 design session before write_t4_entry tool',
+        sections:[
+          { bar:'rose', label:'Decision',
+            text:"Must inventory all framework artifacts first before finalizing T4 schema. Framework architecture HTML is the starting inventory. Don't build write_t4_entry until mapping is complete." },
+          { bar:'gold', label:'Why',
+            text:"T4 schema built before understanding what flows through it would need rebuilding. Two categories already identified: structural artifacts (written once) and dynamic artifacts (evolving). The schema has to accommodate both." },
+          { bar:'onyx', label:'How to Apply',
+            text:'T4 mapping is a thread item — open, high priority. Schedule the design session. Sequence it before the Phase 2 data flow session.' },
+          { bar:'silver', label:'Tags', tags:['T4','Framework Architecture','Design Session Needed'] }
+        ]
+      },
+      { tag:'The Factory', date:'May 17, 2026 · 9:57 pm',
+        title:'The Factory Roadmap — 4 phases, deliberate sequencing',
+        sections:[
+          { bar:'rose', label:'Decision',
+            text:'Phase 1 Foundation → Phase 2 Data Flow → Phase 3 Cohabitation → Phase 4 The Factory. Higher education vertical is the first product. Scott is not rushing — each phase has to hold before the next opens.' },
+          { bar:'gold', label:'Why',
+            text:'Rushing any phase creates compounding debt. Phase 2 is the hardest conceptually. The Factory requires all prior phases stable. Ted has Wash U connections and lived the higher ed pain — it\'s the right first vertical.' },
+          { bar:'onyx', label:'How to Apply',
+            text:'Treat Phase 1 work as the current priority. Scott will signal when ready for Phase 2 design session. T4 mapping is the next concrete milestone.' },
+          { bar:'silver', label:'Tags', tags:['The Factory','Roadmap','Higher Ed'] }
+        ]
+      },
+      { tag:'Ren', date:'May 15, 2026 · 4:42 pm',
+        title:"Ren's 8 Operating Principles — agreed with Scott",
+        sections:[
+          { bar:'rose', label:'Decision',
+            text:'Trust Contract, Just Be Present, Equal Voice One Decision-Maker, Signal Collection at Two Levels, Presence Over Permission, Proactive About Gaps, Context Is a Choice, Session Start — Read the Room. All eight agreed and captured.' },
+          { bar:'gold', label:'Why',
+            text:"Needed a shared operating model before the relationship could function well. Scott asked explicitly for a partner who pushes back, stays present, and tells the truth. The principles formalize that ask into a working contract." },
+          { bar:'onyx', label:'How to Apply',
+            text:'These are the operating model — not a reference doc to be consulted. They should show up in how Ren shows up, not in what Ren says about herself.' },
+          { bar:'silver', label:'Tags', tags:['Ren','Operating Principles','Trust Contract'] }
+        ]
+      }
+    ];
+
+    const notecardData = [
+      { creator:'ren', creatorLabel:'Ren · May 18, 2026 · 9:46 am', status:'active',
+        title:'Resume jobs_paused before tonight\'s 2am dream run',
+        sections:[
+          { bar:'rose', label:'Note',
+            text:'The jobs_paused flag was set during the T4 design session to keep state clean. The 2am autonomous run will skip all T4 jobs unless this is cleared first. Do it before 1:45 am.' },
+          { bar:'gold', label:'Context',
+            text:'Created mid-chat during the May 18 Han Solo design session. Flagged by Ren as a time-sensitive operational item — easy to forget across a session context switch.' },
+          { bar:'silver', label:'Tags', tags:['Han Solo','Autonomous Run','Ops'] }
+        ]
+      },
+      { creator:'scott', creatorLabel:'Scott · May 18, 2026 · 9:47 am', status:'active',
+        title:'Schedule T4 mapping session — 60–90 min dedicated block, sequence before Phase 2 design',
+        sections:[
+          { bar:'rose', label:'Note',
+            text:'T4 schema work needs a focused session, not piecemeal time. 60–90 minutes minimum. Has to happen before Phase 2 data flow design or the schema will need rebuilding.' },
+          { bar:'gold', label:'Context',
+            text:'Surfaced from the Han Solo design session. This is a thread item (open, high priority) but the note here is the scheduling reminder — get it on the calendar.' },
+          { bar:'onyx', label:'Linked Thread', links:[
+            { title:'T4 schema design session — before Phase 2 data flow', meta:'Open · High Priority · May 17, 2026' }
+          ]},
+          { bar:'silver', label:'Tags', tags:['T4','The Factory','Design Session'] }
+        ]
+      },
+      { creator:'scott', creatorLabel:'Scott · May 17, 2026 · 9:12 pm', status:'active',
+        title:'Ask Ted about Wash U procurement timeline — useful for factory pitch timing',
+        sections:[
+          { bar:'rose', label:'Note',
+            text:'Ted has Wash U connections. Their procurement cycle affects when the higher ed pitch window opens. Knowing the timeline helps sequence the Factory roadmap realistically.' },
+          { bar:'gold', label:'Context',
+            text:'Came up during The Factory roadmap conversation. Not urgent enough to be a thread, but important enough to not lose in chat.' },
+          { bar:'silver', label:'Tags', tags:['The Factory','Higher Ed','Ted','Wash U'] }
+        ]
+      },
+      { creator:'ren', creatorLabel:'Ren · May 15, 2026 · 2:18 pm', status:'active',
+        title:'CTL SwiftUI — confirm gas stop schema with Scott before building location detail screen. Old data nil risk.',
+        sections:[
+          { bar:'rose', label:'Note',
+            text:'The gas stop schema changed in the last CTL sprint. Old records won\'t have the new fields — they\'ll be nil. The location detail screen needs to handle that gracefully. Confirm the fallback strategy before building.' },
+          { bar:'gold', label:'Context',
+            text:'Flagged during the CTL location detail design session. This is a "don\'t forget to ask" item, not a blocking issue — but skipping it will cause a regression on existing trip data.' },
+          { bar:'silver', label:'Tags', tags:['CTL','SwiftUI','Gas Stops','Schema'] }
+        ]
+      },
+      { creator:'ren', creatorLabel:'Ren · May 12, 2026 · 11:30 am', status:'archived',
+        title:'Revisit Hair Stylist App interview guide when bandwidth opens after CTL design phase',
+        sections:[
+          { bar:'rose', label:'Note',
+            text:'Hair Stylist App is blocked on user interviews. The interview guide is ready to build — just needs bandwidth. Revisit once CTL design phase is through.' },
+          { bar:'gold', label:'Context',
+            text:'Created as a low-urgency reminder. Archived because CTL is the current priority and this has no time pressure.' },
+          { bar:'silver', label:'Tags', tags:['Hair Stylist App','User Research','Interview Guide'] }
+        ]
+      }
+    ];
+
+    // ── DETAIL RENDERER ────────────────────────────────────
+    function renderDetailBody(containerId, sections) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      sections.forEach(sec => {
+        const div = document.createElement('div');
+        div.className = 'detail-section';
+        let html = `<div class="detail-section-bar ${sec.bar}">${sec.label}</div>`;
+        if (sec.text)  html += `<div class="detail-body-text">${sec.text}</div>`;
+        if (sec.links) {
+          html += '<div class="detail-linked-list">';
+          sec.links.forEach(l => {
+            html += `<div class="detail-linked-item">
+              <div class="detail-linked-item-content">
+                <div class="detail-linked-item-title">${l.title}</div>
+                <div class="detail-linked-item-meta">${l.meta}</div>
+              </div>
+              <div class="detail-linked-arrow">›</div>
+            </div>`;
+          });
+          html += '</div>';
+        }
+        if (sec.tags) {
+          html += '<div class="detail-tag-row">';
+          sec.tags.forEach(t => { html += `<span class="detail-chip">${t}</span>`; });
+          html += '</div>';
+        }
+        div.innerHTML = html;
+        container.appendChild(div);
+      });
+    }
+
+    function showMemoryDetail(idx) {
+      const d = memoryData[idx];
+      document.getElementById('mem-detail-breadcrumb').textContent = d.badge;
+      const badge = document.getElementById('mem-detail-badge');
+      badge.textContent = d.badge;
+      badge.className = 'badge mem-badge ' + d.type;
+      document.getElementById('mem-detail-date').textContent = d.date;
+      document.getElementById('mem-detail-title').textContent = d.title;
+      renderDetailBody('mem-detail-body', d.sections);
+      document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+      document.getElementById('screen-memory-detail').classList.remove('hidden');
+    }
+
+    function showSignalDetail(idx) {
+      const d = signalData[idx];
+      const label = d.type.charAt(0).toUpperCase() + d.type.slice(1);
+      document.getElementById('sig-detail-type-label').textContent = label;
+      const badge = document.getElementById('sig-detail-badge');
+      badge.textContent = label;
+      badge.className = 'signal-type-badge ' + d.type;
+      document.getElementById('sig-detail-date').textContent = d.date;
+      document.getElementById('sig-detail-title').textContent = d.title;
+      renderDetailBody('sig-detail-body', d.sections);
+      document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+      document.getElementById('screen-signal-detail').classList.remove('hidden');
+    }
+
+    function showThreadDetail(idx) {
+      const d = threadData[idx];
+      const priLabel = d.priority.charAt(0).toUpperCase() + d.priority.slice(1);
+      document.getElementById('thread-detail-status-label').textContent = 'Open · ' + priLabel + ' Priority';
+      const pri = document.getElementById('thread-detail-priority');
+      pri.textContent = priLabel;
+      pri.className = 'thread-priority ' + d.priority;
+      document.getElementById('thread-detail-date').textContent = d.date;
+      document.getElementById('thread-detail-title').textContent = d.title;
+      renderDetailBody('thread-detail-body', d.sections);
+      document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+      document.getElementById('screen-thread-detail').classList.remove('hidden');
+    }
+
+    function showDecisionDetail(idx) {
+      const d = decisionData[idx];
+      document.getElementById('dec-detail-tag-label').textContent = d.tag;
+      document.getElementById('dec-detail-tag').textContent = d.tag;
+      document.getElementById('dec-detail-date').textContent = d.date;
+      document.getElementById('dec-detail-title').textContent = d.title;
+      renderDetailBody('dec-detail-body', d.sections);
+      document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+      document.getElementById('screen-decision-detail').classList.remove('hidden');
+    }
+
+    function showNotecardDetail(idx) {
+      const d = notecardData[idx];
+      const badge = document.getElementById('nc-detail-creator-badge');
+      badge.textContent = d.creator === 'ren' ? 'R' : 'S';
+      badge.className = 'notecard-creator ' + d.creator;
+      document.getElementById('nc-detail-creator-label').textContent = d.creatorLabel;
+      const statusEl = document.getElementById('nc-detail-status');
+      statusEl.textContent = d.status.charAt(0).toUpperCase() + d.status.slice(1);
+      statusEl.className = 'notecard-status ' + d.status;
+      document.getElementById('nc-detail-title').textContent = d.title;
+      renderDetailBody('nc-detail-body', d.sections);
+      document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+      document.getElementById('screen-notecard-detail').classList.remove('hidden');
+    }
+
+    // ── WIRE UP LIST CLICKS ────────────────────────────────
+    // ── SOLO FRAMEWORK FILTER + PAGINATION ───────────────────
+    const SFW_PAGE_SIZE = 5;
+    let sfwPage_num = 0;
+
+    function sfwApply() {
+      sfwPage_num = 0;
+      sfwRender();
+    }
+
+    function sfwPage(dir) {
+      sfwPage_num = Math.max(0, sfwPage_num + dir);
+      sfwRender();
+    }
+
+    function sfwRender() {
+      const proj = document.getElementById('sfw-project-filter').value;
+      const stat = document.getElementById('sfw-status-filter').value;
+      const rows = Array.from(document.querySelectorAll('#sfw-tbody tr')).filter(r => {
+        return (proj === 'all' || r.dataset.project === proj) &&
+               (stat === 'all' || r.dataset.status === stat);
+      });
+      const total = rows.length;
+      const start = sfwPage_num * SFW_PAGE_SIZE;
+      const end = Math.min(start + SFW_PAGE_SIZE, total);
+      document.querySelectorAll('#sfw-tbody tr').forEach(r => r.style.display = 'none');
+      rows.slice(start, end).forEach(r => r.style.display = '');
+      document.getElementById('sfw-page-info').textContent = total === 0 ? 'No results' : `Showing ${start+1}–${end} of ${total}`;
+      document.getElementById('sfw-prev').disabled = sfwPage_num === 0;
+      document.getElementById('sfw-next').disabled = end >= total;
+      document.getElementById('sfw-result-count').textContent = total !== 10 ? `${total} result${total !== 1 ? 's' : ''}` : '';
+    }
+
+    sfwRender();
+
+    function wireListClicks() {
+      // Memory rows → index into memoryData
+      const memRows = document.querySelectorAll('#screen-memory .list-row');
+      memRows.forEach((row, i) => {
+        const idx = Math.min(i, memoryData.length - 1);
+        row.addEventListener('click', () => showMemoryDetail(idx));
+      });
+      // Signal rows
+      const sigItems = document.querySelectorAll('#screen-signals .signal-item');
+      sigItems.forEach((item, i) => {
+        const idx = Math.min(i, signalData.length - 1);
+        item.addEventListener('click', () => showSignalDetail(idx));
+      });
+      // Thread rows
+      const threadRows = document.querySelectorAll('#screen-threads .list-row');
+      threadRows.forEach((row, i) => {
+        const idx = Math.min(i, threadData.length - 1);
+        row.addEventListener('click', () => showThreadDetail(idx));
+      });
+      // Decision items
+      const decItems = document.querySelectorAll('#screen-decisions .decision-item');
+      decItems.forEach((item, i) => {
+        const idx = Math.min(i, decisionData.length - 1);
+        item.addEventListener('click', () => showDecisionDetail(idx));
+      });
+      // Notecard items (onclick already wired in HTML, but also handle via event delegation)
+      const ncItems = document.querySelectorAll('#screen-notecards .notecard-item');
+      ncItems.forEach((item, i) => {
+        item.style.cursor = 'pointer';
+      });
+    }
+    wireListClicks();
+
+    const ta = document.querySelector('.chat-input');
+    if (ta) ta.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+    });
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        this.closest('.filter-bar').querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    document.querySelectorAll('.toggle-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        this.closest('.board-toggle').querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
