@@ -536,6 +536,72 @@ async def delete_t4_entry(
         return {"error": str(e)}
 
 
+async def list_t4_projects() -> list[dict]:
+    """
+    Return all distinct project slugs with their current_phase content and
+    aggregate slice counts (total, done).
+    """
+    if not _pool:
+        return []
+    try:
+        async with _pool.acquire() as conn:
+            slugs = await conn.fetch(
+                "SELECT DISTINCT project_slug FROM t4_entries ORDER BY project_slug"
+            )
+            results = []
+            for row in slugs:
+                slug = row["project_slug"]
+                phase_row = await conn.fetchrow(
+                    "SELECT content FROM t4_entries WHERE project_slug=$1 AND entry_type='current_phase'",
+                    slug,
+                )
+                counts = await conn.fetchrow(
+                    """
+                    SELECT
+                        COUNT(*) FILTER (WHERE entry_type='slice') AS total_slices,
+                        COUNT(*) FILTER (WHERE entry_type='slice' AND content ILIKE '%**Status:** Done%') AS done_slices,
+                        COUNT(*) FILTER (WHERE entry_type='phase') AS total_phases,
+                        COUNT(*) FILTER (WHERE entry_type='deliverable') AS total_deliverables
+                    FROM t4_entries WHERE project_slug=$1
+                    """,
+                    slug,
+                )
+                results.append({
+                    "project_slug": slug,
+                    "current_phase": phase_row["content"] if phase_row else None,
+                    "total_slices": counts["total_slices"],
+                    "done_slices": counts["done_slices"],
+                    "total_phases": counts["total_phases"],
+                    "total_deliverables": counts["total_deliverables"],
+                })
+        return results
+    except Exception as e:
+        logger.error("Failed to list T4 projects: %s", e)
+        return []
+
+
+async def list_t4_entries_by_type(project_slug: str, entry_type: str) -> list[dict]:
+    """List all T4 entries of a given type for a project, ordered by entry_id."""
+    if not _pool:
+        return []
+    try:
+        async with _pool.acquire() as conn:
+            rows = await conn.fetch(
+                """
+                SELECT id, project_slug, entry_type, entry_id, parent_id,
+                       content, updated_at
+                FROM t4_entries
+                WHERE project_slug=$1 AND entry_type=$2
+                ORDER BY entry_id
+                """,
+                project_slug, entry_type,
+            )
+        return [dict(r) for r in rows]
+    except Exception as e:
+        logger.error("Failed to list T4 entries: %s", e)
+        return []
+
+
 async def set_jobs_paused(paused: bool) -> bool:
     """Set the jobs_paused flag. Returns True on success."""
     if not _pool:

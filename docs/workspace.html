@@ -753,6 +753,134 @@
     .login-btn { width:100%; padding:9px; background:var(--accent); border:none; border-radius:7px; font-family:var(--font-body); font-size:13px; font-weight:600; color:#fff; cursor:pointer; transition:opacity .13s; }
     .login-btn:hover { opacity:.82; }
     .login-error { font-size:11.5px; color:#dc2626; margin-top:8px; min-height:16px; }
+
+    /* ── OVERLAY ─────────────────────────────────────────────── */
+    .overlay-backdrop {
+      position:fixed; inset:0; background:rgba(0,0,0,0.38);
+      backdrop-filter:blur(3px); z-index:1000;
+      display:none; align-items:center; justify-content:flex-end;
+    }
+    .overlay-backdrop.open { display:flex; }
+    .overlay-panel {
+      width:580px; max-width:92vw; height:100vh;
+      background:var(--sidebar-bg); border-left:1px solid var(--card-border);
+      display:flex; flex-direction:column; overflow:hidden;
+    }
+    .overlay-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:18px 22px; border-bottom:1px solid var(--divider); flex-shrink:0;
+    }
+    .overlay-header-left { display:flex; align-items:center; gap:10px; }
+    .overlay-type-badge {
+      font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+      padding:3px 7px; border-radius:3px;
+    }
+    .overlay-type-badge.slice       { background:rgba(234,154,28,.15); color:var(--accent); }
+    .overlay-type-badge.deliverable { background:rgba(13,148,136,.15); color:#0d9488; }
+    .overlay-type-badge.phase       { background:rgba(124,58,237,.15); color:#7c3aed; }
+    .overlay-title { font-size:14px; font-weight:600; color:var(--text-primary); }
+    .overlay-close {
+      background:none; border:none; cursor:pointer;
+      color:var(--text-meta); font-size:18px; line-height:1; padding:4px 6px;
+    }
+    .overlay-close:hover { color:var(--text-primary); }
+    .overlay-body { flex:1; overflow-y:auto; padding:18px 22px; }
+    .overlay-project-row {
+      display:flex; align-items:center; gap:8px;
+      margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid var(--divider);
+    }
+    .overlay-proj-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+    .overlay-proj-name { font-size:12px; color:var(--text-meta); font-weight:500; flex:1; }
+    .overlay-status-pill {
+      font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+      padding:2px 7px; border-radius:3px;
+    }
+    .overlay-section { margin-bottom:16px; }
+    .overlay-section-label {
+      font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+      color:var(--text-meta); margin-bottom:8px;
+    }
+    .overlay-field { margin-bottom:6px; }
+    .overlay-field-label { font-size:11px; color:var(--text-meta); margin-bottom:2px; }
+    .overlay-field-value { font-size:13px; color:var(--text-primary); line-height:1.55; }
+    .overlay-field-grid {
+      display:grid; grid-template-columns:1fr 1fr; gap:10px;
+    }
+    .overlay-slice-row {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:7px 11px; background:var(--accent-light); border:1px solid var(--card-border);
+      border-radius:6px; margin-bottom:5px;
+    }
+    .overlay-slice-id { font-size:11px; color:var(--text-meta); font-family:monospace; }
+    .overlay-footer {
+      padding:14px 22px; border-top:1px solid var(--divider); flex-shrink:0;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .overlay-footer-meta { font-size:11px; color:var(--text-meta); }
+
+    /* ── LIVE PROJECTS GRID ───────────────────────────────────── */
+    .proj-card {
+      background:var(--card-bg); border:1px solid var(--card-border);
+      border-radius:10px; padding:18px 20px; cursor:pointer; transition:background .12s;
+    }
+    .proj-card:hover { background:var(--accent-light); }
+    .proj-slug {
+      font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+      color:var(--text-meta); margin-bottom:6px;
+    }
+    .proj-name { font-size:16px; font-weight:700; color:var(--text-primary); margin-bottom:4px; }
+    .proj-phase { font-size:12px; color:var(--text-meta); margin-bottom:12px; line-height:1.4; }
+    .proj-stats { display:flex; gap:16px; margin-bottom:12px; }
+    .proj-stat-val { font-size:18px; font-weight:700; color:var(--text-primary); }
+    .proj-stat-lbl { font-size:10px; color:var(--text-meta); text-transform:uppercase; letter-spacing:.08em; }
+    .proj-prog-bar { height:3px; background:var(--divider); border-radius:2px; overflow:hidden; }
+    .proj-prog-fill { height:100%; background:var(--accent); border-radius:2px; transition:width .3s; }
+
+    /* ── LIVE DASHBOARD ───────────────────────────────────────── */
+    .dash-bucket-title {
+      font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+      color:var(--text-meta); padding:14px 20px 8px; border-bottom:1px solid var(--divider);
+    }
+    .dash-bucket-row {
+      display:flex; align-items:flex-start; gap:12px;
+      padding:11px 20px; border-bottom:1px solid var(--divider);
+      cursor:pointer; transition:background .11s;
+    }
+    .dash-bucket-row:hover { background:var(--accent-light); }
+    .dash-row-main { flex:1; min-width:0; }
+    .dash-row-title { font-size:13px; font-weight:500; color:var(--text-primary); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .dash-row-meta { font-size:11px; color:var(--text-meta); }
+    .dash-proj-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+
+    /* ── LIVE BOARD CARDS ─────────────────────────────────────── */
+    .live-board-card {
+      background:var(--card-bg); border:1px solid var(--card-border);
+      border-radius:8px; padding:12px 13px; margin-bottom:8px;
+      cursor:pointer; transition:background .12s;
+    }
+    .live-board-card:hover { background:var(--accent-light); }
+    .live-card-id { font-size:10px; font-family:monospace; color:var(--text-meta); margin-bottom:3px; }
+    .live-card-name { font-size:13px; font-weight:500; color:var(--text-primary); margin-bottom:8px; line-height:1.35; }
+    .live-card-foot { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .live-card-proj { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--text-meta); }
+    .pip-row { display:flex; gap:3px; }
+    .pip { width:7px; height:7px; border-radius:50%; }
+
+    /* ── PROJECT DETAIL LIVE ──────────────────────────────────── */
+    .pd-phase-card {
+      background:var(--card-bg); border:1px solid var(--card-border);
+      border-radius:8px; padding:14px 16px; margin-bottom:8px;
+      cursor:pointer; transition:background .12s;
+    }
+    .pd-phase-card:hover { background:var(--accent-light); }
+    .pd-row {
+      display:flex; align-items:center; gap:12px;
+      padding:10px 0; border-bottom:1px solid var(--divider);
+      cursor:pointer; transition:background .11s;
+    }
+    .pd-row:hover { background:var(--accent-light); }
+    .pd-row-id { font-size:11px; font-family:monospace; color:var(--text-meta); min-width:52px; }
+    .pd-row-name { flex:1; font-size:13px; color:var(--text-primary); }
   </style>
 </head>
 <body class="modern">
@@ -1112,63 +1240,9 @@
       <!-- DASHBOARD -->
       <div class="screen hidden" id="screen-dashboard">
         <div class="screen-header">
-          <div><div class="screen-title">Dashboard</div><div class="screen-sub">6 projects · 14 in-flight · 2 blocked · 1 flagged</div></div>
-          <div class="screen-actions">
-            <span style="font-size:11px;color:var(--text-meta)">Last sync 2m ago</span>
-            <button class="btn-secondary">↻ Refresh</button>
-          </div>
+          <div><div class="screen-title">Dashboard</div><div class="screen-sub" id="dash-sub">Loading…</div></div>
         </div>
-        <div class="dash-body">
-          <div>
-            <div class="dash-section-title">Needs Attention</div>
-            <div class="attention-item">
-              <div style="flex-shrink:0;padding-top:2px"><span class="badge badge-blocked">Blocked</span></div>
-              <div class="attention-item-content">
-                <div class="attention-item-title">SL-047 · Import validation fails on null SKU</div>
-                <div class="attention-item-meta"><span>Fantasy Player Eval</span><span>2h ago</span><span>Waiting on data schema clarification</span></div>
-              </div>
-            </div>
-            <div class="attention-item">
-              <div style="flex-shrink:0;padding-top:2px"><span class="badge badge-blocked">Blocked</span></div>
-              <div class="attention-item-content">
-                <div class="attention-item-title">SL-052 · Mobile nav collapse on 320px viewport</div>
-                <div class="attention-item-meta"><span>CTL Product</span><span>4h ago</span><span>SwiftUI layout constraint conflict</span></div>
-              </div>
-            </div>
-            <div class="attention-item">
-              <div style="flex-shrink:0;padding-top:2px"><span class="badge badge-flagged">Flagged</span></div>
-              <div class="attention-item-content">
-                <div class="attention-item-title">Scope creep risk on auth flow design</div>
-                <div class="attention-item-meta"><span>Han Solo</span><span>1d ago</span><span>More complexity than planned</span></div>
-              </div>
-            </div>
-          </div>
-          <div>
-            <div class="dash-section-title">In Flight</div>
-            <table class="inflight-table">
-              <thead><tr><th>Slice</th><th>Project</th><th>Status</th><th>Updated</th></tr></thead>
-              <tbody>
-                <tr><td>SL-044 · Route config validation</td><td style="color:var(--text-meta)">Han Solo</td><td><span class="badge badge-build">In Build</span></td><td style="color:var(--text-meta)">1h ago</td></tr>
-                <tr><td>SL-049 · Player comparison modal UI</td><td style="color:var(--text-meta)">Fantasy Player</td><td><span class="badge badge-review">In Review</span></td><td style="color:var(--text-meta)">3h ago</td></tr>
-                <tr><td>SL-051 · Location detail screen</td><td style="color:var(--text-meta)">CTL Product</td><td><span class="badge badge-build">In Build</span></td><td style="color:var(--text-meta)">5h ago</td></tr>
-                <tr><td>SL-053 · Memory search endpoint</td><td style="color:var(--text-meta)">Han Solo</td><td><span class="badge badge-test">In Test</span></td><td style="color:var(--text-meta)">6h ago</td></tr>
-                <tr><td>SL-038 · Budget rollover logic</td><td style="color:var(--text-meta)">Weekly Budget</td><td><span class="badge badge-ready">Ready</span></td><td style="color:var(--text-meta)">1d ago</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div>
-            <div class="dash-section-title">Build Health</div>
-            <table class="health-table">
-              <thead><tr><th>Project</th><th>Slices</th><th>Rework %</th><th>Phase Test</th><th>Complexity</th></tr></thead>
-              <tbody>
-                <tr onclick="showProjectDetail('Han Solo')"><td style="font-weight:500">Han Solo</td><td>24</td><td>8%</td><td class="health-pass">✓ Pass</td><td class="health-medium">Medium</td></tr>
-                <tr onclick="showProjectDetail('Fantasy Player')"><td style="font-weight:500">Fantasy Player Eval</td><td>38</td><td class="health-high">12%</td><td class="health-pending">— Pending</td><td class="health-high">High</td></tr>
-                <tr onclick="showProjectDetail('CTL Product')"><td style="font-weight:500">Chase the Light</td><td>19</td><td>5%</td><td class="health-pass">✓ Pass</td><td class="health-medium">Medium</td></tr>
-                <tr onclick="showProjectDetail('Data Config')"><td style="font-weight:500">Data Config Module</td><td>8</td><td>0%</td><td class="health-pending">— N/A</td><td class="health-low">Low</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <div class="dash-body scrollable" id="dash-body"></div>
       </div>
 
       <!-- FEED -->
@@ -1264,197 +1338,24 @@
       <!-- BOARD -->
       <div class="screen hidden" id="screen-board">
         <div class="screen-header">
-          <div><div class="screen-title">Board</div><div class="screen-sub">Portfolio view · All projects</div></div>
+          <div><div class="screen-title">Board</div><div class="screen-sub" id="board-sub">Loading…</div></div>
         </div>
         <div class="board-controls">
-          <select class="board-select"><option>All Projects</option><option>Han Solo</option><option>Fantasy Player</option><option>CTL Product</option></select>
+          <select class="board-select" id="board-proj-select" onchange="renderBoard()"><option value="all">All Projects</option></select>
           <div class="board-toggle">
-            <button class="toggle-btn active">Deliverables</button>
-            <button class="toggle-btn">Slices</button>
+            <button class="toggle-btn active" id="board-toggle-del" onclick="boardToggle('deliverable',this)">Deliverables</button>
+            <button class="toggle-btn" id="board-toggle-sl" onclick="boardToggle('slice',this)">Slices</button>
           </div>
         </div>
-        <div class="board-columns">
-          <div class="board-col">
-            <div class="board-col-header">
-              <span class="board-col-title">Design</span>
-              <span class="board-col-count">3</span>
-            </div>
-            <div class="board-cards">
-              <div class="board-card">
-                <div class="board-card-id">DEL-012</div>
-                <div class="board-card-name">Memory panel redesign</div>
-                <div class="board-card-foot">
-                  <span class="board-card-proj"><span class="proj-dot" style="background:#bd8c7d"></span>Han Solo</span>
-                  <span class="badge badge-planning">Planning</span>
-                </div>
-              </div>
-              <div class="board-card">
-                <div class="board-card-id">DEL-019</div>
-                <div class="board-card-name">Trade analyzer v2 screens</div>
-                <div class="board-card-foot">
-                  <span class="board-card-proj"><span class="proj-dot" style="background:#2563eb"></span>Fantasy Player</span>
-                  <span class="badge badge-planning">Planning</span>
-                </div>
-              </div>
-              <div class="board-card">
-                <div class="board-card-id">DEL-008</div>
-                <div class="board-card-name">Trip summary export screen</div>
-                <div class="board-card-foot">
-                  <span class="board-card-proj"><span class="proj-dot" style="background:#059669"></span>CTL Product</span>
-                  <span class="badge badge-planning">In Review</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="board-col">
-            <div class="board-col-header">
-              <span class="board-col-title">Planning</span>
-              <span class="board-col-count">5</span>
-            </div>
-            <div class="board-cards">
-              <div class="board-card">
-                <div class="board-card-id">DEL-015</div>
-                <div class="board-card-name">T4 write path</div>
-                <div class="board-card-foot">
-                  <span class="board-card-proj"><span class="proj-dot" style="background:#bd8c7d"></span>Han Solo</span>
-                  <span class="badge badge-ready">Ready</span>
-                </div>
-              </div>
-              <div class="board-card">
-                <div class="board-card-id">DEL-021</div>
-                <div class="board-card-name">Matchup detail view</div>
-                <div class="board-card-foot">
-                  <span class="board-card-proj"><span class="proj-dot" style="background:#2563eb"></span>Fantasy Player</span>
-                  <span class="badge badge-ready">Ready</span>
-                </div>
-              </div>
-              <div class="board-card">
-                <div class="board-card-id">DEL-011</div>
-                <div class="board-card-name">Gas stop optimization</div>
-                <div class="board-card-foot">
-                  <span class="board-card-proj"><span class="proj-dot" style="background:#059669"></span>CTL Product</span>
-                  <span class="badge badge-ready">Ready</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="board-col">
-            <div class="board-col-header">
-              <span class="board-col-title">In Build</span>
-              <span class="board-col-count">6</span>
-            </div>
-            <div class="board-cards">
-              <div class="board-card">
-                <div class="board-card-id">DEL-013</div>
-                <div class="board-card-name">Route config validation</div>
-                <div class="board-card-foot">
-                  <span class="board-card-proj"><span class="proj-dot" style="background:#bd8c7d"></span>Han Solo</span>
-                  <span class="badge badge-build">In Build</span>
-                </div>
-              </div>
-              <div class="board-card">
-                <div class="board-card-id">DEL-017</div>
-                <div class="board-card-name">Player comparison modal</div>
-                <div class="board-card-foot">
-                  <span class="board-card-proj"><span class="proj-dot" style="background:#2563eb"></span>Fantasy Player</span>
-                  <span class="badge badge-review">In Review</span>
-                </div>
-              </div>
-              <div class="board-card">
-                <div class="board-card-id">DEL-009</div>
-                <div class="board-card-name">Location detail screen</div>
-                <div class="board-card-foot">
-                  <span class="board-card-proj"><span class="proj-dot" style="background:#059669"></span>CTL Product</span>
-                  <span class="badge badge-build">In Build</span>
-                </div>
-              </div>
-              <div class="board-card">
-                <div class="board-card-id">DEL-022</div>
-                <div class="board-card-name">Memory search endpoint</div>
-                <div class="board-card-foot">
-                  <span class="board-card-proj"><span class="proj-dot" style="background:#bd8c7d"></span>Han Solo</span>
-                  <span class="badge badge-test">In Test</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="board-col">
-            <div class="board-col-header">
-              <span class="board-col-title">Done</span>
-              <span class="board-col-count">28</span>
-            </div>
-            <div class="board-cards">
-              <div class="board-card" style="opacity:.65">
-                <div class="board-card-id">DEL-010</div>
-                <div class="board-card-name">Letta MCP bridge v1</div>
-                <div class="board-card-foot">
-                  <span class="board-card-proj"><span class="proj-dot" style="background:#bd8c7d"></span>Han Solo</span>
-                  <span class="badge badge-done">Done</span>
-                </div>
-              </div>
-              <div class="board-card" style="opacity:.65">
-                <div class="board-card-id">DEL-014</div>
-                <div class="board-card-name">Roster tab complete</div>
-                <div class="board-card-foot">
-                  <span class="board-card-proj"><span class="proj-dot" style="background:#2563eb"></span>Fantasy Player</span>
-                  <span class="badge badge-done">Done</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <div class="board-columns" id="board-columns"></div>
       </div>
 
       <!-- PROJECTS -->
       <div class="screen hidden" id="screen-projects">
         <div class="screen-header">
-          <div><div class="screen-title">Projects</div><div class="screen-sub">4 active · 2 planning</div></div>
-          <button class="btn-primary">+ Project</button>
+          <div><div class="screen-title">Projects</div><div class="screen-sub" id="proj-sub">Loading…</div></div>
         </div>
-        <div class="project-grid">
-          <div class="project-card" onclick="showProjectDetail('Han Solo')">
-            <div class="project-phase-label">Phase 1 — Foundation</div>
-            <div class="project-name">Han Solo</div>
-            <div class="project-desc">Ren's persistent cloud environment. Letta backend, MCP bridge, Claude as the front. Memory working correctly.</div>
-            <div class="phase-track"><div class="phase-pip done"></div><div class="phase-pip active"></div><div class="phase-pip"></div><div class="phase-pip"></div></div>
-            <div class="project-foot"><span class="project-status-badge badge-ready">Active</span><span class="project-updated">May 17</span></div>
-          </div>
-          <div class="project-card" onclick="showProjectDetail('CTL Product')">
-            <div class="project-phase-label">Design Phase</div>
-            <div class="project-name">Chase the Light</div>
-            <div class="project-desc">Photography trip planner SwiftUI product. Three-tab structure, location fields, planning flow designed.</div>
-            <div class="phase-track"><div class="phase-pip done"></div><div class="phase-pip done"></div><div class="phase-pip active"></div><div class="phase-pip"></div><div class="phase-pip"></div></div>
-            <div class="project-foot"><span class="project-status-badge badge-ready">Active</span><span class="project-updated">May 12</span></div>
-          </div>
-          <div class="project-card" onclick="showProjectDetail('Fantasy Player')">
-            <div class="project-phase-label">Build Phase</div>
-            <div class="project-name">Fantasy Player Eval</div>
-            <div class="project-desc">Live FastAPI app. Roster, Player, Trade, Weekly, Matchup tabs built. MFL scoring source. nflverse for schedule.</div>
-            <div class="phase-track"><div class="phase-pip done"></div><div class="phase-pip done"></div><div class="phase-pip done"></div><div class="phase-pip active"></div><div class="phase-pip"></div></div>
-            <div class="project-foot"><span class="project-status-badge badge-ready">Active</span><span class="project-updated">May 15</span></div>
-          </div>
-          <div class="project-card">
-            <div class="project-phase-label">Concept Stage</div>
-            <div class="project-name">The Factory</div>
-            <div class="project-desc">Orchestrated content production for brands. Higher education vertical. E2B execution. Ted + Scott.</div>
-            <div class="phase-track"><div class="phase-pip done"></div><div class="phase-pip"></div><div class="phase-pip"></div><div class="phase-pip"></div></div>
-            <div class="project-foot"><span class="project-status-badge badge-planning">Planning</span><span class="project-updated">May 17</span></div>
-          </div>
-          <div class="project-card">
-            <div class="project-phase-label">Discovery Pending</div>
-            <div class="project-name">Data Config Module</div>
-            <div class="project-desc">SMB-targeted data migration abstraction layer. Brainstorm complete. Discovery session when ready.</div>
-            <div class="phase-track"><div class="phase-pip done"></div><div class="phase-pip"></div><div class="phase-pip"></div><div class="phase-pip"></div></div>
-            <div class="project-foot"><span class="project-status-badge badge-planning">Planning</span><span class="project-updated">May 4</span></div>
-          </div>
-          <div class="project-card">
-            <div class="project-phase-label">Blocked</div>
-            <div class="project-name">Hair Stylist App</div>
-            <div class="project-desc">Blocked on user interviews. Interview guide needed when ready to move forward.</div>
-            <div class="phase-track"><div class="phase-pip done"></div><div class="phase-pip"></div><div class="phase-pip"></div><div class="phase-pip"></div></div>
-            <div class="project-foot"><span class="project-status-badge badge-paused">Paused</span><span class="project-updated">Apr 18</span></div>
-          </div>
-        </div>
+        <div class="project-grid scrollable" id="proj-grid"></div>
       </div>
 
       <!-- PROJECT DETAIL -->
@@ -1462,157 +1363,19 @@
         <div class="detail-header">
           <span class="detail-breadcrumb" onclick="goBack()">← Projects</span>
           <span class="detail-crumb-sep">/</span>
-          <span class="detail-project-name" id="detail-project-name">Han Solo</span>
+          <span class="detail-project-name" id="detail-project-name"></span>
           <div class="detail-header-right">
-            <span class="badge badge-build" id="detail-phase-badge">Phase 2 — Data Flow</span>
-            <span class="detail-sync">Synced 2m ago</span>
+            <span class="badge badge-build" id="detail-phase-badge"></span>
           </div>
         </div>
-        <div class="tabs-bar">
-          <button class="tab-btn active" onclick="showTab('action',this)">Action <span class="tab-count">3</span></button>
-          <button class="tab-btn" onclick="showTab('progress',this)">Progress</button>
-          <button class="tab-btn" onclick="showTab('backlog',this)">Backlog <span class="tab-count">24</span></button>
-          <button class="tab-btn" onclick="showTab('materials',this)">Materials</button>
-          <button class="tab-btn" onclick="showTab('decisions-tab',this)">Decisions <span class="tab-count">12</span></button>
-          <button class="tab-btn" onclick="showTab('metrics',this)">Metrics</button>
+        <div class="tabs-bar" id="pd-tabs-bar">
+          <button class="tab-btn active" onclick="showTab('pd-action',this)">Action</button>
+          <button class="tab-btn" onclick="showTab('pd-progress',this)">Progress</button>
+          <button class="tab-btn" onclick="showTab('pd-backlog',this)">Backlog</button>
         </div>
-
-        <!-- Tab: Action -->
-        <div class="tab-panel" id="tab-action">
-          <div class="detail-section">
-            <div class="detail-section-title">Blocked (1)</div>
-            <div class="action-item">
-              <span class="badge badge-blocked">Blocked</span>
-              <div class="action-item-content">
-                <div class="action-item-title">SL-044 · Route config validation — awaiting schema decision</div>
-                <div class="action-item-meta">Blocked 2h ago · Needs decision on T4 schema before proceeding</div>
-              </div>
-            </div>
-          </div>
-          <div class="detail-section">
-            <div class="detail-section-title">Flagged (1)</div>
-            <div class="action-item">
-              <span class="badge badge-flagged">Flagged</span>
-              <div class="action-item-content">
-                <div class="action-item-title">Scope creep risk on auth flow design</div>
-                <div class="action-item-meta">Flagged 1d ago · More complexity than planned in original slice</div>
-              </div>
-            </div>
-          </div>
-          <div class="detail-section">
-            <div class="detail-section-title">Open Questions (1)</div>
-            <div class="action-item">
-              <span class="badge badge-planning">Question</span>
-              <div class="action-item-content">
-                <div class="action-item-title">Should T4 entries be written per-slice or per-session?</div>
-                <div class="action-item-meta">Open 3d ago · Scott to decide in T4 mapping session</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tab: Progress -->
-        <div class="tab-panel hidden" id="tab-progress">
-          <div style="margin-bottom:20px">
-            <div class="progress-phase-label">Phase 2 — Data Flow</div>
-            <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:25%"></div></div>
-            <div class="progress-label">3 of 12 slices done</div>
-          </div>
-          <div class="progress-status-grid">
-            <div class="progress-status-item"><div class="progress-status-count">3</div><div class="progress-status-label">Done</div></div>
-            <div class="progress-status-item"><div class="progress-status-count">2</div><div class="progress-status-label">In Build</div></div>
-            <div class="progress-status-item"><div class="progress-status-count">1</div><div class="progress-status-label">In Test</div></div>
-            <div class="progress-status-item"><div class="progress-status-count">6</div><div class="progress-status-label">Ready</div></div>
-          </div>
-          <div class="detail-section-title" style="margin-top:20px">Phase History</div>
-          <div style="margin-top:8px">
-            <div class="list-row" style="padding:10px 0;border-bottom:1px solid var(--divider)">
-              <span class="badge badge-done">Done</span>
-              <div class="row-content"><div class="row-title">Phase 1 — Foundation</div><div class="row-meta">Completed May 15 · 8 slices</div></div>
-            </div>
-            <div class="list-row" style="padding:10px 0;border-bottom:none">
-              <span class="badge badge-build">Active</span>
-              <div class="row-content"><div class="row-title">Phase 2 — Data Flow</div><div class="row-meta">Started May 16 · 12 slices · 25% done</div></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tab: Backlog -->
-        <div class="tab-panel hidden" id="tab-backlog">
-          <div class="filter-bar" style="padding:0 0 12px;border-bottom:none">
-            <button class="filter-btn active">All slices</button>
-            <button class="filter-btn">Core architecture</button>
-          </div>
-          <div class="backlog-item"><span class="backlog-id">SL-044</span><span class="backlog-name">Route config validation</span><span class="badge badge-blocked">Blocked</span></div>
-          <div class="backlog-item"><span class="backlog-id">SL-045</span><span class="backlog-name">MCP tool schema definitions</span><span class="badge badge-build">In Build</span></div>
-          <div class="backlog-item"><span class="backlog-id">SL-046</span><span class="backlog-name">Session start archival search</span><span class="badge badge-done">Done</span></div>
-          <div class="backlog-item"><span class="backlog-id">SL-047</span><span class="backlog-name">T4 write_entry tool scaffold</span><span class="badge badge-ready">Ready</span></div>
-          <div class="backlog-item"><span class="backlog-id">SL-048</span><span class="backlog-name">ren-local read on activation</span><span class="badge badge-done">Done</span></div>
-          <div class="backlog-item"><span class="backlog-id">SL-049</span><span class="backlog-name">jobs_paused toggle UI</span><span class="badge badge-done">Done</span></div>
-          <div class="backlog-item"><span class="backlog-id">SL-050</span><span class="backlog-name">Pending thoughts write on close</span><span class="badge badge-ready">Ready</span></div>
-          <div class="backlog-item"><span class="backlog-id">SL-051</span><span class="backlog-name">search_passages MCP exposure</span><span class="badge badge-ready">Ready</span></div>
-          <div class="backlog-item"><span class="backlog-id">SL-052</span><span class="backlog-name">Memory search endpoint</span><span class="badge badge-test">In Test</span></div>
-          <div class="backlog-item"><span class="backlog-id">SL-053</span><span class="backlog-name">Dream synthesis review tool</span><span class="badge badge-ready">Ready</span></div>
-        </div>
-
-        <!-- Tab: Materials -->
-        <div class="tab-panel hidden" id="tab-materials">
-          <div class="materials-grid">
-            <div class="material-item"><span class="material-icon">📋</span><div><div class="material-name">Discovery Brief</div><div class="material-status">Complete</div></div></div>
-            <div class="material-item"><span class="material-icon">🏗</span><div><div class="material-name">Architecture HTML</div><div class="material-status">Generated May 17</div></div></div>
-            <div class="material-item"><span class="material-icon">📝</span><div><div class="material-name">Decision Log</div><div class="material-status">48 decisions</div></div></div>
-            <div class="material-item"><span class="material-icon">▤</span><div><div class="material-name">Backlog</div><div class="material-status">24 slices</div></div></div>
-            <div class="material-item"><span class="material-icon">↪</span><div><div class="material-name">Handoff</div><div class="material-status">Updated May 17</div></div></div>
-            <div class="material-item"><span class="material-icon">⟳</span><div><div class="material-name">Current Phase</div><div class="material-status">Phase 2 — Data Flow</div></div></div>
-            <div class="material-item"><span class="material-icon">🖥</span><div><div class="material-name">Design Screens</div><div class="material-status">In progress</div></div></div>
-            <div class="material-item"><span class="material-icon">⊘</span><div><div class="material-name">Deferred Decisions</div><div class="material-status">3 deferred</div></div></div>
-          </div>
-        </div>
-
-        <!-- Tab: Decisions -->
-        <div class="tab-panel hidden" id="tab-decisions-tab">
-          <div class="decision-item" style="padding:13px 0;border-bottom:1px solid var(--divider)">
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
-              <div class="decision-title">Memory source consolidation: ren-local + Han Solo only</div>
-              <span class="decision-tag" style="white-space:nowrap">May 17</span>
-            </div>
-            <div class="decision-excerpt">ren-memory and MemPalace retired from Ren activation. Simpler, faster, more reliable.</div>
-          </div>
-          <div class="decision-item" style="padding:13px 0;border-bottom:1px solid var(--divider)">
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
-              <div class="decision-title">T4 design session before write_t4_entry tool</div>
-              <span class="decision-tag" style="white-space:nowrap">May 17</span>
-            </div>
-            <div class="decision-excerpt">Must inventory all framework artifacts first. Architecture HTML is starting inventory.</div>
-          </div>
-          <div class="decision-item" style="padding:13px 0;border-bottom:none">
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
-              <div class="decision-title">Ren's memory instructions improved</div>
-              <span class="decision-tag" style="white-space:nowrap">May 17</span>
-            </div>
-            <div class="decision-excerpt">Session-start archival search added. Past-reference phrases made hard triggers. Both system prompt and always_loaded_core in sync.</div>
-          </div>
-        </div>
-
-        <!-- Tab: Metrics -->
-        <div class="tab-panel hidden" id="tab-metrics">
-          <div style="margin-bottom:20px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
-            <div class="progress-status-item"><div class="progress-status-count">8%</div><div class="progress-status-label">Rework rate</div></div>
-            <div class="progress-status-item"><div class="progress-status-count" style="color:#059669">Pass</div><div class="progress-status-label">Phase test</div></div>
-            <div class="progress-status-item"><div class="progress-status-count">Medium</div><div class="progress-status-label">Complexity</div></div>
-          </div>
-          <div class="detail-section-title">Rework by Slice</div>
-          <table class="metrics-table" style="margin-top:10px">
-            <thead><tr><th>Slice</th><th>Rework Cycles</th><th>Notes</th></tr></thead>
-            <tbody>
-              <tr><td>SL-044 Route config</td><td>2</td><td style="color:var(--text-meta);font-size:12px">Scope expanded mid-build</td></tr>
-              <tr><td>SL-046 Session archival</td><td>1</td><td style="color:var(--text-meta);font-size:12px">Instruction format change</td></tr>
-              <tr><td>SL-049 jobs_paused UI</td><td>0</td><td style="color:var(--text-meta);font-size:12px">—</td></tr>
-              <tr><td>SL-052 Memory search</td><td>1</td><td style="color:var(--text-meta);font-size:12px">Auth edge case missed in QA</td></tr>
-            </tbody>
-          </table>
-        </div>
-
+        <div class="tab-panel scrollable" id="tab-pd-action"></div>
+        <div class="tab-panel hidden scrollable" id="tab-pd-progress"></div>
+        <div class="tab-panel hidden scrollable" id="tab-pd-backlog"></div>
       </div><!-- /project-detail -->
 
       <!-- NOTECARDS -->
@@ -1695,6 +1458,55 @@
 
     </div><!-- /main -->
   </div><!-- /app -->
+
+  <!-- ── OVERLAY ───────────────────────────────────────────────────── -->
+  <div id="overlay-backdrop" class="overlay-backdrop" onclick="closeOverlay(event)">
+    <!-- SLICE -->
+    <div id="overlay-slice" class="overlay-panel" style="display:none;flex-direction:column">
+      <div class="overlay-header">
+        <div class="overlay-header-left">
+          <span class="overlay-type-badge slice">Slice</span>
+          <span class="overlay-title" id="ov-slice-title"></span>
+        </div>
+        <button class="overlay-close" onclick="closeOverlay()">✕</button>
+      </div>
+      <div class="overlay-body" id="ov-slice-body"></div>
+      <div class="overlay-footer">
+        <span class="overlay-footer-meta" id="ov-slice-meta"></span>
+        <button class="btn-secondary" id="ov-slice-proj-btn" onclick="goToProject()">Go to project →</button>
+      </div>
+    </div>
+    <!-- DELIVERABLE -->
+    <div id="overlay-deliverable" class="overlay-panel" style="display:none;flex-direction:column">
+      <div class="overlay-header">
+        <div class="overlay-header-left">
+          <span class="overlay-type-badge deliverable">Deliverable</span>
+          <span class="overlay-title" id="ov-del-title"></span>
+        </div>
+        <button class="overlay-close" onclick="closeOverlay()">✕</button>
+      </div>
+      <div class="overlay-body" id="ov-del-body"></div>
+      <div class="overlay-footer">
+        <span class="overlay-footer-meta" id="ov-del-meta"></span>
+        <button class="btn-secondary" id="ov-del-proj-btn" onclick="goToProject()">Go to project →</button>
+      </div>
+    </div>
+    <!-- PHASE -->
+    <div id="overlay-phase" class="overlay-panel" style="display:none;flex-direction:column">
+      <div class="overlay-header">
+        <div class="overlay-header-left">
+          <span class="overlay-type-badge phase">Phase</span>
+          <span class="overlay-title" id="ov-phase-title"></span>
+        </div>
+        <button class="overlay-close" onclick="closeOverlay()">✕</button>
+      </div>
+      <div class="overlay-body" id="ov-phase-body"></div>
+      <div class="overlay-footer">
+        <span class="overlay-footer-meta" id="ov-phase-meta"></span>
+        <button class="btn-secondary" id="ov-phase-proj-btn" onclick="goToProject()">Go to project →</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     const API_BASE = '';  // relative — same origin when served by han-solo server
@@ -2157,6 +1969,567 @@
       });
     });
 
+    // ── T4 SHARED ─────────────────────────────────────────────────────
+    const PROJ_COLORS = {
+      'fantasy-football': '#2563eb',
+      'garden-planner':   '#16a34a',
+      'solo-companion':   '#9333ea',
+      'chase-the-light':  '#d97706',
+      'han-solo':         '#0891b2',
+    };
+    const PROJ_NAMES = {
+      'fantasy-football': 'Fantasy Football',
+      'garden-planner':   'Garden Planner',
+      'solo-companion':   'Solo Companion',
+      'chase-the-light':  'Chase the Light',
+      'han-solo':         'Han Solo',
+    };
+    function projColor(slug) { return PROJ_COLORS[slug] || '#8e8e90'; }
+    function projName(slug)  { return PROJ_NAMES[slug]  || slug; }
+
+    // Status → badge class mapping
+    const STATUS_BADGE = {
+      'Done':        'badge-done',
+      'In Build':    'badge-build',
+      'In Test':     'badge-test',
+      'In Review':   'badge-review',
+      'Ready':       'badge-ready',
+      'Blocked':     'badge-blocked',
+      'Defined':     'badge-planning',
+      'Planning':    'badge-planning',
+      'Active':      'badge-build',
+    };
+    function statusBadge(s) {
+      return `<span class="badge ${STATUS_BADGE[s] || 'badge-planning'}">${escHtml(s||'—')}</span>`;
+    }
+
+    // Parse T4 markdown content into structured fields
+    function parseT4(content) {
+      const lines = content.split('\n');
+      const out = { title:'', status:'', sections:{}, raw: content };
+      // First line: "# TYPE — ID"
+      if (lines[0]) out.title = lines[0].replace(/^#+\s*/, '').trim();
+      // **Status:** value
+      const stMatch = content.match(/\*\*Status:\*\*\s*(.+)/);
+      if (stMatch) out.status = stMatch[1].trim();
+      // Extract ## sections
+      let current = null;
+      const sectionLines = [];
+      for (let i = 1; i < lines.length; i++) {
+        const l = lines[i];
+        if (l.startsWith('## ')) {
+          if (current !== null) out.sections[current] = sectionLines.splice(0).join('\n').trim();
+          current = l.replace(/^##\s*/, '').trim();
+        } else if (current !== null) {
+          sectionLines.push(l);
+        }
+      }
+      if (current !== null) out.sections[current] = sectionLines.join('\n').trim();
+      // Parse anchors subsection
+      if (out.sections['Anchors']) {
+        const a = out.sections['Anchors'];
+        out.anchorDesign   = (a.match(/\*\*Design:\*\*\s*(.+)/)||[])[1]||'';
+        out.anchorData     = (a.match(/\*\*Data:\*\*\s*(.+)/)||[])[1]||'';
+        out.anchorDone     = (a.match(/\*\*Done:\*\*\s*(.+)/)||[])[1]||'';
+        out.anchorProcess  = (a.match(/\*\*Process:\*\*\s*(.+)/)||[])[1]||'';
+      }
+      return out;
+    }
+
+    function renderSection(label, text) {
+      if (!text) return '';
+      return `<div class="overlay-section">
+        <div class="overlay-section-label">${label}</div>
+        <div class="overlay-field"><div class="overlay-field-value">${escHtml(text)}</div></div>
+      </div>`;
+    }
+    function renderAnchors(p) {
+      if (!p.anchorDesign && !p.anchorData && !p.anchorDone && !p.anchorProcess) return '';
+      const cell = (lbl, val) => val ? `<div class="overlay-field">
+        <div class="overlay-field-label">${lbl}</div>
+        <div class="overlay-field-value">${escHtml(val)}</div>
+      </div>` : '';
+      return `<div class="overlay-section">
+        <div class="overlay-section-label">Four Anchors</div>
+        <div class="overlay-field-grid">
+          ${cell('Design', p.anchorDesign)}${cell('Data', p.anchorData)}
+          ${cell('Done', p.anchorDone)}${cell('Process', p.anchorProcess)}
+        </div>
+      </div>`;
+    }
+
+    // ── OVERLAY SYSTEM ────────────────────────────────────────────────
+    let _ovProjectSlug = '';
+
+    function closeOverlay(e) {
+      if (e && e.target !== document.getElementById('overlay-backdrop')) return;
+      const bd = document.getElementById('overlay-backdrop');
+      bd.classList.remove('open');
+      ['overlay-slice','overlay-deliverable','overlay-phase'].forEach(id => {
+        document.getElementById(id).style.display = 'none';
+      });
+    }
+
+    function _showOverlayPanel(panelId, slug) {
+      _ovProjectSlug = slug;
+      const bd = document.getElementById('overlay-backdrop');
+      ['overlay-slice','overlay-deliverable','overlay-phase'].forEach(id => {
+        document.getElementById(id).style.display = 'none';
+      });
+      const panel = document.getElementById(panelId);
+      panel.style.display = 'flex';
+      bd.classList.add('open');
+    }
+
+    function goToProject() {
+      closeOverlay();
+      loadProjectDetail(_ovProjectSlug);
+    }
+
+    function openSliceOverlay(entry) {
+      const p = parseT4(entry.content);
+      const slug = entry.project_slug || _currentPdSlug;
+      document.getElementById('ov-slice-title').textContent = p.title;
+      document.getElementById('ov-slice-meta').textContent = projName(slug) + ' · ' + entry.entry_id;
+      const color = projColor(slug);
+      document.getElementById('ov-slice-body').innerHTML = `
+        <div class="overlay-project-row">
+          <div class="overlay-proj-dot" style="background:${color}"></div>
+          <span class="overlay-proj-name">${escHtml(projName(slug))}</span>
+          ${statusBadge(p.status)}
+        </div>
+        ${renderSection('Plain language', p.sections['Plain language'])}
+        ${renderSection('Technical description', p.sections['Technical description'])}
+        ${renderSection('Acceptance criteria', p.sections['Acceptance criteria'])}
+        ${renderAnchors(p)}
+        ${renderSection('Done criteria', p.sections['Done criteria'])}
+        ${renderSection('Quality contract', p.sections['Quality contract'])}
+        ${renderSection('Dependencies', p.sections['Dependencies'])}
+      `;
+      _showOverlayPanel('overlay-slice', slug);
+    }
+
+    function openDeliverableOverlay(entry, slices) {
+      const p = parseT4(entry.content);
+      const slug = entry.project_slug || _currentPdSlug;
+      document.getElementById('ov-del-title').textContent = p.title;
+      document.getElementById('ov-del-meta').textContent = projName(slug) + ' · ' + entry.entry_id;
+      const color = projColor(slug);
+      const mySlices = (slices || []).filter(s => s.parent_id === entry.entry_id);
+      const sliceRows = mySlices.map(s => {
+        const sp = parseT4(s.content);
+        return `<div class="overlay-slice-row">
+          <span class="overlay-slice-id">${escHtml(s.entry_id)}</span>
+          <span style="flex:1;font-size:12px;color:var(--text-primary);padding:0 8px">${escHtml(sp.title.replace(/^SLICE\s*—\s*/i,''))}</span>
+          ${statusBadge(sp.status)}
+        </div>`;
+      }).join('');
+      document.getElementById('ov-del-body').innerHTML = `
+        <div class="overlay-project-row">
+          <div class="overlay-proj-dot" style="background:${color}"></div>
+          <span class="overlay-proj-name">${escHtml(projName(slug))}</span>
+          ${statusBadge(p.status)}
+        </div>
+        ${renderSection('Plain language', p.sections['Plain language'])}
+        ${renderSection('Technical description', p.sections['Technical description'])}
+        ${renderSection('Acceptance criteria', p.sections['Acceptance criteria'])}
+        ${mySlices.length ? `<div class="overlay-section"><div class="overlay-section-label">Slices (${mySlices.length})</div>${sliceRows}</div>` : ''}
+      `;
+      _showOverlayPanel('overlay-deliverable', slug);
+    }
+
+    function openPhaseOverlay(entry, deliverables, slices) {
+      const p = parseT4(entry.content);
+      const slug = entry.project_slug || _currentPdSlug;
+      document.getElementById('ov-phase-title').textContent = p.title;
+      document.getElementById('ov-phase-meta').textContent = projName(slug) + ' · ' + entry.entry_id;
+      const color = projColor(slug);
+      const myDels = (deliverables || []).filter(d => d.parent_id === entry.entry_id);
+      const total = (slices||[]).filter(s => myDels.some(d => d.entry_id === s.parent_id)).length;
+      const done  = (slices||[]).filter(s => myDels.some(d => d.entry_id === s.parent_id) && s.content.includes('**Status:** Done')).length;
+      const pct = total ? Math.round(done/total*100) : 0;
+      const delRows = myDels.map(d => {
+        const dp = parseT4(d.content);
+        return `<div class="overlay-slice-row">
+          <span class="overlay-slice-id">${escHtml(d.entry_id)}</span>
+          <span style="flex:1;font-size:12px;color:var(--text-primary);padding:0 8px">${escHtml(dp.title.replace(/^DELIVERABLE\s*—\s*/i,''))}</span>
+          ${statusBadge(dp.status)}
+        </div>`;
+      }).join('');
+      document.getElementById('ov-phase-body').innerHTML = `
+        <div class="overlay-project-row">
+          <div class="overlay-proj-dot" style="background:${color}"></div>
+          <span class="overlay-proj-name">${escHtml(projName(slug))}</span>
+          ${statusBadge(p.status)}
+        </div>
+        <div class="overlay-section">
+          <div class="overlay-section-label">Progress</div>
+          <div style="font-size:22px;font-weight:700;color:var(--text-primary)">${pct}%</div>
+          <div style="font-size:12px;color:var(--text-meta)">${done} of ${total} slices done</div>
+        </div>
+        ${renderSection('Plain language', p.sections['Plain language'])}
+        ${renderSection('Technical description', p.sections['Technical description'])}
+        ${myDels.length ? `<div class="overlay-section"><div class="overlay-section-label">Deliverables (${myDels.length})</div>${delRows}</div>` : ''}
+      `;
+      _showOverlayPanel('overlay-phase', slug);
+    }
+
+    // ── PROJECTS ──────────────────────────────────────────────────────
+    let _allProjects = [], _projLoaded = false;
+
+    async function loadProjects() {
+      document.getElementById('proj-sub').textContent = 'Loading…';
+      try {
+        const data = await (await apiFetch('/api/t4/projects')).json();
+        _allProjects = data;
+        _projLoaded = true;
+        renderProjects();
+      } catch(e) {
+        document.getElementById('proj-grid').innerHTML = '<div style="padding:28px;color:var(--text-meta);font-size:13px">Could not load projects.</div>';
+      }
+    }
+
+    function extractCurrentPhase(content) {
+      if (!content) return { name: 'Unknown', status: '' };
+      const nameMatch = content.match(/\*\*(?:Phase|Current Phase|Name):\*\*\s*(.+)/);
+      const statusMatch = content.match(/\*\*Status:\*\*\s*(.+)/);
+      const firstLine = content.split('\n').find(l => l.trim() && !l.startsWith('#') && !l.startsWith('**'));
+      return {
+        name: nameMatch ? nameMatch[1].trim() : (firstLine || 'Active'),
+        status: statusMatch ? statusMatch[1].trim() : '',
+      };
+    }
+
+    function renderProjects() {
+      const grid = document.getElementById('proj-grid');
+      document.getElementById('proj-sub').textContent = `${_allProjects.length} project${_allProjects.length!==1?'s':''}`;
+      if (!_allProjects.length) {
+        grid.innerHTML = '<div style="padding:28px;color:var(--text-meta);font-size:13px">No projects found.</div>';
+        return;
+      }
+      grid.innerHTML = _allProjects.map(p => {
+        const color = projColor(p.project_slug);
+        const name  = projName(p.project_slug);
+        const cp    = extractCurrentPhase(p.current_phase);
+        const pct   = p.total_slices ? Math.round(p.done_slices / p.total_slices * 100) : 0;
+        return `<div class="proj-card" onclick="loadProjectDetail('${escHtml(p.project_slug)}')">
+          <div class="proj-slug" style="color:${color}">${escHtml(p.project_slug)}</div>
+          <div class="proj-name">${escHtml(name)}</div>
+          <div class="proj-phase">${escHtml(cp.name)}${cp.status ? ' · ' + cp.status : ''}</div>
+          <div class="proj-stats">
+            <div><div class="proj-stat-val">${p.total_slices}</div><div class="proj-stat-lbl">Slices</div></div>
+            <div><div class="proj-stat-val">${p.done_slices}</div><div class="proj-stat-lbl">Done</div></div>
+            <div><div class="proj-stat-val">${p.total_phases}</div><div class="proj-stat-lbl">Phases</div></div>
+          </div>
+          <div class="proj-prog-bar"><div class="proj-prog-fill" style="width:${pct}%;background:${color}"></div></div>
+        </div>`;
+      }).join('');
+    }
+
+    // ── DASHBOARD ─────────────────────────────────────────────────────
+    let _dashLoaded = false, _dashProjects = [], _dashSlices = [], _dashDeliverables = [], _dashPhases = [];
+
+    async function loadDashboard() {
+      document.getElementById('dash-sub').textContent = 'Loading…';
+      document.getElementById('dash-body').innerHTML = '<div style="padding:28px;color:var(--text-meta);font-size:13px">Loading…</div>';
+      try {
+        const projects = await (await apiFetch('/api/t4/projects')).json();
+        _dashProjects = projects;
+        const slugs = projects.map(p => p.project_slug);
+        const [slicesAll, delsAll, phasesAll] = await Promise.all([
+          Promise.all(slugs.map(s => apiFetch(`/api/t4/${s}/entries?type=slice`).then(r=>r.json()).then(rows=>rows.map(r=>({...r,project_slug:s}))))),
+          Promise.all(slugs.map(s => apiFetch(`/api/t4/${s}/entries?type=deliverable`).then(r=>r.json()).then(rows=>rows.map(r=>({...r,project_slug:s}))))),
+          Promise.all(slugs.map(s => apiFetch(`/api/t4/${s}/entries?type=phase`).then(r=>r.json()).then(rows=>rows.map(r=>({...r,project_slug:s}))))),
+        ]);
+        _dashSlices       = slicesAll.flat();
+        _dashDeliverables = delsAll.flat();
+        _dashPhases       = phasesAll.flat();
+        _dashLoaded = true;
+        renderDashboard();
+      } catch(e) {
+        document.getElementById('dash-body').innerHTML = '<div style="padding:28px;color:var(--text-meta);font-size:13px">Could not load dashboard.</div>';
+      }
+    }
+
+    const INFLIGHT_STATUSES = new Set(['In Build','In Review','In Test','Ready','Blocked']);
+
+    function renderDashboard() {
+      const blocked = _dashSlices.filter(s => s.content.includes('**Status:** Blocked'));
+      const inflight = _dashSlices.filter(s => {
+        const p = parseT4(s.content);
+        return INFLIGHT_STATUSES.has(p.status) && p.status !== 'Done';
+      });
+
+      document.getElementById('dash-sub').textContent =
+        `${_dashProjects.length} projects · ${inflight.length} in-flight · ${blocked.length} blocked`;
+
+      // Needs Attention
+      const attHtml = blocked.length ? blocked.map(s => {
+        const p = parseT4(s.content);
+        const color = projColor(s.project_slug);
+        return `<div class="dash-bucket-row" onclick='openSliceOverlay(${JSON.stringify(s)})'>
+          <div class="dash-proj-dot" style="background:${color}"></div>
+          <div class="dash-row-main">
+            <div class="dash-row-title">${escHtml(s.entry_id)} · ${escHtml(p.title.replace(/^SLICE\s*—\s*/i,''))}</div>
+            <div class="dash-row-meta">${escHtml(projName(s.project_slug))}</div>
+          </div>
+          ${statusBadge('Blocked')}
+        </div>`;
+      }).join('') : '<div style="padding:12px 20px;font-size:13px;color:var(--text-meta)">No blocked items.</div>';
+
+      // In Flight (non-done, non-blocked, show top 12)
+      const active = _dashSlices.filter(s => {
+        const st = (s.content.match(/\*\*Status:\*\*\s*(.+)/)||[])[1]?.trim();
+        return st && st !== 'Done' && st !== 'Blocked' && st !== 'Defined';
+      }).slice(0,12);
+      const inflightHtml = active.length ? active.map(s => {
+        const p = parseT4(s.content);
+        const color = projColor(s.project_slug);
+        return `<div class="dash-bucket-row" onclick='openSliceOverlay(${JSON.stringify(s)})'>
+          <div class="dash-proj-dot" style="background:${color}"></div>
+          <div class="dash-row-main">
+            <div class="dash-row-title">${escHtml(s.entry_id)} · ${escHtml(p.title.replace(/^SLICE\s*—\s*/i,''))}</div>
+            <div class="dash-row-meta">${escHtml(projName(s.project_slug))}</div>
+          </div>
+          ${statusBadge(p.status)}
+        </div>`;
+      }).join('') : '<div style="padding:12px 20px;font-size:13px;color:var(--text-meta)">No active slices.</div>';
+
+      // Project summary rows
+      const projHtml = _dashProjects.map(proj => {
+        const color = projColor(proj.project_slug);
+        const pct = proj.total_slices ? Math.round(proj.done_slices/proj.total_slices*100) : 0;
+        return `<div class="dash-bucket-row" onclick="loadProjectDetail('${proj.project_slug}')">
+          <div class="dash-proj-dot" style="background:${color}"></div>
+          <div class="dash-row-main">
+            <div class="dash-row-title">${escHtml(projName(proj.project_slug))}</div>
+            <div class="dash-row-meta">${proj.done_slices} / ${proj.total_slices} slices done · ${pct}%</div>
+          </div>
+        </div>`;
+      }).join('');
+
+      document.getElementById('dash-body').innerHTML = `
+        <div style="border-bottom:1px solid var(--divider)">
+          <div class="dash-bucket-title">Needs Attention</div>
+          ${attHtml}
+        </div>
+        <div style="border-bottom:1px solid var(--divider)">
+          <div class="dash-bucket-title">In Flight</div>
+          ${inflightHtml}
+        </div>
+        <div>
+          <div class="dash-bucket-title">Projects</div>
+          ${projHtml}
+        </div>
+      `;
+    }
+
+    // ── BOARD ─────────────────────────────────────────────────────────
+    let _boardLoaded = false, _boardDeliverables = [], _boardSlices = [], _boardView = 'deliverable';
+
+    async function loadBoard() {
+      document.getElementById('board-sub').textContent = 'Loading…';
+      try {
+        const projects = await (await apiFetch('/api/t4/projects')).json();
+        const slugs = projects.map(p => p.project_slug);
+        // Populate project filter
+        const sel = document.getElementById('board-proj-select');
+        sel.innerHTML = '<option value="all">All Projects</option>' +
+          slugs.map(s => `<option value="${s}">${escHtml(projName(s))}</option>`).join('');
+        const [delsAll, slicesAll] = await Promise.all([
+          Promise.all(slugs.map(s => apiFetch(`/api/t4/${s}/entries?type=deliverable`).then(r=>r.json()).then(rows=>rows.map(r=>({...r,project_slug:s}))))),
+          Promise.all(slugs.map(s => apiFetch(`/api/t4/${s}/entries?type=slice`).then(r=>r.json()).then(rows=>rows.map(r=>({...r,project_slug:s}))))),
+        ]);
+        _boardDeliverables = delsAll.flat();
+        _boardSlices       = slicesAll.flat();
+        _boardLoaded = true;
+        renderBoard();
+      } catch(e) {
+        document.getElementById('board-sub').textContent = 'Could not load board.';
+      }
+    }
+
+    function boardToggle(view, btn) {
+      _boardView = view;
+      document.getElementById('board-toggle-del').classList.toggle('active', view === 'deliverable');
+      document.getElementById('board-toggle-sl').classList.toggle('active', view === 'slice');
+      renderBoard();
+    }
+
+    // Column assignment: most-advanced slice status per deliverable
+    const COL_ORDER = ['In Review','Ready','In Build','In Test'];
+    const COL_LABELS = { 'In Review':'Design / Review', 'Ready':'Planning', 'In Build':'In Build', 'In Test':'In Test' };
+
+    function delColumn(del, slices) {
+      const mine = slices.filter(s => s.parent_id === del.entry_id && s.project_slug === del.project_slug);
+      const statuses = mine.map(s => (s.content.match(/\*\*Status:\*\*\s*(.+)/)||[])[1]?.trim()).filter(Boolean);
+      for (const col of ['In Test','In Build','Ready','In Review']) {
+        if (statuses.includes(col)) return col;
+      }
+      if (statuses.every(s => s === 'Done') && statuses.length) return null; // done → skip
+      return 'In Review'; // default Planning
+    }
+
+    function renderBoard() {
+      const selSlug = document.getElementById('board-proj-select').value;
+      const dels = selSlug === 'all' ? _boardDeliverables : _boardDeliverables.filter(d => d.project_slug === selSlug);
+      const sls  = selSlug === 'all' ? _boardSlices       : _boardSlices.filter(s => s.project_slug === selSlug);
+
+      let totalActive = 0;
+      const cols = {};
+      COL_ORDER.forEach(c => { cols[c] = []; });
+
+      if (_boardView === 'deliverable') {
+        dels.forEach(del => {
+          const col = delColumn(del, _boardSlices);
+          if (!col) return; // skip all-done deliverables
+          const p = parseT4(del.content);
+          const mySlices = _boardSlices.filter(s => s.parent_id === del.entry_id && s.project_slug === del.project_slug);
+          const doneCount = mySlices.filter(s => s.content.includes('**Status:** Done')).length;
+          const color = projColor(del.project_slug);
+          cols[col].push(`<div class="live-board-card" onclick='openDeliverableOverlay(${JSON.stringify(del)}, ${JSON.stringify(_boardSlices)})'>
+            <div class="live-card-id">${escHtml(del.entry_id)}</div>
+            <div class="live-card-name">${escHtml(p.title.replace(/^DELIVERABLE\s*—\s*/i,''))}</div>
+            <div class="live-card-foot">
+              <span class="live-card-proj"><span class="proj-dot" style="background:${color};width:7px;height:7px;border-radius:50%;display:inline-block"></span> ${escHtml(projName(del.project_slug))}</span>
+              <span style="font-size:11px;color:var(--text-meta)">${doneCount}/${mySlices.length} done</span>
+            </div>
+          </div>`);
+          totalActive++;
+        });
+      } else {
+        sls.forEach(sl => {
+          const p = parseT4(sl.content);
+          if (!p.status || p.status === 'Done' || p.status === 'Defined') return;
+          const col = COL_ORDER.includes(p.status) ? p.status : 'In Review';
+          const color = projColor(sl.project_slug);
+          cols[col].push(`<div class="live-board-card" onclick='openSliceOverlay(${JSON.stringify(sl)})'>
+            <div class="live-card-id">${escHtml(sl.entry_id)}</div>
+            <div class="live-card-name">${escHtml(p.title.replace(/^SLICE\s*—\s*/i,''))}</div>
+            <div class="live-card-foot">
+              <span class="live-card-proj"><span class="proj-dot" style="background:${color};width:7px;height:7px;border-radius:50%;display:inline-block"></span> ${escHtml(projName(sl.project_slug))}</span>
+              ${statusBadge(p.status)}
+            </div>
+          </div>`);
+          totalActive++;
+        });
+      }
+
+      document.getElementById('board-sub').textContent = `${totalActive} active · ${COL_ORDER.map(c=>`${cols[c].length} ${COL_LABELS[c]}`).join(' · ')}`;
+      document.getElementById('board-columns').innerHTML = COL_ORDER.map(col => `
+        <div class="board-col">
+          <div class="board-col-header">
+            <span class="board-col-title">${COL_LABELS[col]}</span>
+            <span class="board-col-count">${cols[col].length}</span>
+          </div>
+          <div class="board-cards">${cols[col].join('')}</div>
+        </div>`).join('');
+    }
+
+    // ── PROJECT DETAIL ────────────────────────────────────────────────
+    let _currentPdSlug = '', _pdSlices = [], _pdDeliverables = [], _pdPhases = [];
+
+    async function loadProjectDetail(slug) {
+      _currentPdSlug = slug;
+      previousScreen = document.querySelector('.screen:not(.hidden)')?.id?.replace('screen-','') || 'projects';
+      // Set header
+      document.getElementById('detail-project-name').textContent = projName(slug);
+      document.getElementById('detail-phase-badge').textContent = '…';
+      // Show screen
+      document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+      document.getElementById('screen-project-detail').classList.remove('hidden');
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      const navProjects = document.querySelector('[onclick*="projects"]');
+      if (navProjects) navProjects.classList.add('active');
+      // Reset tabs
+      showTab('pd-action', document.querySelector('#pd-tabs-bar .tab-btn'));
+      ['tab-pd-action','tab-pd-progress','tab-pd-backlog'].forEach(id => {
+        document.getElementById(id).innerHTML = '<div style="padding:20px;color:var(--text-meta);font-size:13px">Loading…</div>';
+      });
+      try {
+        const [phases, dels, slices] = await Promise.all([
+          apiFetch(`/api/t4/${slug}/entries?type=phase`).then(r=>r.json()),
+          apiFetch(`/api/t4/${slug}/entries?type=deliverable`).then(r=>r.json()),
+          apiFetch(`/api/t4/${slug}/entries?type=slice`).then(r=>r.json()),
+        ]);
+        _pdPhases       = phases.map(e => ({...e, project_slug: slug}));
+        _pdDeliverables = dels.map(e => ({...e, project_slug: slug}));
+        _pdSlices       = slices.map(e => ({...e, project_slug: slug}));
+        // Phase badge: last non-done phase or first
+        const activePhase = _pdPhases.find(ph => !ph.content.includes('**Status:** Done')) || _pdPhases[0];
+        if (activePhase) {
+          const pp = parseT4(activePhase.content);
+          document.getElementById('detail-phase-badge').textContent = pp.title.replace(/^PHASE\s*—\s*/i,'');
+        }
+        renderPdAction();
+        renderPdProgress();
+        renderPdBacklog();
+      } catch(e) {
+        ['tab-pd-action','tab-pd-progress','tab-pd-backlog'].forEach(id => {
+          document.getElementById(id).innerHTML = '<div style="padding:20px;color:var(--text-meta);font-size:13px">Could not load project.</div>';
+        });
+      }
+    }
+
+    function renderPdAction() {
+      const blocked = _pdSlices.filter(s => s.content.includes('**Status:** Blocked'));
+      const html = blocked.length
+        ? `<div style="padding:14px 0 8px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-meta)">Blocked (${blocked.length})</div>` +
+          blocked.map(s => {
+            const p = parseT4(s.content);
+            return `<div class="pd-row" onclick='openSliceOverlay(${JSON.stringify(s)})'>
+              <span class="pd-row-id">${escHtml(s.entry_id)}</span>
+              <span class="pd-row-name">${escHtml(p.title.replace(/^SLICE\s*—\s*/i,''))}</span>
+              ${statusBadge('Blocked')}
+            </div>`;
+          }).join('')
+        : '<div style="padding:24px;color:var(--text-meta);font-size:13px">No blocked items.</div>';
+      document.getElementById('tab-pd-action').innerHTML = html;
+    }
+
+    function renderPdProgress() {
+      const totalSlices = _pdSlices.length;
+      const doneSlices  = _pdSlices.filter(s => s.content.includes('**Status:** Done')).length;
+      const pct = totalSlices ? Math.round(doneSlices/totalSlices*100) : 0;
+      const phasesHtml = _pdPhases.map(ph => {
+        const p = parseT4(ph.content);
+        const myDels = _pdDeliverables.filter(d => d.parent_id === ph.entry_id);
+        const mySlices = _pdSlices.filter(s => myDels.some(d => d.entry_id === s.parent_id));
+        const phDone = mySlices.filter(s => s.content.includes('**Status:** Done')).length;
+        const phPct  = mySlices.length ? Math.round(phDone/mySlices.length*100) : 0;
+        return `<div class="pd-phase-card" onclick='openPhaseOverlay(${JSON.stringify(ph)}, ${JSON.stringify(_pdDeliverables)}, ${JSON.stringify(_pdSlices)})'>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-size:13px;font-weight:600;color:var(--text-primary)">${escHtml(p.title.replace(/^PHASE\s*—\s*/i,''))}</span>
+            ${statusBadge(p.status)}
+          </div>
+          <div class="proj-prog-bar" style="margin-bottom:5px"><div class="proj-prog-fill" style="width:${phPct}%;background:${projColor(_currentPdSlug)}"></div></div>
+          <div style="font-size:11px;color:var(--text-meta)">${phDone} of ${mySlices.length} slices done</div>
+        </div>`;
+      }).join('');
+
+      document.getElementById('tab-pd-progress').innerHTML = `
+        <div style="padding:16px 0 20px">
+          <div style="font-size:28px;font-weight:700;color:var(--text-primary)">${pct}%</div>
+          <div style="font-size:12px;color:var(--text-meta);margin-bottom:10px">${doneSlices} of ${totalSlices} slices done</div>
+          <div class="proj-prog-bar"><div class="proj-prog-fill" style="width:${pct}%;background:${projColor(_currentPdSlug)}"></div></div>
+        </div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-meta);margin-bottom:10px">Phases</div>
+        ${phasesHtml || '<div style="color:var(--text-meta);font-size:13px">No phases found.</div>'}
+      `;
+    }
+
+    function renderPdBacklog() {
+      const rows = _pdSlices.map(s => {
+        const p = parseT4(s.content);
+        return `<div class="pd-row" onclick='openSliceOverlay(${JSON.stringify(s)})'>
+          <span class="pd-row-id">${escHtml(s.entry_id)}</span>
+          <span class="pd-row-name">${escHtml(p.title.replace(/^SLICE\s*—\s*/i,''))}</span>
+          ${statusBadge(p.status)}
+        </div>`;
+      }).join('');
+      document.getElementById('tab-pd-backlog').innerHTML = rows || '<div style="padding:24px;color:var(--text-meta);font-size:13px">No slices found.</div>';
+    }
+
     // Kick off
     if (token) { loadChat(); } else { showLoginOverlay(); }
 
@@ -2176,10 +2549,13 @@
       document.getElementById('screen-' + id).classList.remove('hidden');
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       if (navEl) navEl.classList.add('active');
-      if (id === 'chat' && token && !chatLoaded) loadChat();
-      if (id === 'notecards' && token && !_notecardsLoaded) loadNotecards();
-      if (id === 'memory' && token && !_memLoaded) loadMemory();
-      if (id === 'signals' && token && !_sigLoaded) loadSignals();
+      if (id === 'chat'      && token && !chatLoaded)          loadChat();
+      if (id === 'notecards' && token && !_notecardsLoaded)    loadNotecards();
+      if (id === 'memory'    && token && !_memLoaded)          loadMemory();
+      if (id === 'signals'   && token && !_sigLoaded)          loadSignals();
+      if (id === 'projects'  && token && !_projLoaded)         loadProjects();
+      if (id === 'dashboard' && token && !_dashLoaded)         loadDashboard();
+      if (id === 'board'     && token && !_boardLoaded)        loadBoard();
     }
 
     function showProjectDetail(projectName) {

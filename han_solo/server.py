@@ -248,6 +248,42 @@ async def api_update_notecard(request: Request) -> JSONResponse:
     return JSONResponse({"id": notecard_id, "status": status})
 
 
+async def api_t4_projects(request: Request) -> JSONResponse:
+    """GET /api/t4/projects — list all projects with current_phase + slice counts."""
+    projects = await db.list_t4_projects()
+    return JSONResponse([
+        {
+            "project_slug": p["project_slug"],
+            "current_phase": p["current_phase"],
+            "total_slices": p["total_slices"],
+            "done_slices": p["done_slices"],
+            "total_phases": p["total_phases"],
+            "total_deliverables": p["total_deliverables"],
+        }
+        for p in projects
+    ])
+
+
+async def api_t4_entries(request: Request) -> JSONResponse:
+    """GET /api/t4/{project_slug}/entries?type=slice|deliverable|phase|..."""
+    project_slug = request.path_params["project_slug"]
+    entry_type = request.query_params.get("type", "").strip()
+    if not entry_type:
+        return JSONResponse({"error": "type query param required"}, status_code=400)
+    rows = await db.list_t4_entries_by_type(project_slug, entry_type)
+    return JSONResponse([
+        {
+            "id": r["id"],
+            "entry_type": r["entry_type"],
+            "entry_id": r["entry_id"],
+            "parent_id": r.get("parent_id"),
+            "content": r["content"],
+            "updated_at": r["updated_at"].isoformat() if r.get("updated_at") else None,
+        }
+        for r in rows
+    ])
+
+
 async def api_memory_health(request: Request) -> JSONResponse:
     """Return memory system health: failed transitions + capture stats."""
     failed = await db.get_failed_transitions(hours=24)
@@ -294,6 +330,8 @@ _chat_routes = [
     Route("/api/memory-panel", chat_api.api_memory_panel),
     Route("/api/memory-health", api_memory_health),
     Route("/api/write-core-block", api_write_core_block, methods=["POST"]),
+    Route("/api/t4/projects", api_t4_projects),
+    Route("/api/t4/{project_slug}/entries", api_t4_entries),
     Route("/api/signals", api_list_signals),
     Route("/api/write-signal", api_write_signal_rest, methods=["POST"]),
     Route("/api/archival-passages", api_list_archival_passages),
