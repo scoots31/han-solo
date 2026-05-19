@@ -230,6 +230,16 @@
     .chip:hover { border-color:var(--accent); color:var(--accent); }
     body.editorial .chip { border-radius:0; font-size:9.5px; letter-spacing:.07em; text-transform:uppercase; }
     body.modern    .chip { border-radius:5px; font-weight:500; }
+    .nc-chip-wrap { position:relative; }
+    .nc-chip-picker { display:none; position:absolute; bottom:calc(100% + 6px); left:0; width:300px; max-height:260px; overflow-y:auto; background:var(--bg); border:1px solid var(--card-border); border-radius:10px; box-shadow:0 4px 16px rgba(0,0,0,.12); z-index:50; }
+    .nc-chip-picker.open { display:block; }
+    .nc-chip-picker-header { padding:9px 13px 7px; font-size:9.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--text-meta); border-bottom:1px solid var(--divider); }
+    .nc-chip-picker-item { padding:10px 13px; cursor:pointer; border-bottom:1px solid var(--divider); transition:background .1s; }
+    .nc-chip-picker-item:last-child { border-bottom:none; }
+    .nc-chip-picker-item:hover { background:var(--accent-light); }
+    .nc-chip-picker-text { font-size:12.5px; color:var(--text-primary); line-height:1.5; }
+    .nc-chip-picker-meta { font-size:10.5px; color:var(--text-meta); margin-top:2px; }
+    .nc-chip-picker-empty { padding:16px 13px; font-size:12.5px; color:var(--text-meta); }
 
     /* ── MEMORY ── */
     .mem-type-col { flex-shrink:0; padding-top:1px; }
@@ -1037,7 +1047,13 @@
                 <button class="send-btn"><svg viewBox="0 0 14 14"><path d="M1.5 7L12.5 1L7 13L6.2 7.8L1.5 7Z"/></svg></button>
               </div>
               <div class="input-chips">
-                <button class="chip">+ Notecard</button>
+                <div class="nc-chip-wrap">
+                  <button class="chip" id="ncChipBtn" onclick="toggleNcPicker()">+ Notecard</button>
+                  <div class="nc-chip-picker" id="nc-chip-picker">
+                    <div class="nc-chip-picker-header">Pin a notecard</div>
+                    <div id="nc-chip-picker-list"></div>
+                  </div>
+                </div>
                 <button class="chip">Signal</button>
                 <button class="chip">Decision</button>
                 <button class="chip">Thread</button>
@@ -1696,6 +1712,53 @@
     document.querySelector('.send-btn').addEventListener('click', sendMessage);
     document.querySelector('.chat-input').addEventListener('keydown', e => {
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+
+    // ── NOTECARD PICKER ───────────────────────────────────────────────────────
+    let _ncPickerOpen = false;
+
+    function toggleNcPicker() {
+      _ncPickerOpen = !_ncPickerOpen;
+      document.getElementById('nc-chip-picker').classList.toggle('open', _ncPickerOpen);
+      if (_ncPickerOpen) loadNcPickerList();
+    }
+
+    async function loadNcPickerList() {
+      const list = document.getElementById('nc-chip-picker-list');
+      list.innerHTML = '<div class="nc-chip-picker-empty">Loading…</div>';
+      try {
+        const res = await apiFetch('/api/notecards?status=active');
+        if (!res.ok) { list.innerHTML = '<div class="nc-chip-picker-empty">Could not load.</div>'; return; }
+        const cards = await res.json();
+        if (!cards.length) { list.innerHTML = '<div class="nc-chip-picker-empty">No active notecards.</div>'; return; }
+        list.innerHTML = '';
+        cards.forEach(c => {
+          const item = document.createElement('div');
+          item.className = 'nc-chip-picker-item';
+          const dateStr = c.created_at ? new Date(c.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric' }) : '';
+          item.innerHTML = `<div class="nc-chip-picker-text">${escHtml(c.text)}</div><div class="nc-chip-picker-meta">${c.creator} · ${dateStr}</div>`;
+          item.addEventListener('click', () => injectNotecard(c.text));
+          list.appendChild(item);
+        });
+      } catch { list.innerHTML = '<div class="nc-chip-picker-empty">Could not load.</div>'; }
+    }
+
+    function injectNotecard(text) {
+      const ta = document.querySelector('.chat-input');
+      const prefix = '📌 ' + text;
+      ta.value = ta.value ? ta.value + '\n\n' + prefix : prefix;
+      ta.style.height = 'auto';
+      ta.style.height = Math.min(ta.scrollHeight, 140) + 'px';
+      _ncPickerOpen = false;
+      document.getElementById('nc-chip-picker').classList.remove('open');
+      ta.focus();
+    }
+
+    document.addEventListener('click', e => {
+      if (_ncPickerOpen && !e.target.closest('.nc-chip-wrap')) {
+        _ncPickerOpen = false;
+        document.getElementById('nc-chip-picker').classList.remove('open');
+      }
     });
 
     // ── CHAT PANEL ────────────────────────────────────────────────────────────
