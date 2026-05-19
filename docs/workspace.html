@@ -2574,8 +2574,8 @@
         const cards = types.flatMap(type => (byType[type] || []).map(e => {
           const icon = DOC_ICONS[type] || '📄';
           const label = DOC_LABELS[type] || type;
-          const subtitle = type === 'sprint_screen' && e.entry_id !== type ? e.entry_id : label.toUpperCase();
-          return `<div onclick='openDocOverlay(${JSON.stringify(e)})' style="cursor:pointer;display:flex;align-items:center;gap:12px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:9px;padding:12px 14px;transition:background .15s" onmouseenter="this.style.background='var(--accent-light)'" onmouseleave="this.style.background='var(--card-bg)'">
+          const idx = _pdDocs.indexOf(e);
+          return `<div onclick="openDocOverlay(${idx})" style="cursor:pointer;display:flex;align-items:center;gap:12px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:9px;padding:12px 14px;transition:background .15s" onmouseenter="this.style.background='var(--accent-light)'" onmouseleave="this.style.background='var(--card-bg)'">
             <div style="font-size:16px;width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--accent-light)">${icon}</div>
             <div style="flex:1;min-width:0">
               <div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(label)}</div>
@@ -2593,7 +2593,8 @@
       document.getElementById('tab-pd-docs').innerHTML = html || '<div style="padding:24px;color:var(--text-meta);font-size:13px">No documents found.</div>';
     }
 
-    function openDocOverlay(entry) {
+    function openDocOverlay(idx) {
+      const entry = _pdDocs[idx];
       const label = DOC_LABELS[entry._docType] || entry._docType;
       const bd = document.getElementById('overlay-backdrop');
       const panel = document.getElementById('overlay-slice');
