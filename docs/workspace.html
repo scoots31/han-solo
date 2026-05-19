@@ -917,76 +917,22 @@
       <!-- MEMORY -->
       <div class="screen hidden" id="screen-memory">
         <div class="screen-header">
-          <div><div class="screen-title">Memory</div><div class="screen-sub">214 passages · Last updated May 17</div></div>
-          <button class="btn-primary">+ Ingest</button>
+          <div><div class="screen-title">Memory</div><div class="screen-sub" id="mem-sub">Loading…</div></div>
         </div>
         <div class="stats-row">
-          <div class="stat-item"><div class="stat-value">214</div><div class="stat-label">Passages</div></div>
-          <div class="stat-item"><div class="stat-value">12</div><div class="stat-label">Sessions</div></div>
-          <div class="stat-item"><div class="stat-value">48</div><div class="stat-label">Decisions</div></div>
-          <div class="stat-item"><div class="stat-value">5</div><div class="stat-label">Open threads</div></div>
+          <div class="stat-item"><div class="stat-value" id="mem-stat-total">—</div><div class="stat-label">Passages</div></div>
+          <div class="stat-item"><div class="stat-value" id="mem-stat-sessions">—</div><div class="stat-label">Sessions</div></div>
+          <div class="stat-item"><div class="stat-value" id="mem-stat-decisions">—</div><div class="stat-label">Decisions</div></div>
+          <div class="stat-item"><div class="stat-value" id="mem-stat-other">—</div><div class="stat-label">Other</div></div>
         </div>
-        <div class="filter-bar">
-          <button class="filter-btn active">All</button>
-          <button class="filter-btn">Sessions</button>
-          <button class="filter-btn">Decisions</button>
-          <button class="filter-btn">Threads</button>
+        <div class="filter-bar" id="mem-filter-bar">
+          <button class="filter-btn active" data-memfilter="all">All</button>
+          <button class="filter-btn" data-memfilter="session">Sessions</button>
+          <button class="filter-btn" data-memfilter="decision">Decisions</button>
+          <button class="filter-btn" data-memfilter="thread">Threads</button>
         </div>
-        <div class="scrollable">
-          <div class="list-row">
-            <div class="mem-type-col"><span class="mem-badge session">Session</span></div>
-            <div class="row-content">
-              <div class="row-title">Memory system simplified · Han Solo docs redesigned</div>
-              <div class="row-excerpt">Retired ren-memory git pull and MemPalace diary. Han-solo-docs full redesign. All deployed to Cloudflare.</div>
-              <div class="row-meta"><span>May 17, 2026</span><span>4 decisions locked</span></div>
-            </div>
-            <div class="row-arrow">›</div>
-          </div>
-          <div class="list-row">
-            <div class="mem-type-col"><span class="mem-badge decision">Decision</span></div>
-            <div class="row-content">
-              <div class="row-title">T4 artifact mapping — design session before build</div>
-              <div class="row-excerpt">Before building write_t4_entry or any T4 write path, map ALL artifacts the framework produces. Architecture HTML is the starting inventory.</div>
-              <div class="row-meta"><span>May 17, 2026</span><span>Han Solo</span></div>
-            </div>
-            <div class="row-arrow">›</div>
-          </div>
-          <div class="list-row">
-            <div class="mem-type-col"><span class="mem-badge decision">Decision</span></div>
-            <div class="row-content">
-              <div class="row-title">Memory consolidation: ren-local + Han Solo only</div>
-              <div class="row-excerpt">ren-memory and MemPalace retired from Ren activation. Simpler, faster, more reliable.</div>
-              <div class="row-meta"><span>May 17, 2026</span><span>Han Solo</span></div>
-            </div>
-            <div class="row-arrow">›</div>
-          </div>
-          <div class="list-row">
-            <div class="mem-type-col"><span class="mem-badge thread">Thread</span></div>
-            <div class="row-content">
-              <div class="row-title">Phase 2 design session — data flow bridge</div>
-              <div class="row-excerpt">Dedicated session needed before any Phase 2 building. Currently a manual bridge between Han Solo and Claude Code.</div>
-              <div class="row-meta"><span>Open · High priority</span><span>May 17</span></div>
-            </div>
-            <div class="row-arrow">›</div>
-          </div>
-          <div class="list-row">
-            <div class="mem-type-col"><span class="mem-badge session">Session</span></div>
-            <div class="row-content">
-              <div class="row-title">Operating principles · ren-local built · Passages migrated</div>
-              <div class="row-excerpt">8 operating principles agreed with Scott. Built ren-local.py + ren.db. Migrated 9 orphaned passages. Trust Contract formalized.</div>
-              <div class="row-meta"><span>May 15, 2026</span><span>9 passages migrated</span></div>
-            </div>
-            <div class="row-arrow">›</div>
-          </div>
-          <div class="list-row">
-            <div class="mem-type-col"><span class="mem-badge decision">Decision</span></div>
-            <div class="row-content">
-              <div class="row-title">The Factory Roadmap — 4-phase deliberate sequencing</div>
-              <div class="row-excerpt">Phase 1 Foundation → Phase 2 Data Flow → Phase 3 Cohabitation → Phase 4 The Factory. Higher education first product.</div>
-              <div class="row-meta"><span>May 17, 2026</span><span>The Factory</span></div>
-            </div>
-            <div class="row-arrow">›</div>
-          </div>
+        <div class="scrollable" id="mem-list">
+          <!-- populated by loadMemory() -->
         </div>
       </div>
 
@@ -2080,6 +2026,113 @@
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
     });
 
+    // ── MEMORY ────────────────────────────────────────────────────────────────
+    let _allPassages = [];
+    let _memLoaded   = false;
+    let _memFilter   = 'all';
+
+    function inferPassageType(text) {
+      const t = text.toLowerCase();
+      if (/session summary|what happened|session entry|session close/i.test(t)) return 'session';
+      if (/^decision[:\s]|decision locked|decided:|how to apply/i.test(t)) return 'decision';
+      if (/^thread[:\s]|open thread|thread:/i.test(t)) return 'thread';
+      if (/^signal[:\s(]|texture:|directional:|relational:|author:synthesis/i.test(t)) return 'signal';
+      return 'other';
+    }
+
+    function passageTitle(text) {
+      const first = text.split('\n')[0]
+        .replace(/^#+\s*/, '')
+        .replace(/^(Session Summary|Decision|Thread|Signal)[:\s]*/i, '')
+        .trim();
+      return first.length > 90 ? first.slice(0, 90) + '…' : (first || '(no title)');
+    }
+
+    function passageExcerpt(text) {
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+      const body  = lines.slice(1).join(' ');
+      return body.length > 170 ? body.slice(0, 170) + '…' : body;
+    }
+
+    async function loadMemory() {
+      if (!token) return;
+      const list = document.getElementById('mem-list');
+      list.innerHTML = '<div style="padding:28px;color:var(--text-meta);font-size:13px">Loading…</div>';
+      try {
+        const res = await apiFetch('/api/archival-passages?limit=500');
+        if (!res.ok) { list.innerHTML = '<div style="padding:28px;color:var(--text-meta);font-size:13px">Could not load memory.</div>'; return; }
+        const raw = await res.json();
+        // Sort newest first
+        _allPassages = raw.sort((a, b) => {
+          if (!a.created_at) return 1;
+          if (!b.created_at) return -1;
+          return new Date(b.created_at) - new Date(a.created_at);
+        }).map(p => ({ ...p, _type: inferPassageType(p.text) }));
+        _memLoaded = true;
+        renderMemory();
+      } catch(e) {
+        list.innerHTML = '<div style="padding:28px;color:var(--text-meta);font-size:13px">Could not load memory.</div>';
+      }
+    }
+
+    function renderMemory() {
+      const total     = _allPassages.length;
+      const sessions  = _allPassages.filter(p => p._type === 'session').length;
+      const decisions = _allPassages.filter(p => p._type === 'decision').length;
+      const other     = total - sessions - decisions;
+
+      document.getElementById('mem-stat-total').textContent    = total;
+      document.getElementById('mem-stat-sessions').textContent = sessions;
+      document.getElementById('mem-stat-decisions').textContent= decisions;
+      document.getElementById('mem-stat-other').textContent    = other;
+
+      const lastDate = _allPassages[0]?.created_at
+        ? new Date(_allPassages[0].created_at).toLocaleDateString('en-US', {month:'short', day:'numeric'})
+        : '—';
+      document.getElementById('mem-sub').textContent = `${total} passages · Last updated ${lastDate}`;
+
+      const filtered = _memFilter === 'all'
+        ? _allPassages
+        : _allPassages.filter(p => p._type === _memFilter);
+
+      const list = document.getElementById('mem-list');
+      if (!filtered.length) {
+        list.innerHTML = '<div style="padding:28px;color:var(--text-meta);font-size:13px">No passages in this category.</div>';
+        return;
+      }
+
+      const typeLabel = { session:'Session', decision:'Decision', thread:'Thread', signal:'Signal', other:'Memory' };
+
+      list.innerHTML = filtered.map(p => {
+        const badge  = p._type;
+        const label  = typeLabel[badge] || 'Memory';
+        const title  = escHtml(passageTitle(p.text));
+        const excerpt= escHtml(passageExcerpt(p.text));
+        const date   = p.created_at
+          ? new Date(p.created_at).toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'})
+          : '';
+        return `
+          <div class="list-row">
+            <div class="mem-type-col"><span class="mem-badge ${badge === 'signal' || badge === 'other' ? 'thread' : badge}">${label}</span></div>
+            <div class="row-content">
+              <div class="row-title">${title}</div>
+              ${excerpt ? `<div class="row-excerpt">${excerpt}</div>` : ''}
+              <div class="row-meta"><span>${date}</span></div>
+            </div>
+            <div class="row-arrow">›</div>
+          </div>`;
+      }).join('');
+    }
+
+    document.getElementById('mem-filter-bar').addEventListener('click', e => {
+      const btn = e.target.closest('[data-memfilter]');
+      if (!btn) return;
+      document.querySelectorAll('#mem-filter-bar .filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      _memFilter = btn.dataset.memfilter;
+      renderMemory();
+    });
+
     // ── NOTECARDS ─────────────────────────────────────────────────────────────
     let _allNotecards = [];
     let _currentUserId = null;
@@ -2223,6 +2276,7 @@
       if (navEl) navEl.classList.add('active');
       if (id === 'chat' && token && !chatLoaded) loadChat();
       if (id === 'notecards' && token && !_notecardsLoaded) loadNotecards();
+      if (id === 'memory' && token && !_memLoaded) loadMemory();
     }
 
     function showProjectDetail(projectName) {
