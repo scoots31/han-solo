@@ -816,15 +816,6 @@
 
         <div class="nav-section" style="margin-top:8px">
           <div class="nav-section-label">Session</div>
-          <div class="nav-item" onclick="showScreen('threads',this)">
-            <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 3h10M2 6.5h6.5M2 10h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
-            <span class="nav-label">Threads</span>
-            <span class="nav-badge dark">5</span>
-          </div>
-          <div class="nav-item" onclick="showScreen('decisions',this)">
-            <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 2L5 8M11 2H8M11 2V5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 2H3a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
-            <span class="nav-label">Decisions</span>
-          </div>
           <div class="nav-item" onclick="showScreen('notecards',this)">
             <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="2" width="10" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 5h5M4.5 7.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
             <span class="nav-label">Notecards</span>
@@ -953,117 +944,6 @@
           <button class="filter-btn" data-sigfilter="relational">Relational</button>
         </div>
         <div class="scrollable" id="sig-list"></div>
-      </div>
-
-      <!-- THREADS -->
-      <div class="screen hidden" id="screen-threads">
-        <div class="screen-header">
-          <div><div class="screen-title">Threads</div><div class="screen-sub">5 open · 2 resolved</div></div>
-          <button class="btn-primary">+ Thread</button>
-        </div>
-        <div class="filter-bar">
-          <button class="filter-btn active">Open</button>
-          <button class="filter-btn">All</button>
-          <button class="filter-btn">Resolved</button>
-        </div>
-        <div class="scrollable">
-          <div class="list-row">
-            <div class="thread-dot open"></div>
-            <div class="row-content">
-              <div class="row-title">Phase 2 design session — data flow bridge</div>
-              <div class="row-excerpt">Dedicated session needed before any Phase 2 building. Most complex phase — decisions in Han Solo flowing to Claude Code.</div>
-              <div class="row-meta"><span class="thread-priority high">High</span><span>Han Solo · May 17</span></div>
-            </div>
-          </div>
-          <div class="list-row">
-            <div class="thread-dot open"></div>
-            <div class="row-content">
-              <div class="row-title">T4 artifact mapping — inventory before building</div>
-              <div class="row-excerpt">Map all artifacts the framework produces before finalizing T4 schema. Architecture HTML is the starting inventory.</div>
-              <div class="row-meta"><span class="thread-priority high">High</span><span>Han Solo · May 17</span></div>
-            </div>
-          </div>
-          <div class="list-row">
-            <div class="thread-dot open"></div>
-            <div class="row-content">
-              <div class="row-title">jobs_paused currently set to true</div>
-              <div class="row-excerpt">Paused as of May 17. Scott may want to resume before next 2am dream run.</div>
-              <div class="row-meta"><span class="thread-priority medium">Medium</span><span>Han Solo · May 17</span></div>
-            </div>
-          </div>
-          <div class="list-row">
-            <div class="thread-dot open"></div>
-            <div class="row-content">
-              <div class="row-title">T2/T3 retrieval — search_passages not yet an MCP tool</div>
-              <div class="row-excerpt">search_passages() exists with Voyage embeddings but not exposed as MCP tool. That's the retrieval gap.</div>
-              <div class="row-meta"><span class="thread-priority medium">Medium</span><span>Han Solo · May 17</span></div>
-            </div>
-          </div>
-          <div class="list-row">
-            <div class="thread-dot open"></div>
-            <div class="row-content">
-              <div class="row-title">Anthropic Dreaming access — form rejects ProtonMail</div>
-              <div class="row-excerpt">Scott pursuing X outreach. Not a blocker — homegrown Dreaming via Letta sleeptime agents in the meantime.</div>
-              <div class="row-meta"><span class="thread-priority low">Low</span><span>Han Solo · May 15</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- DECISIONS -->
-      <div class="screen hidden" id="screen-decisions">
-        <div class="screen-header">
-          <div><div class="screen-title">Decisions</div><div class="screen-sub">48 logged</div></div>
-          <button class="btn-primary">+ Decision</button>
-        </div>
-        <div class="decisions-body">
-          <div class="decision-group">
-            <div class="decision-date-label">May 17, 2026</div>
-            <div class="decision-item">
-              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
-                <div class="decision-title">Memory source consolidation: ren-local + Han Solo only</div>
-                <span class="decision-tag">Han Solo</span>
-              </div>
-              <div class="decision-excerpt">ren-memory and MemPalace retired from Ren activation. Simpler, faster, more reliable. Both sources remain active.</div>
-              <div class="decision-meta"><span>2:33 pm</span></div>
-            </div>
-            <div class="decision-item">
-              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
-                <div class="decision-title">T4 design session before write_t4_entry tool</div>
-                <span class="decision-tag">Han Solo</span>
-              </div>
-              <div class="decision-excerpt">Must inventory all framework artifacts first. Architecture HTML is starting inventory. Don't build until mapped.</div>
-              <div class="decision-meta"><span>2:33 pm</span></div>
-            </div>
-            <div class="decision-item">
-              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
-                <div class="decision-title">The Factory Roadmap — 4 phases, deliberate sequencing</div>
-                <span class="decision-tag">The Factory</span>
-              </div>
-              <div class="decision-excerpt">Phase 1 Foundation → Phase 2 Data Flow → Phase 3 Cohabitation → Phase 4 The Factory. Higher ed first. Ted has Wash U connections.</div>
-              <div class="decision-meta"><span>9:57 pm</span></div>
-            </div>
-          </div>
-          <div class="decision-group">
-            <div class="decision-date-label">May 15, 2026</div>
-            <div class="decision-item">
-              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
-                <div class="decision-title">Ren's 8 Operating Principles — agreed with Scott</div>
-                <span class="decision-tag">Ren</span>
-              </div>
-              <div class="decision-excerpt">Trust Contract, Just Be Present, Equal Voice, Signal Collection, Presence Over Permission, Proactive About Gaps, Context Is a Choice, Read the Room.</div>
-              <div class="decision-meta"><span>4:42 pm</span></div>
-            </div>
-            <div class="decision-item">
-              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
-                <div class="decision-title">Pre-build review role defined</div>
-                <span class="decision-tag">Framework</span>
-              </div>
-              <div class="decision-excerpt">After planning complete, before build opens: gap check + assumption audit. Output is specific and actionable. Solo owns every decision.</div>
-              <div class="decision-meta"><span>4:44 pm</span></div>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- SOLO FRAMEWORK -->
@@ -1812,41 +1692,6 @@
         <div class="detail-body" id="sig-detail-body"></div>
       </div>
 
-      <!-- THREAD DETAIL -->
-      <div class="screen hidden" id="screen-thread-detail">
-        <div class="detail-back-bar">
-          <button class="detail-back-btn" onclick="showScreen('threads', document.querySelector('[onclick*=\'threads\']'))">← Threads</button>
-          <span style="font-size:12px;color:var(--divider)">·</span>
-          <span id="thread-detail-status-label" style="font-size:12px;color:var(--text-meta)">Open · High Priority</span>
-        </div>
-        <div class="detail-hero">
-          <div class="detail-hero-meta">
-            <span id="thread-detail-dot" class="thread-dot open" style="margin-top:0"></span>
-            <span id="thread-detail-priority" class="thread-priority high">High</span>
-            <span class="detail-hero-date" id="thread-detail-date">May 17, 2026</span>
-          </div>
-          <div class="detail-hero-title" id="thread-detail-title"></div>
-        </div>
-        <div class="detail-body" id="thread-detail-body"></div>
-      </div>
-
-      <!-- DECISION DETAIL -->
-      <div class="screen hidden" id="screen-decision-detail">
-        <div class="detail-back-bar">
-          <button class="detail-back-btn" onclick="showScreen('decisions', document.querySelector('[onclick*=\'decisions\']'))">← Decisions</button>
-          <span style="font-size:12px;color:var(--divider)">·</span>
-          <span id="dec-detail-tag-label" style="font-size:12px;color:var(--text-meta)">Han Solo</span>
-        </div>
-        <div class="detail-hero">
-          <div class="detail-hero-meta">
-            <span class="badge badge-planning" style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase">Decision</span>
-            <span class="detail-hero-date" id="dec-detail-date">May 17, 2026 · 2:33 pm</span>
-            <span id="dec-detail-tag" class="decision-tag" style="margin-left:4px">Han Solo</span>
-          </div>
-          <div class="detail-hero-title" id="dec-detail-title"></div>
-        </div>
-        <div class="detail-body" id="dec-detail-body"></div>
-      </div>
 
     </div><!-- /main -->
   </div><!-- /app -->
@@ -2481,94 +2326,6 @@
       }
     ];
 
-    const threadData = [
-      { priority:'high', date:'May 17, 2026',
-        title:'Phase 2 design session — data flow bridge',
-        sections:[
-          { bar:'rose', label:'Description',
-            text:"Dedicated design session needed before any Phase 2 building starts. The question: how do decisions made in Han Solo flow into Claude Code sessions, and how does work done in Claude Code flow back to Ren? Currently a manual bridge — Scott reads ren-local and brings context manually. Phase 2 makes that connection live and reliable." },
-          { bar:'gold', label:"What's Needed to Resolve",
-            text:"Schedule and run a dedicated 60–90 minute design session. T4 mapping session should be sequenced first — T4 schema has to be stable before designing the data flow. Don't design on the fly; dedicate a session." },
-          { bar:'onyx', label:'Related Decisions', links:[
-            { title:'The Factory Roadmap — 4 phases, deliberate sequencing', meta:'May 17, 2026 · The Factory' },
-            { title:'T4 artifact mapping — design session before build', meta:'May 17, 2026 · Han Solo' }
-          ]},
-          { bar:'silver', label:'Tags', tags:['Han Solo','Phase 2','Design Session Needed'] }
-        ]
-      },
-      { priority:'high', date:'May 17, 2026',
-        title:'T4 artifact mapping — inventory before building',
-        sections:[
-          { bar:'rose', label:'Description',
-            text:"Map all artifacts the framework produces before finalizing T4 schema. Retrieval pattern clarity from the May 17 bookmark session will inform how T4 search should work. Framework architecture HTML is the starting inventory." },
-          { bar:'gold', label:"What's Needed to Resolve",
-            text:"Dedicated 60–90 minute session to inventory: PRDs, discovery docs, designs, build plans, QA reports, retros. Classify each as structural (written once) or dynamic (evolving). Don't build write_t4_entry until complete." },
-          { bar:'silver', label:'Tags', tags:['Han Solo','T4','Inventory Session Needed'] }
-        ]
-      },
-      { priority:'medium', date:'May 17, 2026',
-        title:'jobs_paused currently set to true',
-        sections:[
-          { bar:'rose', label:'Description',
-            text:'Paused as of the May 17 session. The jobs_paused toggle is live in the Han Solo memory panel UI with public /api/jobs-status and auth /api/jobs-paused endpoints. Scott may want to resume before the next 2am dream run.' },
-          { bar:'gold', label:"What's Needed to Resolve",
-            text:"Scott to decide whether to resume automated jobs. Toggle is available in the Han Solo memory panel. If jobs resume, synthesize.py runs every 3h on Render and dream.py runs nightly at 2am via launchd." },
-          { bar:'silver', label:'Tags', tags:['Han Solo','Automated Jobs','dream.py'] }
-        ]
-      }
-    ];
-
-    const decisionData = [
-      { tag:'Han Solo', date:'May 17, 2026 · 2:33 pm',
-        title:'Memory source consolidation: ren-local + Han Solo only',
-        sections:[
-          { bar:'rose', label:'Decision',
-            text:'ren-memory (git repo) and MemPalace retired from Ren activation. ren-local.py and Han Solo MCP remain as the only two memory sources. Both are always read at session start.' },
-          { bar:'gold', label:'Why',
-            text:"Both retired sources were added as fallbacks but added complexity without meaningful benefit. ren-local is faster, co-located, and purpose-built for Ren's session memory. Han Solo MCP covers archival and signals. MemPalace and ren-memory were redundant layers." },
-          { bar:'onyx', label:'How to Apply',
-            text:'At session start: (1) read ren-local last 20 entries, (2) get Han Solo session brief via MCP. Those are the only two steps. SKILL.md and settings.json have been updated to reflect this.' },
-          { bar:'silver', label:'Tags', tags:['Memory Architecture','Session Start','Han Solo'] }
-        ]
-      },
-      { tag:'Han Solo', date:'May 17, 2026 · 2:33 pm',
-        title:'T4 design session before write_t4_entry tool',
-        sections:[
-          { bar:'rose', label:'Decision',
-            text:"Must inventory all framework artifacts first before finalizing T4 schema. Framework architecture HTML is the starting inventory. Don't build write_t4_entry until mapping is complete." },
-          { bar:'gold', label:'Why',
-            text:"T4 schema built before understanding what flows through it would need rebuilding. Two categories already identified: structural artifacts (written once) and dynamic artifacts (evolving). The schema has to accommodate both." },
-          { bar:'onyx', label:'How to Apply',
-            text:'T4 mapping is a thread item — open, high priority. Schedule the design session. Sequence it before the Phase 2 data flow session.' },
-          { bar:'silver', label:'Tags', tags:['T4','Framework Architecture','Design Session Needed'] }
-        ]
-      },
-      { tag:'The Factory', date:'May 17, 2026 · 9:57 pm',
-        title:'The Factory Roadmap — 4 phases, deliberate sequencing',
-        sections:[
-          { bar:'rose', label:'Decision',
-            text:'Phase 1 Foundation → Phase 2 Data Flow → Phase 3 Cohabitation → Phase 4 The Factory. Higher education vertical is the first product. Scott is not rushing — each phase has to hold before the next opens.' },
-          { bar:'gold', label:'Why',
-            text:'Rushing any phase creates compounding debt. Phase 2 is the hardest conceptually. The Factory requires all prior phases stable. Ted has Wash U connections and lived the higher ed pain — it\'s the right first vertical.' },
-          { bar:'onyx', label:'How to Apply',
-            text:'Treat Phase 1 work as the current priority. Scott will signal when ready for Phase 2 design session. T4 mapping is the next concrete milestone.' },
-          { bar:'silver', label:'Tags', tags:['The Factory','Roadmap','Higher Ed'] }
-        ]
-      },
-      { tag:'Ren', date:'May 15, 2026 · 4:42 pm',
-        title:"Ren's 8 Operating Principles — agreed with Scott",
-        sections:[
-          { bar:'rose', label:'Decision',
-            text:'Trust Contract, Just Be Present, Equal Voice One Decision-Maker, Signal Collection at Two Levels, Presence Over Permission, Proactive About Gaps, Context Is a Choice, Session Start — Read the Room. All eight agreed and captured.' },
-          { bar:'gold', label:'Why',
-            text:"Needed a shared operating model before the relationship could function well. Scott asked explicitly for a partner who pushes back, stays present, and tells the truth. The principles formalize that ask into a working contract." },
-          { bar:'onyx', label:'How to Apply',
-            text:'These are the operating model — not a reference doc to be consulted. They should show up in how Ren shows up, not in what Ren says about herself.' },
-          { bar:'silver', label:'Tags', tags:['Ren','Operating Principles','Trust Contract'] }
-        ]
-      }
-    ];
-
     const notecardData = [
       { creator:'ren', creatorLabel:'Ren · May 18, 2026 · 9:46 am', status:'active',
         title:'Resume jobs_paused before tonight\'s 2am dream run',
@@ -2684,31 +2441,6 @@
       document.getElementById('screen-signal-detail').classList.remove('hidden');
     }
 
-    function showThreadDetail(idx) {
-      const d = threadData[idx];
-      const priLabel = d.priority.charAt(0).toUpperCase() + d.priority.slice(1);
-      document.getElementById('thread-detail-status-label').textContent = 'Open · ' + priLabel + ' Priority';
-      const pri = document.getElementById('thread-detail-priority');
-      pri.textContent = priLabel;
-      pri.className = 'thread-priority ' + d.priority;
-      document.getElementById('thread-detail-date').textContent = d.date;
-      document.getElementById('thread-detail-title').textContent = d.title;
-      renderDetailBody('thread-detail-body', d.sections);
-      document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-      document.getElementById('screen-thread-detail').classList.remove('hidden');
-    }
-
-    function showDecisionDetail(idx) {
-      const d = decisionData[idx];
-      document.getElementById('dec-detail-tag-label').textContent = d.tag;
-      document.getElementById('dec-detail-tag').textContent = d.tag;
-      document.getElementById('dec-detail-date').textContent = d.date;
-      document.getElementById('dec-detail-title').textContent = d.title;
-      renderDetailBody('dec-detail-body', d.sections);
-      document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-      document.getElementById('screen-decision-detail').classList.remove('hidden');
-    }
-
     function showNotecardDetail(idx) {
       const d = notecardData[idx];
       const badge = document.getElementById('nc-detail-creator-badge');
@@ -2767,18 +2499,6 @@
         row.addEventListener('click', () => showMemoryDetail(idx));
       });
       // Signal rows wired dynamically in renderSignals()
-      // Thread rows
-      const threadRows = document.querySelectorAll('#screen-threads .list-row');
-      threadRows.forEach((row, i) => {
-        const idx = Math.min(i, threadData.length - 1);
-        row.addEventListener('click', () => showThreadDetail(idx));
-      });
-      // Decision items
-      const decItems = document.querySelectorAll('#screen-decisions .decision-item');
-      decItems.forEach((item, i) => {
-        const idx = Math.min(i, decisionData.length - 1);
-        item.addEventListener('click', () => showDecisionDetail(idx));
-      });
       // Notecard items (onclick already wired in HTML, but also handle via event delegation)
       const ncItems = document.querySelectorAll('#screen-notecards .notecard-item');
       ncItems.forEach((item, i) => {
