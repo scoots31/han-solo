@@ -114,6 +114,21 @@ async def api_write_core_block(request: Request) -> JSONResponse:
         return JSONResponse({"error": str(exc)}, status_code=502)
 
 
+async def api_create_core_block(request: Request) -> JSONResponse:
+    """REST endpoint to create a new core memory block and attach it to the Ren agent."""
+    body = await request.json()
+    label = body.get("label", "").strip()
+    value = body.get("value", "")
+    limit = int(body.get("limit", 10000))
+    if not label:
+        return JSONResponse({"error": "label required"}, status_code=400)
+    try:
+        result = await letta.create_and_attach_core_block(label, value, limit)
+        return JSONResponse({"created": True, "label": label, "id": result.get("id")})
+    except Exception as exc:
+        return JSONResponse({"error": str(exc)}, status_code=502)
+
+
 async def api_list_signals(request: Request) -> JSONResponse:
     """GET /api/signals?type=texture|directional|relational"""
     get_current_user()
@@ -364,6 +379,7 @@ _chat_routes = [
     Route("/api/memory-panel", chat_api.api_memory_panel),
     Route("/api/memory-health", api_memory_health),
     Route("/api/write-core-block", api_write_core_block, methods=["POST"]),
+    Route("/api/create-core-block", api_create_core_block, methods=["POST"]),
     Route("/api/skills/{phase_slug}", api_get_skill),
     Route("/api/t4/projects", api_t4_projects),
     Route("/api/t4/projects/{project_slug}", api_t4_project_patch, methods=["PATCH"]),
