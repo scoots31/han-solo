@@ -758,12 +758,13 @@
     .overlay-backdrop {
       position:fixed; inset:0; background:rgba(0,0,0,0.38);
       backdrop-filter:blur(3px); z-index:1000;
-      display:none; align-items:center; justify-content:flex-end;
+      display:none; align-items:center; justify-content:center;
     }
     .overlay-backdrop.open { display:flex; }
     .overlay-panel {
-      width:580px; max-width:92vw; height:100vh;
-      background:var(--sidebar-bg); border-left:1px solid var(--card-border);
+      width:620px; max-width:92vw; max-height:85vh;
+      background:var(--sidebar-bg); border:1px solid var(--card-border);
+      border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,0.18);
       display:flex; flex-direction:column; overflow:hidden;
     }
     .overlay-header {
