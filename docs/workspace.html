@@ -1016,8 +1016,8 @@
             </div>
           </div>
           <div class="screen-actions">
-            <button class="btn-secondary">Memory</button>
-            <button class="btn-secondary">Session</button>
+            <button class="btn-secondary" onclick="showScreen('memory', document.querySelector('[onclick*=\'memory\']'))">Memory</button>
+            <button class="btn-secondary" id="newSessionBtn" onclick="newSession()">New session</button>
           </div>
         </div>
         <div class="messages" id="chat-messages">
@@ -1041,6 +1041,10 @@
       <div class="screen hidden" id="screen-memory">
         <div class="screen-header">
           <div><div class="screen-title">Memory</div><div class="screen-sub" id="mem-sub">Loading…</div></div>
+          <div class="screen-actions">
+            <span id="jobs-badge" style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(189,140,125,.15);color:var(--accent);display:none">—</span>
+            <button class="btn-secondary" id="jobs-toggle-btn" onclick="toggleJobs()" style="display:none">—</button>
+          </div>
         </div>
         <div class="stats-row">
           <div class="stat-item"><div class="stat-value" id="mem-stat-total">—</div><div class="stat-label">Passages</div></div>
@@ -1667,6 +1671,30 @@
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
     });
 
+    // ── NEW SESSION ───────────────────────────────────────────────────────────
+    async function newSession() {
+      const btn = document.getElementById('newSessionBtn');
+      if (!btn || btn.disabled) return;
+      btn.disabled = true;
+      btn.textContent = 'Resetting…';
+      try {
+        const res = await apiFetch('/api/reset-session', { method: 'POST' });
+        if (res.ok) {
+          chatLoaded = false;
+          const el = document.getElementById('chat-messages');
+          el.innerHTML = '';
+          lastDateLabel = null;
+          const div = document.createElement('div');
+          div.style.cssText = 'padding:8px 14px;font-size:11.5px;color:var(--text-meta);text-align:center;';
+          div.textContent = 'New session — memory intact';
+          el.appendChild(div);
+        }
+      } catch {}
+      btn.disabled = false;
+      btn.textContent = 'New session';
+      document.querySelector('.chat-input').focus();
+    }
+
     // ── MEMORY ────────────────────────────────────────────────────────────────
     let _allPassages = [];
     let _memLoaded   = false;
@@ -1711,9 +1739,51 @@
         }).map(p => ({ ...p, _type: inferPassageType(p.text) }));
         _memLoaded = true;
         renderMemory();
+        loadJobsStatus();
       } catch(e) {
         list.innerHTML = '<div style="padding:28px;color:var(--text-meta);font-size:13px">Could not load memory.</div>';
       }
+    }
+
+    async function loadJobsStatus() {
+      try {
+        const res = await fetch('/api/jobs-status');
+        if (!res.ok) return;
+        const data = await res.json();
+        renderJobsBadge(data.paused);
+      } catch {}
+    }
+
+    function renderJobsBadge(paused) {
+      const badge = document.getElementById('jobs-badge');
+      const btn   = document.getElementById('jobs-toggle-btn');
+      if (!badge || !btn) return;
+      badge.textContent = paused ? 'Paused' : 'Running';
+      badge.style.background = paused ? 'rgba(142,142,144,.15)' : 'rgba(189,140,125,.15)';
+      badge.style.color = paused ? 'var(--text-meta)' : 'var(--accent)';
+      badge.style.display = 'inline-block';
+      btn.textContent = paused ? 'Resume' : 'Pause';
+      btn.style.display = 'inline-block';
+    }
+
+    async function toggleJobs() {
+      const badge = document.getElementById('jobs-badge');
+      const btn   = document.getElementById('jobs-toggle-btn');
+      if (!btn || btn.disabled) return;
+      const nowPaused = badge.textContent === 'Running';
+      btn.disabled = true;
+      btn.textContent = '…';
+      try {
+        const res = await apiFetch('/api/jobs-paused', {
+          method: 'POST',
+          body: JSON.stringify({ paused: nowPaused }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          renderJobsBadge(data.paused);
+        }
+      } catch { btn.textContent = 'Error'; }
+      btn.disabled = false;
     }
 
     function renderMemory() {
