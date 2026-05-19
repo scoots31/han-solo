@@ -249,11 +249,13 @@ async def api_update_notecard(request: Request) -> JSONResponse:
 
 
 async def api_t4_projects(request: Request) -> JSONResponse:
-    """GET /api/t4/projects — list all projects with current_phase + slice counts."""
+    """GET /api/t4/projects — list all projects with owner, visibility, current_phase + slice counts."""
     projects = await db.list_t4_projects()
     return JSONResponse([
         {
             "project_slug": p["project_slug"],
+            "owner": p["owner"],
+            "visibility": p["visibility"],
             "current_phase": p["current_phase"],
             "total_slices": p["total_slices"],
             "done_slices": p["done_slices"],
@@ -262,6 +264,22 @@ async def api_t4_projects(request: Request) -> JSONResponse:
         }
         for p in projects
     ])
+
+
+async def api_t4_project_patch(request: Request) -> JSONResponse:
+    """PATCH /api/t4/projects/{slug} — update visibility (private/shared)."""
+    project_slug = request.path_params["project_slug"]
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse({"error": "invalid JSON"}, status_code=400)
+    visibility = body.get("visibility", "").strip()
+    if visibility not in ("private", "shared"):
+        return JSONResponse({"error": "visibility must be 'private' or 'shared'"}, status_code=400)
+    ok = await db.update_project_visibility(project_slug, visibility)
+    if not ok:
+        return JSONResponse({"error": "project not found or update failed"}, status_code=404)
+    return JSONResponse({"project_slug": project_slug, "visibility": visibility})
 
 
 async def api_t4_entries(request: Request) -> JSONResponse:
@@ -331,6 +349,7 @@ _chat_routes = [
     Route("/api/memory-health", api_memory_health),
     Route("/api/write-core-block", api_write_core_block, methods=["POST"]),
     Route("/api/t4/projects", api_t4_projects),
+    Route("/api/t4/projects/{project_slug}", api_t4_project_patch, methods=["PATCH"]),
     Route("/api/t4/{project_slug}/entries", api_t4_entries),
     Route("/api/signals", api_list_signals),
     Route("/api/write-signal", api_write_signal_rest, methods=["POST"]),

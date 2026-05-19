@@ -2211,6 +2211,19 @@
       };
     }
 
+    async function toggleVisibility(e, slug, current) {
+      e.stopPropagation();
+      const next = current === 'shared' ? 'private' : 'shared';
+      const res = await apiFetch(`/api/t4/projects/${slug}`, {
+        method: 'PATCH', body: JSON.stringify({ visibility: next })
+      });
+      if (res.ok) {
+        const proj = _allProjects.find(p => p.project_slug === slug);
+        if (proj) proj.visibility = next;
+        renderProjects();
+      }
+    }
+
     function renderProjects() {
       const grid = document.getElementById('proj-grid');
       document.getElementById('proj-sub').textContent = `${_allProjects.length} project${_allProjects.length!==1?'s':''}`;
@@ -2219,10 +2232,16 @@
         return;
       }
       grid.innerHTML = _allProjects.map(p => {
-        const color = projColor(p.project_slug);
-        const name  = projName(p.project_slug);
-        const cp    = extractCurrentPhase(p.current_phase);
-        const pct   = p.total_slices ? Math.round(p.done_slices / p.total_slices * 100) : 0;
+        const color      = projColor(p.project_slug);
+        const name       = projName(p.project_slug);
+        const cp         = extractCurrentPhase(p.current_phase);
+        const pct        = p.total_slices ? Math.round(p.done_slices / p.total_slices * 100) : 0;
+        const isShared   = p.visibility === 'shared';
+        const ownerLabel = escHtml(p.owner || 'scott');
+        const visLabel   = isShared ? 'Shared' : 'Private';
+        const visBtnStyle = isShared
+          ? 'background:rgba(16,185,129,.12);color:#059669;border:1px solid rgba(16,185,129,.25)'
+          : 'background:var(--card-bg);color:var(--text-meta);border:1px solid var(--divider)';
         return `<div class="proj-card" onclick="loadProjectDetail('${escHtml(p.project_slug)}')">
           <div class="proj-slug" style="color:${color}">${escHtml(p.project_slug)}</div>
           <div class="proj-name">${escHtml(name)}</div>
@@ -2232,7 +2251,14 @@
             <div><div class="proj-stat-val">${p.done_slices}</div><div class="proj-stat-lbl">Done</div></div>
             <div><div class="proj-stat-val">${p.total_phases}</div><div class="proj-stat-lbl">Phases</div></div>
           </div>
-          <div class="proj-prog-bar"><div class="proj-prog-fill" style="width:${pct}%;background:${color}"></div></div>
+          <div class="proj-prog-bar" style="margin-bottom:12px"><div class="proj-prog-fill" style="width:${pct}%;background:${color}"></div></div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:10.5px;color:var(--text-secondary)">Owner: ${ownerLabel}</span>
+            <button onclick="toggleVisibility(event,'${escHtml(p.project_slug)}','${escHtml(p.visibility || 'private')}')"
+              style="font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:3px 9px;border-radius:4px;cursor:pointer;font-family:inherit;${visBtnStyle}">
+              ${visLabel}
+            </button>
+          </div>
         </div>`;
       }).join('');
     }

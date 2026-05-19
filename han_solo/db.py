@@ -88,6 +88,20 @@ CREATE TABLE IF NOT EXISTS signals (
 );
 CREATE INDEX IF NOT EXISTS idx_signals_type
     ON signals(signal_type, created_at DESC);
+CREATE TABLE IF NOT EXISTS t4_projects (
+    project_slug TEXT        PRIMARY KEY,
+    owner        TEXT        NOT NULL DEFAULT 'scott',
+    visibility   TEXT        NOT NULL DEFAULT 'private',
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+"""
+
+# Runs after CREATE_TABLE_SQL — backfills existing slugs as scott/private, idempotent
+MIGRATE_T4_PROJECTS_SQL = """
+INSERT INTO t4_projects (project_slug, owner, visibility)
+SELECT DISTINCT project_slug, 'scott', 'private'
+FROM t4_entries
+ON CONFLICT (project_slug) DO NOTHING;
 """
 
 # Health tracking — last successful write timestamp
@@ -104,6 +118,7 @@ async def init_pool() -> None:
         _pool = await asyncpg.create_pool(DATABASE_URL, min_size=1, max_size=5)
         async with _pool.acquire() as conn:
             await conn.execute(CREATE_TABLE_SQL)
+            await conn.execute(MIGRATE_T4_PROJECTS_SQL)
         logger.info("Transcript DB pool ready")
     except Exception as e:
         logger.error("Failed to init transcript DB pool: %s", e)
@@ -536,10 +551,46 @@ async def delete_t4_entry(
         return {"error": str(e)}
 
 
+async def ensure_project_exists(project_slug: str, owner: str = "scott") -> None:
+    """Create a t4_projects record for a slug if one doesn't exist yet."""
+    if not _pool:
+        return
+    try:
+        async with _pool.acquire() as conn:
+            await conn.execute(
+                """
+                INSERT INTO t4_projects (project_slug, owner, visibility)
+                VALUES ($1, $2, 'private')
+                ON CONFLICT (project_slug) DO NOTHING
+                """,
+                project_slug, owner,
+            )
+    except Exception as e:
+        logger.error("ensure_project_exists failed for %s: %s", project_slug, e)
+
+
+async def update_project_visibility(project_slug: str, visibility: str) -> bool:
+    """Set visibility to 'private' or 'shared'. Returns True on success."""
+    if visibility not in ("private", "shared"):
+        return False
+    if not _pool:
+        return False
+    try:
+        async with _pool.acquire() as conn:
+            result = await conn.execute(
+                "UPDATE t4_projects SET visibility=$1 WHERE project_slug=$2",
+                visibility, project_slug,
+            )
+        return result == "UPDATE 1"
+    except Exception as e:
+        logger.error("update_project_visibility failed for %s: %s", project_slug, e)
+        return False
+
+
 async def list_t4_projects() -> list[dict]:
     """
-    Return all distinct project slugs with their current_phase content and
-    aggregate slice counts (total, done).
+    Return all projects with owner, visibility, current_phase, and slice counts.
+    Joins t4_projects for ownership data; falls back gracefully if row missing.
     """
     if not _pool:
         return []
@@ -551,6 +602,10 @@ async def list_t4_projects() -> list[dict]:
             results = []
             for row in slugs:
                 slug = row["project_slug"]
+                proj_row = await conn.fetchrow(
+                    "SELECT owner, visibility FROM t4_projects WHERE project_slug=$1",
+                    slug,
+                )
                 phase_row = await conn.fetchrow(
                     "SELECT content FROM t4_entries WHERE project_slug=$1 AND entry_type='current_phase'",
                     slug,
@@ -568,6 +623,8 @@ async def list_t4_projects() -> list[dict]:
                 )
                 results.append({
                     "project_slug": slug,
+                    "owner": proj_row["owner"] if proj_row else "scott",
+                    "visibility": proj_row["visibility"] if proj_row else "private",
                     "current_phase": phase_row["content"] if phase_row else None,
                     "total_slices": counts["total_slices"],
                     "done_slices": counts["done_slices"],

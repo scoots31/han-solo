@@ -142,6 +142,9 @@ def register(server: FastMCP) -> None:
         """
         get_current_user()
 
+        # Ensure project record exists (idempotent — creates only if missing)
+        await db.ensure_project_exists(project_slug)
+
         if entry_type not in WRITE_BEHAVIORS:
             return f"Error: unknown entry_type '{entry_type}'. Valid types: {sorted(WRITE_BEHAVIORS)}"
 
