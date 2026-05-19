@@ -2497,6 +2497,14 @@
       const p = parseT4(s.content);
       return (p.sections['Plain language'] || '').split('\n')[0].trim() || s.entry_id;
     }
+    function phaseName(ph) {
+      const p = parseT4(ph.content);
+      return (p.sections['Plain language'] || '').split('\n')[0].trim() || p.title.replace(/^PHASE\s*—\s*/i,'').trim() || ph.entry_id;
+    }
+    function deliverableName(d) {
+      const p = parseT4(d.content);
+      return (p.sections['Plain language'] || '').split('\n')[0].trim() || p.title.replace(/^DELIVERABLE\s*—\s*/i,'').trim() || d.entry_id;
+    }
 
     function renderPdAction() {
       const blocked = _pdSlices.filter(s => s.content.includes('**Status:** Blocked'));
@@ -2552,7 +2560,7 @@
         const idx = _ovItems.push(ph) - 1;
         return `<div class="pd-row" onclick="openPhaseOverlay(_ovItems[${idx}])">
           <span class="pd-row-id">${escHtml(ph.entry_id)}</span>
-          <span class="pd-row-name">${escHtml(p.title.replace(/^PHASE\s*—\s*/i,''))}</span>
+          <span class="pd-row-name">${escHtml(phaseName(ph))}</span>
           ${statusBadge(p.status)}
         </div>`;
       }).join('');
@@ -2562,7 +2570,7 @@
         const idx = _ovItems.push(d) - 1;
         return `<div class="pd-row" onclick="openDeliverableOverlay(_ovItems[${idx}])">
           <span class="pd-row-id">${escHtml(d.entry_id)}</span>
-          <span class="pd-row-name">${escHtml(p.title.replace(/^DELIVERABLE\s*—\s*/i,''))}</span>
+          <span class="pd-row-name">${escHtml(deliverableName(d))}</span>
           ${statusBadge(p.status)}
         </div>`;
       }).join('');
