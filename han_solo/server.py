@@ -249,8 +249,10 @@ async def api_update_notecard(request: Request) -> JSONResponse:
 
 
 async def api_t4_projects(request: Request) -> JSONResponse:
-    """GET /api/t4/projects — list all projects with owner, visibility, current_phase + slice counts."""
+    """GET /api/t4/projects — list projects visible to the caller (owned or shared)."""
+    user = get_current_user()
     projects = await db.list_t4_projects()
+    projects = [p for p in projects if p["owner"] == user.id or p["visibility"] == "shared"]
     return JSONResponse([
         {
             "project_slug": p["project_slug"],
