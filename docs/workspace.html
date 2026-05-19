@@ -1814,83 +1814,24 @@
       <!-- NOTECARDS -->
       <div class="screen hidden" id="screen-notecards">
         <div class="screen-header">
-          <div><div class="screen-title">Notecards</div><div class="screen-sub">4 active · 1 archived</div></div>
-          <button class="btn-primary">+ Notecard</button>
+          <div><div class="screen-title">Notecards</div><div class="screen-sub" id="nc-sub">Loading…</div></div>
+          <button class="btn-primary" id="nc-add-btn">+ Notecard</button>
         </div>
         <div class="stats-row">
-          <div class="stat-item"><div class="stat-value">4</div><div class="stat-label">Active</div></div>
-          <div class="stat-item"><div class="stat-value">2</div><div class="stat-label">From Ren</div></div>
-          <div class="stat-item"><div class="stat-value">2</div><div class="stat-label">From You</div></div>
-          <div class="stat-item"><div class="stat-value">1</div><div class="stat-label">Archived</div></div>
+          <div class="stat-item"><div class="stat-value" id="nc-stat-active">—</div><div class="stat-label">Active</div></div>
+          <div class="stat-item"><div class="stat-value" id="nc-stat-ren">—</div><div class="stat-label">From Ren</div></div>
+          <div class="stat-item"><div class="stat-value" id="nc-stat-you">—</div><div class="stat-label">From You</div></div>
+          <div class="stat-item"><div class="stat-value" id="nc-stat-archived">—</div><div class="stat-label">Archived</div></div>
         </div>
-        <div class="filter-bar">
-          <button class="filter-btn active">Active</button>
-          <button class="filter-btn">All</button>
-          <button class="filter-btn">Yours</button>
-          <button class="filter-btn">Ren's</button>
-          <button class="filter-btn">Archived</button>
+        <div class="filter-bar" id="nc-filter-bar">
+          <button class="filter-btn active" data-ncfilter="active">Active</button>
+          <button class="filter-btn" data-ncfilter="all">All</button>
+          <button class="filter-btn" data-ncfilter="yours">Yours</button>
+          <button class="filter-btn" data-ncfilter="rens">Ren's</button>
+          <button class="filter-btn" data-ncfilter="archived">Archived</button>
         </div>
-        <div class="scrollable">
-
-          <div class="notecard-item" onclick="showNotecardDetail(0)">
-            <div class="notecard-creator ren">R</div>
-            <div class="notecard-content">
-              <div class="notecard-text">Resume jobs_paused before tonight's 2am dream run</div>
-              <div class="notecard-meta">
-                <span class="notecard-status active">Active</span>
-                <span>Ren · May 18 · 9:46 am</span>
-                <span>From chat</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="notecard-item" onclick="showNotecardDetail(1)">
-            <div class="notecard-creator scott">S</div>
-            <div class="notecard-content">
-              <div class="notecard-text">Schedule T4 mapping session — 60–90 min dedicated block, sequence before Phase 2 design</div>
-              <div class="notecard-meta">
-                <span class="notecard-status active">Active</span>
-                <span>Scott · May 18 · 9:47 am</span>
-                <span>From chat</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="notecard-item" onclick="showNotecardDetail(2)">
-            <div class="notecard-creator scott">S</div>
-            <div class="notecard-content">
-              <div class="notecard-text">Ask Ted about Wash U procurement timeline — useful for factory pitch timing</div>
-              <div class="notecard-meta">
-                <span class="notecard-status active">Active</span>
-                <span>Scott · May 17 · 9:12 pm</span>
-                <span>From chat</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="notecard-item" onclick="showNotecardDetail(3)">
-            <div class="notecard-creator ren">R</div>
-            <div class="notecard-content">
-              <div class="notecard-text">CTL SwiftUI — confirm gas stop schema with Scott before building location detail screen. Old data nil risk.</div>
-              <div class="notecard-meta">
-                <span class="notecard-status active">Active</span>
-                <span>Ren · May 15 · 2:18 pm</span>
-                <span>From chat</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="notecard-item" onclick="showNotecardDetail(4)" style="opacity:.55">
-            <div class="notecard-creator ren">R</div>
-            <div class="notecard-content">
-              <div class="notecard-text">Revisit Hair Stylist App interview guide when bandwidth opens after CTL design phase</div>
-              <div class="notecard-meta">
-                <span class="notecard-status archived">Archived</span>
-                <span>Ren · May 12 · 11:30 am</span>
-              </div>
-            </div>
-          </div>
-
+        <div class="scrollable" id="nc-list">
+          <!-- populated by loadNotecards() -->
         </div>
       </div>
 
@@ -2139,6 +2080,128 @@
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
     });
 
+    // ── NOTECARDS ─────────────────────────────────────────────────────────────
+    let _allNotecards = [];
+    let _currentUserId = null;
+    let _notecardsLoaded = false;
+    let _ncFilter = 'active';
+
+    function escHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+    function fmtShortDate(ts) {
+      if (!ts) return '';
+      return new Date(ts).toLocaleDateString('en-US', { month:'short', day:'numeric' });
+    }
+
+    async function loadNotecards() {
+      if (!token) return;
+      try {
+        const reqs = await Promise.all([
+          apiFetch('/api/notecards'),
+          apiFetch('/api/notecards?status=archived'),
+        ]);
+        if (!reqs[0].ok || !reqs[1].ok) return;
+        const [active, archived] = await Promise.all(reqs.map(r => r.json()));
+        _allNotecards = [...active, ...archived];
+        if (!_currentUserId) {
+          const me = await apiFetch('/api/me');
+          if (me.ok) { const d = await me.json(); _currentUserId = d.id; }
+        }
+        _notecardsLoaded = true;
+        renderNotecards();
+      } catch(e) {
+        document.getElementById('nc-list').innerHTML = '<div style="padding:28px;color:var(--text-meta);font-size:13px">Could not load notecards.</div>';
+      }
+    }
+
+    function ncFilteredCards() {
+      switch(_ncFilter) {
+        case 'active':   return _allNotecards.filter(c => c.status === 'active' || c.status === 'completed');
+        case 'yours':    return _allNotecards.filter(c => c.creator === _currentUserId);
+        case 'rens':     return _allNotecards.filter(c => c.creator !== _currentUserId);
+        case 'archived': return _allNotecards.filter(c => c.status === 'archived');
+        default:         return _allNotecards;
+      }
+    }
+
+    function renderNotecards() {
+      const activeCount   = _allNotecards.filter(c => c.status === 'active' || c.status === 'completed').length;
+      const fromRen       = _allNotecards.filter(c => c.creator !== _currentUserId).length;
+      const fromYou       = _allNotecards.filter(c => c.creator === _currentUserId).length;
+      const archivedCount = _allNotecards.filter(c => c.status === 'archived').length;
+
+      document.getElementById('nc-stat-active').textContent   = activeCount;
+      document.getElementById('nc-stat-ren').textContent      = fromRen;
+      document.getElementById('nc-stat-you').textContent      = fromYou;
+      document.getElementById('nc-stat-archived').textContent = archivedCount;
+      document.getElementById('nc-sub').textContent = `${activeCount} active · ${archivedCount} archived`;
+
+      const cards = ncFilteredCards();
+      const list  = document.getElementById('nc-list');
+      if (!cards.length) {
+        list.innerHTML = '<div style="padding:28px;color:var(--text-meta);font-size:13px">No notecards here.</div>';
+        return;
+      }
+      list.innerHTML = cards.map(c => {
+        const isRen      = c.creator !== _currentUserId;
+        const isArchived = c.status === 'archived';
+        const creatorLabel = isRen ? 'Ren' : 'Scott';
+        const archiveBtn = !isArchived
+          ? `<button class="nc-archive-btn" data-id="${c.id}" style="margin-left:auto;font-size:10.5px;color:var(--text-meta);background:none;border:1px solid var(--divider);border-radius:4px;padding:2px 7px;cursor:pointer;font-family:inherit;">Archive</button>`
+          : '';
+        return `
+          <div class="notecard-item" style="${isArchived ? 'opacity:.55' : ''}">
+            <div class="notecard-creator ${isRen ? 'ren' : 'scott'}">${isRen ? 'R' : 'S'}</div>
+            <div class="notecard-content">
+              <div class="notecard-text">${escHtml(c.text)}</div>
+              <div class="notecard-meta">
+                <span class="notecard-status ${c.status}">${cap(c.status)}</span>
+                <span>${escHtml(creatorLabel)} · ${fmtShortDate(c.created_at)} · ${fmtTime(c.created_at)}</span>
+                <span>From ${escHtml(c.source)}</span>
+                ${archiveBtn}
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+
+      list.querySelectorAll('.nc-archive-btn').forEach(btn => {
+        btn.addEventListener('click', async e => {
+          e.stopPropagation();
+          const id = btn.dataset.id;
+          const res = await apiFetch(`/api/notecards/${id}`, { method:'PATCH', body: JSON.stringify({ status:'archived' }) });
+          if (res.ok) {
+            const card = _allNotecards.find(c => String(c.id) === String(id));
+            if (card) card.status = 'archived';
+            renderNotecards();
+          }
+        });
+      });
+    }
+
+    // Filter bar
+    document.getElementById('nc-filter-bar').addEventListener('click', e => {
+      const btn = e.target.closest('[data-ncfilter]');
+      if (!btn) return;
+      document.querySelectorAll('#nc-filter-bar .filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      _ncFilter = btn.dataset.ncfilter;
+      renderNotecards();
+    });
+
+    // + Notecard
+    document.getElementById('nc-add-btn').addEventListener('click', async () => {
+      const text = window.prompt('New notecard:');
+      if (!text || !text.trim()) return;
+      const res = await apiFetch('/api/notecards', { method:'POST', body: JSON.stringify({ text: text.trim(), source:'workspace' }) });
+      if (res.ok) {
+        const card = await res.json();
+        _allNotecards.unshift(card);
+        renderNotecards();
+      }
+    });
+
     // Kick off
     if (token) { loadChat(); } else { showLoginOverlay(); }
 
@@ -2159,6 +2222,7 @@
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       if (navEl) navEl.classList.add('active');
       if (id === 'chat' && token && !chatLoaded) loadChat();
+      if (id === 'notecards' && token && !_notecardsLoaded) loadNotecards();
     }
 
     function showProjectDetail(projectName) {
