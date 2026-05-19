@@ -94,6 +94,12 @@ CREATE TABLE IF NOT EXISTS t4_projects (
     visibility   TEXT        NOT NULL DEFAULT 'private',
     created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+CREATE TABLE IF NOT EXISTS skills (
+    phase_slug   TEXT        PRIMARY KEY,
+    layer        TEXT        NOT NULL DEFAULT 'phase-active',
+    content      TEXT        NOT NULL,
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
 """
 
 # Runs after CREATE_TABLE_SQL — backfills existing slugs as scott/private, idempotent
@@ -820,3 +826,42 @@ async def get_failed_transitions(hours: int = 24) -> list[dict]:
     except Exception as e:
         logger.error("Failed to fetch failed transitions: %s", e)
         return []
+
+
+async def get_skill(phase_slug: str) -> Optional[dict]:
+    """Return skill record for a given phase slug, or None if not found."""
+    if not _pool:
+        return None
+    try:
+        async with _pool.acquire() as conn:
+            row = await conn.fetchrow(
+                "SELECT phase_slug, layer, content, updated_at FROM skills WHERE phase_slug = $1",
+                phase_slug,
+            )
+        return dict(row) if row else None
+    except Exception as e:
+        logger.error("Failed to get skill %s: %s", phase_slug, e)
+        return None
+
+
+async def upsert_skill(phase_slug: str, content: str, layer: str = "phase-active") -> bool:
+    """Insert or update a skill record. Returns True on success."""
+    if not _pool:
+        return False
+    try:
+        async with _pool.acquire() as conn:
+            await conn.execute(
+                """
+                INSERT INTO skills (phase_slug, layer, content, updated_at)
+                VALUES ($1, $2, $3, NOW())
+                ON CONFLICT (phase_slug) DO UPDATE
+                    SET content = EXCLUDED.content,
+                        layer = EXCLUDED.layer,
+                        updated_at = NOW()
+                """,
+                phase_slug, layer, content,
+            )
+        return True
+    except Exception as e:
+        logger.error("Failed to upsert skill %s: %s", phase_slug, e)
+        return False

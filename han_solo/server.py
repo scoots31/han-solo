@@ -304,6 +304,20 @@ async def api_t4_entries(request: Request) -> JSONResponse:
     ])
 
 
+async def api_get_skill(request: Request) -> JSONResponse:
+    """GET /api/skills/{phase_slug} — return skill content for a phase."""
+    phase_slug = request.path_params["phase_slug"]
+    skill = await db.get_skill(phase_slug)
+    if not skill:
+        return JSONResponse({"error": "skill not found"}, status_code=404)
+    return JSONResponse({
+        "phase_slug": skill["phase_slug"],
+        "layer": skill["layer"],
+        "content": skill["content"],
+        "updated_at": skill["updated_at"].isoformat() if skill.get("updated_at") else None,
+    })
+
+
 async def api_memory_health(request: Request) -> JSONResponse:
     """Return memory system health: failed transitions + capture stats."""
     failed = await db.get_failed_transitions(hours=24)
@@ -350,6 +364,7 @@ _chat_routes = [
     Route("/api/memory-panel", chat_api.api_memory_panel),
     Route("/api/memory-health", api_memory_health),
     Route("/api/write-core-block", api_write_core_block, methods=["POST"]),
+    Route("/api/skills/{phase_slug}", api_get_skill),
     Route("/api/t4/projects", api_t4_projects),
     Route("/api/t4/projects/{project_slug}", api_t4_project_patch, methods=["PATCH"]),
     Route("/api/t4/{project_slug}/entries", api_t4_entries),
