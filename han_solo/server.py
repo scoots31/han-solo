@@ -315,7 +315,7 @@ async def workspace_index(request: Request) -> HTMLResponse:
 _chat_routes = [
     Mount("/docs", app=StaticFiles(directory=_docs_dir, html=True)),
     Route("/workspace", workspace_index),
-    Route("/", chat_api.chat_index),
+    Route("/", workspace_index),
     Route("/chat", chat_api.chat_legacy),
     Route("/api/notecards", api_list_notecards),
     Route("/api/notecards", api_create_notecard, methods=["POST"]),
