@@ -779,7 +779,7 @@
     .overlay-type-badge.slice       { background:rgba(234,154,28,.15); color:var(--accent); }
     .overlay-type-badge.deliverable { background:rgba(13,148,136,.15); color:#0d9488; }
     .overlay-type-badge.phase       { background:rgba(124,58,237,.15); color:#7c3aed; }
-    .overlay-title { font-size:14px; font-weight:600; color:var(--text-primary); }
+    .overlay-title { font-size:18px; font-weight:600; color:#3a3a3b; }
     .overlay-close {
       background:none; border:none; cursor:pointer;
       color:var(--text-meta); font-size:18px; line-height:1; padding:4px 6px;
@@ -798,8 +798,8 @@
     }
     .overlay-section { margin-bottom:16px; }
     .overlay-section-label {
-      font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
-      color:var(--text-meta); margin-bottom:8px;
+      display:block; font-size:9.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+      background:#3a3a3b; color:#ffffff; padding:5px 10px; border-radius:4px; margin-bottom:8px;
     }
     .overlay-field { margin-bottom:6px; }
     .overlay-field-label { font-size:11px; color:var(--text-meta); margin-bottom:2px; }
@@ -839,8 +839,8 @@
 
     /* ── LIVE DASHBOARD ───────────────────────────────────────── */
     .dash-bucket-title {
-      font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
-      color:var(--text-meta); padding:14px 20px 8px; border-bottom:1px solid var(--divider);
+      font-size:9.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+      background:#3a3a3b; color:#ffffff; padding:6px 20px; border-bottom:none; margin:0;
     }
     .dash-bucket-row {
       display:flex; align-items:flex-start; gap:12px;
@@ -850,7 +850,7 @@
     .dash-bucket-row:hover { background:var(--accent-light); }
     .dash-row-main { flex:1; min-width:0; }
     .dash-row-title { font-size:13px; font-weight:500; color:var(--text-primary); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .dash-row-meta { font-size:11px; color:var(--text-meta); }
+    .dash-row-meta { font-size:11px; color:var(--text-secondary); }
     .dash-proj-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; margin-top:5px; }
 
     /* ── LIVE BOARD CARDS ─────────────────────────────────────── */
@@ -1462,7 +1462,7 @@
     <div id="overlay-slice" class="overlay-panel" style="display:none;flex-direction:column">
       <div class="overlay-header">
         <div class="overlay-header-left">
-          <span class="overlay-type-badge slice">Slice</span>
+          <span class="overlay-type-badge slice" id="ov-slice-type">Slice</span>
           <span class="overlay-title" id="ov-slice-title"></span>
         </div>
         <button class="overlay-close" onclick="closeOverlay()">✕</button>
@@ -2035,9 +2035,10 @@
 
     function renderSection(label, text) {
       if (!text) return '';
+      const formatted = escHtml(text).replace(/\n/g, '<br>');
       return `<div class="overlay-section">
         <div class="overlay-section-label">${label}</div>
-        <div class="overlay-field"><div class="overlay-field-value">${escHtml(text)}</div></div>
+        <div class="overlay-field"><div class="overlay-field-value">${formatted}</div></div>
       </div>`;
     }
     function renderAnchors(p) {
@@ -2057,6 +2058,7 @@
 
     // ── OVERLAY SYSTEM ────────────────────────────────────────────────
     let _ovProjectSlug = '';
+    let _ovItems = []; // index-based onclick cache — reset per render, avoids JSON.stringify in attributes
 
     function closeOverlay(e) {
       if (e && e.target !== document.getElementById('overlay-backdrop')) return;
@@ -2106,13 +2108,16 @@
       _showOverlayPanel('overlay-slice', slug);
     }
 
-    function openDeliverableOverlay(entry, slices) {
+    function openDeliverableOverlay(entry) {
       const p = parseT4(entry.content);
       const slug = entry.project_slug || _currentPdSlug;
       document.getElementById('ov-del-title').textContent = p.title;
       document.getElementById('ov-del-meta').textContent = projName(slug) + ' · ' + entry.entry_id;
       const color = projColor(slug);
-      const mySlices = (slices || []).filter(s => s.parent_id === entry.entry_id);
+      // Pull slices from whichever store is populated for this project
+      const sourceSlices = _pdSlices.length && (_pdSlices[0]?.project_slug === slug)
+        ? _pdSlices : _boardSlices;
+      const mySlices = sourceSlices.filter(s => s.parent_id === entry.entry_id && s.project_slug === slug);
       const sliceRows = mySlices.map(s => {
         const sp = parseT4(s.content);
         return `<div class="overlay-slice-row">
@@ -2135,15 +2140,15 @@
       _showOverlayPanel('overlay-deliverable', slug);
     }
 
-    function openPhaseOverlay(entry, deliverables, slices) {
+    function openPhaseOverlay(entry) {
       const p = parseT4(entry.content);
       const slug = entry.project_slug || _currentPdSlug;
       document.getElementById('ov-phase-title').textContent = p.title;
       document.getElementById('ov-phase-meta').textContent = projName(slug) + ' · ' + entry.entry_id;
       const color = projColor(slug);
-      const myDels = (deliverables || []).filter(d => d.parent_id === entry.entry_id);
-      const total = (slices||[]).filter(s => myDels.some(d => d.entry_id === s.parent_id)).length;
-      const done  = (slices||[]).filter(s => myDels.some(d => d.entry_id === s.parent_id) && s.content.includes('**Status:** Done')).length;
+      const myDels = _pdDeliverables.filter(d => d.parent_id === entry.entry_id);
+      const total = _pdSlices.filter(s => myDels.some(d => d.entry_id === s.parent_id)).length;
+      const done  = _pdSlices.filter(s => myDels.some(d => d.entry_id === s.parent_id) && s.content.includes('**Status:** Done')).length;
       const pct = total ? Math.round(done/total*100) : 0;
       const delRows = myDels.map(d => {
         const dp = parseT4(d.content);
@@ -2250,11 +2255,14 @@
 
     const INFLIGHT_STATUSES = new Set(['In Build','In Review','In Test','Ready','Blocked']);
 
+    const ACTIVE_STATUSES = new Set(['In Build','In Review','In Test','Ready']);
+
     function renderDashboard() {
+      _ovItems = [];
       const blocked = _dashSlices.filter(s => s.content.includes('**Status:** Blocked'));
       const inflight = _dashSlices.filter(s => {
-        const p = parseT4(s.content);
-        return INFLIGHT_STATUSES.has(p.status) && p.status !== 'Done';
+        const st = (s.content.match(/\*\*Status:\*\*\s*(.+)/)||[])[1]?.trim();
+        return ACTIVE_STATUSES.has(st);
       });
 
       document.getElementById('dash-sub').textContent =
@@ -2262,30 +2270,28 @@
 
       // Needs Attention
       const attHtml = blocked.length ? blocked.map(s => {
-        const p = parseT4(s.content);
         const color = projColor(s.project_slug);
-        return `<div class="dash-bucket-row" onclick='openSliceOverlay(${JSON.stringify(s)})'>
+        const idx = _ovItems.push(s) - 1;
+        return `<div class="dash-bucket-row" onclick="openSliceOverlay(_ovItems[${idx}])">
           <div class="dash-proj-dot" style="background:${color}"></div>
           <div class="dash-row-main">
-            <div class="dash-row-title">${escHtml(s.entry_id)} · ${escHtml(p.title.replace(/^SLICE\s*—\s*/i,''))}</div>
+            <div class="dash-row-title">${escHtml(s.entry_id)} · ${escHtml(sliceName(s))}</div>
             <div class="dash-row-meta">${escHtml(projName(s.project_slug))}</div>
           </div>
           ${statusBadge('Blocked')}
         </div>`;
       }).join('') : '<div style="padding:12px 20px;font-size:13px;color:var(--text-meta)">No blocked items.</div>';
 
-      // In Flight (non-done, non-blocked, show top 12)
-      const active = _dashSlices.filter(s => {
-        const st = (s.content.match(/\*\*Status:\*\*\s*(.+)/)||[])[1]?.trim();
-        return st && st !== 'Done' && st !== 'Blocked' && st !== 'Defined';
-      }).slice(0,12);
+      // In Flight — only active statuses (Ready, In Build, In Review, In Test), top 12
+      const active = inflight.slice(0, 12);
       const inflightHtml = active.length ? active.map(s => {
         const p = parseT4(s.content);
         const color = projColor(s.project_slug);
-        return `<div class="dash-bucket-row" onclick='openSliceOverlay(${JSON.stringify(s)})'>
+        const idx = _ovItems.push(s) - 1;
+        return `<div class="dash-bucket-row" onclick="openSliceOverlay(_ovItems[${idx}])">
           <div class="dash-proj-dot" style="background:${color}"></div>
           <div class="dash-row-main">
-            <div class="dash-row-title">${escHtml(s.entry_id)} · ${escHtml(p.title.replace(/^SLICE\s*—\s*/i,''))}</div>
+            <div class="dash-row-title">${escHtml(s.entry_id)} · ${escHtml(sliceName(s))}</div>
             <div class="dash-row-meta">${escHtml(projName(s.project_slug))}</div>
           </div>
           ${statusBadge(p.status)}
@@ -2368,6 +2374,7 @@
     }
 
     function renderBoard() {
+      _ovItems = [];
       const selSlug = document.getElementById('board-proj-select').value;
       const dels = selSlug === 'all' ? _boardDeliverables : _boardDeliverables.filter(d => d.project_slug === selSlug);
       const sls  = selSlug === 'all' ? _boardSlices       : _boardSlices.filter(s => s.project_slug === selSlug);
@@ -2379,12 +2386,13 @@
       if (_boardView === 'deliverable') {
         dels.forEach(del => {
           const col = delColumn(del, _boardSlices);
-          if (!col) return; // skip all-done deliverables
+          if (!col) return;
           const p = parseT4(del.content);
           const mySlices = _boardSlices.filter(s => s.parent_id === del.entry_id && s.project_slug === del.project_slug);
           const doneCount = mySlices.filter(s => s.content.includes('**Status:** Done')).length;
           const color = projColor(del.project_slug);
-          cols[col].push(`<div class="live-board-card" onclick='openDeliverableOverlay(${JSON.stringify(del)}, ${JSON.stringify(_boardSlices)})'>
+          const idx = _ovItems.push(del) - 1;
+          cols[col].push(`<div class="live-board-card" onclick="openDeliverableOverlay(_ovItems[${idx}])">
             <div class="live-card-id">${escHtml(del.entry_id)}</div>
             <div class="live-card-name">${escHtml(p.title.replace(/^DELIVERABLE\s*—\s*/i,''))}</div>
             <div class="live-card-foot">
@@ -2400,9 +2408,10 @@
           if (!p.status || p.status === 'Done' || p.status === 'Defined') return;
           const col = COL_ORDER.includes(p.status) ? p.status : 'In Review';
           const color = projColor(sl.project_slug);
-          cols[col].push(`<div class="live-board-card" onclick='openSliceOverlay(${JSON.stringify(sl)})'>
+          const idx = _ovItems.push(sl) - 1;
+          cols[col].push(`<div class="live-board-card" onclick="openSliceOverlay(_ovItems[${idx}])">
             <div class="live-card-id">${escHtml(sl.entry_id)}</div>
-            <div class="live-card-name">${escHtml(p.title.replace(/^SLICE\s*—\s*/i,''))}</div>
+            <div class="live-card-name">${escHtml(sliceName(sl))}</div>
             <div class="live-card-foot">
               <span class="live-card-proj"><span class="proj-dot" style="background:${color};width:7px;height:7px;border-radius:50%;display:inline-block"></span> ${escHtml(projName(sl.project_slug))}</span>
               ${statusBadge(p.status)}
@@ -2463,6 +2472,7 @@
           const pp = parseT4(activePhase.content);
           document.getElementById('detail-phase-badge').textContent = pp.title.replace(/^PHASE\s*—\s*/i,'');
         }
+        _ovItems = []; // reset once before all pd renders so indices are stable across tabs
         renderPdAction();
         renderPdProgress();
         renderPdBacklog();
@@ -2484,7 +2494,8 @@
       const html = blocked.length
         ? `<div style="padding:14px 0 8px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-meta)">Blocked (${blocked.length})</div>` +
           blocked.map(s => {
-            return `<div class="pd-row" onclick='openSliceOverlay(${JSON.stringify(s)})'>
+            const idx = _ovItems.push(s) - 1;
+            return `<div class="pd-row" onclick="openSliceOverlay(_ovItems[${idx}])">
               <span class="pd-row-id">${escHtml(s.entry_id)}</span>
               <span class="pd-row-name">${escHtml(sliceName(s))}</span>
               ${statusBadge('Blocked')}
@@ -2504,7 +2515,8 @@
         const mySlices = _pdSlices.filter(s => myDels.some(d => d.entry_id === s.parent_id));
         const phDone = mySlices.filter(s => s.content.includes('**Status:** Done')).length;
         const phPct  = mySlices.length ? Math.round(phDone/mySlices.length*100) : 0;
-        return `<div class="pd-phase-card" onclick='openPhaseOverlay(${JSON.stringify(ph)}, ${JSON.stringify(_pdDeliverables)}, ${JSON.stringify(_pdSlices)})'>
+        const idx = _ovItems.push(ph) - 1;
+        return `<div class="pd-phase-card" onclick="openPhaseOverlay(_ovItems[${idx}])">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
             <span style="font-size:13px;font-weight:600;color:var(--text-primary)">${escHtml(p.title.replace(/^PHASE\s*—\s*/i,''))}</span>
             ${statusBadge(p.status)}
@@ -2528,7 +2540,8 @@
     function renderPdBacklog() {
       const rows = _pdSlices.map(s => {
         const p = parseT4(s.content);
-        return `<div class="pd-row" onclick='openSliceOverlay(${JSON.stringify(s)})'>
+        const idx = _ovItems.push(s) - 1;
+        return `<div class="pd-row" onclick="openSliceOverlay(_ovItems[${idx}])">
           <span class="pd-row-id">${escHtml(s.entry_id)}</span>
           <span class="pd-row-name">${escHtml(sliceName(s))}</span>
           ${statusBadge(p.status)}
@@ -2593,6 +2606,22 @@
       document.getElementById('tab-pd-docs').innerHTML = html || '<div style="padding:24px;color:var(--text-meta);font-size:13px">No documents found.</div>';
     }
 
+    function mdToHtml(raw) {
+      // Minimal markdown → HTML: headers, bold, bullets, line breaks
+      return raw
+        .split('\n')
+        .map(line => {
+          if (/^### (.+)/.test(line)) return `<div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-meta);margin:14px 0 4px">${escHtml(line.replace(/^### /,''))}</div>`;
+          if (/^## (.+)/.test(line))  return `<div style="font-size:14px;font-weight:600;color:var(--text-primary);margin:16px 0 6px">${escHtml(line.replace(/^## /,''))}</div>`;
+          if (/^# (.+)/.test(line))   return `<div style="font-size:16px;font-weight:600;color:var(--text-primary);margin:0 0 10px">${escHtml(line.replace(/^# /,''))}</div>`;
+          if (/^[-*] (.+)/.test(line)) return `<div style="padding:2px 0 2px 14px;color:var(--text-primary)">· ${escHtml(line.replace(/^[-*] /,'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>'))}</div>`;
+          if (line.trim() === '')     return '<div style="height:8px"></div>';
+          const rendered = escHtml(line).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+          return `<div style="font-size:13px;line-height:1.7;color:var(--text-primary)">${rendered}</div>`;
+        })
+        .join('');
+    }
+
     function openDocOverlay(idx) {
       const entry = _pdDocs[idx];
       const label = DOC_LABELS[entry._docType] || entry._docType;
@@ -2600,13 +2629,12 @@
       const panel = document.getElementById('overlay-slice');
       document.querySelectorAll('.overlay-panel').forEach(p => p.style.display = 'none');
       panel.style.display = 'flex';
-      document.getElementById('ov-slice-type').textContent = label;
-      document.getElementById('ov-slice-type').className = 'overlay-type-badge deliverable';
+      const typeEl = document.getElementById('ov-slice-type');
+      typeEl.textContent = label;
+      typeEl.className = 'overlay-type-badge deliverable';
       document.getElementById('ov-slice-title').textContent = label;
-      document.getElementById('ov-slice-status').textContent = '';
-      const body = document.getElementById('ov-slice-body');
-      body.innerHTML = `<div style="white-space:pre-wrap;font-size:13px;line-height:1.7;color:var(--text-primary)">${escHtml(entry.content)}</div>`;
-      document.getElementById('ov-slice-footer').innerHTML = '';
+      document.getElementById('ov-slice-body').innerHTML = `<div style="padding:4px 0">${mdToHtml(entry.content)}</div>`;
+      document.getElementById('ov-slice-meta').textContent = projName(entry.project_slug || _currentPdSlug);
       _ovProjectSlug = entry.project_slug || _currentPdSlug;
       bd.classList.add('open');
     }
