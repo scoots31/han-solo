@@ -240,6 +240,16 @@
     .nc-chip-picker-text { font-size:12.5px; color:var(--text-primary); line-height:1.5; }
     .nc-chip-picker-meta { font-size:10.5px; color:var(--text-meta); margin-top:2px; }
     .nc-chip-picker-empty { padding:16px 13px; font-size:12.5px; color:var(--text-meta); }
+    .nc-create-wrap { position:relative; }
+    .nc-create-form { display:none; position:absolute; bottom:calc(100% + 6px); left:0; width:300px; background:var(--bg); border:1px solid var(--card-border); border-radius:10px; box-shadow:0 4px 16px rgba(0,0,0,.12); z-index:50; padding:12px 13px; }
+    .nc-create-form.open { display:block; }
+    .nc-create-form textarea { width:100%; font-size:12.5px; font-family:var(--font-body); color:var(--text-primary); background:var(--card-bg); border:1px solid var(--divider); border-radius:6px; padding:8px 10px; resize:none; min-height:72px; outline:none; line-height:1.5; }
+    .nc-create-form textarea:focus { border-color:var(--accent); }
+    .nc-create-form-actions { display:flex; justify-content:flex-end; gap:7px; margin-top:8px; }
+    .nc-create-save { font-size:11px; font-family:var(--font-body); font-weight:600; background:var(--accent); color:#fff; border:none; border-radius:20px; padding:4px 13px; cursor:pointer; }
+    .nc-create-save:hover { opacity:.88; }
+    .nc-create-cancel { font-size:11px; font-family:var(--font-body); background:none; border:1px solid var(--divider); border-radius:20px; padding:4px 10px; cursor:pointer; color:var(--text-meta); }
+    .nc-create-cancel:hover { border-color:var(--accent); color:var(--accent); }
 
     /* ── MEMORY ── */
     .mem-type-col { flex-shrink:0; padding-top:1px; }
@@ -1048,10 +1058,20 @@
               </div>
               <div class="input-chips">
                 <div class="nc-chip-wrap">
-                  <button class="chip" id="ncChipBtn" onclick="toggleNcPicker()">+ Notecard</button>
+                  <button class="chip" id="ncPinBtn" onclick="toggleNcPicker()" title="Pin a notecard into your message">📌</button>
                   <div class="nc-chip-picker" id="nc-chip-picker">
                     <div class="nc-chip-picker-header">Pin a notecard</div>
                     <div id="nc-chip-picker-list"></div>
+                  </div>
+                </div>
+                <div class="nc-create-wrap">
+                  <button class="chip" id="ncCreateBtn" onclick="toggleNcCreate()">+ Notecard</button>
+                  <div class="nc-create-form" id="nc-create-form">
+                    <textarea id="nc-create-text" placeholder="What do you want to capture…" rows="3"></textarea>
+                    <div class="nc-create-form-actions">
+                      <button class="nc-create-cancel" onclick="closeNcCreate()">Cancel</button>
+                      <button class="nc-create-save" onclick="submitNewNotecard()">Save</button>
+                    </div>
                   </div>
                 </div>
                 <button class="chip">Signal</button>
@@ -1759,7 +1779,50 @@
         _ncPickerOpen = false;
         document.getElementById('nc-chip-picker').classList.remove('open');
       }
+      if (_ncCreateOpen && !e.target.closest('.nc-create-wrap')) {
+        closeNcCreate();
+      }
     });
+
+    // ── NOTECARD CREATE ───────────────────────────────────────────────────────
+    let _ncCreateOpen = false;
+
+    function toggleNcCreate() {
+      _ncCreateOpen = !_ncCreateOpen;
+      document.getElementById('nc-create-form').classList.toggle('open', _ncCreateOpen);
+      if (_ncCreateOpen) {
+        setTimeout(() => document.getElementById('nc-create-text').focus(), 50);
+      }
+    }
+
+    function closeNcCreate() {
+      _ncCreateOpen = false;
+      document.getElementById('nc-create-form').classList.remove('open');
+      document.getElementById('nc-create-text').value = '';
+    }
+
+    async function submitNewNotecard() {
+      const text = document.getElementById('nc-create-text').value.trim();
+      if (!text) return;
+      const btn = document.querySelector('.nc-create-save');
+      btn.textContent = 'Saving…';
+      btn.disabled = true;
+      try {
+        const res = await apiFetch('/api/notecards', {
+          method: 'POST',
+          body: JSON.stringify({ text, source: 'chat' })
+        });
+        if (res.ok) {
+          closeNcCreate();
+        } else {
+          btn.textContent = 'Error';
+          setTimeout(() => { btn.textContent = 'Save'; btn.disabled = false; }, 1500);
+        }
+      } catch {
+        btn.textContent = 'Error';
+        setTimeout(() => { btn.textContent = 'Save'; btn.disabled = false; }, 1500);
+      }
+    }
 
     // ── CHAT PANEL ────────────────────────────────────────────────────────────
     let _panelOpen = false;
