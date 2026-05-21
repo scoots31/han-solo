@@ -16,14 +16,14 @@ from datetime import datetime, timezone
 
 import httpx
 from starlette.requests import Request
-from starlette.responses import HTMLResponse, JSONResponse
+from starlette.responses import HTMLResponse, JSONResponse, Response
 
 from .auth import get_current_user
 from . import letta_client as letta
 from . import db
 from .app_html import APP_HTML
 from .chat_html import CHAT_HTML
-from .config import ANTHROPIC_API_KEY
+from .config import ANTHROPIC_API_KEY, ELEVENLABS_API_KEY, ELEVENLABS_VOICE_ID
 
 logger = logging.getLogger(__name__)
 
@@ -364,3 +364,51 @@ async def api_memory_panel(request: Request) -> JSONResponse:
         ],
         "capture_health": health,
     })
+
+
+async def api_tts(request: Request) -> Response:
+    """
+    Text-to-speech via ElevenLabs.
+    POST {"text": "..."} → audio/mpeg binary.
+    Used by the chat UI to play Ren's voice — both auto-play and on-demand.
+    """
+    get_current_user()
+
+    if not ELEVENLABS_API_KEY or not ELEVENLABS_VOICE_ID:
+        return JSONResponse({"error": "TTS not configured"}, status_code=503)
+
+    body = await request.json()
+    text = body.get("text", "").strip()
+    if not text:
+        return JSONResponse({"error": "Empty text"}, status_code=400)
+
+    # Truncate very long messages — TTS has a character limit and long passages
+    # don't benefit from audio anyway.
+    if len(text) > 2000:
+        text = text[:2000] + "…"
+
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.post(
+                f"https://api.elevenlabs.io/v1/text-to-speech/{ELEVENLABS_VOICE_ID}",
+                headers={
+                    "xi-api-key": ELEVENLABS_API_KEY,
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "text": text,
+                    "model_id": "eleven_turbo_v2_5",
+                    "voice_settings": {
+                        "stability": 0.5,
+                        "similarity_boost": 0.75,
+                    },
+                },
+            )
+        resp.raise_for_status()
+        return Response(content=resp.content, media_type="audio/mpeg")
+    except httpx.HTTPStatusError as exc:
+        logger.warning("ElevenLabs TTS error %s: %s", exc.response.status_code, exc.response.text)
+        return JSONResponse({"error": "TTS request failed"}, status_code=502)
+    except Exception as exc:
+        logger.warning("TTS unexpected error: %s", exc)
+        return JSONResponse({"error": "TTS unavailable"}, status_code=502)

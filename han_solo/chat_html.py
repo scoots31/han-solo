@@ -292,6 +292,48 @@ CHAT_HTML = """<!DOCTYPE html>
     }
     .attach-btn:hover { color: var(--text); }
 
+    /* Mic button — same shape as attach, glows red while listening */
+    .mic-btn {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      padding: 4px 6px;
+      font-size: 16px;
+      line-height: 1;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      transition: color 0.15s;
+    }
+    .mic-btn:hover { color: var(--text); }
+    .mic-btn.listening { color: #e05555; animation: pulse 1s infinite; }
+
+    /* Speaker button — appears on Ren bubbles */
+    .speak-btn {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 2px 4px;
+      margin-left: 6px;
+      opacity: 0;
+      transition: opacity 0.15s;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+    .msg-bubble:hover .speak-btn { opacity: 1; }
+    .speak-btn.playing { color: var(--gold); opacity: 1; }
+
+    /* Voice auto toggle active state */
+    .icon-btn.voice-on { color: var(--gold); border-color: var(--gold); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
     .file-preview {
       display: none;
       align-items: center;
@@ -523,6 +565,7 @@ CHAT_HTML = """<!DOCTYPE html>
   <div class="header-actions">
     <button class="icon-btn" id="newSessionBtn" title="Start a fresh session (memory is preserved)">New session</button>
     <button class="icon-btn" id="themeBtn" title="Toggle theme">Light</button>
+    <button class="icon-btn" id="voiceAutoBtn" title="Toggle auto-play voice">Voice: Off</button>
     <button class="icon-btn" id="memoryBtn" title="Memory panel">Memory</button>
     <button class="icon-btn" id="logoutBtn" title="Sign out">Sign out</button>
   </div>
@@ -550,6 +593,7 @@ CHAT_HTML = """<!DOCTYPE html>
       </div>
       <button class="attach-btn" id="attachBtn" title="Attach a file">📎</button>
       <input type="file" id="fileInput" accept=".txt,.md,.py,.js,.ts,.jsx,.tsx,.json,.yaml,.yml,.html,.css,.sql,.sh,.csv,.toml,.env,.jpg,.jpeg,.png,.gif,.webp,image/*" style="display:none">
+      <button class="mic-btn" id="micBtn" title="Speak your message">🎤</button>
       <button class="send-btn" id="sendBtn">Send</button>
     </div>
   </div>
@@ -607,12 +651,14 @@ const appLayout     = $('appLayout');
 const headerUser    = $('headerUser');
 const newSessionBtn = $('newSessionBtn');
 const themeBtn      = $('themeBtn');
+const voiceAutoBtn  = $('voiceAutoBtn');
 const memoryBtn     = $('memoryBtn');
 const logoutBtn     = $('logoutBtn');
 const messages      = $('messages');
 const emptyState    = $('emptyState');
 const msgInput      = $('msgInput');
 const sendBtn       = $('sendBtn');
+const micBtn        = $('micBtn');
 const memoryPanel   = $('memoryPanel');
 
 // ── Init ───────────────────────────────────────────────────────────────────
@@ -623,6 +669,19 @@ const memoryPanel   = $('memoryPanel');
   document.documentElement.setAttribute('data-theme', _theme);
   themeBtn.textContent = _theme === 'dark' ? 'Light' : 'Dark';
 })();
+
+// Voice auto-play toggle — persisted in localStorage
+let _voiceAuto = localStorage.getItem('hs_voice_auto') === 'true';
+(function applyVoiceState() {
+  voiceAutoBtn.textContent = _voiceAuto ? 'Voice: On' : 'Voice: Off';
+  voiceAutoBtn.classList.toggle('voice-on', _voiceAuto);
+})();
+voiceAutoBtn.addEventListener('click', () => {
+  _voiceAuto = !_voiceAuto;
+  localStorage.setItem('hs_voice_auto', _voiceAuto);
+  voiceAutoBtn.textContent = _voiceAuto ? 'Voice: On' : 'Voice: Off';
+  voiceAutoBtn.classList.toggle('voice-on', _voiceAuto);
+});
 
 async function init() {
   const saved = localStorage.getItem('hs_token');
@@ -789,6 +848,15 @@ function renderMessages() {
       }
       if (m.text) {
         bubble.appendChild(document.createTextNode(m.text));
+      }
+      // Speaker button on Ren bubbles — visible on hover, always visible in auto mode
+      if (g.cls === 'ren' && m.text) {
+        const speakBtn = document.createElement('button');
+        speakBtn.className = 'speak-btn';
+        speakBtn.title = 'Play voice';
+        speakBtn.textContent = '🔊';
+        speakBtn.addEventListener('click', () => playTTS(m.text, speakBtn));
+        bubble.appendChild(speakBtn);
       }
       bubblesWrap.appendChild(bubble);
     }
@@ -974,10 +1042,15 @@ async function sendMessage() {
 }
 
 // Render a list of Ren messages sequentially — each as its own bubble with a brief pause between.
+// Auto-plays TTS for each message when voice auto mode is on.
 async function renderRenMessages(msgs) {
   for (let i = 0; i < msgs.length; i++) {
     _msgs.push({ role: 'assistant', name: 'Ren', text: msgs[i] });
     renderMessages();
+    if (_voiceAuto && msgs[i]) {
+      // Find the speaker button for the bubble we just added and play it
+      await playTTS(msgs[i], null);
+    }
     if (i < msgs.length - 1) {
       await new Promise(r => setTimeout(r, 1000));
     }
@@ -1045,6 +1118,84 @@ msgInput.addEventListener('keydown', e => {
     e.preventDefault();
     sendMessage();
   }
+});
+
+// ── Voice output (TTS) ─────────────────────────────────────────────────────
+
+let _currentAudio = null; // track playing audio so we can stop it
+
+async function playTTS(text, btn) {
+  // Stop any currently playing audio
+  if (_currentAudio) {
+    _currentAudio.pause();
+    _currentAudio = null;
+    document.querySelectorAll('.speak-btn.playing').forEach(b => b.classList.remove('playing'));
+    if (btn) {
+      // If clicking the same button again, just stop
+      if (btn.classList.contains('playing')) return;
+    }
+  }
+  if (btn) btn.classList.add('playing');
+  try {
+    const resp = await apiFetch('/api/tts', {
+      method: 'POST',
+      body: JSON.stringify({ text }),
+    });
+    if (!resp.ok) { if (btn) btn.classList.remove('playing'); return; }
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    _currentAudio = new Audio(url);
+    _currentAudio.onended = () => {
+      if (btn) btn.classList.remove('playing');
+      URL.revokeObjectURL(url);
+      _currentAudio = null;
+    };
+    _currentAudio.onerror = () => {
+      if (btn) btn.classList.remove('playing');
+      _currentAudio = null;
+    };
+    await _currentAudio.play();
+  } catch {
+    if (btn) btn.classList.remove('playing');
+  }
+}
+
+// ── Voice input (mic) ──────────────────────────────────────────────────────
+
+let _recognition = null;
+
+micBtn.addEventListener('click', () => {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    alert('Voice input is not supported in this browser. Try Chrome.');
+    return;
+  }
+  if (_recognition) {
+    _recognition.stop();
+    return;
+  }
+  _recognition = new SpeechRecognition();
+  _recognition.lang = 'en-US';
+  _recognition.interimResults = false;
+  _recognition.maxAlternatives = 1;
+
+  micBtn.classList.add('listening');
+
+  _recognition.onresult = e => {
+    const transcript = e.results[0][0].transcript;
+    msgInput.value = (msgInput.value ? msgInput.value + ' ' : '') + transcript;
+    msgInput.dispatchEvent(new Event('input'));
+    msgInput.focus();
+  };
+  _recognition.onend = () => {
+    micBtn.classList.remove('listening');
+    _recognition = null;
+  };
+  _recognition.onerror = () => {
+    micBtn.classList.remove('listening');
+    _recognition = null;
+  };
+  _recognition.start();
 });
 
 msgInput.addEventListener('input', function() {

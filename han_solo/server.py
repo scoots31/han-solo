@@ -515,6 +515,7 @@ _chat_routes = [
     Route("/api/memory/access-patterns", api_memory_access_patterns),
     Route("/api/admin/agent-info", admin_agent_info),
     Route("/api/admin/patch-model", admin_patch_model, methods=["POST"]),
+    Route("/api/tts", chat_api.api_tts, methods=["POST"]),
 ]
 for i, route in enumerate(_chat_routes):
     _mcp_app.router.routes.insert(i, route)

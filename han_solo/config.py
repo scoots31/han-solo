@@ -44,6 +44,10 @@ REN_AGENT_ID = os.environ.get("REN_AGENT_ID")
 # Anthropic API — used for inline synthesis at rollover and by the cron script
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 
+# ElevenLabs TTS — voice output for Ren
+ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY", "")
+ELEVENLABS_VOICE_ID = os.environ.get("ELEVENLABS_VOICE_ID", "")
+
 # MCP server port
 PORT = int(os.environ.get("PORT", "8000"))
 
