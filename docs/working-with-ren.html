@@ -15,6 +15,8 @@
   <a class="nav-link" href="index.html">Home</a>
   <a class="nav-link" href="how-it-works.html">How it works</a>
   <a class="nav-link active" href="working-with-ren.html">Working with Ren</a>
+  <a class="nav-link" href="memory.html">Memory</a>
+  <a class="nav-link" href="the-workspace.html">Workspace</a>
   <a class="nav-link" href="roadmap.html">Roadmap</a>
 </nav>
 
@@ -38,7 +40,7 @@
     <li><strong>Her own portrait</strong> — what she's learned about herself, what she got right and wrong</li>
   </ul>
 
-  <p>In addition to core blocks, she has 108+ searchable archival passages — synthesized session memories, signals, and project context, all embedded with Voyage AI for semantic search. She can search these proactively when she senses she's missing context. You can also ask her to search explicitly.</p>
+  <p>In addition to core blocks, she has 214+ searchable archival passages — synthesized session memories, signals, and project context, all embedded with Voyage AI for semantic search. She can search these proactively when she senses she's missing context. You can also ask her to search explicitly.</p>
 
   <hr>
 
@@ -177,8 +179,8 @@
   <h3>Use her for thinking, not just answers</h3>
   <p>Ren is a partner, not a search engine. She'll push back when something is wrong. She'll ask questions when something isn't clear. She'll flag when a direction will cause pain later. Let that happen — that's the value.</p>
 
-  <h3>Share documents via the paperclip</h3>
-  <p>The chat UI has a file attachment button. You can share text files up to 100KB — code, notes, documents. She receives them inline and reads them fully. She can't open URLs that require JavaScript rendering (most single-page apps won't load), but plain-text URLs fetch fine.</p>
+  <h3>Share documents and images via the paperclip</h3>
+  <p>The chat UI has a file attachment button. You can share text files up to 100KB — code, notes, documents — or images up to 5MB (JPEG, PNG, GIF, WebP). Text files are read inline. Images are described by Claude vision and written into Ren's archival memory with an <code>[image-memory]</code> tag — searchable and recallable across future sessions. She can't open URLs that require JavaScript rendering (most single-page apps won't load), but plain-text URLs fetch fine.</p>
 
   <h3>Ask her to search her memory</h3>
   <p>If you want context on something specific, ask: <em>"What do you know about the Garden Planner data audit?"</em> She'll run an archival search and surface what she has. She also does this proactively — if you mention a project, she'll search before responding.</p>
@@ -210,10 +212,10 @@
   <h3>Manual — "New session" button</h3>
   <p>In the header. Use it when a conversation feels complete, or after a close-out. Creates a fresh Letta conversation with all memory copied. The screen clears and shows a divider. Ren opens the next message from her memory blocks — she knows everything she wrote during close-out.</p>
 
-  <h3>Automatic — rollover at 50 messages</h3>
-  <p>Fires automatically when the conversation hits 50 messages (about 25 exchanges). Happens transparently on your next send — you'll see "Session refreshed — memory intact" appear in the UI. You don't need to do anything.</p>
+  <h3>Automatic — warning at 40, hard reset at 80</h3>
+  <p>At 40 messages you'll see a warning banner — Ren's context is filling up, and it's a good time for a manual close-out and fresh session. If the conversation continues to 80 messages, an automatic rollover fires on your next send: you'll see "Session refreshed — memory intact" in the UI and the thread resets. You don't need to do anything.</p>
 
-  <p>This exists because Letta's context window can overflow on long sessions, especially ones with heavy web page fetching. The auto-rollover keeps you well clear of that limit.</p>
+  <p>This exists because Letta's context window can overflow on long sessions, especially ones with heavy web page fetching. The warning at 40 gives you time to close cleanly; the hard limit at 80 is the safety net.</p>
 
   <hr>
 
@@ -238,19 +240,20 @@
 
   <h3>She can</h3>
   <ul>
-    <li>Search her own memory (core blocks + 108 archival passages)</li>
+    <li>Search her own memory (core blocks + 214+ archival passages)</li>
     <li>Fetch plain-text web pages and read them fully</li>
     <li>Search the web (via Exa AI, wired into her tools)</li>
     <li>Write to her own memory — update blocks, add archival passages, add portrait signals</li>
     <li>Hold a conversation across sessions with genuine continuity</li>
     <li>Push back, disagree, challenge directions she thinks are wrong</li>
+    <li><strong>See images</strong> — drop a screenshot, photo, or diagram into the chat. Claude vision describes it and the description is written to archival memory with an <code>[image-memory]</code> tag, searchable across future sessions.</li>
+    <li><strong>Receive Claude Code context automatically</strong> — the Solo Hook fires at the start of every Claude Code session and pulls her pending thoughts and session brief in. No manual handoff.</li>
   </ul>
 
   <h3>She can't (yet)</h3>
   <ul>
     <li><strong>Read JavaScript-rendered pages</strong> — her web fetcher gets the raw HTML. Most single-page apps return an empty shell. Share the content directly instead.</li>
-    <li><strong>See images</strong> — Letta v0.16.7 doesn't pass image content through to Anthropic. Deferred until confirmed working in a future Letta release.</li>
-    <li><strong>Initiate work in Claude Code</strong> — the Ren-to-Claude webhook bridge is designed but not built (Session 5 on the roadmap).</li>
+    <li><strong>Initiate a Claude Code session autonomously</strong> — the context handoff is live (she writes, Claude Code reads), but she can't trigger a session without you opening it. That's Point M on the roadmap.</li>
     <li><strong>Private thread with Ted</strong> — @mention and private messaging are on the roadmap but not built yet.</li>
   </ul>
 
@@ -283,9 +286,16 @@
   <p>Reads raw chat transcripts from the <code>chat_transcripts</code> Postgres table and calls Anthropic directly using Sonnet to extract structured meaning. It then writes the results (a pending_thoughts addition + 2–5 archival signals) to Ren via the MCP REST API.</p>
   <p><strong>Why direct Anthropic, not through Letta?</strong> Ren runs on Haiku. The synthesis step — extracting specific decisions, open threads, and long-term signals from a raw transcript — needs Sonnet quality. Routing through Letta would use Haiku and produce lower-quality extractions. The direct call is intentional, not an oversight. It also handles T1→T2 and T2→T3 tier promotions on each run.</p>
 
-  <h3>Archival search — what's built vs. what's exposed</h3>
-  <p>Letta's archival memory uses <strong>Voyage AI embeddings</strong> (voyage-3, 1024 dimensions) stored in pgvector on the han-solo-db Postgres instance. Every signal written by synthesize.py is embedded and indexed for semantic search. The search function (<code>search_passages()</code> in <code>letta_client.py</code>) exists and works — it does vector similarity search over all archival passages.</p>
-  <p><strong>The current gap:</strong> this search capability is not yet exposed as an MCP tool that Ren can call from Claude Code sessions, or that Ren can trigger herself in response to sensing a context gap. The infrastructure is in place. The wiring is the next step — and it's smaller than building anything new.</p>
+  <h3>curator.py — memory connections (nightly via Render cron)</h3>
+  <p>Runs after synthesize.py each night. Takes the most recent archival passages in batches of 20 and asks Sonnet to identify meaningful connections between them: <em>relates_to</em>, <em>follows_from</em>, <em>expands_on</em>, <em>references_same_entity</em>, <em>contradicts</em>. Connections with confidence ≥ 0.7 are written bidirectionally to the <code>memory_connections</code> table. Low-confidence or flagged passages go to <code>curator_flags</code> for review.</p>
+  <p>The connection graph is what turns a flat list of passages into a navigable memory. When Ren searches and finds a relevant passage, the curator's links let her follow to related passages — context that a keyword or vector search alone wouldn't surface.</p>
+
+  <h3>Archival search and the Memory MRI</h3>
+  <p>Archival memory uses <strong>Voyage AI embeddings</strong> (voyage-3, 1024 dimensions) stored in pgvector. Every search Ren runs — whether triggered by the conversation or explicitly requested — is logged to the <code>memory_access_log</code> table: the query, the passage IDs returned, and whether each was actually used in the response. This is the Memory MRI: a record of what she looked for, what she found, and what she chose to use.</p>
+  <p>The MRI makes it possible to see whether her memory is actually being accessed and whether the right things are surfacing. A passage that keeps getting found but never used is a signal about relevance. A topic that keeps generating searches with no results is a gap worth filling.</p>
+
+  <h3>Emotional markers in archival passages</h3>
+  <p>When synthesize.py writes an archival passage, it embeds three contextual prefixes: <code>emotional_register</code> (the tone of the moment — reflective, tense, energized), <code>source_context</code> (what kind of session it came from), and <code>moment_texture</code> (the felt quality of what happened). These aren't visible in normal conversation, but they're in the passage text — which means they're searchable. A query about a difficult decision will surface passages that were marked tense, not just ones that mention the topic.</p>
 
   <h3>Pausing automated jobs</h3>
   <p>Both jobs respect a <code>jobs_paused</code> flag in the <code>han_solo_config</code> Postgres table. Toggle it from the Memory panel in the chat UI (Pause / Resume button). Useful when Anthropic credits are being depleted during inactive periods. dream.py checks the public <code>/api/jobs-status</code> endpoint; synthesize.py reads the DB flag directly.</p>

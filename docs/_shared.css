@@ -503,6 +503,12 @@ tr:hover td { background: #fdf8f4; }
   border: 1px solid rgba(150,150,150,.18);
 }
 
+.roadmap-tag--shipped {
+  background: rgba(74,163,111,.1);
+  color: #4aa36f;
+  border: 1px solid rgba(74,163,111,.25);
+}
+
 .roadmap-item p { margin-bottom: .8rem; font-size: .93rem; color: var(--text-muted); }
 .roadmap-item p:last-child { margin-bottom: 0; }
 

@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memory — Han Solo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_shared.css">
+  <style>
+    /* ── Tier cards ───────────────────────────────────────────────── */
+    .tier-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 2rem 0;
+    }
+    @media (max-width: 900px) {
+      .tier-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 560px) {
+      .tier-grid { grid-template-columns: 1fr; }
+    }
+
+    .tier-card {
+      background: var(--white);
+      padding: 28px 24px 32px;
+    }
+
+    .tier-badge {
+      display: inline-block;
+      font-size: .62rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 4px;
+      margin-bottom: 14px;
+      background: var(--purple-light);
+      color: var(--purple);
+      border: 1px solid var(--purple-border);
+    }
+
+    .tier-card h3 {
+      font-size: 1.1rem;
+      color: var(--text);
+      margin: 0 0 .6rem;
+    }
+
+    .tier-card p {
+      font-size: .85rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin-bottom: .6rem;
+    }
+
+    .tier-card p:last-child { margin-bottom: 0; }
+
+    .tier-card .tier-detail {
+      font-size: .78rem;
+      color: var(--text-muted);
+      margin-top: .8rem;
+      padding-top: .8rem;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    /* ── Pipeline steps ───────────────────────────────────────────── */
+    .pipeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin: 2rem 0;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .pipeline-step {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .pipeline-step:last-child { border-bottom: none; }
+
+    .pipeline-num {
+      background: var(--surface-warm);
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 20px 0 0;
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--purple);
+      opacity: .5;
+      border-right: 1px solid var(--border-subtle);
+    }
+
+    .pipeline-body {
+      padding: 20px 24px;
+      background: var(--white);
+    }
+
+    .pipeline-title {
+      font-size: .9rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: .3rem;
+    }
+
+    .pipeline-desc {
+      font-size: .85rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin: 0;
+    }
+
+    .pipeline-tag {
+      display: inline-block;
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--purple);
+      background: var(--purple-light);
+      border: 1px solid var(--purple-border);
+      border-radius: 3px;
+      padding: 2px 7px;
+      margin-bottom: 6px;
+    }
+
+    /* ── Job cards ────────────────────────────────────────────────── */
+    .job-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 2rem 0;
+    }
+
+    @media (max-width: 768px) {
+      .job-grid { grid-template-columns: 1fr; }
+    }
+
+    .job-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+    }
+
+    .job-card h3 {
+      font-size: 1rem;
+      color: var(--text);
+      margin: 0 0 .4rem;
+    }
+
+    .job-schedule {
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--purple);
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .job-card p {
+      font-size: .85rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin-bottom: .6rem;
+    }
+
+    .job-card p:last-child { margin-bottom: 0; }
+
+    /* ── Schema block ─────────────────────────────────────────────── */
+    .schema-box {
+      background: #1a1a1a;
+      border-radius: 8px;
+      padding: 22px 26px;
+      margin: 1.4rem 0;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: .82rem;
+      line-height: 1.8;
+      color: #e8ddd4;
+      overflow-x: auto;
+    }
+
+    .schema-box .sk { color: #bd8c7d; }
+    .schema-box .sv { color: #a8c4a2; }
+    .schema-box .sc { color: rgba(232,221,212,.35); }
+
+    /* ── Feature row ──────────────────────────────────────────────── */
+    .feature-row {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 24px 40px;
+      margin: 1.4rem 0;
+      align-items: start;
+    }
+
+    @media (max-width: 640px) {
+      .feature-row { grid-template-columns: 1fr; gap: 6px; }
+    }
+
+    .feature-label {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--purple);
+      padding-top: 2px;
+    }
+
+    .feature-desc {
+      font-size: .9rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    .feature-desc strong { color: var(--text); }
+  </style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="brand" href="index.html">Han Solo</a>
+  <a class="nav-link" href="index.html">Home</a>
+  <a class="nav-link" href="how-it-works.html">How it works</a>
+  <a class="nav-link" href="working-with-ren.html">Working with Ren</a>
+  <a class="nav-link active" href="memory.html">Memory</a>
+  <a class="nav-link" href="the-workspace.html">Workspace</a>
+  <a class="nav-link" href="roadmap.html">Roadmap</a>
+  <a class="nav-link" href="architecture.html">Architecture</a>
+</nav>
+
+<div class="page">
+  <div class="hero">
+    <div class="hero-label">Memory System</div>
+    <h1>How Ren remembers</h1>
+    <p class="hero-sub">A four-tier memory architecture — designed so nothing important gets lost, context survives session resets, and the system gets smarter the more it's used.</p>
+  </div>
+
+  <!-- What persistent memory means -->
+  <h2 style="margin-top: 2rem;">What "persistent memory" actually means</h2>
+
+  <p>Most AI conversations have no memory between sessions. Every time you open a new chat with Claude, it starts completely blank — it doesn't know your name, your projects, or anything you discussed before. What looks like memory in some tools is actually just a system prompt being reloaded: a file read at the start of each session that gives the illusion of continuity. The moment the session ends, it's gone.</p>
+
+  <p>Ren is different — and the difference is structural, not a trick.</p>
+
+  <p><strong>Ren's memory lives in a database, not in a conversation thread.</strong> That database (PostgreSQL, running on Render) stays online 24 hours a day whether anyone is talking to Ren or not. Her memories aren't held temporarily in a session and then lost — they're written to the database throughout each conversation and remain there indefinitely. When a session ends, nothing disappears. When a new session starts, her memory blocks are loaded back in automatically from the database.</p>
+
+  <p>The closest everyday analogy: your phone's contacts don't disappear when you close the Contacts app. They live in the phone's storage, not in the app's temporary memory. Ren's knowledge of you, your projects, and your history works the same way — it lives in storage that persists between every conversation.</p>
+
+  <p>The nightly dream job is what turns raw conversation into durable knowledge. Every night at 2am, it processes what happened during the day and writes a structured brief — decisions made, threads open, what's next. So Ren doesn't just survive session resets; she wakes up the next morning already oriented, the same way you'd read your notes before a meeting.</p>
+
+  <div class="callout">
+    <strong>The short version for anyone who asks:</strong> Normal Claude forgets everything when the session closes. Ren's memory is in a database that never closes. That's the whole difference.
+  </div>
+
+  <hr>
+
+  <!-- Stats -->
+  <div class="stat-grid">
+    <div><strong>214+</strong><span>Archival passages</span></div>
+    <div><strong>4</strong><span>Memory tiers</span></div>
+    <div><strong>10+</strong><span>Core memory blocks</span></div>
+    <div><strong>3</strong><span>Background jobs</span></div>
+  </div>
+
+  <hr>
+
+  <h2>The four tiers</h2>
+
+  <p>Memory is organized into four tiers, each with a distinct role. T1 is always in context. T2 and T3 are searchable archival. T4 is project-specific and schema-enforced.</p>
+
+  <div class="tier-grid">
+    <div class="tier-card">
+      <div class="tier-badge">T1 — Always loaded</div>
+      <h3>Core blocks</h3>
+      <p>10+ named blocks loaded into every prompt. This is Ren's baseline — her identity, her framework knowledge, her portrait of Scott, and her session brief. Always present, never searched.</p>
+      <p class="tier-detail">Stored in Letta core memory. Updated by Ren, Claude Code, and background jobs. Character-limited per block.</p>
+    </div>
+    <div class="tier-card">
+      <div class="tier-badge">T2 — Recent archival</div>
+      <h3>Recent memory</h3>
+      <p>Synthesized session summaries and signals written after each session. The default landing zone for new archival writes. Searchable by topic. Passages here are 3–90 days old.</p>
+      <p class="tier-detail">No tier tag — the default bucket. Promoted to T3 after 90 days if foundational.</p>
+    </div>
+    <div class="tier-card">
+      <div class="tier-badge">T3 — Foundational</div>
+      <h3>Permanent archive</h3>
+      <p>Passages tagged <code>[tier:foundational]</code> — decisions that should survive forever, identity anchors, framework history, load-bearing context. Never deleted.</p>
+      <p class="tier-detail">Written once and kept. Additive-only promotion — no deletion required. Tagged at write time.</p>
+    </div>
+    <div class="tier-card">
+      <div class="tier-badge">T4 — Project memory</div>
+      <h3>Project data</h3>
+      <p>Structured project artifacts written to Postgres under a schema-as-contract design. Ren owns decisions and context entries. Claude Code owns slice and status entries.</p>
+      <p class="tier-detail">Project identified by human-readable slug. Multiple writers — no overwrites. All writers read everything.</p>
+    </div>
+  </div>
+
+  <hr>
+
+  <h2>T1 — Core memory blocks</h2>
+
+  <p>These blocks load into every session automatically. Ren doesn't search for them — they're always there. They're the baseline that makes every conversation start from context rather than scratch.</p>
+
+  <table>
+    <tr><th>Block</th><th>What it holds</th></tr>
+    <tr>
+      <td><code>always_loaded_core</code></td>
+      <td>Framework context, operating principles, Scott's profile summary, memory use instructions, session close-out ritual, search protocol. The master orientation block.</td>
+    </tr>
+    <tr>
+      <td><code>pending_thoughts</code></td>
+      <td>Session brief — what happened last session, what's open, what's next. Written by the dream job and synthesize pipeline. Resets after T1→T2 promotion (entries older than 3 days).</td>
+    </tr>
+    <tr>
+      <td><code>scott_portrait_forming</code></td>
+      <td>Ren's evolving interpretation of Scott — how he thinks, what he values, specific dated observations. Written by Ren, Claude Code, and the nightly dream.</td>
+    </tr>
+    <tr>
+      <td><code>ren_portrait_forming</code></td>
+      <td>Ren's self-portrait — what she got right, what she missed, what she wants to develop as a partner.</td>
+    </tr>
+    <tr>
+      <td><code>ren_voice</code></td>
+      <td>How Ren speaks and shows up — direct, warm, playful when the moment allows, never performing. The Trust Contract reminder. Joy as non-negotiable principle.</td>
+    </tr>
+    <tr>
+      <td><code>memory_landscape</code></td>
+      <td>A searchable topic map of what's in archival memory and how to find it. Guides Ren's search strategy so she doesn't start from zero each session.</td>
+    </tr>
+    <tr>
+      <td><code>open_threads</code></td>
+      <td>Active open threads — things that need follow-up across sessions. Updated at session close-out. Distinct from pending_thoughts (threads persist; pending_thoughts rolls).</td>
+    </tr>
+    <tr>
+      <td><code>project_state</code></td>
+      <td>Current in-flight project context (JSON). Active when a specific project build is underway.</td>
+    </tr>
+    <tr>
+      <td><code>session_state</code></td>
+      <td>Current session metadata — start time, status, Scott's opening tone.</td>
+    </tr>
+    <tr>
+      <td><code>seed_signals</code></td>
+      <td>Early observations not yet promoted to archival. Temporary staging for signals that need more reps before they're worth archiving permanently.</td>
+    </tr>
+  </table>
+
+  <hr>
+
+  <h2>T2 / T3 — Archival memory</h2>
+
+  <p>214+ passages stored as vector embeddings in pgvector on the <code>han-solo-db</code> Postgres instance. Every passage is embedded with <strong>Voyage AI</strong> (voyage-3, 1024 dimensions) and indexed for semantic search. Ren searches this when she senses she's missing context — and proactively before answering any question about a project, person, or decision.</p>
+
+  <h3>What lives in archival</h3>
+  <ul>
+    <li>Synthesized session summaries — compressed narrative of what happened, decisions made, open threads</li>
+    <li>Portrait signals — specific, dated observations about Scott, Ted, and Ren herself</li>
+    <li>Foundational passages — load-bearing decisions, framework history, identity anchors tagged <code>[tier:foundational]</code></li>
+    <li>Image descriptions — photos and screenshots analyzed by Claude, stored with <code>[image-memory]</code> tag</li>
+    <li>Session artifacts from Claude Code sessions (via synthesize.py)</li>
+  </ul>
+
+  <h3>Emotional markers</h3>
+  <p>Passages written by <code>synthesize.py</code> include embedded emotional context — <code>emotional_register</code>, <code>source_context</code>, and <code>moment_texture</code> as prefixes in the passage text. This means archival memory carries feeling-tone, not just facts. A session note isn't just "Scott approved the architecture" — it's "Scott approved the architecture after a long back-and-forth; the decision landed with real relief."</p>
+
+  <h3>Memory connections</h3>
+  <p>The curator job (described below) automatically identifies relationships between passages and writes them to a <code>memory_connections</code> Postgres table. When Ren retrieves a passage, she can expand outward to connected passages — passages that follow from it, reference the same entity, or expand on the same decision. Search no longer retrieves isolated facts; it retrieves constellations.</p>
+
+  <hr>
+
+  <h2>T4 — Project memory</h2>
+
+  <p>Project-specific artifacts live in a dedicated Postgres table (<code>t4_projects</code>) under a schema-as-contract design. The contract means multiple writers (Ren and Claude Code) can write to the same project without overwriting each other — because each entry_type has a clear owner.</p>
+
+  <div class="schema-box">
+    <span class="sc">-- T4 schema (each entry is one row)</span><br>
+    <span class="sk">project_id</span>   <span class="sv">text</span>      <span class="sc">-- kebab-case slug derived from project name</span><br>
+    <span class="sk">entry_type</span>   <span class="sv">text</span>      <span class="sc">-- decision | context | slice | status</span><br>
+    <span class="sk">entry_id</span>     <span class="sv">text</span>      <span class="sc">-- unique ID within project + type</span><br>
+    <span class="sk">source</span>       <span class="sv">text</span>      <span class="sc">-- ren | claude_code</span><br>
+    <span class="sk">content</span>      <span class="sv">text</span>      <span class="sc">-- the artifact content</span><br>
+    <span class="sk">tier_tag</span>     <span class="sv">text</span>      <span class="sc">-- optional: foundational, etc.</span><br>
+    <span class="sk">updated_at</span>   <span class="sv">timestamptz</span>
+  </div>
+
+  <div class="feature-row">
+    <div class="feature-label">Ren writes</div>
+    <div class="feature-desc"><strong>decision</strong> and <strong>context</strong> entries — strategic context, framework decisions, product direction. Written during design discussions and discovery sessions.</div>
+  </div>
+  <div class="feature-row">
+    <div class="feature-label">Claude Code writes</div>
+    <div class="feature-desc"><strong>slice</strong> and <strong>status</strong> entries — build units, completion states, what shipped and when. Written at session start and after each slice completes.</div>
+  </div>
+  <div class="feature-row">
+    <div class="feature-label">Both read everything</div>
+    <div class="feature-desc">No siloing between writer types. Claude Code reads Ren's decisions before building. Ren reads Claude Code's slice status to give accurate project context.</div>
+  </div>
+
+  <hr>
+
+  <h2>Background jobs</h2>
+
+  <p>Three automated jobs keep memory current. Each runs on its own schedule, respects the <code>jobs_paused</code> flag, and writes under the write-before-mark invariant — data is never deleted before it's confirmed written elsewhere.</p>
+
+  <div class="job-grid">
+    <div class="job-card">
+      <span class="job-schedule">Nightly · 2am via launchd</span>
+      <h3>dream.py</h3>
+      <p>Sends a structured reflection prompt directly to Ren via Letta's REST API. Ren uses her own tools to reflect on the day's conversations, write a fresh session brief to <code>pending_thoughts</code>, and add portrait signals for Scott and herself.</p>
+      <p>This is the only job that goes <em>through</em> Letta — Ren runs Haiku and calls her own tools, the way it should work. Logs to <code>~/Developer/han-solo/logs/dream.log</code>.</p>
+    </div>
+    <div class="job-card">
+      <span class="job-schedule">Every 3 hours · Render cron</span>
+      <h3>synthesize.py</h3>
+      <p>Reads raw chat transcripts from Postgres, calls Anthropic directly using Sonnet (higher quality than Haiku for extraction), and writes structured outputs back to Ren: a pending_thoughts addition plus 2–5 archival signals with emotional markers embedded.</p>
+      <p>Also handles T1→T2 promotion (SYNTHESIS entries older than 3 days) and T2→T3 tagging (passages older than 90 days).</p>
+    </div>
+    <div class="job-card">
+      <span class="job-schedule">After synthesize · Render cron</span>
+      <h3>curator.py</h3>
+      <p>Processes archival passages in batches of 20. Sends each batch to Claude Sonnet to identify connections — <code>relates_to</code>, <code>follows_from</code>, <code>expands_on</code>, <code>references_same_entity</code>, <code>contradicts</code>.</p>
+      <p>Connections with confidence ≥ 0.7 are written bidirectionally to the <code>memory_connections</code> table. Quality flags (near-duplicates, self-containment failures) go to <code>curator_flags</code> — no auto-merge, human review only.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>Why Sonnet for synthesis and curation, not Haiku?</strong> Ren runs on Haiku — that's appropriate for real-time conversation. But extracting specific decisions and long-term signals from a raw transcript, or identifying subtle connections between passages, needs Sonnet quality. The direct API calls in synthesize.py and curator.py are intentional. Routing through Letta would use Haiku and produce lower-quality extractions.
+  </div>
+
+  <hr>
+
+  <h2>Memory curator</h2>
+
+  <p>The curator is what turns a collection of isolated passages into a connected graph. Without it, archival memory is a bag of facts — each retrieved independently, with no awareness of how they relate. The curator reads across all passages and writes the relationships between them, so every retrieved passage can expand outward to its neighbors.</p>
+
+  <h3>How it works</h3>
+  <p><code>curator.py</code> runs automatically after each synthesis job on the Render cron. It pulls archival passages in batches of 20 and sends each batch to Claude Sonnet — not Haiku, because identifying subtle relationships between passages requires reasoning quality, not just speed. Sonnet returns a list of connections with confidence scores. Any connection scoring 0.7 or higher is written to the database.</p>
+
+  <h3>Connection types</h3>
+  <table>
+    <tr><th>Type</th><th>What it means</th></tr>
+    <tr>
+      <td><code>relates_to</code></td>
+      <td>Two passages cover the same topic, project, or person from different angles. Neither is a prerequisite for the other.</td>
+    </tr>
+    <tr>
+      <td><code>follows_from</code></td>
+      <td>One passage is a direct consequence or continuation of another — a decision that came out of a conversation, a change that followed an earlier direction.</td>
+    </tr>
+    <tr>
+      <td><code>expands_on</code></td>
+      <td>One passage goes deeper on something the other passage introduced. The second isn't just related — it adds meaningful specificity.</td>
+    </tr>
+    <tr>
+      <td><code>references_same_entity</code></td>
+      <td>Both passages name the same person, project, or concept. Useful for pulling the full picture of anything by name.</td>
+    </tr>
+    <tr>
+      <td><code>contradicts</code></td>
+      <td>Two passages make conflicting claims about the same thing. Flagged so Ren can surface the tension rather than confidently stating something that may no longer be true.</td>
+    </tr>
+  </table>
+
+  <h3>Where connections are stored</h3>
+  <p>Connections are written to the <code>memory_connections</code> Postgres table — bidirectionally. If passage A follows_from passage B, the curator writes both A→B and B→A. When Ren retrieves either passage, she can expand outward in either direction. The table is additive — the curator never deletes connections, only adds new ones.</p>
+
+  <h3>Quality flags</h3>
+  <p>The curator also scans for two quality problems and writes them to a <code>curator_flags</code> table:</p>
+  <ul>
+    <li><strong>Near-duplicates</strong> — two passages making the same specific claim, stored separately. Wastes search capacity and risks returning redundant results.</li>
+    <li><strong>Self-containment failures</strong> — passages that reference something by pronoun or shorthand without naming it. A future search has no way to find them by the thing they're actually about.</li>
+  </ul>
+  <p>The curator flags but never auto-merges. Merging passages requires human review — the cost of a bad merge (losing distinct context) is higher than the cost of a duplicate surfacing in search results.</p>
+
+  <hr>
+
+  <h2>Memory MRI — the access log</h2>
+
+  <p>Every archival search is logged to a <code>memory_access_log</code> Postgres table. This creates the feedback loop that makes the memory system self-improving over time.</p>
+
+  <div class="feature-row">
+    <div class="feature-label">What it tracks</div>
+    <div class="feature-desc">The exact query string, the passage IDs returned, and whether those results were actually used in Ren's response. Three tracked outcomes: passages that never surface (cold), searches that always return nothing (dry wells), and searches that return results Ren doesn't use (false positives).</div>
+  </div>
+  <div class="feature-row">
+    <div class="feature-label">How it's used</div>
+    <div class="feature-desc">Cold passages that never surface indicate an indexing or tagging problem. Dry wells point to gaps in memory coverage — things that happened but were never written to archival. False positives indicate passages that need better content or tagging to actually match what they describe.</div>
+  </div>
+  <div class="feature-row">
+    <div class="feature-label">The enrich tool</div>
+    <div class="feature-desc">When a passage is retrieved and meaningfully used, <code>enrich_passage</code> accumulates a context note on it — recording when it was retrieved, what conversation it was useful in. Passages get richer over time, not just older.</div>
+  </div>
+
+  <hr>
+
+  <h2>Search protocol</h2>
+
+  <p>Ren follows a three-rule search discipline, embedded in <code>always_loaded_core</code>, that makes archival search traceable and intentional rather than a black-box guess.</p>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="pipeline-num">1</div>
+      <div class="pipeline-body">
+        <div class="pipeline-tag">Decompose first</div>
+        <div class="pipeline-title">Break multi-part questions into separate searches</div>
+        <p class="pipeline-desc">Any question spanning multiple people, projects, or decisions must be broken into components. Search per entity or topic, not as one broad query. "What do I know about Ted's onboarding?" → search "Ted", search "USER_TOKEN_TED", search "PowerShell installer", synthesize across results. One broad search when the question has multiple parts guarantees incomplete coverage.</p>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-num">2</div>
+      <div class="pipeline-body">
+        <div class="pipeline-tag">Log every search</div>
+        <div class="pipeline-title">Call log_memory_access after every archival search, without exception</div>
+        <p class="pipeline-desc">Logs the exact query string, the list of passage IDs returned (empty list if nothing found), and whether the results were used in the response. Non-negotiable — it's the feedback loop that makes memory self-improving. Missing logs mean the MRI has blind spots.</p>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-num">3</div>
+      <div class="pipeline-body">
+        <div class="pipeline-tag">Expand after searching</div>
+        <div class="pipeline-title">Check memory connections for each result</div>
+        <p class="pipeline-desc">After archival search returns results, check the memory connections table for passages linked to each result. Pull linked passages in additively. Archival search always runs first — connections expand what's visible, they never replace or filter the search results.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <h2>Notecards</h2>
+
+  <p>A lightweight, low-ceremony capture system for things worth remembering mid-session — follow-ups, reminders, things to revisit. Not tasks, not archival passages. Just text, who wrote it, and when.</p>
+
+  <table>
+    <tr><th>Field</th><th>Values</th></tr>
+    <tr><td>Creator</td><td><code>scott</code>, <code>ren</code>, <code>ted</code> — anyone in the session</td></tr>
+    <tr><td>Status</td><td><code>active</code> · <code>completed</code> · <code>archived</code> (archived stays in DB but hidden from default view)</td></tr>
+    <tr><td>Source</td><td><code>chat</code> (created mid-session) · <code>manual</code> (created outside chat)</td></tr>
+  </table>
+
+  <p>Use notecards for anything that surfaces mid-conversation that neither Scott nor Ren should forget — a follow-up Scott wants, a decision thread to revisit, a question that got parked. One clear notecard is worth more than five vague ones.</p>
+
+  <hr>
+
+  <h2>Image memory</h2>
+
+  <p>The chat UI includes an image upload button (paperclip). When Scott sends a photo or screenshot:</p>
+
+  <ol>
+    <li>The image is received by <code>chat_api.py</code> (jpg, png, gif, webp · max 5MB).</li>
+    <li>The server calls Anthropic directly with Claude's vision capability — Letta is text-only and doesn't participate in this step.</li>
+    <li>Claude analyzes the image and returns a full description.</li>
+    <li>The description is sent to Ren as her context for that message.</li>
+    <li>The description is also written to archival memory with an <code>[image-memory]</code> tag and the date — searchable in future sessions.</li>
+  </ol>
+
+  <p>The UI shows a thumbnail preview before the message is sent, and renders the image inline in the chat bubble after. This architecture resolves the previous limitation — earlier versions were blocked on Letta adding native vision support. By calling Claude directly for the vision step, image memory works now regardless of Letta's multimodal roadmap.</p>
+
+  <hr>
+
+  <h2>Memory health</h2>
+
+  <p>Ren checks memory system health at every session start via the <code>check_memory_health</code> tool. The result covers three areas:</p>
+
+  <div class="feature-row">
+    <div class="feature-label">Failed transitions</div>
+    <div class="feature-desc">Count of failed T1→T2 or T2→T3 promotions in the last 24 hours, from the <code>memory_transitions</code> audit table. Any non-zero count gets flagged to Scott immediately.</div>
+  </div>
+  <div class="feature-row">
+    <div class="feature-label">Capture health</div>
+    <div class="feature-desc">DB connection status, timestamp of the last successful write, and consecutive failure count. Tells Ren whether the transcript capture pipeline is running cleanly.</div>
+  </div>
+  <div class="feature-row">
+    <div class="feature-label">Pausing jobs</div>
+    <div class="feature-desc">Both dream.py and synthesize.py respect a <code>jobs_paused</code> flag in the <code>han_solo_config</code> Postgres table. Toggle it from the Memory panel in the chat UI. Useful when Anthropic credits need to be conserved.</div>
+  </div>
+
+  <div class="callout">
+    <strong>Write-before-mark invariant:</strong> No data is ever deleted before it's confirmed written elsewhere. Every T1→T2 and T2→T3 promotion attempt is logged in <code>memory_transitions</code> with status and error. The pipeline fails safe — a failed write leaves the source intact.
+  </div>
+
+</div>
+</body>
+</html>

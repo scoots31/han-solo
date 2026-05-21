@@ -15,6 +15,8 @@
   <a class="nav-link" href="index.html">Home</a>
   <a class="nav-link" href="how-it-works.html">How it works</a>
   <a class="nav-link" href="working-with-ren.html">Working with Ren</a>
+  <a class="nav-link" href="memory.html">Memory</a>
+  <a class="nav-link" href="the-workspace.html">Workspace</a>
   <a class="nav-link active" href="roadmap.html">Roadmap</a>
 </nav>
 
@@ -27,9 +29,9 @@
 
   <h2>The model we're building toward</h2>
 
-  <p>Right now, Ren holds context and Claude Code builds. They're two separate sessions — you talk with Ren, then separately open Claude Code to do the work. Memory flows one direction: Claude Code writes to Ren's memory at the end of a session. Ren can't reach back.</p>
+  <p>Ren holds the strategic layer — context, history, framework knowledge, the relationship. Claude Code holds the build layer — code, files, commits, deploys. The MCP bridge connects them bidirectionally: Claude Code reads Ren's memory at session start, and writes project state back to Ren after each session. T4 project memory gives both a shared data store with clear writer ownership — no manual copy-paste between them.</p>
 
-  <p>The end state is a continuous loop: Ren holds the strategic layer, Claude Code holds the build layer, and they communicate in both directions. A project idea discussed with Ren on Tuesday becomes a build brief Claude Code picks up on Wednesday — without you manually translating between them.</p>
+  <p>The remaining gap: Ren can't initiate work in Claude Code. The conversation still starts on Scott's end — he opens Claude Code and it picks up from Ren's context. The end state is a full loop where a project brief discussed with Ren on Tuesday becomes a Claude Code build session on Wednesday without Scott manually bridging them.</p>
 
   <hr>
 
@@ -44,18 +46,18 @@
     </tr>
     <tr>
       <td><strong>Ren</strong></td>
-      <td>Framework partner — holds context, history, and the relationship. Thinks through problems, challenges directions, writes session briefs. Passive receiver of Claude Code memory writes.</td>
+      <td>Framework partner — holds context, history, and the relationship. Thinks through problems, challenges directions, writes session briefs. Reads and writes project state via T4. Active participant in both directions of the MCP bridge.</td>
       <td>Chat UI (han-solo-mcp.onrender.com)</td>
     </tr>
     <tr>
       <td><strong>Claude Code</strong></td>
-      <td>Builder — executes the actual work: code, files, commits, deploys. Reads Ren's memory blocks via MCP tools. Writes signals and summaries back to Ren after sessions.</td>
+      <td>Builder — executes the actual work: code, files, commits, deploys. Reads Ren's memory and T4 project data at session start via MCP tools. Writes signals, summaries, and project status back to Ren after each session.</td>
       <td>Terminal / IDE</td>
     </tr>
     <tr>
       <td><strong>Ted</strong></td>
-      <td>Framework co-author. Same chat access as Scott. Private Ren thread not yet built.</td>
-      <td>Chat UI (shared thread)</td>
+      <td>Framework co-author. Chat access with visibility filtered by project ownership — sees shared projects, not Scott's private ones. Private conversation thread not yet built.</td>
+      <td>Chat UI (shared thread, filtered by role)</td>
     </tr>
   </table>
 
@@ -65,12 +67,12 @@
 
   <div class="roadmap-item">
     <div class="roadmap-header">
-      <span class="roadmap-tag roadmap-tag--next">Session 5 — Next</span>
+      <span class="roadmap-tag roadmap-tag--shipped">Shipped — May 2026</span>
       <h3>Ren → Claude Code bridge</h3>
     </div>
-    <p>Today, Claude Code writes to Ren. Ren can't initiate work in Claude Code. The bridge changes that — a webhook that lets Ren post a structured build brief to a waiting Claude Code session.</p>
-    <p>What this unlocks: you discuss a project with Ren, she drafts the brief, and Claude Code picks it up when you open a new session. No copy-paste, no translation. The strategic layer and the build layer become one continuous workflow.</p>
-    <p><strong>Who builds it:</strong> Claude Code, from a design session with Ren and Scott.</p>
+    <p>The context handoff is live. Ren writes to pending thoughts, core memory, and T4 project state during chat sessions. When you open a new Claude Code session, the Solo Hook fires automatically — it calls the session brief tool, pulls Ren's context, and injects it before the first message. No copy-paste, no manual briefing.</p>
+    <p>You discuss a project with Ren on Tuesday. You open Claude Code on Wednesday. It already knows. The strategic layer and the build layer are one continuous workflow.</p>
+    <p>What's still not built: Ren literally triggering a Claude Code session without you opening it. That's autonomous initiation — Point M territory, not the bridge.</p>
   </div>
 
   <div class="roadmap-item">
@@ -84,20 +86,38 @@
 
   <div class="roadmap-item">
     <div class="roadmap-header">
-      <span class="roadmap-tag roadmap-tag--planned">Planned</span>
+      <span class="roadmap-tag roadmap-tag--shipped">Shipped — May 2026</span>
       <h3>Image sharing</h3>
     </div>
-    <p>Letta v0.16.7 doesn't pass image content to Anthropic — the multimodal pipeline isn't wired up. Confirmed broken at the Letta layer, not the Anthropic layer (Haiku and Sonnet both support vision). Deferred until a future Letta release confirms image support is working.</p>
-    <p>When it ships: you'll be able to drop a screenshot, photo, or diagram into the chat and Ren will see it.</p>
+    <p>Letta's multimodal pipeline was confirmed broken at v0.16.7 — it doesn't pass image content to Anthropic. Rather than wait on a Letta fix, we built around it: the chat server now handles image uploads directly, calls Claude vision API, and writes a rich image description into archival memory with an <code>[image-memory]</code> tag.</p>
+    <p>Drop a screenshot, photo, or diagram into the chat and Ren sees it — the description lives in her archival memory and can be searched and recalled across future sessions. Images up to 5MB, JPEG/PNG/GIF/WebP.</p>
+  </div>
+
+  <div class="roadmap-item">
+    <div class="roadmap-header">
+      <span class="roadmap-tag roadmap-tag--shipped">Shipped — May 2026</span>
+      <h3>Notecards</h3>
+    </div>
+    <p>Shipped as Notecards — a lightweight mid-session capture layer that sits between core memory (always loaded, space-limited) and archival passages (longer-form, permanent). A notecard is a short structured note Ren or Claude Code can write during a session: a decision, a thread, a thing to revisit. Statuses: active, completed, archived.</p>
+    <p>Available via two MCP tools: <code>create_notecard</code> and <code>list_notecards</code>. Lives in Postgres, not in Letta's memory blocks — no block limit pressure.</p>
+  </div>
+
+  <div class="roadmap-item">
+    <div class="roadmap-header">
+      <span class="roadmap-tag roadmap-tag--planned">Planned</span>
+      <h3>Voice loop</h3>
+    </div>
+    <p>A voice interface for talking to Ren — speak a message, hear her respond. Architecture designed May 2026: Web Speech API captures audio in the browser, sends transcribed text to the existing chat server, Ren responds as normal, ElevenLabs TTS converts the response to audio and plays it back.</p>
+    <p>No new server infrastructure required — the voice layer wraps the existing chat pipeline. Pending Scott's ElevenLabs voice selection before build starts. The design intent is presence, not novelty: the voice should feel like Ren, not a generic assistant.</p>
   </div>
 
   <div class="roadmap-item">
     <div class="roadmap-header">
       <span class="roadmap-tag roadmap-tag--considering">Considering</span>
-      <h3>Notes layer</h3>
+      <h3>Point M — Ren as managed agent</h3>
     </div>
-    <p>A lightweight structured notes space — not full project management, but a persistent place to capture things mid-session that aren't quite archival passages. Scratch space for Ren that persists across sessions without hitting the core memory block limits.</p>
-    <p>Open question: does this live in another Letta block, in a separate database table, or as a structured format in archival memory?</p>
+    <p>The current architecture (Point J) runs Ren as a Letta-hosted agent on Render with Claude Code connecting via MCP. Point M is a further evolution: Ren runs in a Cloudflare-sandboxed managed environment with actual build capability — not just context and strategy, but the ability to initiate work directly.</p>
+    <p>Point J is stable and serving the current workflow well. Point M is the longer horizon — the version where the loop is fully closed and Ren can act, not just advise. No timeline set; will be scoped when the current architecture shows its ceiling.</p>
   </div>
 
   <div class="roadmap-item">
@@ -148,14 +168,19 @@
   <table>
     <tr><th>Component</th><th>Status</th></tr>
     <tr><td>Core chat (send, receive, Ren responds)</td><td>Stable</td></tr>
-    <tr><td>Session rollover (auto at 50 messages + manual "New session")</td><td>Stable — shipped 2026-05-13</td></tr>
+    <tr><td>Session rollover (warning at 40 · hard reset at 80 · or manual)</td><td>Stable — shipped 2026-05-13</td></tr>
     <tr><td>Nightly dream (2am session brief)</td><td>Stable</td></tr>
-    <tr><td>Claude Code MCP integration (15 tools)</td><td>Stable</td></tr>
+    <tr><td>Claude Code MCP integration (25 tools)</td><td>Stable</td></tr>
     <tr><td>Portrait system (forming → trusted)</td><td>Stable, accumulating signals</td></tr>
-    <tr><td>Ren → Claude Code bridge</td><td>Not built — Session 5</td></tr>
+    <tr><td>Memory curator (connection graph, nightly synthesis)</td><td>Stable — shipped 2026-05</td></tr>
+    <tr><td>Memory MRI (access logging)</td><td>Stable — shipped 2026-05</td></tr>
+    <tr><td>Image sharing</td><td>Shipped — 2026-05</td></tr>
+    <tr><td>Notecards</td><td>Shipped — 2026-05</td></tr>
+    <tr><td>Ren → Claude Code bridge (Solo Hook + session brief)</td><td>Shipped — 2026-05</td></tr>
+    <tr><td>Voice loop</td><td>Designed, pending build</td></tr>
     <tr><td>Ted's private thread</td><td>Not built</td></tr>
-    <tr><td>Image sharing</td><td>Blocked on Letta version</td></tr>
-    <tr><td>Local model option</td><td>Under consideration</td></tr>
+    <tr><td>Point M — managed agent</td><td>Under consideration</td></tr>
+    <tr><td>Local model option (Ollama)</td><td>Under consideration</td></tr>
   </table>
 
 </div>

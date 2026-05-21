@@ -238,6 +238,8 @@ svg#flowchart:active{cursor:grabbing}
   <a class="nav-link" href="index.html">Home</a>
   <a class="nav-link" href="how-it-works.html">How it works</a>
   <a class="nav-link" href="working-with-ren.html">Working with Ren</a>
+  <a class="nav-link" href="memory.html">Memory</a>
+  <a class="nav-link" href="the-workspace.html">Workspace</a>
   <a class="nav-link" href="roadmap.html">Roadmap</a>
   <a class="nav-link active" href="architecture.html">Architecture</a>
 </nav>
@@ -303,6 +305,14 @@ svg#flowchart:active{cursor:grabbing}
               fill="#fdf8f4" stroke="#8e8e90" stroke-width="1.5"/>
         <text x="785" y="52" text-anchor="middle" fill="#8e8e90" font-size="12" font-weight="700">Render</text>
         <text x="785" y="69" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">health check / deploy</text>
+      </g>
+
+      <!-- Curator script -->
+      <g class="node-group" data-node="curator" onclick="nodeClick('curator')">
+        <rect class="node-rect" x="890" y="30" width="130" height="52"
+              fill="#fdf8f4" stroke="#49494b" stroke-width="1.5"/>
+        <text x="955" y="52" text-anchor="middle" fill="#49494b" font-size="12" font-weight="700">curator.py</text>
+        <text x="955" y="69" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">nightly cron (Render)</text>
       </g>
 
       <!-- ════════════════════════════════════════════════
@@ -388,6 +398,13 @@ svg#flowchart:active{cursor:grabbing}
         <text x="745" y="319" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">forming · trusted layers</text>
       </g>
 
+      <g class="node-group" data-node="tool-t4" onclick="nodeClick('tool-t4')">
+        <rect class="node-rect" x="840" y="280" width="140" height="52"
+              fill="#fdf8f4" stroke="#8e8e90" stroke-width="1.5"/>
+        <text x="910" y="302" text-anchor="middle" fill="#8e8e90" font-size="12" font-weight="700">tools/t4 · notecards</text>
+        <text x="910" y="319" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">project data · captures</text>
+      </g>
+
       <!-- ════════════════════════════════════════════════
            LETTA CLIENT — fourth band
       ════════════════════════════════════════════════ -->
@@ -461,15 +478,19 @@ svg#flowchart:active{cursor:grabbing}
 
       <!-- PostgreSQL -->
       <g class="node-group" data-node="postgres" onclick="nodeClick('postgres')">
-        <rect class="node-rect" x="180" y="720" width="380" height="100"
+        <rect class="node-rect" x="180" y="720" width="380" height="185"
               fill="#fdf8f4" stroke="#49494b" stroke-width="1.5"/>
         <text x="370" y="745" text-anchor="middle" fill="#49494b" font-size="13" font-weight="700">PostgreSQL</text>
         <text x="370" y="763" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">Render managed DB</text>
         <line x1="190" y1="772" x2="550" y2="772" stroke="#e8ddd4" stroke-width="1"/>
-        <text x="280" y="790" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="9">chat_transcripts</text>
-        <text x="280" y="806" text-anchor="middle" fill="rgba(26,26,26,0.40)" font-size="9">session_id · role · content · processed</text>
-        <text x="460" y="790" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="9">han_solo_config</text>
-        <text x="370" y="815" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="9">memory_transitions (T1→T2→T3 audit log)</text>
+        <text x="280" y="789" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="9">chat_transcripts</text>
+        <text x="460" y="789" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="9">han_solo_config</text>
+        <text x="280" y="803" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="9">signals · notecards</text>
+        <text x="460" y="803" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="9">t4_projects · skills</text>
+        <text x="280" y="817" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="9">memory_connections</text>
+        <text x="460" y="817" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="9">memory_access_log</text>
+        <text x="280" y="831" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="9">curator_flags</text>
+        <text x="460" y="831" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="9">memory_transitions</text>
       </g>
 
       <!-- ════════════════════════════════════════════════
@@ -596,6 +617,16 @@ svg#flowchart:active{cursor:grabbing}
       <!-- dream → letta-api directly -->
       <path class="edge" id="e-dream-lapi" d="M510,56 L860,56 L860,350 L900,360" stroke="#49494b" stroke-dasharray="4,3" marker-end="url(#arr)" data-edges='["dream","letta-api"]'/>
 
+      <!-- curator → db (reads/writes memory_connections, curator_flags) -->
+      <path class="edge" id="e-curator-db" d="M955,82 L955,620 L560,620" stroke="#49494b" stroke-dasharray="4,3" marker-end="url(#arr)" data-edges='["curator","db"]'/>
+      <!-- curator → anthropic (Sonnet for connection analysis) -->
+      <path class="edge" id="e-curator-ant" d="M1020,56 L1150,400" stroke="#d1bfa7" stroke-dasharray="4,3" marker-end="url(#arr)" data-edges='["curator","anthropic-api"]'/>
+
+      <!-- fastmcp → tool-t4 -->
+      <path class="edge" id="e-mcp-tt4" d="M380,202 L910,280" stroke="#8e8e90" marker-end="url(#arr)" data-edges='["fastmcp","tool-t4"]'/>
+      <!-- tool-t4 → db (T4 data lives in Postgres, not Letta) -->
+      <path class="edge" id="e-tt4-db" d="M910,332 L560,610" stroke="#49494b" stroke-dasharray="4,3" marker-end="url(#arr)" data-edges='["tool-t4","db"]'/>
+
       <!-- section labels -->
       <text x="22" y="26" fill="rgba(26,26,26,0.35)" font-size="10" font-weight="700" letter-spacing=".06em">CLIENTS</text>
       <text x="22" y="145" fill="rgba(26,26,26,0.35)" font-size="10" font-weight="700" letter-spacing=".06em">AUTH / SERVER</text>
@@ -665,15 +696,15 @@ const FLOWS = [
     id: 'mcp-tool-call',
     label: 'MCP tool call (Claude client)',
     color: '#8e8e90',
-    nodes: ['claude','auth-middleware','fastmcp','tool-memory','tool-signals','tool-phase','tool-brief','tool-portraits','validation','letta-client','letta-api'],
+    nodes: ['claude','auth-middleware','fastmcp','tool-memory','tool-signals','tool-phase','tool-brief','tool-portraits','tool-t4','validation','letta-client','letta-api','db'],
     steps: [
       {title:'Claude sends MCP request',desc:'Any Claude instance (Claude Code, Cursor, etc.) sends a JSON-RPC call to POST /mcp with Authorization: Bearer <token>.',ref:'server.py · MCP Streamable HTTP'},
       {title:'BearerAuthMiddleware intercepts',desc:'Raw ASGI middleware (not BaseHTTPMiddleware — preserves SSE streaming). Validates token via lookup_token → TOKEN_REGISTRY. Sets _current_user ContextVar.',ref:'auth.py:BearerAuthMiddleware.__call__'},
-      {title:'FastMCP routes to tool',desc:'server.py has five registered tool groups: memory, signals, phase, brief, portraits. FastMCP dispatches to the matching @server.tool() handler.',ref:'server.py:memory.register … portraits.register'},
-      {title:'Validation gate',desc:'Tools that write call validation.assert_can_write_block or assert_can_write_signal. Owner-only blocks (user_registry, api_keys) are always blocked for non-owners.',ref:'validation.py · tools/memory.py · tools/signals.py'},
-      {title:'letta_client executes',desc:'Tool calls letta_client functions: read_core_block, write_core_block, insert_passage, search_passages, etc. Agent ID resolved once (DB → env → Letta lookup).',ref:'letta_client.py:ensure_ren_agent_id'},
-      {title:'Letta API call',desc:'letta._letta() fires authenticated httpx request to han-solo-letta.onrender.com. Handles Render\'s http redirect artifact by re-following with https.',ref:'letta_client.py:_letta'},
-      {title:'Result returned to Claude',desc:'Letta API responds, tool returns string/dict back through FastMCP JSON-RPC response. Claude sees the tool result.',ref:'FastMCP response serialization'},
+      {title:'FastMCP routes to tool',desc:'server.py has seven registered tool groups: memory, signals, phase, brief, portraits, t4, notecards. FastMCP dispatches to the matching @server.tool() handler.',ref:'server.py:memory.register … notecards.register'},
+      {title:'Validation gate',desc:'Tools that write call validation.assert_can_write_block or assert_can_write_signal. Owner-only blocks are always blocked for non-owners. T4 tools check project visibility before returning entries.',ref:'validation.py · tools/memory.py · tools/t4.py'},
+      {title:'letta_client or db executes',desc:'Memory/portrait/signal tools call letta_client (Letta API). T4 and notecard tools call db.py directly — project data lives in Postgres, not Letta.',ref:'letta_client.py · db.py'},
+      {title:'Letta API call (memory path)',desc:'letta._letta() fires authenticated httpx request to han-solo-letta.onrender.com. Handles Render redirect artifact. Agent ID resolved once (DB → env → Letta lookup).',ref:'letta_client.py:_letta · ensure_ren_agent_id'},
+      {title:'Result returned to Claude',desc:'Tool returns string/dict back through FastMCP JSON-RPC response. Claude sees the tool result and may call additional tools in the same session.',ref:'FastMCP response serialization'},
     ]
   },
   {
@@ -717,6 +748,20 @@ const FLOWS = [
       {title:'T1→T2 promotion',desc:'promote_old_entries: SYNTHESIS entries >3 days old beyond the 2 most recent are written to archival memory as texture/ren signals, then trimmed from pending_thoughts.',ref:'synthesize.py:promote_old_entries'},
       {title:'T2→T3 tagging',desc:'_tag_foundational: archival passages >90 days old get [tier:foundational] prepended. New tagged passage written, then old passage deleted (write-before-delete invariant).',ref:'synthesize.py:_tag_foundational'},
       {title:'Purge & cleanup',desc:'DELETE processed transcripts older than 5 days. memory_transitions table audits every T1→T2 and T2→T3 attempt with status/error.',ref:'synthesize.py:purge_old · db.py:memory_transitions'},
+    ]
+  },
+  {
+    id: 'curator-flow',
+    label: 'Memory curator (connection graph)',
+    color: '#49494b',
+    nodes: ['curator','db','postgres','anthropic-api'],
+    steps: [
+      {title:'Cron fires curator.py',desc:'Render cron runs curator.py nightly after synthesize.py completes. Creates asyncpg pool, checks jobs_paused flag.',ref:'curator.py:run'},
+      {title:'Fetch recent passages',desc:'Queries archival passages written in the last 48 hours, in batches of 20. Only passages not yet processed by the curator.',ref:'curator.py:get_recent_passages'},
+      {title:'Call Anthropic for connection analysis',desc:'Sends batch of passage pairs to claude-sonnet-4-6 with a structured prompt. Returns JSON array of connections: {passage_id_a, passage_id_b, relationship, confidence, grounding}.',ref:'curator.py:analyze_connections · _anthropic_request'},
+      {title:'Filter by confidence',desc:'Only connections with confidence ≥ 0.7 are written. Lower-confidence items go to curator_flags with reason for review.',ref:'curator.py:filter_connections'},
+      {title:'Write bidirectional connections',desc:'db.upsert_connection writes each connection twice — A→B and B→A — to memory_connections. UNIQUE constraint on (passage_id_a, passage_id_b, relationship) prevents duplicates.',ref:'db.py:upsert_connection · memory_connections table'},
+      {title:'Flag low-confidence passages',desc:'Passages flagged for ambiguity, contradiction, or low confidence written to curator_flags with curator_run_id for tracing.',ref:'db.py:write_curator_flag'},
     ]
   },
   {

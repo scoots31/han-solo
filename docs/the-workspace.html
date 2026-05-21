@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Workspace — Han Solo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_shared.css">
+  <style>
+    .section-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .section-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+    }
+    .section-card h4 {
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: .5rem;
+    }
+    .section-card p {
+      font-size: .88rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin: 0;
+    }
+    .section-card .card-label {
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: .4rem;
+    }
+    .nav-group {
+      margin: 1.5rem 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .nav-group-header {
+      background: var(--surface);
+      padding: .6rem 1.25rem;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-group-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: .9rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-group-item:last-child { border-bottom: none; }
+    .nav-group-item-name {
+      font-size: .88rem;
+      font-weight: 600;
+      color: var(--text);
+      min-width: 120px;
+      flex-shrink: 0;
+    }
+    .nav-group-item-desc {
+      font-size: .88rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .visibility-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .visibility-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+    }
+    .visibility-card h4 {
+      font-size: .88rem;
+      font-weight: 600;
+      margin-bottom: .4rem;
+    }
+    .visibility-card p {
+      font-size: .85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin: 0;
+    }
+    .visibility-card.private { border-color: rgba(150,150,150,.25); }
+    .visibility-card.shared { border-color: rgba(74,163,111,.3); background: rgba(74,163,111,.04); }
+    .visibility-card.private h4 { color: #6b7280; }
+    .visibility-card.shared h4 { color: #4aa36f; }
+    .schema-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: .78rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+      margin: 1rem 0 1.5rem;
+    }
+    .schema-box em { color: var(--accent); font-style: normal; }
+  </style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="brand" href="index.html">Han Solo</a>
+  <a class="nav-link" href="index.html">Home</a>
+  <a class="nav-link" href="how-it-works.html">How it works</a>
+  <a class="nav-link" href="working-with-ren.html">Working with Ren</a>
+  <a class="nav-link" href="memory.html">Memory</a>
+  <a class="nav-link active" href="the-workspace.html">Workspace</a>
+  <a class="nav-link" href="roadmap.html">Roadmap</a>
+  <a class="nav-link" href="architecture.html">Architecture</a>
+</nav>
+
+<div class="page">
+  <div class="hero">
+    <div class="hero-label">The Workspace</div>
+    <h1>Where work lives</h1>
+    <p class="hero-sub">The project layer of Han Solo — a live view of every project's phases, slices, deliverables, and status. Connected to Ren's memory, the framework's skill library, and the T4 data store that ties them together.</p>
+  </div>
+
+  <h2>What the workspace replaced</h2>
+
+  <p>Solo Companion started as a local Mac app — a read-only viewer for framework memory that lived on one machine and couldn't be shared. As the system evolved, the useful parts were rebuilt as a live section inside Han Solo: cloud-hosted, accessible to both Scott and Ted, and connected directly to the same database Ren reads and writes.</p>
+
+  <p>The workspace isn't a separate product bolted on. It's the same system — the same Postgres database, the same T4 project data, the same skill records — surfaced as a UI instead of an API call.</p>
+
+  <hr>
+
+  <h2>Two sides of the sidebar</h2>
+
+  <p>The workspace sidebar has two distinct sections. The top half is Ren-facing: conversation, memory, signals, and notecards. The bottom half is project-facing: the live state of every build in progress.</p>
+
+  <div class="nav-group">
+    <div class="nav-group-header">Ren</div>
+    <div class="nav-group-item">
+      <div class="nav-group-item-name">Chat</div>
+      <div class="nav-group-item-desc">The main conversation interface — send messages to Ren, see her responses. Same conversation as han-solo-mcp.onrender.com, same memory, same context.</div>
+    </div>
+    <div class="nav-group-item">
+      <div class="nav-group-item-name">Memory</div>
+      <div class="nav-group-item-desc">Live view of Ren's core memory blocks — what she has loaded at all times. Useful for verifying she has the right context before a session.</div>
+    </div>
+    <div class="nav-group-item">
+      <div class="nav-group-item-name">Signals</div>
+      <div class="nav-group-item-desc">Portrait signals written by Claude Code after build sessions — the forming → trusted confidence ladder. Shows what Claude Code has been communicating back to Ren.</div>
+    </div>
+    <div class="nav-group-item">
+      <div class="nav-group-item-name">Notecards</div>
+      <div class="nav-group-item-desc">Mid-session captures — short structured notes that sit between core memory and full archival passages. Statuses: active, completed, archived. Written by Ren or Claude Code.</div>
+    </div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-header">Workspace</div>
+    <div class="nav-group-item">
+      <div class="nav-group-item-name">Dashboard</div>
+      <div class="nav-group-item-desc">Cross-project summary — active slices, recent signals, phase distribution. The first thing to open when starting a new session to get oriented across all live work.</div>
+    </div>
+    <div class="nav-group-item">
+      <div class="nav-group-item-name">Activity Feed</div>
+      <div class="nav-group-item-desc">Chronological stream of all project events — slice status changes, deliverables completed, phase advances, signals written. Filterable by project.</div>
+    </div>
+    <div class="nav-group-item">
+      <div class="nav-group-item-name">Board</div>
+      <div class="nav-group-item-desc">Kanban-style view of slices, deliverables, and phases within a project. Filter by project and toggle between slice and deliverable views. Status badges: ready, build, review, test, done, blocked.</div>
+    </div>
+    <div class="nav-group-item">
+      <div class="nav-group-item-name">Projects</div>
+      <div class="nav-group-item-desc">Full project list with phase progress and slice counts. Drill into any project to see the complete structure: phases → deliverables → slices. Visibility toggle here (Private / Shared).</div>
+    </div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-header">Frameworks</div>
+    <div class="nav-group-item">
+      <div class="nav-group-item-name">Solo Builder</div>
+      <div class="nav-group-item-desc">The framework's skill library — all phase skills and always-on content stored in Postgres and browsable here. Includes active slices across all projects and the full skill document index. See below for how this works.</div>
+    </div>
+    <div class="nav-group-item">
+      <div class="nav-group-item-name">API</div>
+      <div class="nav-group-item-desc">Reference view of the MCP tool surface — the 25 tools Claude Code uses to read and write to Han Solo. Useful for verifying what's available in a given session.</div>
+    </div>
+    <div class="nav-group-item">
+      <div class="nav-group-item-name">Agent</div>
+      <div class="nav-group-item-desc">Ren's agent configuration — the Letta agent ID, memory block layout, and active tool connections. Diagnostic view, not for editing.</div>
+    </div>
+  </div>
+
+  <hr>
+
+  <h2>The framework in the database</h2>
+
+  <p>The Solo Builder Framework's skills and phase content used to live exclusively as local files on disk — readable by Claude Code but invisible to Ren. They're now stored in Postgres alongside all of Ren's memory data. Ren can read them directly. Claude Code can query them via the <code>/api/skills/{phase_slug}</code> endpoint. Both sides of the system have access to the same source of truth.</p>
+
+  <p>Every skill has a <code>phase_slug</code> (the skill's identity, e.g. <code>discover</code>, <code>design-sprint</code>, <code>solo-build</code>), a <code>layer</code> that marks whether it's always-on or phase-active, and a <code>content</code> field with the full skill text. Updates to a skill are reflected immediately — no file sync, no local path dependency.</p>
+
+  <div class="schema-box">
+phase_slug   text      <em>-- e.g. "discover", "solo-build", "ren"</em>
+layer        text      <em>-- "phase-active" | "always-on"</em>
+content      text      <em>-- full skill content</em>
+updated_at   timestamptz
+  </div>
+
+  <p>The Solo Builder section of the workspace shows the full skill library browsable by category — phase skills, supporting skills, always-on context. When Ren and Scott discuss a project and Ren needs to orient Claude Code on what phase it's in, the relevant skill content can be passed directly from her context without Scott manually pasting files.</p>
+
+  <hr>
+
+  <h2>Project visibility</h2>
+
+  <p>Every project in the workspace is either <strong>Private</strong> or <strong>Shared</strong>. Private projects are only visible to their owner. Shared projects are visible to all users with workspace access — currently Scott and Ted.</p>
+
+  <div class="visibility-row">
+    <div class="visibility-card private">
+      <h4>Private</h4>
+      <p>Default for all new projects. Only the project owner sees it in their workspace. Ted won't see Scott's private projects, and vice versa.</p>
+    </div>
+    <div class="visibility-card shared">
+      <h4>Shared</h4>
+      <p>Visible to all workspace users. Scott marks a project Shared from the Projects view when he wants Ted to have full visibility into its phases, slices, and deliverables.</p>
+    </div>
+  </div>
+
+  <p>Ren's access isn't filtered by visibility — she reads all project state via MCP tools and her portrait data. The visibility model controls what appears in the workspace UI, not what Ren knows.</p>
+
+  <hr>
+
+  <h2>T4 as the data layer</h2>
+
+  <p>Everything the workspace shows comes from T4 — the project data layer in Postgres. T4 entries have a type (<code>slice</code>, <code>deliverable</code>, <code>phase</code>, <code>decision</code>, <code>context</code>, <code>status</code>) and a project scope. Claude Code writes to T4 after every build session. Ren reads from T4 when asked about project state. The workspace reads from T4 to render the Board, Dashboard, and project drill-downs.</p>
+
+  <p>There's no manual sync step. A slice that Claude Code marks done in the build session shows up in the workspace Board the next time it loads. A decision Ren writes to T4 during a chat session is visible in the project detail view immediately.</p>
+
+  <div class="callout">
+    <strong>The connection:</strong> Ren holds the context. Claude Code does the work. T4 is the shared record. The workspace is how you see all three at once.
+  </div>
+
+</div>
+</body>
+</html>
