@@ -392,6 +392,18 @@ async def api_write_memory_connection(request: Request) -> JSONResponse:
     return JSONResponse({"written": True}, status_code=201)
 
 
+async def api_memory_access_patterns(request: Request) -> JSONResponse:
+    """GET /api/memory/access-patterns?days=30
+    Returns the MRI: hot passages, cold passages, dry wells, false positives.
+    """
+    try:
+        days = int(request.query_params.get("days", "30"))
+    except ValueError:
+        days = 30
+    patterns = await db.get_memory_access_patterns(days=days)
+    return JSONResponse(patterns)
+
+
 async def api_get_curator_flags(request: Request) -> JSONResponse:
     """GET /api/curator/flags?type=near_duplicate|self_containment&resolved=false"""
     flag_type = request.query_params.get("type", "").strip() or None
@@ -500,6 +512,7 @@ _chat_routes = [
     Route("/api/memory/enrichments/{passage_id}", api_get_passage_enrichments),
     Route("/api/memory/enrichments", api_write_passage_enrichment, methods=["POST"]),
     Route("/api/curator/flags", api_get_curator_flags),
+    Route("/api/memory/access-patterns", api_memory_access_patterns),
     Route("/api/admin/agent-info", admin_agent_info),
     Route("/api/admin/patch-model", admin_patch_model, methods=["POST"]),
 ]

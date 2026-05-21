@@ -74,6 +74,37 @@ def register(server: FastMCP) -> None:
         ]
 
     @server.tool()
+    async def log_memory_access(
+        search_query: str,
+        passage_ids: list[str],
+        used_in_response: bool,
+    ) -> str:
+        """
+        Log an archival memory search for access pattern analysis (the MRI).
+
+        Call this after EVERY archival_memory_search, without exception:
+        - search_query: the exact string you searched for
+        - passage_ids: list of passage IDs returned (empty list if nothing found)
+        - used_in_response: True if you actually used the results in your reply, False if not
+
+        This builds the access log that identifies cold passages (never surfacing),
+        dry wells (searches that always fail), and false positives (found but unused).
+        It is the feedback loop that makes the memory system self-improving over time.
+        """
+        get_current_user()
+        session_id = await letta.ensure_ren_agent_id()
+        ok = await db.log_memory_access(
+            search_query=search_query,
+            passage_ids=passage_ids or [],
+            used_in_response=used_in_response,
+            session_id=session_id,
+        )
+        if ok:
+            found = len(passage_ids or [])
+            return f"Logged: query='{search_query[:40]}', {found} result(s), used={used_in_response}."
+        return "Log write failed — continuing."
+
+    @server.tool()
     async def enrich_passage(passage_id: str, context_note: str, session_date: str = "") -> str:
         """
         Record context about how a passage was used during retrieval (memory reconsolidation).

@@ -136,6 +136,19 @@ CREATE TABLE IF NOT EXISTS passage_enrichments (
 );
 CREATE INDEX IF NOT EXISTS idx_enrichments_passage
     ON passage_enrichments(passage_id, created_at DESC);
+CREATE TABLE IF NOT EXISTS memory_access_log (
+    id              SERIAL PRIMARY KEY,
+    search_query    TEXT        NOT NULL,
+    passage_ids     TEXT[]      NOT NULL DEFAULT '{}',
+    passage_count   INT         NOT NULL DEFAULT 0,
+    used_in_response BOOLEAN    NOT NULL DEFAULT FALSE,
+    session_id      TEXT,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_access_log_session
+    ON memory_access_log(session_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_access_log_time
+    ON memory_access_log(created_at DESC);
 """
 
 # Runs after CREATE_TABLE_SQL — backfills existing slugs as scott/private, idempotent
@@ -934,6 +947,121 @@ async def get_connections_for_passage(passage_id: str, min_confidence: float = 0
     except Exception as e:
         logger.error("Failed to get connections for %s: %s", passage_id, e)
         return []
+
+
+async def log_memory_access(
+    search_query: str,
+    passage_ids: list[str],
+    used_in_response: bool,
+    session_id: str | None = None,
+) -> bool:
+    """Log an archival search: what was queried, what was found, whether it was used."""
+    if not _pool:
+        return False
+    try:
+        async with _pool.acquire() as conn:
+            await conn.execute(
+                """
+                INSERT INTO memory_access_log
+                    (search_query, passage_ids, passage_count, used_in_response, session_id)
+                VALUES ($1, $2, $3, $4, $5)
+                """,
+                search_query, passage_ids, len(passage_ids), used_in_response, session_id,
+            )
+        return True
+    except Exception as e:
+        logger.error("Failed to log memory access: %s", e)
+        return False
+
+
+async def get_memory_access_patterns(days: int = 30) -> dict:
+    """
+    Aggregate access log into pattern analysis:
+    - hot passages (accessed most)
+    - cold passages (never accessed, from all known passage IDs)
+    - dry wells (queries returning no results)
+    - false positives (found but not used)
+    Returns dict with each category.
+    """
+    if not _pool:
+        return {}
+    try:
+        async with _pool.acquire() as conn:
+            # Query frequency and usage rates per passage
+            passage_rows = await conn.fetch(
+                """
+                SELECT
+                    unnest(passage_ids) AS passage_id,
+                    COUNT(*) AS access_count,
+                    SUM(CASE WHEN used_in_response THEN 1 ELSE 0 END) AS used_count
+                FROM memory_access_log
+                WHERE created_at > NOW() - INTERVAL '1 day' * $1
+                GROUP BY passage_id
+                ORDER BY access_count DESC
+                """,
+                days,
+            )
+
+            # Dry wells: searches that returned nothing
+            dry_wells = await conn.fetch(
+                """
+                SELECT search_query, COUNT(*) AS occurrences
+                FROM memory_access_log
+                WHERE passage_count = 0
+                  AND created_at > NOW() - INTERVAL '1 day' * $1
+                GROUP BY search_query
+                ORDER BY occurrences DESC
+                LIMIT 20
+                """,
+                days,
+            )
+
+            # False positives: found passages but didn't use them
+            false_positives = await conn.fetch(
+                """
+                SELECT
+                    unnest(passage_ids) AS passage_id,
+                    COUNT(*) AS found_count,
+                    SUM(CASE WHEN used_in_response THEN 1 ELSE 0 END) AS used_count
+                FROM memory_access_log
+                WHERE passage_count > 0
+                  AND created_at > NOW() - INTERVAL '1 day' * $1
+                GROUP BY passage_id
+                HAVING SUM(CASE WHEN used_in_response THEN 1 ELSE 0 END) = 0
+                ORDER BY found_count DESC
+                LIMIT 20
+                """,
+                days,
+            )
+
+            # Total searches in period
+            total = await conn.fetchval(
+                "SELECT COUNT(*) FROM memory_access_log WHERE created_at > NOW() - INTERVAL '1 day' * $1",
+                days,
+            )
+
+        hot = [
+            {"passage_id": r["passage_id"], "access_count": r["access_count"],
+             "used_count": r["used_count"],
+             "use_rate": round(r["used_count"] / r["access_count"], 2) if r["access_count"] else 0}
+            for r in passage_rows[:20]
+        ]
+        cold_ids = [r["passage_id"] for r in passage_rows if r["access_count"] == 0]
+
+        return {
+            "period_days": days,
+            "total_searches": total,
+            "hot_passages": hot,
+            "cold_passage_ids": cold_ids,
+            "dry_wells": [{"query": r["search_query"], "occurrences": r["occurrences"]} for r in dry_wells],
+            "false_positives": [
+                {"passage_id": r["passage_id"], "found_count": r["found_count"]}
+                for r in false_positives
+            ],
+        }
+    except Exception as e:
+        logger.error("Failed to get memory access patterns: %s", e)
+        return {}
 
 
 async def write_curator_flag(
