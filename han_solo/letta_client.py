@@ -329,16 +329,21 @@ async def send_chat_message(content: str, user_name: str) -> tuple[list[str], bo
     resp = await _letta("POST", f"{LETTA_URL}/v1/agents/{agent_id}/messages", json=payload, timeout=180.0)
     data = resp.json()
 
-    messages: list[str] = []
+    # Collect the single assistant_message Letta returns per step.
+    # Ren uses [[MSG]] to separate multiple logical bubbles within one send_message call,
+    # and [[CONTINUES]] at the end to signal she has more to say next turn.
+    raw = ""
     for msg in data.get("messages", []):
         if msg.get("message_type") == "assistant_message":
-            text = msg.get("content", "") or msg.get("assistant_message", "")
-            if text:
-                messages.append(text)
+            raw = msg.get("content", "") or msg.get("assistant_message", "")
+            break  # Letta only emits one per step
 
     wants_to_continue = False
-    if messages and "[[CONTINUES]]" in messages[-1]:
+    if "[[CONTINUES]]" in raw:
         wants_to_continue = True
-        messages[-1] = messages[-1].replace("[[CONTINUES]]", "").strip()
+        raw = raw.replace("[[CONTINUES]]", "").strip()
+
+    # Split on [[MSG]] to produce separate bubbles
+    messages = [m.strip() for m in raw.split("[[MSG]]") if m.strip()]
 
     return messages, wants_to_continue
