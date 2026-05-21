@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 # Without this, FastMCP rejects requests from the Render hostname with 421.
 _transport_security = TransportSecuritySettings(enable_dns_rebinding_protection=False)
 
-server = FastMCP("han-solo", transport_security=_transport_security)
+server = FastMCP("han-solo", transport_security=_transport_security, stateless_http=True)
 
 memory.register(server)
 signals.register(server)
