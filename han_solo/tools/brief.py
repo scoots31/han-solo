@@ -2,6 +2,9 @@
 Session brief tools — retrieve pending thoughts and generate the session opening brief.
 Ren reads this at session start and decides what to surface, when, and how.
 """
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
+
 from mcp.server.fastmcp import FastMCP
 
 from ..auth import get_current_user
@@ -51,7 +54,12 @@ def register(server: FastMCP) -> None:
         except Exception:
             recent_signals = []
 
+        ct = ZoneInfo("America/Chicago")
+        now = datetime.now(tz=ct)
+        current_datetime = now.strftime("%A, %B %-d, %Y — %-I:%M %p CT")
+
         return {
+            "current_datetime": current_datetime,
             "always_loaded_core": always_loaded,
             "pending_thoughts": pending_thoughts,
             "recent_signals": recent_signals,
