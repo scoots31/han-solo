@@ -108,6 +108,29 @@ async def _flush_capture_buffer(session_id: str) -> None:
         await db.write_messages_bulk(session_id, to_write)
 
 
+async def _analyze_image(base64_data: str, media_type: str, user_message: str) -> str:
+    """Call Claude directly with a base64 image and return a detailed analysis."""
+    if not ANTHROPIC_API_KEY:
+        raise RuntimeError("ANTHROPIC_API_KEY not set")
+    prompt_text = user_message if user_message else "Describe this image in detail. If there is text, read it. If it is a design, UI, screenshot, or document, describe the content and structure thoroughly."
+    content = [
+        {"type": "image", "source": {"type": "base64", "media_type": media_type, "data": base64_data}},
+        {"type": "text", "text": prompt_text},
+    ]
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        resp = await client.post(
+            "https://api.anthropic.com/v1/messages",
+            headers={
+                "x-api-key": ANTHROPIC_API_KEY,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+            },
+            json={"model": "claude-sonnet-4-6", "max_tokens": 1024, "messages": [{"role": "user", "content": content}]},
+        )
+    resp.raise_for_status()
+    return resp.json()["content"][0]["text"]
+
+
 async def _synthesize_handoff(messages: list[dict]) -> str | None:
     """
     Call Anthropic directly to produce a brief handoff summary of the current
@@ -229,8 +252,30 @@ async def api_send(request: Request) -> JSONResponse:
     elif history_len == WARN_AT:
         session_warning = "Getting long — good time to start a new session at a natural stopping point."
 
-    # Build the message Ren receives — inline file content when attached
-    if attachment:
+    # Build the message Ren receives — inline file content or vision analysis when attached
+    if attachment and attachment.get("type") == "image":
+        name = attachment.get("name", "image")
+        data_url = attachment.get("content", "")
+        media_type = "image/jpeg"
+        b64_data = data_url
+        if "," in data_url:
+            header, b64_data = data_url.split(",", 1)
+            if ":" in header and ";" in header:
+                media_type = header.split(":")[1].split(";")[0]
+        try:
+            analysis = await _analyze_image(b64_data, media_type, message)
+            letta_message = f"[Image shared: {name}]\n\nWhat I can see: {analysis}"
+            # Write to archival so Ren can search this image later
+            today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+            asyncio.create_task(letta.insert_passage(
+                f"[image-memory] Scott shared an image on {today}: {name}\n{analysis}",
+                ["image-memory", "visual"],
+            ))
+        except Exception as exc:
+            logger.warning("Image analysis failed: %s", exc)
+            letta_message = f"[Image: {name} — analysis unavailable]\n{message}" if message else f"[Image: {name} — could not be analyzed]"
+        display_text = f"{message}\n\n🖼 {name}" if message else f"🖼 {name}"
+    elif attachment:
         name = attachment.get("name", "file")
         content = attachment.get("content", "")
         file_block = f"\n\n---\n📄 **{name}**\n```\n{content}\n```"

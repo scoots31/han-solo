@@ -315,6 +315,25 @@ CHAT_HTML = """<!DOCTYPE html>
     }
     .file-preview-remove:hover { color: var(--text); }
 
+    .file-preview-thumb {
+      width: 28px;
+      height: 28px;
+      object-fit: cover;
+      border-radius: 4px;
+      flex-shrink: 0;
+      display: none;
+    }
+    .file-preview-thumb.visible { display: block; }
+
+    .msg-image {
+      display: block;
+      max-width: 240px;
+      max-height: 180px;
+      border-radius: 6px;
+      object-fit: contain;
+      margin-bottom: 4px;
+    }
+
     .send-btn {
       background: var(--send-bg);
       color: var(--send-text);
@@ -519,7 +538,8 @@ CHAT_HTML = """<!DOCTYPE html>
       </div>
     </div>
     <div class="file-preview" id="filePreview">
-      <span>📄</span>
+      <img id="filePreviewThumb" class="file-preview-thumb" alt="" />
+      <span id="filePreviewIcon">📄</span>
       <span class="file-preview-name" id="filePreviewName"></span>
       <span id="filePreviewSize"></span>
       <button class="file-preview-remove" id="fileRemoveBtn" title="Remove file">×</button>
@@ -529,7 +549,7 @@ CHAT_HTML = """<!DOCTYPE html>
         <textarea id="msgInput" placeholder="Message Ren…" rows="1"></textarea>
       </div>
       <button class="attach-btn" id="attachBtn" title="Attach a file">📎</button>
-      <input type="file" id="fileInput" accept=".txt,.md,.py,.js,.ts,.jsx,.tsx,.json,.yaml,.yml,.html,.css,.sql,.sh,.csv,.toml,.env" style="display:none">
+      <input type="file" id="fileInput" accept=".txt,.md,.py,.js,.ts,.jsx,.tsx,.json,.yaml,.yml,.html,.css,.sql,.sh,.csv,.toml,.env,.jpg,.jpeg,.png,.gif,.webp,image/*" style="display:none">
       <button class="send-btn" id="sendBtn">Send</button>
     </div>
   </div>
@@ -739,10 +759,10 @@ function renderMessages() {
   let cur = null;
   for (const m of _msgs) {
     if (!cur || cur.name !== m.name) {
-      cur = { name: m.name, cls: whoClass(m.name), texts: [] };
+      cur = { name: m.name, cls: whoClass(m.name), msgs: [] };
       groups.push(cur);
     }
-    cur.texts.push(m.text);
+    cur.msgs.push(m);
   }
 
   for (const g of groups) {
@@ -757,10 +777,19 @@ function renderMessages() {
     const bubblesWrap = document.createElement('div');
     bubblesWrap.className = 'msg-bubbles';
 
-    for (const text of g.texts) {
+    for (const m of g.msgs) {
       const bubble = document.createElement('div');
       bubble.className = `msg-bubble ${g.cls}`;
-      bubble.textContent = text;
+      if (m.imageDataUrl) {
+        const img = document.createElement('img');
+        img.src = m.imageDataUrl;
+        img.className = 'msg-image';
+        img.alt = 'shared image';
+        bubble.appendChild(img);
+      }
+      if (m.text) {
+        bubble.appendChild(document.createTextNode(m.text));
+      }
       bubblesWrap.appendChild(bubble);
     }
 
@@ -804,24 +833,34 @@ function stopPolling() {
 
 // ── File attachment ─────────────────────────────────────────────────────────
 
-const attachBtn     = $('attachBtn');
-const fileInput     = $('fileInput');
-const filePreview   = $('filePreview');
-const filePreviewName = $('filePreviewName');
-const filePreviewSize = $('filePreviewSize');
-const fileRemoveBtn = $('fileRemoveBtn');
+const attachBtn       = $('attachBtn');
+const fileInput       = $('fileInput');
+const filePreview     = $('filePreview');
+const filePreviewThumb = $('filePreviewThumb');
+const filePreviewIcon  = $('filePreviewIcon');
+const filePreviewName  = $('filePreviewName');
+const filePreviewSize  = $('filePreviewSize');
+const fileRemoveBtn    = $('fileRemoveBtn');
 
-const MAX_FILE_BYTES = 100 * 1024; // 100 KB
-let attachment = null; // { name, content } or null
+const MAX_FILE_BYTES  = 100 * 1024;       // 100 KB for text files
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;  // 5 MB for images
+let attachment = null; // { name, content, type } or null
 
 function formatBytes(n) {
   return n < 1024 ? n + ' B' : (n / 1024).toFixed(1) + ' KB';
+}
+
+function isImageFile(file) {
+  return file.type.startsWith('image/');
 }
 
 function clearAttachment() {
   attachment = null;
   fileInput.value = '';
   filePreview.classList.remove('visible');
+  filePreviewThumb.src = '';
+  filePreviewThumb.classList.remove('visible');
+  filePreviewIcon.style.display = '';
 }
 
 attachBtn.addEventListener('click', () => fileInput.click());
@@ -832,20 +871,35 @@ fileInput.addEventListener('change', () => {
   const file = fileInput.files[0];
   if (!file) return;
 
-  if (file.size > MAX_FILE_BYTES) {
-    alert(`File too large (${formatBytes(file.size)}). Max 100 KB.`);
+  const isImage = isImageFile(file);
+  const maxBytes = isImage ? MAX_IMAGE_BYTES : MAX_FILE_BYTES;
+  if (file.size > maxBytes) {
+    alert(`File too large (${formatBytes(file.size)}). Max ${isImage ? '5 MB' : '100 KB'}.`);
     fileInput.value = '';
     return;
   }
 
   const reader = new FileReader();
   reader.onload = e => {
-    attachment = { name: file.name, content: e.target.result };
+    const content = e.target.result;
+    attachment = { name: file.name, content, type: isImage ? 'image' : 'text' };
     filePreviewName.textContent = file.name;
     filePreviewSize.textContent = formatBytes(file.size);
+    if (isImage) {
+      filePreviewThumb.src = content;
+      filePreviewThumb.classList.add('visible');
+      filePreviewIcon.style.display = 'none';
+    } else {
+      filePreviewThumb.classList.remove('visible');
+      filePreviewIcon.style.display = '';
+    }
     filePreview.classList.add('visible');
   };
-  reader.readAsText(file);
+  if (isImage) {
+    reader.readAsDataURL(file);
+  } else {
+    reader.readAsText(file);
+  }
 });
 
 // ── Send ───────────────────────────────────────────────────────────────────
@@ -863,10 +917,14 @@ async function sendMessage() {
   clearAttachment();
 
   // Optimistic: show user message (include filename if attached)
+  const isImageAttach = currentAttachment && currentAttachment.type === 'image';
+  const icon = isImageAttach ? '🖼' : '📄';
   const displayText = currentAttachment
-    ? (text ? `${text}\n\n📄 ${currentAttachment.name}` : `📄 ${currentAttachment.name}`)
+    ? (text ? `${text}\n\n${icon} ${currentAttachment.name}` : `${icon} ${currentAttachment.name}`)
     : text;
-  _msgs.push({ role: 'user', name: userName, text: displayText });
+  const msgEntry = { role: 'user', name: userName, text: displayText };
+  if (isImageAttach) msgEntry.imageDataUrl = currentAttachment.content;
+  _msgs.push(msgEntry);
   renderMessages();
 
   // Loading indicator
