@@ -120,6 +120,16 @@
 
     .screen-actions { display:flex; gap:7px; align-items:center; }
     .btn-secondary.voice-on { color:var(--accent); border-color:var(--accent); }
+    .file-preview {
+      display:none; align-items:center; gap:8px;
+      padding:6px 18px; border-top:1px solid var(--divider);
+      font-size:12px; color:var(--text-meta); background:var(--card-bg);
+    }
+    .file-preview.visible { display:flex; }
+    .file-preview-name { color:var(--text-primary); font-weight:500; }
+    .file-remove { background:none; border:none; color:var(--text-meta); cursor:pointer; font-size:14px; padding:0 4px; }
+    .file-remove:hover { color:var(--text-primary); }
+    .file-preview-thumb { height:36px; width:36px; object-fit:cover; border-radius:4px; }
     .speak-btn {
       background:none; border:none; color:var(--text-meta); cursor:pointer;
       font-size:11px; padding:2px 4px; margin-left:5px; opacity:0;
@@ -1062,12 +1072,21 @@
             <div class="messages" id="chat-messages">
               <!-- populated by loadChat() -->
             </div>
+            <div class="file-preview" id="filePreview">
+              <img id="filePreviewThumb" class="file-preview-thumb" style="display:none" alt="" />
+              <span id="filePreviewIcon">📄</span>
+              <span class="file-preview-name" id="filePreviewName"></span>
+              <span id="filePreviewSize" style="color:var(--text-meta)"></span>
+              <button class="file-remove" id="fileRemoveBtn">×</button>
+            </div>
             <div class="input-area">
               <div class="input-wrapper">
                 <textarea class="chat-input" rows="1" placeholder="Message Ren…"></textarea>
                 <button class="send-btn"><svg viewBox="0 0 14 14"><path d="M1.5 7L12.5 1L7 13L6.2 7.8L1.5 7Z"/></svg></button>
               </div>
               <div class="input-chips">
+                <button class="chip" id="attachBtn" title="Attach a file or image">📎</button>
+                <input type="file" id="fileInput" accept=".txt,.md,.py,.js,.ts,.jsx,.tsx,.json,.yaml,.yml,.html,.css,.sql,.sh,.csv,.toml,.env,.jpg,.jpeg,.png,.gif,.webp,image/*" style="display:none">
                 <div class="nc-chip-wrap">
                   <button class="chip" id="ncPinBtn" onclick="toggleNcPicker()" title="Pin a notecard into your message">📌</button>
                   <div class="nc-chip-picker" id="nc-chip-picker">
@@ -1712,20 +1731,63 @@
       }
     }
 
+    // ── File attachment ────────────────────────────────────────────────────────
+    let _attachment = null;
+    const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 MB for images, 100 KB enforced per type below
+    function formatBytes(n) { return n < 1024 ? n + ' B' : (n/1024).toFixed(1) + ' KB'; }
+
+    function clearAttachment() {
+      _attachment = null;
+      document.getElementById('fileInput').value = '';
+      document.getElementById('filePreview').classList.remove('visible');
+      document.getElementById('filePreviewThumb').style.display = 'none';
+      document.getElementById('filePreviewIcon').style.display = '';
+    }
+
+    document.getElementById('attachBtn').addEventListener('click', () => document.getElementById('fileInput').click());
+    document.getElementById('fileRemoveBtn').addEventListener('click', clearAttachment);
+
+    document.getElementById('fileInput').addEventListener('change', () => {
+      const file = document.getElementById('fileInput').files[0];
+      if (!file) return;
+      const isImage = file.type.startsWith('image/');
+      const maxBytes = isImage ? 5 * 1024 * 1024 : 100 * 1024;
+      if (file.size > maxBytes) { alert(isImage ? 'Image too large (max 5 MB).' : 'File too large (max 100 KB).'); document.getElementById('fileInput').value = ''; return; }
+      const reader = new FileReader();
+      reader.onload = e => {
+        _attachment = { name: file.name, content: e.target.result, type: isImage ? 'image' : 'text' };
+        document.getElementById('filePreviewName').textContent = file.name;
+        document.getElementById('filePreviewSize').textContent = formatBytes(file.size);
+        if (isImage) {
+          const thumb = document.getElementById('filePreviewThumb');
+          thumb.src = e.target.result; thumb.style.display = '';
+          document.getElementById('filePreviewIcon').style.display = 'none';
+        }
+        document.getElementById('filePreview').classList.add('visible');
+      };
+      if (isImage) reader.readAsDataURL(file); else reader.readAsText(file);
+    });
+
     async function sendMessage() {
       if (chatSending || !token) return;
       const ta = document.querySelector('.chat-input');
       const msg = ta.value.trim();
-      if (!msg) return;
+      if (!msg && !_attachment) return;
       chatSending = true;
       ta.value = '';
       ta.style.height = 'auto';
-      chatAppend('user', msg, new Date().toISOString());
+      const cur = _attachment;
+      clearAttachment();
+      const isImg = cur && cur.type === 'image';
+      const displayText = cur ? (msg ? msg + '\n\n' + (isImg ? '🖼 ' : '📄 ') + cur.name : (isImg ? '🖼 ' : '📄 ') + cur.name) : msg;
+      chatAppend('user', displayText, new Date().toISOString());
       chatShowThinking();
       const el = document.getElementById('chat-messages');
       el.scrollTop = el.scrollHeight;
       try {
-        const res = await apiFetch('/api/send', { method: 'POST', body: JSON.stringify({ message: msg }) });
+        const body = { message: msg };
+        if (cur) body.attachment = cur;
+        const res = await apiFetch('/api/send', { method: 'POST', body: JSON.stringify(body) });
         chatHideThinking();
         if (!res.ok) { chatAppend('assistant', '[Error — could not reach Ren]', new Date().toISOString()); chatSending = false; return; }
         const data = await res.json();
