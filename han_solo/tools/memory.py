@@ -6,6 +6,7 @@ from mcp.server.fastmcp import FastMCP
 from ..auth import get_current_user
 from ..validation import assert_can_write_block
 from .. import letta_client as letta
+from .. import db
 
 
 def register(server: FastMCP) -> None:
@@ -71,3 +72,22 @@ def register(server: FastMCP) -> None:
             }
             for b in blocks
         ]
+
+    @server.tool()
+    async def enrich_passage(passage_id: str, context_note: str, session_date: str = "") -> str:
+        """
+        Record context about how a passage was used during retrieval (memory reconsolidation).
+
+        Call this when an archival passage was meaningfully retrieved and used in a response.
+        The context note accumulates over time — each note is appended, never overwritten.
+        Future retrievals of this passage will include these notes as additional context.
+
+        passage_id: the Letta passage ID (from archival_memory_search results)
+        context_note: what this passage was used for, what session context it connected to
+        session_date: YYYY-MM-DD (optional, defaults to today)
+        """
+        get_current_user()
+        ok = await db.write_passage_enrichment(passage_id, context_note, session_date or None)
+        if ok:
+            return f"Enrichment recorded for passage {passage_id[:8]}."
+        return f"Failed to record enrichment for passage {passage_id[:8]}."

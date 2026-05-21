@@ -65,6 +65,37 @@ Passages to analyze:
 """
 
 
+QUALITY_SCAN_PROMPT = """You are auditing a batch of memory passages for two quality issues.
+
+ISSUE 1 — NEAR DUPLICATES: Passages that say substantially the same thing and would cause
+retrieval noise (returning two versions of the same information). Not just the same topic —
+the same specific claim, decision, or observation.
+
+ISSUE 2 — SELF-CONTAINMENT FAILURES: Passages that reference something without naming it,
+making them impossible to understand or retrieve correctly in isolation. Examples: "the earlier
+decision," "what we discussed," "as mentioned," "the approach we agreed on." The referenced
+thing must be explicitly named inside the passage.
+
+For each issue found, return the passage ID and a brief note explaining the problem.
+
+Return only valid JSON:
+{
+  "near_duplicates": [
+    {"passage_id_a": "...", "passage_id_b": "...", "note": "..."},
+    ...
+  ],
+  "self_containment_failures": [
+    {"passage_id": "...", "note": "..."},
+    ...
+  ]
+}
+
+If no issues found, return empty lists. Be conservative — only flag clear cases.
+
+Passages to audit:
+"""
+
+
 # ---------------------------------------------------------------------------
 # HTTP helpers
 # ---------------------------------------------------------------------------
@@ -118,6 +149,30 @@ def _format_batch(passages: list[dict]) -> str:
     for p in passages:
         lines.append(f"[ID: {p['id']}]\n{p['text']}\n")
     return "\n---\n".join(lines)
+
+
+def _scan_quality(passages: list[dict]) -> dict:
+    """Send a batch to Claude for near-duplicate and self-containment scanning."""
+    if not passages:
+        return {"near_duplicates": [], "self_containment_failures": []}
+    batch_text = _format_batch(passages)
+    prompt = QUALITY_SCAN_PROMPT + batch_text
+    try:
+        response = _anthropic_request(prompt)
+        text = response.strip()
+        if text.startswith("```"):
+            text = text.split("```", 2)[1]
+            if text.startswith("json"):
+                text = text[4:]
+            text = text.rsplit("```", 1)[0].strip()
+        result = json.loads(text)
+        return {
+            "near_duplicates": result.get("near_duplicates", []),
+            "self_containment_failures": result.get("self_containment_failures", []),
+        }
+    except Exception as e:
+        print(f"  ✗ Quality scan failed for batch: {e}", file=sys.stderr)
+        return {"near_duplicates": [], "self_containment_failures": []}
 
 
 def _identify_connections(passages: list[dict]) -> list[dict]:
@@ -201,7 +256,39 @@ CREATE INDEX IF NOT EXISTS idx_connections_a
     ON memory_connections(passage_id_a, confidence DESC);
 CREATE INDEX IF NOT EXISTS idx_connections_b
     ON memory_connections(passage_id_b, confidence DESC);
+CREATE TABLE IF NOT EXISTS curator_flags (
+    id                  SERIAL PRIMARY KEY,
+    passage_id          TEXT        NOT NULL,
+    flag_type           TEXT        NOT NULL,
+    related_passage_id  TEXT,
+    note                TEXT,
+    resolved            BOOLEAN     NOT NULL DEFAULT FALSE,
+    curator_run_id      TEXT,
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_curator_flags_type
+    ON curator_flags(flag_type, resolved, created_at DESC);
 """
+
+
+async def write_flag(
+    pool: asyncpg.Pool, passage_id: str, flag_type: str,
+    note: str | None, related_passage_id: str | None, curator_run_id: str,
+) -> bool:
+    try:
+        async with pool.acquire() as conn:
+            await conn.execute(
+                """
+                INSERT INTO curator_flags
+                    (passage_id, flag_type, related_passage_id, note, curator_run_id)
+                VALUES ($1, $2, $3, $4, $5)
+                """,
+                passage_id, flag_type, related_passage_id, note, curator_run_id,
+            )
+        return True
+    except Exception as e:
+        print(f"  ✗ Flag write failed: {e}", file=sys.stderr)
+        return False
 
 
 # ---------------------------------------------------------------------------
@@ -251,6 +338,25 @@ async def run():
             high_conf = [c for c in connections if c.get("confidence", 0) >= MIN_CONFIDENCE]
             total_found += len(high_conf)
             print(f"  Found {len(connections)} connections, {len(high_conf)} above threshold.")
+
+            # Quality scan: near-duplicates + self-containment failures
+            quality = _scan_quality(batch)
+            nd_count = len(quality["near_duplicates"])
+            sc_count = len(quality["self_containment_failures"])
+            if nd_count or sc_count:
+                print(f"  Quality: {nd_count} near-duplicate pair(s), {sc_count} self-containment failure(s)")
+            for nd in quality["near_duplicates"]:
+                pid_a = nd.get("passage_id_a", "").strip()
+                pid_b = nd.get("passage_id_b", "").strip()
+                note = nd.get("note", "").strip() or None
+                if pid_a and pid_b:
+                    await write_flag(pool, pid_a, "near_duplicate", note, pid_b, run_id)
+                    await write_flag(pool, pid_b, "near_duplicate", note, pid_a, run_id)
+            for sc in quality["self_containment_failures"]:
+                pid = sc.get("passage_id", "").strip()
+                note = sc.get("note", "").strip() or None
+                if pid:
+                    await write_flag(pool, pid, "self_containment", note, None, run_id)
 
             for conn in high_conf:
                 pid_a = conn.get("passage_id_a", "").strip()

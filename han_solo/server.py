@@ -392,6 +392,54 @@ async def api_write_memory_connection(request: Request) -> JSONResponse:
     return JSONResponse({"written": True}, status_code=201)
 
 
+async def api_get_curator_flags(request: Request) -> JSONResponse:
+    """GET /api/curator/flags?type=near_duplicate|self_containment&resolved=false"""
+    flag_type = request.query_params.get("type", "").strip() or None
+    resolved = request.query_params.get("resolved", "false").lower() == "true"
+    flags = await db.get_curator_flags(flag_type=flag_type, resolved=resolved)
+    return JSONResponse([
+        {
+            "id": f["id"],
+            "passage_id": f["passage_id"],
+            "flag_type": f["flag_type"],
+            "related_passage_id": f.get("related_passage_id"),
+            "note": f.get("note"),
+            "resolved": f["resolved"],
+            "created_at": f["created_at"].isoformat() if f.get("created_at") else None,
+        }
+        for f in flags
+    ])
+
+
+async def api_get_passage_enrichments(request: Request) -> JSONResponse:
+    """GET /api/memory/enrichments/{passage_id} — enrichments Ren has added on retrieval."""
+    passage_id = request.path_params["passage_id"]
+    enrichments = await db.get_passage_enrichments(passage_id)
+    return JSONResponse([
+        {
+            "id": e["id"],
+            "context_note": e["context_note"],
+            "session_date": e["session_date"].isoformat() if e.get("session_date") else None,
+            "created_at": e["created_at"].isoformat() if e.get("created_at") else None,
+        }
+        for e in enrichments
+    ])
+
+
+async def api_write_passage_enrichment(request: Request) -> JSONResponse:
+    """POST /api/memory/enrichments — Ren records context when meaningfully retrieving a passage."""
+    body = await request.json()
+    passage_id = body.get("passage_id", "").strip()
+    context_note = body.get("context_note", "").strip()
+    session_date = body.get("session_date", "").strip() or None
+    if not passage_id or not context_note:
+        return JSONResponse({"error": "passage_id and context_note required"}, status_code=400)
+    ok = await db.write_passage_enrichment(passage_id, context_note, session_date)
+    if not ok:
+        return JSONResponse({"error": "DB write failed"}, status_code=500)
+    return JSONResponse({"written": True}, status_code=201)
+
+
 async def api_memory_health(request: Request) -> JSONResponse:
     """Return memory system health: failed transitions + capture stats."""
     failed = await db.get_failed_transitions(hours=24)
@@ -449,6 +497,9 @@ _chat_routes = [
     Route("/api/archival-passage/delete", api_delete_archival_passage, methods=["POST"]),
     Route("/api/memory/connections/{passage_id}", api_get_memory_connections),
     Route("/api/memory/connections", api_write_memory_connection, methods=["POST"]),
+    Route("/api/memory/enrichments/{passage_id}", api_get_passage_enrichments),
+    Route("/api/memory/enrichments", api_write_passage_enrichment, methods=["POST"]),
+    Route("/api/curator/flags", api_get_curator_flags),
     Route("/api/admin/agent-info", admin_agent_info),
     Route("/api/admin/patch-model", admin_patch_model, methods=["POST"]),
 ]

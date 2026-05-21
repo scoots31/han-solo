@@ -115,6 +115,27 @@ CREATE INDEX IF NOT EXISTS idx_connections_a
     ON memory_connections(passage_id_a, confidence DESC);
 CREATE INDEX IF NOT EXISTS idx_connections_b
     ON memory_connections(passage_id_b, confidence DESC);
+CREATE TABLE IF NOT EXISTS curator_flags (
+    id                  SERIAL PRIMARY KEY,
+    passage_id          TEXT        NOT NULL,
+    flag_type           TEXT        NOT NULL,
+    related_passage_id  TEXT,
+    note                TEXT,
+    resolved            BOOLEAN     NOT NULL DEFAULT FALSE,
+    curator_run_id      TEXT,
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_curator_flags_type
+    ON curator_flags(flag_type, resolved, created_at DESC);
+CREATE TABLE IF NOT EXISTS passage_enrichments (
+    id              SERIAL PRIMARY KEY,
+    passage_id      TEXT        NOT NULL,
+    context_note    TEXT        NOT NULL,
+    session_date    DATE,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_enrichments_passage
+    ON passage_enrichments(passage_id, created_at DESC);
 """
 
 # Runs after CREATE_TABLE_SQL — backfills existing slugs as scott/private, idempotent
@@ -912,6 +933,108 @@ async def get_connections_for_passage(passage_id: str, min_confidence: float = 0
         return [dict(r) for r in rows]
     except Exception as e:
         logger.error("Failed to get connections for %s: %s", passage_id, e)
+        return []
+
+
+async def write_curator_flag(
+    passage_id: str,
+    flag_type: str,
+    note: str | None = None,
+    related_passage_id: str | None = None,
+    curator_run_id: str | None = None,
+) -> bool:
+    """Write a curator quality flag for a passage. flag_type: near_duplicate | self_containment."""
+    if not _pool:
+        return False
+    try:
+        async with _pool.acquire() as conn:
+            await conn.execute(
+                """
+                INSERT INTO curator_flags
+                    (passage_id, flag_type, related_passage_id, note, curator_run_id)
+                VALUES ($1, $2, $3, $4, $5)
+                """,
+                passage_id, flag_type, related_passage_id, note, curator_run_id,
+            )
+        return True
+    except Exception as e:
+        logger.error("Failed to write curator flag: %s", e)
+        return False
+
+
+async def get_curator_flags(flag_type: str | None = None, resolved: bool = False) -> list[dict]:
+    """Return curator flags, optionally filtered by type and resolution status."""
+    if not _pool:
+        return []
+    try:
+        async with _pool.acquire() as conn:
+            if flag_type:
+                rows = await conn.fetch(
+                    """
+                    SELECT id, passage_id, flag_type, related_passage_id, note, resolved, created_at
+                    FROM curator_flags
+                    WHERE flag_type = $1 AND resolved = $2
+                    ORDER BY created_at DESC
+                    """,
+                    flag_type, resolved,
+                )
+            else:
+                rows = await conn.fetch(
+                    """
+                    SELECT id, passage_id, flag_type, related_passage_id, note, resolved, created_at
+                    FROM curator_flags
+                    WHERE resolved = $1
+                    ORDER BY created_at DESC
+                    """,
+                    resolved,
+                )
+        return [dict(r) for r in rows]
+    except Exception as e:
+        logger.error("Failed to get curator flags: %s", e)
+        return []
+
+
+async def write_passage_enrichment(
+    passage_id: str, context_note: str, session_date: str | None = None
+) -> bool:
+    """Append a context note to a passage. Called by Ren when a passage is meaningfully retrieved."""
+    if not _pool:
+        return False
+    try:
+        from datetime import date as _date
+        date_val = session_date or _date.today().isoformat()
+        async with _pool.acquire() as conn:
+            await conn.execute(
+                """
+                INSERT INTO passage_enrichments (passage_id, context_note, session_date)
+                VALUES ($1, $2, $3::date)
+                """,
+                passage_id, context_note, date_val,
+            )
+        return True
+    except Exception as e:
+        logger.error("Failed to write passage enrichment: %s", e)
+        return False
+
+
+async def get_passage_enrichments(passage_id: str) -> list[dict]:
+    """Return all enrichments for a passage, newest first."""
+    if not _pool:
+        return []
+    try:
+        async with _pool.acquire() as conn:
+            rows = await conn.fetch(
+                """
+                SELECT id, context_note, session_date, created_at
+                FROM passage_enrichments
+                WHERE passage_id = $1
+                ORDER BY created_at DESC
+                """,
+                passage_id,
+            )
+        return [dict(r) for r in rows]
+    except Exception as e:
+        logger.error("Failed to get passage enrichments for %s: %s", passage_id, e)
         return []
 
 
