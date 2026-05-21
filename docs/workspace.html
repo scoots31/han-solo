@@ -119,6 +119,16 @@
     .screen-sub { font-size:11.5px; color:var(--text-meta); margin-top:2px; }
 
     .screen-actions { display:flex; gap:7px; align-items:center; }
+    .btn-secondary.voice-on { color:var(--accent); border-color:var(--accent); }
+    .speak-btn {
+      background:none; border:none; color:var(--text-meta); cursor:pointer;
+      font-size:11px; padding:2px 4px; margin-left:5px; opacity:0;
+      transition:opacity .15s; vertical-align:middle;
+    }
+    .msg-bubble:hover .speak-btn { opacity:1; }
+    .speak-btn.playing { color:var(--accent); opacity:1; }
+    .mic-btn-active { color:#e05555 !important; animation:mic-pulse 1s infinite; }
+    @keyframes mic-pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
     .btn-primary { padding:6px 13px; background:var(--accent); border:none; border-radius:7px; font-family:var(--font-body); font-size:11.5px; font-weight:500; color:white; cursor:pointer; transition:opacity .13s; }
     .btn-primary:hover { opacity:.82; }
     .btn-secondary { padding:6px 13px; background:transparent; border:1px solid var(--divider); border-radius:7px; font-family:var(--font-body); font-size:11.5px; color:var(--text-secondary); cursor:pointer; transition:all .13s; }
@@ -1042,6 +1052,7 @@
             </div>
           </div>
           <div class="screen-actions">
+            <button class="btn-secondary" id="voiceAutoBtn" onclick="toggleVoiceAuto()">Voice: Off</button>
             <button class="btn-secondary" id="memoryPanelBtn" onclick="toggleChatPanel()">Memory</button>
             <button class="btn-secondary" id="newSessionBtn" onclick="newSession()">New session</button>
           </div>
@@ -1064,6 +1075,7 @@
                     <div id="nc-chip-picker-list"></div>
                   </div>
                 </div>
+                <button class="chip" id="micBtn" title="Speak your message">🎤</button>
                 <div class="nc-create-wrap">
                   <button class="chip" id="ncCreateBtn" onclick="toggleNcCreate()">+ Notecard</button>
                   <div class="nc-create-form" id="nc-create-form">
@@ -1646,6 +1658,10 @@
       bubble.className = 'msg-bubble';
       bubble.textContent = text;
       if (isRen) {
+        const sp = document.createElement('button');
+        sp.className = 'speak-btn'; sp.title = 'Play voice'; sp.textContent = '🔊';
+        sp.addEventListener('click', () => playTTS(text, sp));
+        bubble.appendChild(sp);
         const label = document.createElement('div');
         label.className = 'msg-sender-label';
         label.textContent = 'Ren';
@@ -1713,13 +1729,16 @@
         chatHideThinking();
         if (!res.ok) { chatAppend('assistant', '[Error — could not reach Ren]', new Date().toISOString()); chatSending = false; return; }
         const data = await res.json();
-        if (data.response) chatAppend('assistant', data.response, new Date().toISOString());
         if (data.session_warning) {
           const warn = document.createElement('div');
           warn.style.cssText = 'padding:8px 14px;font-size:11.5px;color:var(--text-meta);text-align:center;';
           warn.textContent = data.session_warning;
           el.appendChild(warn);
         }
+        const msgs = data.messages && data.messages.length ? data.messages
+                   : data.response ? [data.response] : [];
+        await renderRenMessages(msgs);
+        if (data.wants_to_continue) await triggerContinuation();
         el.scrollTop = el.scrollHeight;
       } catch (e) {
         chatHideThinking();
@@ -1727,6 +1746,94 @@
       }
       chatSending = false;
     }
+
+    async function renderRenMessages(msgs) {
+      const el = document.getElementById('chat-messages');
+      const ts = new Date().toISOString();
+      for (let i = 0; i < msgs.length; i++) {
+        chatAppend('assistant', msgs[i], ts);
+        el.scrollTop = el.scrollHeight;
+        if (_voiceAuto && msgs[i]) await playTTS(msgs[i], null);
+        if (i < msgs.length - 1) await new Promise(r => setTimeout(r, 1000));
+      }
+    }
+
+    async function triggerContinuation(depth = 0) {
+      if (depth >= 5) return;
+      await new Promise(r => setTimeout(r, 2500));
+      chatShowThinking();
+      const el = document.getElementById('chat-messages');
+      el.scrollTop = el.scrollHeight;
+      try {
+        const res = await apiFetch('/api/send', { method: 'POST', body: JSON.stringify({ message: '__continue__' }) });
+        chatHideThinking();
+        if (!res.ok) return;
+        const data = await res.json();
+        const msgs = data.messages && data.messages.length ? data.messages
+                   : data.response ? [data.response] : [];
+        await renderRenMessages(msgs);
+        if (data.wants_to_continue) await triggerContinuation(depth + 1);
+      } catch { chatHideThinking(); }
+    }
+
+    // ── Voice output (TTS) ────────────────────────────────────────────────────
+    let _voiceAuto = localStorage.getItem('hs_voice_auto') === 'true';
+    let _currentAudio = null;
+
+    (function initVoiceToggle() {
+      const btn = document.getElementById('voiceAutoBtn');
+      if (!btn) return;
+      btn.textContent = _voiceAuto ? 'Voice: On' : 'Voice: Off';
+      btn.classList.toggle('voice-on', _voiceAuto);
+    })();
+
+    function toggleVoiceAuto() {
+      _voiceAuto = !_voiceAuto;
+      localStorage.setItem('hs_voice_auto', _voiceAuto);
+      const btn = document.getElementById('voiceAutoBtn');
+      btn.textContent = _voiceAuto ? 'Voice: On' : 'Voice: Off';
+      btn.classList.toggle('voice-on', _voiceAuto);
+    }
+
+    async function playTTS(text, btn) {
+      if (_currentAudio) {
+        _currentAudio.pause(); _currentAudio = null;
+        document.querySelectorAll('.speak-btn.playing').forEach(b => b.classList.remove('playing'));
+        if (btn && btn.classList.contains('playing')) return;
+      }
+      if (btn) btn.classList.add('playing');
+      try {
+        const resp = await apiFetch('/api/tts', { method: 'POST', body: JSON.stringify({ text }) });
+        if (!resp.ok) { if (btn) btn.classList.remove('playing'); return; }
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        _currentAudio = new Audio(url);
+        _currentAudio.onended = () => { if (btn) btn.classList.remove('playing'); URL.revokeObjectURL(url); _currentAudio = null; };
+        _currentAudio.onerror = () => { if (btn) btn.classList.remove('playing'); _currentAudio = null; };
+        await _currentAudio.play();
+      } catch { if (btn) btn.classList.remove('playing'); }
+    }
+
+    // ── Voice input (mic) ─────────────────────────────────────────────────────
+    let _recognition = null;
+    document.getElementById('micBtn').addEventListener('click', () => {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) { alert('Voice input not supported in this browser. Try Chrome.'); return; }
+      if (_recognition) { _recognition.stop(); return; }
+      _recognition = new SR();
+      _recognition.lang = 'en-US'; _recognition.interimResults = false;
+      const micBtn = document.getElementById('micBtn');
+      micBtn.classList.add('mic-btn-active');
+      _recognition.onresult = e => {
+        const t = e.results[0][0].transcript;
+        const ta = document.querySelector('.chat-input');
+        ta.value = (ta.value ? ta.value + ' ' : '') + t;
+        ta.dispatchEvent(new Event('input')); ta.focus();
+      };
+      _recognition.onend = () => { micBtn.classList.remove('mic-btn-active'); _recognition = null; };
+      _recognition.onerror = () => { micBtn.classList.remove('mic-btn-active'); _recognition = null; };
+      _recognition.start();
+    });
 
     // Wire send button and Enter key (already in DOM at this point)
     document.querySelector('.send-btn').addEventListener('click', sendMessage);
