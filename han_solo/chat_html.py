@@ -952,9 +952,11 @@ async function sendMessage() {
       if (data.session_warning) {
         addSessionDivider(data.session_warning);
       }
-      if (data.response) {
-        _msgs.push({ role: 'assistant', name: 'Ren', text: data.response });
-        renderMessages();
+      const msgs = data.messages && data.messages.length ? data.messages
+                 : data.response ? [data.response] : [];
+      await renderRenMessages(msgs);
+      if (data.wants_to_continue) {
+        await triggerContinuation();
       }
     } else {
       _msgs.push({ role: 'assistant', name: 'Ren', text: '(Something went wrong — try again)' });
@@ -968,6 +970,44 @@ async function sendMessage() {
     sending = false;
     sendBtn.disabled = false;
     msgInput.focus();
+  }
+}
+
+// Render a list of Ren messages sequentially — each as its own bubble with a brief pause between.
+async function renderRenMessages(msgs) {
+  for (let i = 0; i < msgs.length; i++) {
+    _msgs.push({ role: 'assistant', name: 'Ren', text: msgs[i] });
+    renderMessages();
+    if (i < msgs.length - 1) {
+      await new Promise(r => setTimeout(r, 1000));
+    }
+  }
+}
+
+// Auto-trigger when Ren signals she has more to say. Shows a typing indicator, then re-fires.
+// Caps at 5 consecutive continuations to prevent runaway loops.
+async function triggerContinuation(depth = 0) {
+  if (depth >= 5) return;
+  await new Promise(r => setTimeout(r, 2500));
+  const contId = 'continue-' + Date.now();
+  addLoading(contId);
+  try {
+    const resp = await apiFetch('/api/send', {
+      method: 'POST',
+      body: JSON.stringify({ message: '__continue__' }),
+    });
+    removeLoading(contId);
+    if (resp.ok) {
+      const data = await resp.json();
+      const msgs = data.messages && data.messages.length ? data.messages
+                 : data.response ? [data.response] : [];
+      await renderRenMessages(msgs);
+      if (data.wants_to_continue) {
+        await triggerContinuation(depth + 1);
+      }
+    }
+  } catch {
+    removeLoading(contId);
   }
 }
 

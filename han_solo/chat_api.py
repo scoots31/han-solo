@@ -230,6 +230,29 @@ async def api_send(request: Request) -> JSONResponse:
     message = body.get("message", "").strip()
     attachment = body.get("attachment")  # {name, content} or None
 
+    # Silent continuation trigger from the UI — Ren picks up where she left off.
+    # Bypass all message-building, history-push, and session-limit logic.
+    is_continuation = (message == "__continue__")
+    if is_continuation:
+        session_id = await letta.ensure_ren_agent_id()
+        try:
+            response_messages, wants_to_continue = await letta.send_chat_message(
+                "__system_continue__", "system"
+            )
+        except Exception as exc:
+            return JSONResponse({"error": str(exc)}, status_code=502)
+        for text in response_messages:
+            _push("Ren", text, "assistant")
+            asyncio.create_task(_capture_message(session_id, "assistant", "Ren", text))
+        return JSONResponse({
+            "messages": response_messages,
+            "response": response_messages[0] if response_messages else "",
+            "wants_to_continue": wants_to_continue,
+            "session_reset": False,
+            "session_warning": None,
+            "capture_health": db.health_status(),
+        })
+
     if not message and not attachment:
         return JSONResponse({"error": "Empty message"}, status_code=400)
 
@@ -291,16 +314,18 @@ async def api_send(request: Request) -> JSONResponse:
     asyncio.create_task(_capture_message(session_id, "user", user.name, display_text))
 
     try:
-        response_text = await letta.send_chat_message(letta_message, user.name)
+        response_messages, wants_to_continue = await letta.send_chat_message(letta_message, user.name)
     except Exception as exc:
         return JSONResponse({"error": str(exc)}, status_code=502)
 
-    if response_text:
-        _push("Ren", response_text, "assistant")
-        asyncio.create_task(_capture_message(session_id, "assistant", "Ren", response_text))
+    for text in response_messages:
+        _push("Ren", text, "assistant")
+        asyncio.create_task(_capture_message(session_id, "assistant", "Ren", text))
 
     return JSONResponse({
-        "response": response_text,
+        "messages": response_messages,
+        "response": response_messages[0] if response_messages else "",  # backwards compat
+        "wants_to_continue": wants_to_continue,
         "session_reset": rolled_over,
         "session_warning": session_warning,
         "capture_health": db.health_status(),

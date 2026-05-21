@@ -311,8 +311,16 @@ async def list_chat_messages(limit: int = 200) -> list[dict[str, Any]]:
 # Chat — send a message and get Ren's response
 # ---------------------------------------------------------------------------
 
-async def send_chat_message(content: str, user_name: str) -> str:
-    """Send a message to the Ren agent, return the assistant's text response."""
+async def send_chat_message(content: str, user_name: str) -> tuple[list[str], bool]:
+    """
+    Send a message to the Ren agent.
+
+    Returns (messages, wants_to_continue) where messages is a list of all
+    send_message calls Ren made in this step (rendered as separate bubbles)
+    and wants_to_continue signals that Ren has more to say next turn.
+
+    Ren signals continuation by appending [[CONTINUES]] to her last message.
+    """
     agent_id = await ensure_ren_agent_id()
     payload = {
         "messages": [{"role": "user", "content": content, "name": user_name}],
@@ -320,7 +328,17 @@ async def send_chat_message(content: str, user_name: str) -> str:
     }
     resp = await _letta("POST", f"{LETTA_URL}/v1/agents/{agent_id}/messages", json=payload, timeout=180.0)
     data = resp.json()
+
+    messages: list[str] = []
     for msg in data.get("messages", []):
         if msg.get("message_type") == "assistant_message":
-            return msg.get("content", "") or msg.get("assistant_message", "")
-    return ""
+            text = msg.get("content", "") or msg.get("assistant_message", "")
+            if text:
+                messages.append(text)
+
+    wants_to_continue = False
+    if messages and "[[CONTINUES]]" in messages[-1]:
+        wants_to_continue = True
+        messages[-1] = messages[-1].replace("[[CONTINUES]]", "").strip()
+
+    return messages, wants_to_continue
