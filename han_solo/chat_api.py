@@ -36,11 +36,12 @@ _history_loaded: bool = False
 
 # Session length thresholds. Each exchange = 2 entries (user + assistant).
 # WARN_AT: surface a note in the UI so Scott can choose a clean stopping point.
-# HARD_LIMIT_AT: safety rollover to prevent Letta context crashes — same as
-#   what used to happen at 50, but pushed back and only fires if Scott doesn't
-#   start a new session himself.
-WARN_AT = 40
-HARD_LIMIT_AT = 80
+# HARD_LIMIT_AT: safety rollover to prevent Letta context crashes.
+# NOTE: continuation messages ([[CONTINUES]]) bypass the user-message path, so
+# history can grow past WARN_AT without ever hitting the == check. Both limits
+# are checked in the continuation path too.
+WARN_AT = 60
+HARD_LIMIT_AT = 150
 
 # Capture cadence: write to transcript table every N messages.
 # Set to 1 to capture every message — safest, minimal DB overhead.
@@ -231,9 +232,28 @@ async def api_send(request: Request) -> JSONResponse:
     attachment = body.get("attachment")  # {name, content} or None
 
     # Silent continuation trigger from the UI — Ren picks up where she left off.
-    # Bypass all message-building, history-push, and session-limit logic.
+    # Bypass message-building and history-push, but still check session limits so
+    # continuation loops can't silently blow past WARN_AT and HARD_LIMIT_AT.
     is_continuation = (message == "__continue__")
     if is_continuation:
+        cont_history_len = len(_history)
+        cont_rolled_over = False
+        cont_warning = None
+
+        if cont_history_len >= HARD_LIMIT_AT:
+            try:
+                current_id = await letta.ensure_ren_agent_id()
+                await _flush_capture_buffer(current_id)
+                summary = await _synthesize_handoff(_history)
+                await letta.reset_conversation(handoff_summary=summary)
+                _history = []
+                _history_loaded = True
+                cont_rolled_over = True
+            except Exception:
+                pass
+        elif WARN_AT <= cont_history_len < HARD_LIMIT_AT:
+            cont_warning = "Getting long — good time to start a new session at a natural stopping point."
+
         session_id = await letta.ensure_ren_agent_id()
         try:
             response_messages, wants_to_continue = await letta.send_chat_message(
@@ -248,8 +268,8 @@ async def api_send(request: Request) -> JSONResponse:
             "messages": response_messages,
             "response": response_messages[0] if response_messages else "",
             "wants_to_continue": wants_to_continue,
-            "session_reset": False,
-            "session_warning": None,
+            "session_reset": cont_rolled_over,
+            "session_warning": cont_warning,
             "capture_health": db.health_status(),
         })
 
@@ -272,7 +292,7 @@ async def api_send(request: Request) -> JSONResponse:
             rolled_over = True
         except Exception:
             pass  # rollover failed — continue on existing agent
-    elif history_len == WARN_AT:
+    elif WARN_AT <= history_len < HARD_LIMIT_AT:
         session_warning = "Getting long — good time to start a new session at a natural stopping point."
 
     # Build the message Ren receives — inline file content or vision analysis when attached
