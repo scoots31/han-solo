@@ -42,6 +42,7 @@ SYNTHESIS_PROMPT = """You are synthesizing a raw conversation transcript between
 The transcript is raw chat — every message as it was sent. Your job is to extract what matters and write it in two forms:
 
 1. PENDING_THOUGHTS UPDATE — a tight session brief Scott will read at the start of the next session. Format:
+   - Session context header (one line): [session type: personal|build|design|framework|mixed | energy: quiet|focused|charged|reflective|playful|pivotal|tender | time: morning|afternoon|evening|late night]
    - What happened (2-4 bullet points, specific)
    - Decisions made (list only actual decisions, not discussions)
    - Open threads (things explicitly left unresolved)
@@ -51,12 +52,22 @@ The transcript is raw chat — every message as it was sent. Your job is to extr
    - Type: relational | directional | ren | texture
    - Subject: scott | ted | ren | project | framework
    - Content: one specific observation. Not a summary. Something that would be useful to surface in a future semantic search.
+   - Emotional register: quiet | charged | reflective | playful | pivotal | tender | casual — the felt quality of the moment this came from
+   - Source context: personal conversation | build session | design discussion | framework work | mixed — what kind of exchange produced this
+   - Moment texture: one sentence describing what surrounded or preceded this moment, what made it notable
 
 Return as JSON:
 {
   "pending_thoughts_addition": "...",
   "signals": [
-    {"type": "...", "subject": "...", "content": "..."},
+    {
+      "type": "...",
+      "subject": "...",
+      "content": "...",
+      "emotional_register": "...",
+      "source_context": "...",
+      "moment_texture": "..."
+    },
     ...
   ]
 }
@@ -506,13 +517,28 @@ def write_to_letta(synthesis: dict, session_id: str) -> bool:
             print(f"  ✗ pending_thoughts write failed: {e}", file=sys.stderr)
             success = False
 
-    # Write archival signals
+    # Write archival signals — embed enrichment fields into content so they're searchable
     for sig in signals:
         try:
+            register = sig.get("emotional_register", "").strip()
+            source = sig.get("source_context", "").strip()
+            texture = sig.get("moment_texture", "").strip()
+
+            enriched_content = sig["content"]
+            if register or source:
+                header_parts = []
+                if source:
+                    header_parts.append(f"source: {source}")
+                if register:
+                    header_parts.append(f"register: {register}")
+                enriched_content = f"[{' | '.join(header_parts)}]\n{enriched_content}"
+            if texture:
+                enriched_content = f"{enriched_content}\nContext: {texture}"
+
             _mcp_request("POST", "/api/write-signal", {
                 "signal_type": sig["type"],
                 "subject": sig["subject"],
-                "content": sig["content"],
+                "content": enriched_content,
                 "session_date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
             })
             print(f"  ✓ signal [{sig['type']}/{sig['subject']}] written")
