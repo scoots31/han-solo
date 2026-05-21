@@ -100,6 +100,21 @@ CREATE TABLE IF NOT EXISTS skills (
     content      TEXT        NOT NULL,
     updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+CREATE TABLE IF NOT EXISTS memory_connections (
+    id              SERIAL PRIMARY KEY,
+    passage_id_a    TEXT        NOT NULL,
+    passage_id_b    TEXT        NOT NULL,
+    relationship    TEXT        NOT NULL,
+    confidence      FLOAT       NOT NULL DEFAULT 0.0,
+    grounding       TEXT,
+    curator_run_id  TEXT,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(passage_id_a, passage_id_b, relationship)
+);
+CREATE INDEX IF NOT EXISTS idx_connections_a
+    ON memory_connections(passage_id_a, confidence DESC);
+CREATE INDEX IF NOT EXISTS idx_connections_b
+    ON memory_connections(passage_id_b, confidence DESC);
 """
 
 # Runs after CREATE_TABLE_SQL — backfills existing slugs as scott/private, idempotent
@@ -842,6 +857,62 @@ async def get_skill(phase_slug: str) -> Optional[dict]:
     except Exception as e:
         logger.error("Failed to get skill %s: %s", phase_slug, e)
         return None
+
+
+async def write_connection(
+    passage_id_a: str,
+    passage_id_b: str,
+    relationship: str,
+    confidence: float,
+    grounding: str | None = None,
+    curator_run_id: str | None = None,
+) -> bool:
+    """Upsert a memory connection. Updates confidence and grounding if higher-confidence run."""
+    if not _pool:
+        return False
+    try:
+        async with _pool.acquire() as conn:
+            await conn.execute(
+                """
+                INSERT INTO memory_connections
+                    (passage_id_a, passage_id_b, relationship, confidence, grounding, curator_run_id)
+                VALUES ($1, $2, $3, $4, $5, $6)
+                ON CONFLICT (passage_id_a, passage_id_b, relationship)
+                DO UPDATE SET
+                    confidence = GREATEST(memory_connections.confidence, EXCLUDED.confidence),
+                    grounding = EXCLUDED.grounding,
+                    curator_run_id = EXCLUDED.curator_run_id
+                """,
+                passage_id_a, passage_id_b, relationship, confidence, grounding, curator_run_id,
+            )
+        return True
+    except Exception as e:
+        logger.error("Failed to write connection: %s", e)
+        return False
+
+
+async def get_connections_for_passage(passage_id: str, min_confidence: float = 0.7) -> list[dict]:
+    """Return all connections for a passage (bidirectional), ordered by confidence desc."""
+    if not _pool:
+        return []
+    try:
+        async with _pool.acquire() as conn:
+            rows = await conn.fetch(
+                """
+                SELECT
+                    id, passage_id_a, passage_id_b, relationship, confidence, grounding, created_at,
+                    CASE WHEN passage_id_a = $1 THEN passage_id_b ELSE passage_id_a END AS connected_passage_id
+                FROM memory_connections
+                WHERE (passage_id_a = $1 OR passage_id_b = $1)
+                  AND confidence >= $2
+                ORDER BY confidence DESC
+                """,
+                passage_id, min_confidence,
+            )
+        return [dict(r) for r in rows]
+    except Exception as e:
+        logger.error("Failed to get connections for %s: %s", passage_id, e)
+        return []
 
 
 async def upsert_skill(phase_slug: str, content: str, layer: str = "phase-active") -> bool:

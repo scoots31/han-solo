@@ -333,6 +333,65 @@ async def api_get_skill(request: Request) -> JSONResponse:
     })
 
 
+async def api_get_memory_connections(request: Request) -> JSONResponse:
+    """GET /api/memory/connections/{passage_id}?min_confidence=0.7
+    Returns all connections for a passage, ordered by confidence.
+    Used by Ren during retrieval to expand search results additively.
+    """
+    passage_id = request.path_params["passage_id"]
+    try:
+        min_conf = float(request.query_params.get("min_confidence", "0.7"))
+    except ValueError:
+        min_conf = 0.7
+    connections = await db.get_connections_for_passage(passage_id, min_confidence=min_conf)
+    return JSONResponse([
+        {
+            "id": c["id"],
+            "connected_passage_id": c["connected_passage_id"],
+            "relationship": c["relationship"],
+            "confidence": c["confidence"],
+            "grounding": c.get("grounding"),
+            "created_at": c["created_at"].isoformat() if c.get("created_at") else None,
+        }
+        for c in connections
+    ])
+
+
+async def api_write_memory_connection(request: Request) -> JSONResponse:
+    """POST /api/memory/connections — write a connection (curator use only).
+    Body: {passage_id_a, passage_id_b, relationship, confidence, grounding?, curator_run_id?}
+    """
+    body = await request.json()
+    passage_id_a = body.get("passage_id_a", "").strip()
+    passage_id_b = body.get("passage_id_b", "").strip()
+    relationship = body.get("relationship", "").strip()
+    confidence = body.get("confidence", 0.0)
+    grounding = body.get("grounding", "").strip() or None
+    curator_run_id = body.get("curator_run_id", "").strip() or None
+
+    if not all([passage_id_a, passage_id_b, relationship]):
+        return JSONResponse({"error": "passage_id_a, passage_id_b, relationship required"}, status_code=400)
+
+    valid_relationships = {"relates_to", "follows_from", "expands_on", "references_same_entity", "contradicts"}
+    if relationship not in valid_relationships:
+        return JSONResponse({"error": f"relationship must be one of: {', '.join(valid_relationships)}"}, status_code=400)
+
+    if not (0.0 <= float(confidence) <= 1.0):
+        return JSONResponse({"error": "confidence must be between 0.0 and 1.0"}, status_code=400)
+
+    ok = await db.write_connection(
+        passage_id_a=passage_id_a,
+        passage_id_b=passage_id_b,
+        relationship=relationship,
+        confidence=float(confidence),
+        grounding=grounding,
+        curator_run_id=curator_run_id,
+    )
+    if not ok:
+        return JSONResponse({"error": "DB write failed"}, status_code=500)
+    return JSONResponse({"written": True}, status_code=201)
+
+
 async def api_memory_health(request: Request) -> JSONResponse:
     """Return memory system health: failed transitions + capture stats."""
     failed = await db.get_failed_transitions(hours=24)
@@ -388,6 +447,8 @@ _chat_routes = [
     Route("/api/write-signal", api_write_signal_rest, methods=["POST"]),
     Route("/api/archival-passages", api_list_archival_passages),
     Route("/api/archival-passage/delete", api_delete_archival_passage, methods=["POST"]),
+    Route("/api/memory/connections/{passage_id}", api_get_memory_connections),
+    Route("/api/memory/connections", api_write_memory_connection, methods=["POST"]),
     Route("/api/admin/agent-info", admin_agent_info),
     Route("/api/admin/patch-model", admin_patch_model, methods=["POST"]),
 ]
