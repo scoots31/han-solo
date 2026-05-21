@@ -227,6 +227,22 @@ APP_HTML = """<!DOCTYPE html>
       flex-shrink: 0; display: flex; align-items: center;
     }
     .attach-btn:hover { color: var(--text-secondary); }
+    .mic-btn {
+      background: none; border: none; color: var(--text-meta);
+      cursor: pointer; padding: 4px 6px; font-size: 16px;
+      flex-shrink: 0; display: flex; align-items: center; transition: color .15s;
+    }
+    .mic-btn:hover { color: var(--text-secondary); }
+    .mic-btn.listening { color: #e05555; animation: mic-pulse 1s infinite; }
+    @keyframes mic-pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .speak-btn {
+      background: none; border: none; color: var(--text-meta);
+      cursor: pointer; font-size: 11px; padding: 2px 4px; margin-left: 5px;
+      opacity: 0; transition: opacity .15s; vertical-align: middle; flex-shrink: 0;
+    }
+    .msg-bubble:hover .speak-btn { opacity: 1; }
+    .speak-btn.playing { color: var(--accent); opacity: 1; }
+    .btn-secondary.voice-on { color: var(--accent); border-color: var(--accent); }
     .send-btn {
       background: var(--accent); color: #fff; border: none;
       border-radius: 8px; padding: 9px 18px;
@@ -554,6 +570,7 @@ APP_HTML = """<!DOCTYPE html>
           <div class="screen-sub">Session with Ren</div>
         </div>
         <div class="screen-actions">
+          <button class="btn-secondary" id="voiceAutoBtn" title="Toggle auto-play voice">Voice: Off</button>
           <button class="btn-secondary" id="newSessionBtn">New session</button>
         </div>
       </div>
@@ -583,6 +600,7 @@ APP_HTML = """<!DOCTYPE html>
         </div>
         <button class="attach-btn" id="attachBtn" title="Attach a file">📎</button>
         <input type="file" id="fileInput" accept=".txt,.md,.py,.js,.ts,.jsx,.tsx,.json,.yaml,.yml,.html,.css,.sql,.sh,.csv,.toml,.env" style="display:none">
+        <button class="mic-btn" id="micBtn" title="Speak your message">🎤</button>
         <button class="send-btn" id="sendBtn">Send</button>
       </div>
     </div>
@@ -972,6 +990,12 @@ function renderMessages() {
       const b = document.createElement('div');
       b.className = 'msg-bubble ' + g.cls;
       b.textContent = text;
+      if (g.cls === 'ren' && text) {
+        const sp = document.createElement('button');
+        sp.className = 'speak-btn'; sp.title = 'Play voice'; sp.textContent = '🔊';
+        sp.addEventListener('click', () => playTTS(text, sp));
+        b.appendChild(sp);
+      }
       wrap.appendChild(b);
     }
     group.appendChild(wrap);
@@ -1103,7 +1127,10 @@ async function sendMessage() {
       const data = await resp.json();
       if (data.session_reset) { _msgs = []; renderMessages(); addSessionDivider('Session refreshed — memory intact'); }
       if (data.session_warning) addSessionDivider(data.session_warning);
-      if (data.response) { _msgs.push({ role: 'assistant', name: 'Ren', text: data.response }); renderMessages(); }
+      const msgs = data.messages && data.messages.length ? data.messages
+                 : data.response ? [data.response] : [];
+      await renderRenMessages(msgs);
+      if (data.wants_to_continue) await triggerContinuation();
     } else {
       _msgs.push({ role: 'assistant', name: 'Ren', text: '(Something went wrong — try again)' });
       renderMessages();
@@ -1118,6 +1145,88 @@ async function sendMessage() {
     $('msgInput').focus();
   }
 }
+
+async function renderRenMessages(msgs) {
+  for (let i = 0; i < msgs.length; i++) {
+    _msgs.push({ role: 'assistant', name: 'Ren', text: msgs[i] });
+    renderMessages();
+    if (_voiceAuto && msgs[i]) await playTTS(msgs[i], null);
+    if (i < msgs.length - 1) await new Promise(r => setTimeout(r, 1000));
+  }
+}
+
+async function triggerContinuation(depth = 0) {
+  if (depth >= 5) return;
+  await new Promise(r => setTimeout(r, 2500));
+  const cid = 'continue-' + Date.now();
+  addLoading(cid);
+  try {
+    const resp = await apiFetch('/api/send', { method: 'POST', body: JSON.stringify({ message: '__continue__' }) });
+    removeLoading(cid);
+    if (resp.ok) {
+      const data = await resp.json();
+      const msgs = data.messages && data.messages.length ? data.messages
+                 : data.response ? [data.response] : [];
+      await renderRenMessages(msgs);
+      if (data.wants_to_continue) await triggerContinuation(depth + 1);
+    }
+  } catch { removeLoading(cid); }
+}
+
+// ── Voice output ───────────────────────────────────────────────────────────
+let _voiceAuto = localStorage.getItem('hs_voice_auto') === 'true';
+let _currentAudio = null;
+
+(function() {
+  const btn = $('voiceAutoBtn');
+  btn.textContent = _voiceAuto ? 'Voice: On' : 'Voice: Off';
+  btn.classList.toggle('voice-on', _voiceAuto);
+  btn.addEventListener('click', () => {
+    _voiceAuto = !_voiceAuto;
+    localStorage.setItem('hs_voice_auto', _voiceAuto);
+    btn.textContent = _voiceAuto ? 'Voice: On' : 'Voice: Off';
+    btn.classList.toggle('voice-on', _voiceAuto);
+  });
+})();
+
+async function playTTS(text, btn) {
+  if (_currentAudio) {
+    _currentAudio.pause(); _currentAudio = null;
+    document.querySelectorAll('.speak-btn.playing').forEach(b => b.classList.remove('playing'));
+    if (btn && btn.classList.contains('playing')) return;
+  }
+  if (btn) btn.classList.add('playing');
+  try {
+    const resp = await apiFetch('/api/tts', { method: 'POST', body: JSON.stringify({ text }) });
+    if (!resp.ok) { if (btn) btn.classList.remove('playing'); return; }
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    _currentAudio = new Audio(url);
+    _currentAudio.onended = () => { if (btn) btn.classList.remove('playing'); URL.revokeObjectURL(url); _currentAudio = null; };
+    _currentAudio.onerror = () => { if (btn) btn.classList.remove('playing'); _currentAudio = null; };
+    await _currentAudio.play();
+  } catch { if (btn) btn.classList.remove('playing'); }
+}
+
+// ── Voice input (mic) ─────────────────────────────────────────────────────
+let _recognition = null;
+$('micBtn').addEventListener('click', () => {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert('Voice input not supported in this browser. Try Chrome.'); return; }
+  if (_recognition) { _recognition.stop(); return; }
+  _recognition = new SR();
+  _recognition.lang = 'en-US'; _recognition.interimResults = false; _recognition.maxAlternatives = 1;
+  $('micBtn').classList.add('listening');
+  _recognition.onresult = e => {
+    const t = e.results[0][0].transcript;
+    const inp = $('msgInput');
+    inp.value = (inp.value ? inp.value + ' ' : '') + t;
+    inp.dispatchEvent(new Event('input')); inp.focus();
+  };
+  _recognition.onend = () => { $('micBtn').classList.remove('listening'); _recognition = null; };
+  _recognition.onerror = () => { $('micBtn').classList.remove('listening'); _recognition = null; };
+  _recognition.start();
+});
 
 $('sendBtn').addEventListener('click', sendMessage);
 $('msgInput').addEventListener('keydown', e => {
