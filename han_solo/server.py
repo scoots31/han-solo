@@ -475,9 +475,13 @@ async def api_memory_health(request: Request) -> JSONResponse:
 _docs_dir = os.path.join(os.path.dirname(__file__), "..", "docs")
 
 
+# Live app UI — edit docs/workspace.html for all UI changes.
 async def workspace_index(request: Request) -> HTMLResponse:
     with open(os.path.join(_docs_dir, "workspace.html"), "r") as f:
-        return HTMLResponse(f.read())
+        return HTMLResponse(
+            f.read(),
+            headers={"Cache-Control": "no-store, no-cache, must-revalidate"},
+        )
 
 
 _chat_routes = [
