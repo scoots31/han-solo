@@ -21,7 +21,10 @@ def lookup_token(token: str) -> Optional[UserIdentity]:
     return TOKEN_REGISTRY.get(token)
 
 
-EXEMPT_PATHS = {"/health", "/", "/chat", "/workspace", "/api/jobs-status", "/api/session-logs"}
+EXEMPT_PATHS = {"/health", "/", "/chat", "/workspace", "/api/jobs-status"}
+
+# (path, method) pairs exempt from auth — GET-only public endpoints
+EXEMPT_PATH_METHODS = {("/api/session-logs", "GET")}
 
 
 class BearerAuthMiddleware:
@@ -43,7 +46,8 @@ class BearerAuthMiddleware:
             return
 
         path = scope.get("path", "")
-        if path in EXEMPT_PATHS or path.startswith("/docs/"):
+        method = scope.get("method", "GET")
+        if path in EXEMPT_PATHS or path.startswith("/docs/") or (path, method) in EXEMPT_PATH_METHODS:
             await self.app(scope, receive, send)
             return
 
