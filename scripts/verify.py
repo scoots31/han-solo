@@ -30,7 +30,7 @@ import urllib.error
 MCP_URL   = os.environ.get("MCP_URL", "https://han-solo-mcp.onrender.com")
 MCP_TOKEN = os.environ.get("MCP_TOKEN", "RHcpXjeAJlu_DzhYplsLaUOUSGVrU-gceamJQoXb81Q")
 LETTA_URL = os.environ.get("LETTA_URL", "https://han-solo-letta.onrender.com")
-LETTA_KEY = os.environ.get("LETTA_KEY", "KTZbsSbNocYbp7a-qhk87RwboYiLcX_W")
+LETTA_KEY = os.environ.get("LETTA_API_KEY") or os.environ.get("LETTA_KEY", "")
 AGENT_ID  = os.environ.get("AGENT_ID",  "agent-fe4a3d5b-bb51-458e-92f1-6a1ee5b0ce94")
 
 # Expected state — update these when the architecture changes
