@@ -2,6 +2,12 @@
 
 ## Absolute rules
 
+**Commit message standard**
+Every commit must include two things, written by Claude at the time of the commit — not reconstructed afterward:
+1. What changed — one sentence describing the specific change
+2. Why it was made — one sentence on the reason, decision, or problem it solves
+Thin messages ("updated db.py", "fixed bug") are not acceptable. The why must be explicit.
+
 **No agents. No worktrees. Ever.**
 Never use the Agent tool. Never use EnterWorktree. Never pass `isolation: "worktree"` to any call.
 All work happens directly in the current conversation. No exceptions for any reason — not complexity,
