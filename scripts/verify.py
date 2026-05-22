@@ -383,4 +383,19 @@ if failed:
         print(f"  {line}")
 print()
 
+# POST results to Han Solo so the dashboard can display them
+try:
+    details = [{"ok": ok, "line": line} for ok, line in results]
+    cold = [{"service": s, "elapsed": round(t, 1)} for s, t in _cold_starts]
+    payload = json.dumps({"passed": passed, "failed": total - passed, "total": total,
+                          "details": details, "cold_starts": cold}).encode()
+    req = urllib.request.Request(
+        f"{MCP_URL}/api/verify-runs", data=payload, method="POST",
+        headers={"Authorization": f"Bearer {MCP_TOKEN}", "Content-Type": "application/json"},
+    )
+    with urllib.request.urlopen(req, timeout=15) as r:
+        print(f"  Verify run saved to Han Solo ({r.status})")
+except Exception as e:
+    print(f"  (Could not save verify run to Han Solo: {e})")
+
 sys.exit(0 if not failed else 1)
