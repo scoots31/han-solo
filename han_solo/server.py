@@ -447,7 +447,11 @@ async def api_list_transcripts(request: Request) -> JSONResponse:
             }
             for r in results
         ])
-    logs = await db.list_session_transcripts(project=project)
+    try:
+        days = int(request.query_params.get("days", "45"))
+    except ValueError:
+        days = 45
+    logs = await db.list_session_transcripts(project=project, days=days)
     return JSONResponse([
         {
             "session_id": r["session_id"],
@@ -539,6 +543,17 @@ async def api_write_verify_run(request: Request) -> JSONResponse:
     return JSONResponse({"id": result["id"], "ran_at": result["ran_at"].isoformat()}, status_code=201)
 
 
+async def api_prune_transcripts(request: Request) -> JSONResponse:
+    """POST /api/admin/prune-transcripts — auth required. Deletes sessions older than ?days=45."""
+    get_current_user()
+    try:
+        days = int(request.query_params.get("days", "45"))
+    except ValueError:
+        days = 45
+    deleted = await db.prune_old_transcripts(days=days)
+    return JSONResponse({"deleted": deleted, "days": days})
+
+
 async def api_memory_health(request: Request) -> JSONResponse:
     """Return memory system health: failed transitions + capture stats."""
     failed = await db.get_failed_transitions(hours=24)
@@ -603,6 +618,7 @@ _chat_routes = [
     Route("/api/memory/access-patterns", api_memory_access_patterns),
     Route("/api/admin/agent-info", admin_agent_info),
     Route("/api/admin/patch-model", admin_patch_model, methods=["POST"]),
+    Route("/api/admin/prune-transcripts", api_prune_transcripts, methods=["POST"]),
     Route("/api/tts", chat_api.api_tts, methods=["POST"]),
     Route("/api/session-logs", api_list_session_logs),
     Route("/api/session-logs", api_create_session_log, methods=["POST"]),

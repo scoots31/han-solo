@@ -1217,29 +1217,31 @@ async def upsert_session_transcript(
         return {"_error": str(e)}
 
 
-async def list_session_transcripts(project: str | None = None, limit: int = 100) -> list[dict]:
-    """List session transcripts newest first, optionally filtered by project."""
+async def list_session_transcripts(project: str | None = None, limit: int = 100, days: int = 45) -> list[dict]:
+    """List session transcripts newest first, filtered to the last N days."""
     if not _pool:
         return []
     try:
         async with _pool.acquire() as conn:
+            cutoff = f"NOW() - INTERVAL '{days} days'"
             if project:
                 rows = await conn.fetch(
-                    """
+                    f"""
                     SELECT session_id, project, started_at, updated_at,
                            entry_count, is_complete, watermark
                     FROM session_transcripts
-                    WHERE project = $1
+                    WHERE project = $1 AND started_at >= {cutoff}
                     ORDER BY started_at DESC LIMIT $2
                     """,
                     project, limit,
                 )
             else:
                 rows = await conn.fetch(
-                    """
+                    f"""
                     SELECT session_id, project, started_at, updated_at,
                            entry_count, is_complete, watermark
                     FROM session_transcripts
+                    WHERE started_at >= {cutoff}
                     ORDER BY started_at DESC LIMIT $1
                     """,
                     limit,
@@ -1248,6 +1250,24 @@ async def list_session_transcripts(project: str | None = None, limit: int = 100)
     except Exception as e:
         logger.error("Failed to list session transcripts: %s", e)
         return []
+
+
+async def prune_old_transcripts(days: int = 45) -> int:
+    """Delete session transcripts older than N days. Returns count deleted."""
+    if not _pool:
+        return 0
+    try:
+        async with _pool.acquire() as conn:
+            result = await conn.execute(
+                f"DELETE FROM session_transcripts WHERE started_at < NOW() - INTERVAL '{days} days'"
+            )
+            # asyncpg returns "DELETE N" as the status string
+            count = int(result.split()[-1]) if result else 0
+            logger.info("Pruned %d session transcripts older than %d days", count, days)
+            return count
+    except Exception as e:
+        logger.error("Failed to prune session transcripts: %s", e)
+        return 0
 
 
 async def get_session_transcript(session_id: str) -> Optional[dict]:
