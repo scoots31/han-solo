@@ -3320,7 +3320,10 @@
         detail.innerHTML = entries.map(e => {
           const isUser = e.type === 'user';
           const tools = (e.tool_calls||[]).map(tc=>
-            `<span style="display:inline-block;font-family:monospace;font-size:10px;padding:1px 7px;border-radius:3px;background:rgba(150,150,150,.08);color:var(--text-meta);border:1px solid var(--divider);margin:2px 2px 0 0;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(tc.summary)}">${escHtml(tc.tool)}</span>`
+            `<div style="display:flex;align-items:baseline;gap:5px;padding:2px 0">
+              <span style="font-family:monospace;font-size:10px;font-weight:600;padding:1px 6px;border-radius:3px;background:rgba(150,150,150,.08);color:var(--text-meta);border:1px solid var(--divider);flex-shrink:0">${escHtml(tc.tool)}</span>
+              ${tc.summary ? `<span style="font-size:11px;color:var(--text-secondary);white-space:pre-wrap;word-break:break-all">${escHtml(tc.summary)}</span>` : ''}
+            </div>`
           ).join('');
           return `<div style="padding:8px 0;border-bottom:1px solid var(--divider)">
             <div style="display:flex;gap:8px;align-items:flex-start">
