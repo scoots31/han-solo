@@ -512,36 +512,53 @@ async def search_t4(
     entry_type: str | None = None,
     limit: int = 10,
 ) -> list[dict]:
-    """Full-text search across T4 entries for a project."""
+    """Full-text search across T4 entries for a project.
+
+    Splits query into words and requires each word to appear in the content
+    (AND logic, case-insensitive). Multi-word queries like "slot target calibration"
+    match entries containing all three words anywhere in the content.
+    """
     if not _pool:
         return []
     try:
+        words = [w.strip() for w in query.split() if w.strip()]
+        if not words:
+            return []
+
         async with _pool.acquire() as conn:
+            # Build param list: $1=project_slug, optional $2=entry_type, then word patterns, then limit
+            params: list = [project_slug]
             if entry_type:
-                rows = await conn.fetch(
-                    """
+                params.append(entry_type)
+
+            word_conditions = []
+            for word in words:
+                params.append(f"%{word}%")
+                word_conditions.append(f"content ILIKE ${len(params)}")
+            params.append(limit)
+            where_words = " AND ".join(word_conditions)
+
+            if entry_type:
+                sql = f"""
                     SELECT id, project_slug, entry_type, entry_id, parent_id,
                            content, updated_at
                     FROM t4_entries
                     WHERE project_slug=$1 AND entry_type=$2
-                      AND content ILIKE $3
+                      AND {where_words}
                     ORDER BY updated_at DESC
-                    LIMIT $4
-                    """,
-                    project_slug, entry_type, f"%{query}%", limit,
-                )
-            else:
-                rows = await conn.fetch(
+                    LIMIT ${len(params)}
                     """
+            else:
+                sql = f"""
                     SELECT id, project_slug, entry_type, entry_id, parent_id,
                            content, updated_at
                     FROM t4_entries
-                    WHERE project_slug=$1 AND content ILIKE $2
+                    WHERE project_slug=$1
+                      AND {where_words}
                     ORDER BY updated_at DESC
-                    LIMIT $3
-                    """,
-                    project_slug, f"%{query}%", limit,
-                )
+                    LIMIT ${len(params)}
+                    """
+            rows = await conn.fetch(sql, *params)
         return [dict(r) for r in rows]
     except Exception as e:
         logger.error("Failed to search T4: %s", e)
