@@ -893,6 +893,21 @@ async def get_skill(phase_slug: str) -> Optional[dict]:
         return None
 
 
+async def list_skills() -> list[dict]:
+    """Return all skill records ordered by phase_slug."""
+    if not _pool:
+        return []
+    try:
+        async with _pool.acquire() as conn:
+            rows = await conn.fetch(
+                "SELECT phase_slug, layer, content, updated_at FROM skills ORDER BY phase_slug",
+            )
+        return [dict(r) for r in rows]
+    except Exception as e:
+        logger.error("Failed to list skills: %s", e)
+        return []
+
+
 async def write_connection(
     passage_id_a: str,
     passage_id_b: str,

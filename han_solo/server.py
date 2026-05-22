@@ -25,7 +25,7 @@ from .auth import BearerAuthMiddleware, get_current_user
 from .config import REN_AGENT_NAME, REN_AGENT_ID
 from . import letta_client as letta
 from . import db
-from .tools import memory, signals, phase, brief, portraits, notecards, t4
+from .tools import memory, signals, phase, brief, portraits, notecards, t4, skills
 from . import chat_api
 
 logging.basicConfig(level=logging.INFO)
@@ -48,6 +48,7 @@ brief.register(server)
 portraits.register(server)
 notecards.register(server)
 t4.register(server)
+skills.register(server)
 
 
 # ---------------------------------------------------------------------------
