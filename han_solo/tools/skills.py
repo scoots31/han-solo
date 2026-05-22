@@ -2,7 +2,7 @@
 Framework skill tools — read phase skill content from the skills table (Store 1).
 
 The skills table is the authoritative source of Solo Builder Framework skill content.
-It is populated by the curator/sync pipeline and injected into Claude Code sessions
+It is populated by the sync pipeline and injected into Claude Code sessions
 via the framework-skill-inject hook on every UserPromptSubmit.
 
 Ren uses these tools to understand what phase Claude Code is currently operating in

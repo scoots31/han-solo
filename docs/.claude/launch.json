@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "han-solo-docs",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "7700"],
+      "port": 7700,
+      "autoPort": false
+    }
+  ]
+}

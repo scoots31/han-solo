@@ -100,33 +100,6 @@ CREATE TABLE IF NOT EXISTS skills (
     content      TEXT        NOT NULL,
     updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-CREATE TABLE IF NOT EXISTS memory_connections (
-    id              SERIAL PRIMARY KEY,
-    passage_id_a    TEXT        NOT NULL,
-    passage_id_b    TEXT        NOT NULL,
-    relationship    TEXT        NOT NULL,
-    confidence      FLOAT       NOT NULL DEFAULT 0.0,
-    grounding       TEXT,
-    curator_run_id  TEXT,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    UNIQUE(passage_id_a, passage_id_b, relationship)
-);
-CREATE INDEX IF NOT EXISTS idx_connections_a
-    ON memory_connections(passage_id_a, confidence DESC);
-CREATE INDEX IF NOT EXISTS idx_connections_b
-    ON memory_connections(passage_id_b, confidence DESC);
-CREATE TABLE IF NOT EXISTS curator_flags (
-    id                  SERIAL PRIMARY KEY,
-    passage_id          TEXT        NOT NULL,
-    flag_type           TEXT        NOT NULL,
-    related_passage_id  TEXT,
-    note                TEXT,
-    resolved            BOOLEAN     NOT NULL DEFAULT FALSE,
-    curator_run_id      TEXT,
-    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS idx_curator_flags_type
-    ON curator_flags(flag_type, resolved, created_at DESC);
 CREATE TABLE IF NOT EXISTS passage_enrichments (
     id              SERIAL PRIMARY KEY,
     passage_id      TEXT        NOT NULL,
@@ -908,60 +881,6 @@ async def list_skills() -> list[dict]:
         return []
 
 
-async def write_connection(
-    passage_id_a: str,
-    passage_id_b: str,
-    relationship: str,
-    confidence: float,
-    grounding: str | None = None,
-    curator_run_id: str | None = None,
-) -> bool:
-    """Upsert a memory connection. Updates confidence and grounding if higher-confidence run."""
-    if not _pool:
-        return False
-    try:
-        async with _pool.acquire() as conn:
-            await conn.execute(
-                """
-                INSERT INTO memory_connections
-                    (passage_id_a, passage_id_b, relationship, confidence, grounding, curator_run_id)
-                VALUES ($1, $2, $3, $4, $5, $6)
-                ON CONFLICT (passage_id_a, passage_id_b, relationship)
-                DO UPDATE SET
-                    confidence = GREATEST(memory_connections.confidence, EXCLUDED.confidence),
-                    grounding = EXCLUDED.grounding,
-                    curator_run_id = EXCLUDED.curator_run_id
-                """,
-                passage_id_a, passage_id_b, relationship, confidence, grounding, curator_run_id,
-            )
-        return True
-    except Exception as e:
-        logger.error("Failed to write connection: %s", e)
-        return False
-
-
-async def get_connections_for_passage(passage_id: str, min_confidence: float = 0.7) -> list[dict]:
-    """Return all connections for a passage (bidirectional), ordered by confidence desc."""
-    if not _pool:
-        return []
-    try:
-        async with _pool.acquire() as conn:
-            rows = await conn.fetch(
-                """
-                SELECT
-                    id, passage_id_a, passage_id_b, relationship, confidence, grounding, created_at,
-                    CASE WHEN passage_id_a = $1 THEN passage_id_b ELSE passage_id_a END AS connected_passage_id
-                FROM memory_connections
-                WHERE (passage_id_a = $1 OR passage_id_b = $1)
-                  AND confidence >= $2
-                ORDER BY confidence DESC
-                """,
-                passage_id, min_confidence,
-            )
-        return [dict(r) for r in rows]
-    except Exception as e:
-        logger.error("Failed to get connections for %s: %s", passage_id, e)
-        return []
 
 
 async def log_memory_access(
@@ -1079,62 +998,6 @@ async def get_memory_access_patterns(days: int = 30) -> dict:
         return {}
 
 
-async def write_curator_flag(
-    passage_id: str,
-    flag_type: str,
-    note: str | None = None,
-    related_passage_id: str | None = None,
-    curator_run_id: str | None = None,
-) -> bool:
-    """Write a curator quality flag for a passage. flag_type: near_duplicate | self_containment."""
-    if not _pool:
-        return False
-    try:
-        async with _pool.acquire() as conn:
-            await conn.execute(
-                """
-                INSERT INTO curator_flags
-                    (passage_id, flag_type, related_passage_id, note, curator_run_id)
-                VALUES ($1, $2, $3, $4, $5)
-                """,
-                passage_id, flag_type, related_passage_id, note, curator_run_id,
-            )
-        return True
-    except Exception as e:
-        logger.error("Failed to write curator flag: %s", e)
-        return False
-
-
-async def get_curator_flags(flag_type: str | None = None, resolved: bool = False) -> list[dict]:
-    """Return curator flags, optionally filtered by type and resolution status."""
-    if not _pool:
-        return []
-    try:
-        async with _pool.acquire() as conn:
-            if flag_type:
-                rows = await conn.fetch(
-                    """
-                    SELECT id, passage_id, flag_type, related_passage_id, note, resolved, created_at
-                    FROM curator_flags
-                    WHERE flag_type = $1 AND resolved = $2
-                    ORDER BY created_at DESC
-                    """,
-                    flag_type, resolved,
-                )
-            else:
-                rows = await conn.fetch(
-                    """
-                    SELECT id, passage_id, flag_type, related_passage_id, note, resolved, created_at
-                    FROM curator_flags
-                    WHERE resolved = $1
-                    ORDER BY created_at DESC
-                    """,
-                    resolved,
-                )
-        return [dict(r) for r in rows]
-    except Exception as e:
-        logger.error("Failed to get curator flags: %s", e)
-        return []
 
 
 async def write_passage_enrichment(

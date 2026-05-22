@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Han Solo — System State · May 21, 2026</title>
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    /* ── Layout ── */
+    body { max-width: 960px; margin: 0 auto; padding: 48px 32px 80px; }
+    h1 { font-size: 2rem; margin-bottom: 4px; }
+    .subtitle { color: var(--muted, #888); font-size: 0.9rem; margin-bottom: 48px; }
+
+    /* ── Section headers ── */
+    h2 { font-size: 1.25rem; margin: 48px 0 16px; border-bottom: 1px solid var(--border, #2a2a2a); padding-bottom: 8px; }
+    h3 { font-size: 1rem; margin: 24px 0 8px; color: var(--accent, #E8971C); }
+
+    /* ── Status pills ── */
+    .pill {
+      display: inline-block; font-size: 0.72rem; font-weight: 600;
+      padding: 2px 8px; border-radius: 9999px; letter-spacing: 0.04em;
+      text-transform: uppercase; margin-left: 8px; vertical-align: middle;
+    }
+    .ok   { background: #1a3a1a; color: #4caf4c; }
+    .warn { background: #3a2a00; color: #E8971C; }
+    .off  { background: #3a1a1a; color: #cf4c4c; }
+    .new  { background: #1a2a3a; color: #4c9acf; }
+
+    /* ── Tables ── */
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.875rem; }
+    th { text-align: left; padding: 8px 12px; border-bottom: 2px solid var(--border, #2a2a2a); color: var(--muted, #888); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    td { padding: 8px 12px; border-bottom: 1px solid var(--border, #1e1e1e); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    td code, th code { font-size: 0.8rem; }
+
+    /* ── Code blocks ── */
+    pre {
+      background: #0e0e0e; border: 1px solid #222; border-radius: 6px;
+      padding: 16px; overflow-x: auto; font-size: 0.8rem; line-height: 1.5;
+      margin: 12px 0;
+    }
+    code { font-family: 'SF Mono', 'Fira Code', monospace; }
+
+    /* ── Cards ── */
+    .card {
+      background: #111; border: 1px solid #222; border-radius: 8px;
+      padding: 20px 24px; margin: 16px 0;
+    }
+    .card-row { display: flex; gap: 16px; }
+    .card-row .card { flex: 1; }
+
+    /* ── Check list ── */
+    .checklist { list-style: none; padding: 0; margin: 12px 0; }
+    .checklist li { padding: 5px 0; font-size: 0.9rem; }
+    .checklist li::before { margin-right: 10px; }
+    .checklist .pass::before { content: '✅'; }
+    .checklist .warn::before { content: '⚠️'; }
+    .checklist .fail::before { content: '❌'; }
+    .checklist .pend::before { content: '🕐'; }
+
+    /* ── Flow diagram ── */
+    .flow {
+      display: flex; align-items: center; gap: 0; flex-wrap: wrap;
+      margin: 20px 0; font-size: 0.8rem;
+    }
+    .flow-box {
+      background: #1a1a1a; border: 1px solid #333; border-radius: 6px;
+      padding: 10px 16px; text-align: center; min-width: 120px;
+    }
+    .flow-box .label { font-size: 0.65rem; text-transform: uppercase; color: #666; letter-spacing: 0.08em; margin-bottom: 4px; }
+    .flow-box .name { font-weight: 600; }
+    .flow-box .detail { font-size: 0.72rem; color: #888; margin-top: 2px; }
+    .flow-arrow { padding: 0 8px; color: #444; font-size: 1.2rem; }
+    .flow-box.highlight { border-color: #E8971C; background: #1a1500; }
+    .flow-box.new-item { border-color: #4c9acf; background: #0a1520; }
+
+    /* ── Token display ── */
+    .token { font-family: monospace; font-size: 0.75rem; color: #4c9acf; word-break: break-all; }
+
+    /* ── Callout ── */
+    .callout {
+      border-left: 3px solid var(--accent, #E8971C);
+      padding: 12px 16px; margin: 16px 0;
+      background: #1a1500; border-radius: 0 6px 6px 0;
+      font-size: 0.875rem;
+    }
+    .callout.info { border-color: #4c9acf; background: #0a1520; }
+    .callout.danger { border-color: #cf4c4c; background: #1a0a0a; }
+
+    /* ── Pending items ── */
+    .pending-list { list-style: none; padding: 0; }
+    .pending-list li {
+      padding: 12px 16px; margin: 8px 0; background: #111;
+      border: 1px solid #222; border-radius: 6px; font-size: 0.875rem;
+    }
+    .pending-list li strong { display: block; margin-bottom: 4px; }
+    .pending-list li span { color: #888; font-size: 0.8rem; }
+
+    /* ── TOC ── */
+    .toc { background: #111; border: 1px solid #222; border-radius: 8px; padding: 20px 24px; margin-bottom: 48px; }
+    .toc h4 { margin: 0 0 12px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: #888; }
+    .toc ol { margin: 0; padding-left: 20px; }
+    .toc li { padding: 3px 0; font-size: 0.875rem; }
+    .toc a { color: #E8971C; text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<h1>Han Solo — System State</h1>
+<p class="subtitle">Session: Thursday, May 21, 2026 · Documented after major Ren upgrade</p>
+
+<div class="toc">
+  <h4>Contents</h4>
+  <ol>
+    <li><a href="#what-we-built">What we built this session</a></li>
+    <li><a href="#architecture">Architecture overview</a></li>
+    <li><a href="#auth">Authentication &amp; identity</a></li>
+    <li><a href="#letta-mcp">Letta ↔ Han Solo MCP connection</a></li>
+    <li><a href="#ren-tools">Ren's full tool inventory</a></li>
+    <li><a href="#memory-blocks">Core memory blocks</a></li>
+    <li><a href="#t4">T4 project memory</a></li>
+    <li><a href="#always-loaded-core">always_loaded_core — what changed</a></li>
+    <li><a href="#cost">Cost context — burn &amp; paused jobs</a></li>
+    <li><a href="#verification">End-to-end verification results</a></li>
+    <li><a href="#pending">Still pending</a></li>
+  </ol>
+</div>
+
+
+<!-- ─────────────────────────────────────────────────── -->
+<h2 id="what-we-built">1. What we built this session</h2>
+
+<p>This session addressed a set of critical gaps in how Ren operates. The two biggest: a runaway cost problem from the curator script, and Ren having zero visibility into T4 project memory. Both are now resolved.</p>
+
+<table>
+  <thead><tr><th>#</th><th>Gap</th><th>Status</th><th>What we did</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>Ren blind to T4 project memory</td>
+      <td><span class="pill new">Done</span></td>
+      <td>Wired Letta → Han Solo MCP via native Streamable HTTP integration. Ren now has 5 read-only project memory tools.</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Dead tool references in always_loaded_core</td>
+      <td><span class="pill new">Done</span></td>
+      <td>Stripped <code>log_memory_access</code>, <code>enrich_passage</code>, <code>create_notecard</code> — none were in Ren's tool list.</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>T4 described as Letta archival (wrong)</td>
+      <td><span class="pill new">Done</span></td>
+      <td>Corrected memory structure documentation. T4 is PostgreSQL, not pgvector. always_loaded_core now says so explicitly.</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>always_loaded_core 477 chars over limit</td>
+      <td><span class="pill new">Done</span></td>
+      <td>Trimmed from 10,477 → 8,208 chars (10,000 char limit). Tightened operating principles, removed redundant sections.</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Ren has no identity / bearer token</td>
+      <td><span class="pill new">Done</span></td>
+      <td>Added <code>Role.AGENT</code> enum and Ren user to <code>config.py</code>. New token with full visibility clearance. Deployed.</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>Curator burning $25/day</td>
+      <td><span class="pill warn">Paused</span></td>
+      <td>Jobs paused via API. Root cause: processing all 392+ archival passages with Sonnet on every hourly run. Redesign pending.</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>pending_thoughts bloated (28,933 chars)</td>
+      <td><span class="pill warn">Pending</span></td>
+      <td>Not yet addressed. Loads fully on every Ren step. Next session.</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>Curator schedule (hourly vs. 2AM)</td>
+      <td><span class="pill warn">Pending</span></td>
+      <td>Not yet addressed. Needs incremental processing + schedule change. Next session.</td>
+    </tr>
+  </tbody>
+</table>
+
+
+<!-- ─────────────────────────────────────────────────── -->
+<h2 id="architecture">2. Architecture overview</h2>
+
+<div class="flow">
+  <div class="flow-box">
+    <div class="label">Browser / App</div>
+    <div class="name">Scott / Ted</div>
+    <div class="detail">han-solo-mcp.onrender.com</div>
+  </div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-box highlight">
+    <div class="label">MCP Bridge</div>
+    <div class="name">Han Solo MCP</div>
+    <div class="detail">FastMCP · Python · Render</div>
+  </div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-box">
+    <div class="label">AI Backend</div>
+    <div class="name">Letta v0.16.7</div>
+    <div class="detail">han-solo-letta.onrender.com</div>
+  </div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-box">
+    <div class="label">Agent</div>
+    <div class="name">Ren (ren-v2)</div>
+    <div class="detail">Claude Haiku · 10 tools</div>
+  </div>
+</div>
+
+<div class="flow">
+  <div class="flow-box new-item">
+    <div class="label">New — 2026-05-21</div>
+    <div class="name">Ren → MCP</div>
+    <div class="detail">Letta calls Han Solo MCP<br>via Streamable HTTP</div>
+  </div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-box">
+    <div class="label">Database</div>
+    <div class="name">PostgreSQL</div>
+    <div class="detail">han-solo-db · Render</div>
+  </div>
+  <div class="flow-arrow">+</div>
+  <div class="flow-box">
+    <div class="label">Vector Store</div>
+    <div class="name">pgvector</div>
+    <div class="detail">Letta archival · T2/T3</div>
+  </div>
+</div>
+
+<table>
+  <thead><tr><th>Service</th><th>URL</th><th>What it does</th></tr></thead>
+  <tbody>
+    <tr><td>han-solo-mcp</td><td><code>han-solo-mcp.onrender.com</code></td><td>Main app server — chat API, MCP endpoint, workspace UI, all REST endpoints</td></tr>
+    <tr><td>han-solo-letta</td><td><code>han-solo-letta.onrender.com</code></td><td>Letta agent backend — manages Ren's context, tools, core memory blocks</td></tr>
+    <tr><td>han-solo-db</td><td>Render PostgreSQL</td><td>T4 project artifacts, signals, notecards, chat transcripts, curator tables</td></tr>
+    <tr><td>Letta pgvector</td><td>Letta internal</td><td>T2/T3 archival passages — general discussion, synthesis, framework content</td></tr>
+  </tbody>
+</table>
+
+
+<!-- ─────────────────────────────────────────────────── -->
+<h2 id="auth">3. Authentication &amp; identity</h2>
+
+<p>Token-based auth. Each bearer token maps to a <code>UserIdentity</code> with role and visibility clearance. Tokens set as Render env vars: <code>USER_TOKEN_SCOTT</code>, <code>USER_TOKEN_TED</code>, <code>USER_TOKEN_REN</code>.</p>
+
+<div class="callout info">Ren's token was added this session. <code>USER_TOKEN_REN</code> is now set in Render for han-solo-mcp. Her role is <code>AGENT</code> — a new role type added specifically for AI participants.</div>
+
+<table>
+  <thead><tr><th>User</th><th>ID</th><th>Role</th><th>Visibility clearance</th><th>Token env var</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Scott</td>
+      <td><code>scott</code></td>
+      <td>OWNER</td>
+      <td>private · shared · client_joint · client_exclusive</td>
+      <td><code>USER_TOKEN_SCOTT</code></td>
+    </tr>
+    <tr>
+      <td>Ted</td>
+      <td><code>ted</code></td>
+      <td>COLLABORATOR</td>
+      <td>shared · client_joint</td>
+      <td><code>USER_TOKEN_TED</code></td>
+    </tr>
+    <tr>
+      <td>Ren</td>
+      <td><code>ren</code></td>
+      <td>AGENT <span class="pill new">New</span></td>
+      <td>private · shared · client_joint · client_exclusive</td>
+      <td><code>USER_TOKEN_REN</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Role enum (config.py)</h3>
+<pre><code>class Role(str, Enum):
+    OWNER = "owner"
+    COLLABORATOR = "collaborator"
+    AGENT = "agent"   # Ren and future AI agents — full read clearance, no human role</code></pre>
+
+<h3>Exempt paths (no auth required)</h3>
+<pre><code>EXEMPT_PATHS = {"/health", "/", "/chat", "/workspace", "/api/jobs-status"}</code></pre>
+
+<h3>Code change committed</h3>
+<pre><code>commit 1bf668f
+Add Ren as AGENT identity with own bearer token</code></pre>
+
+
+<!-- ─────────────────────────────────────────────────── -->
+<h2 id="letta-mcp">4. Letta ↔ Han Solo MCP connection</h2>
+
+<p>Letta v0.16.7 supports native MCP server integration. We registered Han Solo's MCP endpoint directly with Letta — no custom code required. Letta calls out to Han Solo as a Streamable HTTP MCP server using Ren's bearer token.</p>
+
+<div class="callout">This is the key architectural change. Previously Ren had zero access to Han Solo's PostgreSQL data. Now Letta makes authenticated tool calls to the Han Solo MCP, and the results come back into Ren's context exactly like any other tool response.</div>
+
+<h3>Registration payload (PUT /v1/tools/mcp/servers)</h3>
+<pre><code>{
+  "server_name": "han-solo",
+  "type": "streamable_http",
+  "server_url": "https://han-solo-mcp.onrender.com/mcp",
+  "auth_header": "Authorization",
+  "auth_token": "Bearer &lt;USER_TOKEN_REN&gt;"
+}</code></pre>
+
+<h3>How it works step by step</h3>
+<ol>
+  <li>Ren decides she needs project data — e.g. user asks about the garden planner</li>
+  <li>Ren calls <code>search_t4(project_slug="garden-planner", query="phase")</code></li>
+  <li>Letta makes an HTTP POST to <code>han-solo-mcp.onrender.com/mcp</code> with JSON-RPC, authenticated as Ren</li>
+  <li>Han Solo MCP executes the tool, queries PostgreSQL, returns results as JSON</li>
+  <li>Letta injects the results into Ren's context as a tool response</li>
+  <li>Ren reads the data and responds to the user</li>
+</ol>
+
+<h3>Important schema note</h3>
+<p>The <code>PUT /v1/tools/mcp/servers</code> endpoint uses <code>StreamableHTTPServerConfig</code> schema — the body is the config directly, not wrapped in a <code>config</code> object. The discriminator field is <code>type</code>, not <code>mcp_server_type</code>. This differs from the <code>CreateMCPServerRequest</code> schema which uses <code>mcp_server_type</code> as the discriminator.</p>
+
+
+<!-- ─────────────────────────────────────────────────── -->
+<h2 id="ren-tools">5. Ren's full tool inventory</h2>
+
+<p>Ren now has 10 tools: 5 Letta core tools + 5 Han Solo MCP tools added this session.</p>
+
+<table>
+  <thead><tr><th>Tool</th><th>Type</th><th>Source</th><th>What it does</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>search_t4</code></td>
+      <td><span class="pill new">New</span> external_mcp</td>
+      <td>Han Solo PostgreSQL</td>
+      <td>Full-text search across T4 project artifacts by slug + keyword. Returns entry_type, entry_id, content excerpt, updated_at.</td>
+    </tr>
+    <tr>
+      <td><code>get_t4_entry</code></td>
+      <td><span class="pill new">New</span> external_mcp</td>
+      <td>Han Solo PostgreSQL</td>
+      <td>Fetch a specific T4 artifact in full by project_slug + entry_type + entry_id.</td>
+    </tr>
+    <tr>
+      <td><code>search_signals</code></td>
+      <td><span class="pill new">New</span> external_mcp</td>
+      <td>Han Solo PostgreSQL</td>
+      <td>Semantic search across archival signals. Filter by signal_type (relational/directional/ren/texture) or subject.</td>
+    </tr>
+    <tr>
+      <td><code>get_session_brief</code></td>
+      <td><span class="pill new">New</span> external_mcp</td>
+      <td>Han Solo + Letta</td>
+      <td>Loads full session context package: always_loaded_core, pending_thoughts, 5 recent signals, current datetime. For session open.</td>
+    </tr>
+    <tr>
+      <td><code>list_notecards</code></td>
+      <td><span class="pill new">New</span> external_mcp</td>
+      <td>Han Solo PostgreSQL</td>
+      <td>Returns active + completed notecards. Filter by status (active/completed/archived). Returns id, text, creator, status, created_at.</td>
+    </tr>
+    <tr>
+      <td><code>archival_memory_search</code></td>
+      <td>letta_core</td>
+      <td>Letta pgvector</td>
+      <td>Semantic search across T2/T3 archival passages (general discussion, synthesis, framework content).</td>
+    </tr>
+    <tr>
+      <td><code>archival_memory_insert</code></td>
+      <td>letta_core</td>
+      <td>Letta pgvector</td>
+      <td>Write a new passage to Letta archival memory (T2).</td>
+    </tr>
+    <tr>
+      <td><code>core_memory_replace</code></td>
+      <td>letta_memory_core</td>
+      <td>Letta core blocks</td>
+      <td>Replace content in a core memory block (pending_thoughts, open_threads, etc.).</td>
+    </tr>
+    <tr>
+      <td><code>memory_apply_patch</code></td>
+      <td>letta_memory_core</td>
+      <td>Letta core blocks</td>
+      <td>Apply a patch to a core memory block (surgical edits rather than full replace).</td>
+    </tr>
+    <tr>
+      <td><code>fetch_webpage</code></td>
+      <td>letta_builtin</td>
+      <td>Letta</td>
+      <td>Fetch a webpage by URL. Used for looking up documentation, articles, or live data during a session.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Tool IDs (Letta internal — for reference)</h3>
+<table>
+  <thead><tr><th>Tool</th><th>Letta tool ID</th></tr></thead>
+  <tbody>
+    <tr><td>search_t4</td><td><code>tool-b820ca56-8d76-4d95-9e56-a725c9ef866f</code></td></tr>
+    <tr><td>get_t4_entry</td><td><code>tool-d3da16b2-12c6-49fe-98a8-ce9ec551005d</code></td></tr>
+    <tr><td>search_signals</td><td><code>tool-72e4ca07-94d2-4bbd-813e-9329452362c3</code></td></tr>
+    <tr><td>get_session_brief</td><td><code>tool-04301cfb-9b99-4ae8-8841-9ef5840462c7</code></td></tr>
+    <tr><td>list_notecards</td><td><code>tool-6f1198b7-4845-47d8-b06b-10e16ec009e0</code></td></tr>
+  </tbody>
+</table>
+
+<div class="callout info">
+  <strong>Tools not given to Ren (intentional):</strong> The Han Solo MCP exposes 25 tools total. We selectively gave Ren only read-only tools. Write tools (write_t4_entry, write_signal, write_core_memory, write_portrait, etc.) remain Claude Code–only. This prevents Ren from corrupting structured project data during a chat session.
+</div>
+
+
+<!-- ─────────────────────────────────────────────────── -->
+<h2 id="memory-blocks">6. Core memory blocks</h2>
+
+<p>Letta loads ALL core blocks on every agent step. Every single message Ren processes includes the full content of all 12 blocks below. Token cost is a real concern — blocks that are over-limit or bloated slow the system and increase cost.</p>
+
+<table>
+  <thead><tr><th>Block</th><th>Chars</th><th>Limit</th><th>Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>always_loaded_core</code></td><td>8,208</td><td>10,000</td><td><span class="pill ok">OK</span></td><td>Updated this session. Was 10,477 — over limit. Now corrected.</td></tr>
+    <tr><td><code>pending_thoughts</code></td><td>28,933</td><td>100,000</td><td><span class="pill warn">Bloated</span></td><td>Within limit but very large. Loads every step. Trim scheduled next session.</td></tr>
+    <tr><td><code>ren_portrait_forming</code></td><td>13,312</td><td>20,000</td><td><span class="pill ok">OK</span></td><td>Ren's self-model and relationship context. Growing over time.</td></tr>
+    <tr><td><code>scott_portrait_forming</code></td><td>8,086</td><td>20,000</td><td><span class="pill ok">OK</span></td><td>Scott's portrait — preferences, patterns, working style.</td></tr>
+    <tr><td><code>ren_voice</code></td><td>2,903</td><td>10,000</td><td><span class="pill ok">OK</span></td><td>Ren's voice and communication style guidance.</td></tr>
+    <tr><td><code>memory_landscape</code></td><td>2,149</td><td>10,000</td><td><span class="pill ok">OK</span></td><td>High-level map of what's in memory and how to navigate it.</td></tr>
+    <tr><td><code>session_2026_05_20_brief</code></td><td>5,675</td><td>100,000</td><td><span class="pill warn">Stale</span></td><td>Yesterday's session brief. Could be moved to archival once synthesize.py runs.</td></tr>
+    <tr><td><code>session_state</code></td><td>1,228</td><td>100,000</td><td><span class="pill ok">OK</span></td><td>Current session tracking.</td></tr>
+    <tr><td><code>session_context</code></td><td>364</td><td>100,000</td><td><span class="pill ok">OK</span></td><td>Lightweight current context note.</td></tr>
+    <tr><td><code>seed_signals</code></td><td>1,694</td><td>20,000</td><td><span class="pill ok">OK</span></td><td>Early relationship signals — founding context for Ren.</td></tr>
+    <tr><td><code>project_state</code></td><td>2</td><td>10,000</td><td><span class="pill ok">OK</span></td><td>Nearly empty — project state is in T4, not here.</td></tr>
+    <tr><td><code>open_threads</code></td><td>0</td><td>4,000</td><td><span class="pill ok">OK</span></td><td>Empty — no open threads recorded at this point in session.</td></tr>
+  </tbody>
+</table>
+
+<h3>Context cost reality</h3>
+<p>Letta sends the FULL content of every core block to Claude Haiku on every single agent step. With 12 blocks averaging ~5,400 chars each, that's ~18,000+ tokens of core memory loaded per step. At Haiku's $0.25/MTok rate, that's ~$0.005 per step just for core memory — before any message history or tool results.</p>
+
+
+<!-- ─────────────────────────────────────────────────── -->
+<h2 id="t4">7. T4 project memory</h2>
+
+<p>T4 is the structured project artifact store. It lives in Han Solo's PostgreSQL database — completely separate from Letta's pgvector archival store. Ren can now access T4 via the 5 new MCP tools. Claude Code writes to T4 via <code>write_t4_entry</code> during framework sessions.</p>
+
+<h3>Current T4 projects (as of May 21, 2026)</h3>
+
+<table>
+  <thead><tr><th>Project slug</th><th>Owner</th><th>Slices done</th><th>Phases</th><th>Current status</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>chase-the-light</code></td>
+      <td>scott</td>
+      <td>2 / 2</td>
+      <td>1</td>
+      <td>Phase 1 complete. All planning steps done. Pending Phase Test to formally close.</td>
+    </tr>
+    <tr>
+      <td><code>fantasy-football</code></td>
+      <td>scott</td>
+      <td>15 / 17</td>
+      <td>1</td>
+      <td>Deployed to Railway. In maintenance mode. 3 open items: contracts sync, PFF data, is_scott flag.</td>
+    </tr>
+    <tr>
+      <td><code>garden-planner</code></td>
+      <td>scott</td>
+      <td>32 / 45</td>
+      <td>11</td>
+      <td>Phase 4 in progress, blocked on 52 plant images needing R2 hosting. Phase 9 (open registration) design approved.</td>
+    </tr>
+    <tr>
+      <td><code>solo-companion</code></td>
+      <td>scott</td>
+      <td>37 / 37</td>
+      <td>6</td>
+      <td>All phases complete. 37/37 slices done. In maintenance mode.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>T4 entry types</h3>
+<table>
+  <thead><tr><th>Entry type</th><th>Write behavior</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td>phase</td><td>upsert</td><td>Phase definition and current status</td></tr>
+    <tr><td>deliverable</td><td>upsert</td><td>Phase-level deliverable</td></tr>
+    <tr><td>slice</td><td>upsert</td><td>Individual unit of work (SL-XXX)</td></tr>
+    <tr><td>discovery_brief</td><td>append</td><td>Running discovery notes</td></tr>
+    <tr><td>brainstorm</td><td>append</td><td>Brainstorm session captures</td></tr>
+    <tr><td>tech_context</td><td>write_once</td><td>Technical stack and architecture decisions</td></tr>
+    <tr><td>decisions_log</td><td>append</td><td>Key decisions and their rationale</td></tr>
+    <tr><td>current_phase</td><td>upsert</td><td>Active phase summary — what the workspace displays</td></tr>
+    <tr><td>handoff</td><td>upsert</td><td>Session handoff notes</td></tr>
+    <tr><td>retro</td><td>write_once</td><td>Phase retrospective</td></tr>
+  </tbody>
+</table>
+
+<h3>T4 schema (PostgreSQL)</h3>
+<pre><code>CREATE TABLE t4_entries (
+    id           SERIAL PRIMARY KEY,
+    project_slug TEXT        NOT NULL,
+    entry_type   TEXT        NOT NULL,
+    entry_id     TEXT        NOT NULL,
+    parent_id    TEXT,
+    content      TEXT        NOT NULL,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(project_slug, entry_type, entry_id)
+);</code></pre>
+
+<div class="callout info">
+  <strong>Why T4 ≠ Letta archival:</strong> T4 is intentionally in PostgreSQL rather than pgvector because project artifacts (slices, phases, PRDs) are structured records — they need update-in-place semantics (upsert behavior) and exact key-based retrieval. Letta's archival store is append-only vector search, which is right for unstructured discussion and signals but wrong for project state.
+</div>
+
+
+<!-- ─────────────────────────────────────────────────── -->
+<h2 id="always-loaded-core">8. always_loaded_core — what changed</h2>
+
+<p>The <code>always_loaded_core</code> block is Ren's primary identity and operating instructions document. It was over the 10,000 char limit and had multiple errors. Here's a precise accounting of every change made.</p>
+
+<table>
+  <thead><tr><th>Change</th><th>Before</th><th>After</th><th>Why</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Block size</td>
+      <td>10,477 chars</td>
+      <td>8,208 chars</td>
+      <td>Was over the 10,000 char limit — Letta may truncate or error on blocks exceeding limit</td>
+    </tr>
+    <tr>
+      <td>T4 description</td>
+      <td>T4 described as Letta archival with [t4] tags, searchable via archival_memory_search</td>
+      <td>"Separate PostgreSQL database — NOT in Letta archival. Use search_t4 and get_t4_entry tools."</td>
+      <td>Was factually wrong. T4 is PostgreSQL. Ren was searching the wrong store.</td>
+    </tr>
+    <tr>
+      <td>Dead tool: log_memory_access</td>
+      <td>Required after every archival_memory_search call</td>
+      <td>Removed</td>
+      <td>Tool is Claude Code MCP only — not in Ren's Letta tool list</td>
+    </tr>
+    <tr>
+      <td>Dead tool: enrich_passage</td>
+      <td>Listed as available MCP tool</td>
+      <td>Removed</td>
+      <td>Not in Ren's Letta tool list</td>
+    </tr>
+    <tr>
+      <td>Dead tool: create_notecard</td>
+      <td>Listed as available MCP tool</td>
+      <td>Removed — note redirects to Claude Code</td>
+      <td>Not in Ren's Letta tool list</td>
+    </tr>
+    <tr>
+      <td>Dead protocol: expand after searching</td>
+      <td>Instructed Ren to call GET /api/memory/connections/{id}</td>
+      <td>Removed</td>
+      <td>Ren cannot make arbitrary HTTP calls — only calls tools in her tool list</td>
+    </tr>
+    <tr>
+      <td>SEARCH PROTOCOL</td>
+      <td>3 items: decompose · log every search · expand via connections</td>
+      <td>2 items: decompose · T4 first for projects</td>
+      <td>Items 2 and 3 referenced unavailable tools/endpoints. Replaced item 2 with actionable T4 guidance.</td>
+    </tr>
+    <tr>
+      <td>PROJECT MEMORY TOOLS section</td>
+      <td>Did not exist</td>
+      <td>New section with all 5 MCP tools, parameters, and slug examples</td>
+      <td>Ren needs to know these tools exist and how to call them</td>
+    </tr>
+    <tr>
+      <td>FRAMEWORK IN MEMORY section</td>
+      <td>Separate 570-char section</td>
+      <td>Folded into MEMORY STRUCTURE</td>
+      <td>Redundant. Consolidating reduced chars without losing information.</td>
+    </tr>
+    <tr>
+      <td>Memory use section</td>
+      <td>870-char detailed section</td>
+      <td>Condensed to SEARCH FIRST — 420 chars</td>
+      <td>Kept core behaviors, cut repetitive elaboration</td>
+    </tr>
+    <tr>
+      <td>Operating principles</td>
+      <td>1,340 chars — each item fully written out</td>
+      <td>~950 chars — trimmed elaboration, kept meaning</td>
+      <td>Pure char reduction. No semantic change.</td>
+    </tr>
+  </tbody>
+</table>
+
+
+<!-- ─────────────────────────────────────────────────── -->
+<h2 id="cost">9. Cost context — burn &amp; paused jobs</h2>
+
+<div class="callout danger">
+  <strong>Jobs are currently PAUSED.</strong> Both <code>synthesize.py</code> and <code>curator.py</code> check the <code>jobs_paused</code> flag in the <code>han_solo_config</code> table at startup and exit immediately if true. The flag was set to true via <code>POST /api/jobs-paused {"paused": true}</code> during this session.
+</div>
+
+<h3>Root cause of $25/day burn</h3>
+<p>The <code>Dockerfile.synth</code> runs <code>synthesize.py</code> then <code>curator.py</code> as a Render cron job. Curator was scheduled <strong>hourly</strong> and on every run:</p>
+<ol>
+  <li>Fetches all 392+ archival passages from Letta (no state, no checkpointing)</li>
+  <li>Processes in batches of 20 with 2 Claude Sonnet calls per batch (connection finding + quality scan)</li>
+  <li>That's ~40 Sonnet API calls per run × 24 runs/day = ~960 Sonnet calls/day</li>
+  <li>At ~$0.026/call estimated → ~$25/day</li>
+</ol>
+
+<h3>Redesign needed before re-enabling</h3>
+<table>
+  <thead><tr><th>Problem</th><th>Fix needed</th></tr></thead>
+  <tbody>
+    <tr><td>Runs hourly — should run once at 2AM with dream.py</td><td>Change Render cron schedule</td></tr>
+    <tr><td>Reprocesses all passages every run</td><td>Checkpoint: track last-processed passage ID, only process new ones</td></tr>
+    <tr><td>Uses Sonnet — expensive for batch analysis</td><td>Evaluate switching to Haiku for curator tasks</td></tr>
+  </tbody>
+</table>
+
+<h3>Cost per Ren step (after curator fix)</h3>
+<table>
+  <thead><tr><th>Component</th><th>Tokens</th><th>Rate</th><th>Cost/step</th></tr></thead>
+  <tbody>
+    <tr><td>Core memory (12 blocks, ~18K tokens)</td><td>~18,000</td><td>Haiku $0.25/MTok</td><td>~$0.0045</td></tr>
+    <tr><td>Message history + tool results</td><td>varies</td><td>Haiku $0.25/MTok</td><td>varies</td></tr>
+    <tr><td>pending_thoughts alone (28,933 chars)</td><td>~7,200</td><td>Haiku $0.25/MTok</td><td>~$0.0018</td></tr>
+  </tbody>
+</table>
+
+
+<!-- ─────────────────────────────────────────────────── -->
+<h2 id="verification">10. End-to-end verification results</h2>
+
+<p>All checks run at 9:18 PM CT, May 21, 2026.</p>
+
+<ul class="checklist">
+  <li class="pass"><strong>Han Solo MCP health</strong> — <code>{"status":"ok","ren_agent":"agent-fe4a3d5b-bb51-458e-92f1-6a1ee5b0ce94"}</code></li>
+  <li class="pass"><strong>Ren bearer token auth</strong> — Returns <code>{"name":"Ren","role":"agent","id":"ren"}</code></li>
+  <li class="pass"><strong>Scott bearer token auth</strong> — Returns <code>{"name":"Scott","role":"owner","id":"scott"}</code></li>
+  <li class="pass"><strong>Letta MCP server registration</strong> — han-solo registered as streamable_http pointing to han-solo-mcp.onrender.com/mcp</li>
+  <li class="pass"><strong>Ren tool count</strong> — 10 tools total (5 external_mcp + 5 Letta core/builtin)</li>
+  <li class="pass"><strong>always_loaded_core</strong> — 8,208/10,000 chars. Has PROJECT MEMORY TOOLS section. Has T4 PostgreSQL note. No dead log_memory_access reference.</li>
+  <li class="pass"><strong>T4 project list</strong> — 4 projects: chase-the-light, fantasy-football, garden-planner, solo-companion</li>
+  <li class="pass"><strong>search_t4 live call</strong> — fantasy-football / "deployed" → 3 results returned. First: entry_type=slice, entry_id=SL-P8</li>
+  <li class="pass"><strong>list_notecards</strong> — 3 active notecards returned</li>
+  <li class="pass"><strong>get_session_brief</strong> — Returns JSON with current_datetime, always_loaded_core, pending_thoughts, recent signals</li>
+  <li class="pass"><strong>Ren live test (garden-planner)</strong> — Ren correctly described Phase 4 status, the 52-image blocker, Phase 9 design approval, and asked a follow-up question</li>
+  <li class="warn"><strong>search_signals</strong> — Returns 0 results. Signals table is empty — no signals have been written since synthesize.py is paused. Tool connection is working; data population is paused.</li>
+</ul>
+
+<h3>Ren's self-report of tools (live response)</h3>
+<pre><code>Project memory tools (T4):    search_t4, get_t4_entry
+Signal tools:                  search_signals, get_session_brief, list_notecards
+Archival/memory tools:         archival_memory_search, archival_memory_insert,
+                               core_memory_replace, memory_apply_patch
+Web/fetch tools:               fetch_webpage</code></pre>
+
+
+<!-- ─────────────────────────────────────────────────── -->
+<h2 id="pending">11. Still pending</h2>
+
+<ul class="pending-list">
+  <li>
+    <strong>Trim pending_thoughts (Gap 4)</strong>
+    <span>Currently 28,933 chars. Loads fully on every Ren step — significant context cost. Approach: archive old entries to Letta archival as T2 passages, keep only last 2–3 sessions of active content in the block. Estimate: bring it to under 8,000 chars.</span>
+  </li>
+  <li>
+    <strong>Curator redesign + reschedule (Gap 5)</strong>
+    <span>Currently paused. Needs: (1) incremental processing — checkpoint last-processed passage ID so only new passages are curated, (2) schedule change from hourly to once daily at 2AM alongside dream.py. Do not re-enable until incremental logic is in place.</span>
+  </li>
+  <li>
+    <strong>Re-enable jobs</strong>
+    <span>After curator redesign: POST /api/jobs-paused with {"paused": false}. synthesize.py can probably be re-enabled sooner since it only processes unprocessed chat sessions and is not the cost driver.</span>
+  </li>
+  <li>
+    <strong>Ren given only read MCP tools — write tools still Claude Code only</strong>
+    <span>Not a bug — intentional. But worth revisiting once we trust the tool routing. Ren writing signals or notecards directly during chat could be useful. Requires clear safety guardrails first.</span>
+  </li>
+</ul>
+
+<hr style="border:none; border-top: 1px solid #222; margin: 48px 0 24px" />
+<p style="color: #555; font-size: 0.8rem;">Han Solo System State · May 21, 2026 · Documented end of session</p>
+
+</body>
+</html>
