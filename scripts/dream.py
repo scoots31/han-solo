@@ -17,9 +17,9 @@ import urllib.request
 import urllib.error
 from datetime import datetime
 
-LETTA_URL     = "https://han-solo-letta.onrender.com"
-LETTA_API_KEY = "KTZbsSbNocYbp7a-qhk87RwboYiLcX_W"
-AGENT_ID      = "agent-fe4a3d5b-bb51-458e-92f1-6a1ee5b0ce94"
+LETTA_URL     = os.environ.get("LETTA_URL", "https://han-solo-letta.onrender.com")
+LETTA_API_KEY = os.environ["LETTA_API_KEY"]
+AGENT_ID      = os.environ.get("REN_AGENT_ID", "agent-fe4a3d5b-bb51-458e-92f1-6a1ee5b0ce94")
 
 # dream.py routes through Letta correctly — it sends a message to the Ren agent endpoint
 # and Ren uses her own built-in tools (conversation_search, archival search, core block writes)

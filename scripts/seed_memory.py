@@ -16,9 +16,9 @@ import time
 import urllib.request
 import urllib.error
 
-LETTA_URL     = "https://han-solo-letta.onrender.com"
-LETTA_API_KEY = "KTZbsSbNocYbp7a-qhk87RwboYiLcX_W"
-AGENT_ID      = "agent-44d4a28a-9d66-4aea-b327-2f77b23359ef"
+LETTA_URL     = os.environ.get("LETTA_URL", "https://han-solo-letta.onrender.com")
+LETTA_API_KEY = os.environ["LETTA_API_KEY"]
+AGENT_ID      = os.environ.get("REN_AGENT_ID", "agent-44d4a28a-9d66-4aea-b327-2f77b23359ef")
 SEEDED_FILE   = os.path.join(os.path.dirname(__file__), ".seeded_passages")
 
 # ---------------------------------------------------------------------------

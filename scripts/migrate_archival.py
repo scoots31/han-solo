@@ -1,8 +1,10 @@
 """One-shot script to copy archival passages from ren-v1 to ren-v2."""
 import json, urllib.request, urllib.error, time, sys
 
-LETTA_URL = 'https://han-solo-letta.onrender.com'
-LETTA_API_KEY = 'KTZbsSbNocYbp7a-qhk87RwboYiLcX_W'
+import os
+
+LETTA_URL = os.environ.get("LETTA_URL", 'https://han-solo-letta.onrender.com')
+LETTA_API_KEY = os.environ["LETTA_API_KEY"]
 OLD_ID = 'agent-44d4a28a-9d66-4aea-b327-2f77b23359ef'
 NEW_ID = 'agent-fe4a3d5b-bb51-458e-92f1-6a1ee5b0ce94'
 
