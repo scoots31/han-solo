@@ -1206,7 +1206,7 @@ async def upsert_session_transcript(
         return dict(row) if row else None
     except Exception as e:
         logger.error("Failed to upsert session transcript %s: %s", session_id, e)
-        return None
+        return {"_error": str(e)}
 
 
 async def list_session_transcripts(project: str | None = None, limit: int = 100) -> list[dict]:

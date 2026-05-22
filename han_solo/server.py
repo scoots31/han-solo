@@ -494,8 +494,9 @@ async def api_upsert_transcript(request: Request) -> JSONResponse:
         parsed_text=body.get("parsed_text", ""),
         watermark=body.get("watermark", 0),
     )
-    if not result:
-        return JSONResponse({"error": "DB write failed"}, status_code=500)
+    if not result or "_error" in result:
+        err = result.get("_error", "unknown") if result else "no result"
+        return JSONResponse({"error": "DB write failed", "detail": err}, status_code=500)
     return JSONResponse({"session_id": result["session_id"], "entry_count": result["entry_count"]}, status_code=200)
 
 
