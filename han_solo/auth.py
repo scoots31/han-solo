@@ -24,7 +24,11 @@ def lookup_token(token: str) -> Optional[UserIdentity]:
 EXEMPT_PATHS = {"/health", "/", "/chat", "/workspace", "/api/jobs-status"}
 
 # (path, method) pairs exempt from auth — GET-only public endpoints
-EXEMPT_PATH_METHODS = {("/api/session-logs", "GET")}
+EXEMPT_PATH_METHODS = {("/api/session-logs", "GET"), ("/api/transcripts", "GET"),
+                       ("/api/verify-runs/latest", "GET")}
+
+# Path prefixes exempt for GET — covers dynamic routes like /api/transcripts/{id}
+EXEMPT_GET_PREFIXES = {"/api/transcripts/"}
 
 
 class BearerAuthMiddleware:
@@ -47,7 +51,8 @@ class BearerAuthMiddleware:
 
         path = scope.get("path", "")
         method = scope.get("method", "GET")
-        if path in EXEMPT_PATHS or path.startswith("/docs/") or (path, method) in EXEMPT_PATH_METHODS:
+        get_prefix_exempt = method == "GET" and any(path.startswith(p) for p in EXEMPT_GET_PREFIXES)
+        if path in EXEMPT_PATHS or path.startswith("/docs/") or (path, method) in EXEMPT_PATH_METHODS or get_prefix_exempt:
             await self.app(scope, receive, send)
             return
 

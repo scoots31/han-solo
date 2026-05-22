@@ -138,6 +138,34 @@ CREATE INDEX IF NOT EXISTS idx_session_logs_date
     ON session_logs(session_date DESC);
 CREATE INDEX IF NOT EXISTS idx_session_logs_level
     ON session_logs(level, session_date DESC);
+CREATE TABLE IF NOT EXISTS session_transcripts (
+    session_id    TEXT        PRIMARY KEY,
+    project       TEXT        NOT NULL DEFAULT 'Apps',
+    started_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    entry_count   INT         NOT NULL DEFAULT 0,
+    is_complete   BOOLEAN     NOT NULL DEFAULT FALSE,
+    parsed_content JSONB      NOT NULL DEFAULT '[]',
+    parsed_text   TEXT        NOT NULL DEFAULT '',
+    watermark     INT         NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_session_transcripts_project
+    ON session_transcripts(project, started_at DESC);
+CREATE INDEX IF NOT EXISTS idx_session_transcripts_complete
+    ON session_transcripts(is_complete, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_session_transcripts_fts
+    ON session_transcripts USING GIN (to_tsvector('english', parsed_text));
+CREATE TABLE IF NOT EXISTS verify_runs (
+    id          SERIAL PRIMARY KEY,
+    ran_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    passed      INT         NOT NULL DEFAULT 0,
+    failed      INT         NOT NULL DEFAULT 0,
+    total       INT         NOT NULL DEFAULT 0,
+    details     JSONB       NOT NULL DEFAULT '[]',
+    cold_starts JSONB       NOT NULL DEFAULT '[]'
+);
+CREATE INDEX IF NOT EXISTS idx_verify_runs_ran_at
+    ON verify_runs(ran_at DESC);
 """
 
 # Runs after CREATE_TABLE_SQL — backfills existing slugs as scott/private, idempotent
@@ -1139,6 +1167,174 @@ async def list_session_logs(level: Optional[str] = None, tag: Optional[str] = No
     except Exception as e:
         logger.error("Failed to list session logs: %s", e)
         return []
+
+
+async def upsert_session_transcript(
+    session_id: str,
+    project: str,
+    started_at: str,
+    entry_count: int,
+    is_complete: bool,
+    parsed_content: list,
+    parsed_text: str,
+    watermark: int,
+) -> Optional[dict]:
+    """Upsert a parsed Claude Code session transcript. One row per session, updated on each parser run."""
+    if not _pool:
+        return None
+    try:
+        import json as _json
+        async with _pool.acquire() as conn:
+            row = await conn.fetchrow(
+                """
+                INSERT INTO session_transcripts
+                    (session_id, project, started_at, updated_at, entry_count,
+                     is_complete, parsed_content, parsed_text, watermark)
+                VALUES ($1, $2, $3::timestamptz, NOW(), $4, $5, $6::jsonb, $7, $8)
+                ON CONFLICT (session_id) DO UPDATE SET
+                    updated_at     = NOW(),
+                    entry_count    = EXCLUDED.entry_count,
+                    is_complete    = EXCLUDED.is_complete,
+                    parsed_content = EXCLUDED.parsed_content,
+                    parsed_text    = EXCLUDED.parsed_text,
+                    watermark      = EXCLUDED.watermark
+                RETURNING session_id, project, started_at, updated_at, entry_count, is_complete, watermark
+                """,
+                session_id, project, started_at, entry_count, is_complete,
+                _json.dumps(parsed_content), parsed_text, watermark,
+            )
+        return dict(row) if row else None
+    except Exception as e:
+        logger.error("Failed to upsert session transcript %s: %s", session_id, e)
+        return None
+
+
+async def list_session_transcripts(project: str | None = None, limit: int = 100) -> list[dict]:
+    """List session transcripts newest first, optionally filtered by project."""
+    if not _pool:
+        return []
+    try:
+        async with _pool.acquire() as conn:
+            if project:
+                rows = await conn.fetch(
+                    """
+                    SELECT session_id, project, started_at, updated_at,
+                           entry_count, is_complete, watermark
+                    FROM session_transcripts
+                    WHERE project = $1
+                    ORDER BY started_at DESC LIMIT $2
+                    """,
+                    project, limit,
+                )
+            else:
+                rows = await conn.fetch(
+                    """
+                    SELECT session_id, project, started_at, updated_at,
+                           entry_count, is_complete, watermark
+                    FROM session_transcripts
+                    ORDER BY started_at DESC LIMIT $1
+                    """,
+                    limit,
+                )
+        return [dict(r) for r in rows]
+    except Exception as e:
+        logger.error("Failed to list session transcripts: %s", e)
+        return []
+
+
+async def get_session_transcript(session_id: str) -> Optional[dict]:
+    """Return a single session transcript including full parsed content."""
+    if not _pool:
+        return None
+    try:
+        async with _pool.acquire() as conn:
+            row = await conn.fetchrow(
+                """
+                SELECT session_id, project, started_at, updated_at,
+                       entry_count, is_complete, parsed_content, parsed_text, watermark
+                FROM session_transcripts
+                WHERE session_id = $1
+                """,
+                session_id,
+            )
+        return dict(row) if row else None
+    except Exception as e:
+        logger.error("Failed to get session transcript %s: %s", session_id, e)
+        return None
+
+
+async def search_session_transcripts(query: str, limit: int = 20) -> list[dict]:
+    """Full-text keyword search across all parsed session transcripts."""
+    if not _pool:
+        return []
+    try:
+        words = [w.strip() for w in query.split() if w.strip()]
+        if not words:
+            return []
+        async with _pool.acquire() as conn:
+            params: list = []
+            conditions = []
+            for word in words:
+                params.append(f"%{word}%")
+                conditions.append(f"parsed_text ILIKE ${len(params)}")
+            params.append(limit)
+            sql = f"""
+                SELECT session_id, project, started_at, updated_at, entry_count, is_complete,
+                       LEFT(parsed_text, 500) AS preview
+                FROM session_transcripts
+                WHERE {" AND ".join(conditions)}
+                ORDER BY started_at DESC
+                LIMIT ${len(params)}
+            """
+            rows = await conn.fetch(sql, *params)
+        return [dict(r) for r in rows]
+    except Exception as e:
+        logger.error("Failed to search session transcripts: %s", e)
+        return []
+
+
+async def write_verify_run(
+    passed: int, failed: int, total: int, details: list, cold_starts: list
+) -> Optional[dict]:
+    """Write a verify.py run result. Returns the new row."""
+    if not _pool:
+        return None
+    try:
+        import json as _json
+        async with _pool.acquire() as conn:
+            row = await conn.fetchrow(
+                """
+                INSERT INTO verify_runs (passed, failed, total, details, cold_starts)
+                VALUES ($1, $2, $3, $4::jsonb, $5::jsonb)
+                RETURNING id, ran_at, passed, failed, total
+                """,
+                passed, failed, total,
+                _json.dumps(details), _json.dumps(cold_starts),
+            )
+        return dict(row) if row else None
+    except Exception as e:
+        logger.error("Failed to write verify run: %s", e)
+        return None
+
+
+async def get_latest_verify_run() -> Optional[dict]:
+    """Return the most recent verify.py run result."""
+    if not _pool:
+        return None
+    try:
+        async with _pool.acquire() as conn:
+            row = await conn.fetchrow(
+                """
+                SELECT id, ran_at, passed, failed, total, details, cold_starts
+                FROM verify_runs
+                ORDER BY ran_at DESC
+                LIMIT 1
+                """
+            )
+        return dict(row) if row else None
+    except Exception as e:
+        logger.error("Failed to get latest verify run: %s", e)
+        return None
 
 
 async def upsert_skill(phase_slug: str, content: str, layer: str = "phase-active") -> bool:

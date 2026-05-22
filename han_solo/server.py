@@ -427,6 +427,110 @@ async def api_create_session_log(request: Request) -> JSONResponse:
     return JSONResponse({"id": result["id"], "level": result["level"]}, status_code=201)
 
 
+async def api_list_transcripts(request: Request) -> JSONResponse:
+    """GET /api/transcripts — public. Supports ?project=Apps&q=keyword"""
+    project = request.query_params.get("project", "").strip() or None
+    query = request.query_params.get("q", "").strip()
+    if query:
+        results = await db.search_session_transcripts(query)
+        return JSONResponse([
+            {
+                "session_id": r["session_id"],
+                "project": r["project"],
+                "started_at": r["started_at"].isoformat() if r.get("started_at") else None,
+                "updated_at": r["updated_at"].isoformat() if r.get("updated_at") else None,
+                "entry_count": r["entry_count"],
+                "is_complete": r["is_complete"],
+                "preview": r.get("preview", ""),
+            }
+            for r in results
+        ])
+    logs = await db.list_session_transcripts(project=project)
+    return JSONResponse([
+        {
+            "session_id": r["session_id"],
+            "project": r["project"],
+            "started_at": r["started_at"].isoformat() if r.get("started_at") else None,
+            "updated_at": r["updated_at"].isoformat() if r.get("updated_at") else None,
+            "entry_count": r["entry_count"],
+            "is_complete": r["is_complete"],
+        }
+        for r in logs
+    ])
+
+
+async def api_get_transcript(request: Request) -> JSONResponse:
+    """GET /api/transcripts/{session_id} — public, returns full parsed content."""
+    session_id = request.path_params["session_id"]
+    result = await db.get_session_transcript(session_id)
+    if not result:
+        return JSONResponse({"error": "not found"}, status_code=404)
+    return JSONResponse({
+        "session_id": result["session_id"],
+        "project": result["project"],
+        "started_at": result["started_at"].isoformat() if result.get("started_at") else None,
+        "updated_at": result["updated_at"].isoformat() if result.get("updated_at") else None,
+        "entry_count": result["entry_count"],
+        "is_complete": result["is_complete"],
+        "parsed_content": result["parsed_content"],
+        "watermark": result["watermark"],
+    })
+
+
+async def api_upsert_transcript(request: Request) -> JSONResponse:
+    """POST /api/transcripts — auth required. Upserts a parsed session transcript."""
+    get_current_user()
+    body = await request.json()
+    session_id = body.get("session_id", "").strip()
+    if not session_id:
+        return JSONResponse({"error": "session_id required"}, status_code=400)
+    result = await db.upsert_session_transcript(
+        session_id=session_id,
+        project=body.get("project", "Apps"),
+        started_at=body.get("started_at", "now"),
+        entry_count=body.get("entry_count", 0),
+        is_complete=body.get("is_complete", False),
+        parsed_content=body.get("parsed_content", []),
+        parsed_text=body.get("parsed_text", ""),
+        watermark=body.get("watermark", 0),
+    )
+    if not result:
+        return JSONResponse({"error": "DB write failed"}, status_code=500)
+    return JSONResponse({"session_id": result["session_id"], "entry_count": result["entry_count"]}, status_code=200)
+
+
+async def api_get_latest_verify_run(request: Request) -> JSONResponse:
+    """GET /api/verify-runs/latest — public. Returns most recent verify.py result."""
+    result = await db.get_latest_verify_run()
+    if not result:
+        return JSONResponse({"error": "no verify runs found"}, status_code=404)
+    return JSONResponse({
+        "id": result["id"],
+        "ran_at": result["ran_at"].isoformat() if result.get("ran_at") else None,
+        "passed": result["passed"],
+        "failed": result["failed"],
+        "total": result["total"],
+        "details": result["details"],
+        "cold_starts": result["cold_starts"],
+    })
+
+
+async def api_write_verify_run(request: Request) -> JSONResponse:
+    """POST /api/verify-runs — auth required. Stores a verify.py run result."""
+    get_current_user()
+    body = await request.json()
+    result = await db.write_verify_run(
+        passed=body.get("passed", 0),
+        failed=body.get("failed", 0),
+        total=body.get("total", 0),
+        details=body.get("details", []),
+        cold_starts=body.get("cold_starts", []),
+    )
+    if not result:
+        return JSONResponse({"error": "DB write failed"}, status_code=500)
+    return JSONResponse({"id": result["id"], "ran_at": result["ran_at"].isoformat()}, status_code=201)
+
+
 async def api_memory_health(request: Request) -> JSONResponse:
     """Return memory system health: failed transitions + capture stats."""
     failed = await db.get_failed_transitions(hours=24)
@@ -494,6 +598,11 @@ _chat_routes = [
     Route("/api/tts", chat_api.api_tts, methods=["POST"]),
     Route("/api/session-logs", api_list_session_logs),
     Route("/api/session-logs", api_create_session_log, methods=["POST"]),
+    Route("/api/transcripts", api_list_transcripts),
+    Route("/api/transcripts", api_upsert_transcript, methods=["POST"]),
+    Route("/api/transcripts/{session_id}", api_get_transcript),
+    Route("/api/verify-runs/latest", api_get_latest_verify_run),
+    Route("/api/verify-runs", api_write_verify_run, methods=["POST"]),
 ]
 for i, route in enumerate(_chat_routes):
     _mcp_app.router.routes.insert(i, route)
