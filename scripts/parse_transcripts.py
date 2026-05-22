@@ -88,10 +88,10 @@ def extract_text(content) -> str:
 
 
 def _summarize_tool_input(tool_name: str, inp: dict) -> str:
-    """Produce a short readable summary of a tool call's inputs."""
+    """Produce a readable summary of a tool call's inputs."""
     if tool_name in ("Bash", "bash"):
         cmd = inp.get("command", "")
-        return cmd[:120] + ("..." if len(cmd) > 120 else "")
+        return cmd[:600] + ("..." if len(cmd) > 600 else "")
     if tool_name in ("Read", "read"):
         return inp.get("file_path", "")
     if tool_name in ("Edit", "edit"):
@@ -100,11 +100,10 @@ def _summarize_tool_input(tool_name: str, inp: dict) -> str:
     if tool_name in ("Write", "write"):
         path = inp.get("file_path", "")
         return f"{path}"
-    # MCP tools — show tool name + first string value
-    for v in inp.values():
-        if isinstance(v, str) and v:
-            return v[:80]
-    return json.dumps(inp)[:80] if inp else ""
+    # MCP tools — show all string values joined
+    parts = [v for v in inp.values() if isinstance(v, str) and v]
+    summary = " | ".join(parts)
+    return summary[:400] + ("..." if len(summary) > 400 else "")
 
 
 def parse_entry(raw: dict) -> dict | None:
@@ -126,7 +125,7 @@ def parse_entry(raw: dict) -> dict | None:
             isinstance(b, dict) and b.get("type") == "tool_result" for b in content
         ):
             return None
-        return {"type": "user", "timestamp": timestamp, "text": text[:1000]}
+        return {"type": "user", "timestamp": timestamp, "text": text[:4000]}
 
     if entry_type == "assistant":
         msg = raw.get("message", {})
@@ -141,7 +140,7 @@ def parse_entry(raw: dict) -> dict | None:
             if block.get("type") == "text":
                 t = block.get("text", "").strip()
                 if t:
-                    parts.append(t[:500])
+                    parts.append(t[:2000])
             elif block.get("type") == "tool_use":
                 name = block.get("name", "?")
                 inp = block.get("input", {})
