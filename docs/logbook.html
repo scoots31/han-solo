@@ -357,11 +357,22 @@
           <div class="log-details">
             ${log.decisions ? `<div class="log-section-label">Decisions</div><div class="log-section-content">${escHtml(log.decisions)}</div>` : ''}
             ${log.open_threads ? `<div class="log-section-label">Open threads</div><div class="log-section-content">${escHtml(log.open_threads)}</div>` : ''}
-            ${log.commit_refs ? `<div class="log-section-label">Commits</div><div class="log-section-content">${escHtml(log.commit_refs)}</div>` : ''}
+            ${log.commit_refs ? `<div class="log-section-label">Commits</div><div class="log-section-content">${renderCommitRefs(log.commit_refs)}</div>` : ''}
           </div>
         </div>
       `;
     }).join('');
+  }
+
+  function renderCommitRefs(refs) {
+    return refs.split(',').map(r => {
+      const s = r.trim();
+      if (!s) return '';
+      if (s.startsWith('http')) {
+        return `<a href="${escHtml(s)}" target="_blank" rel="noopener" style="color:var(--purple);text-decoration:none;">${escHtml(s)}</a>`;
+      }
+      return `<a href="https://github.com/scoots31/han-solo/commit/${escHtml(s)}" target="_blank" rel="noopener" style="color:var(--purple);text-decoration:none;font-family:monospace;">${escHtml(s)}</a>`;
+    }).join('  ·  ');
   }
 
   function toggleEntry(id) {
