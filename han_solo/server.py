@@ -9,6 +9,7 @@ Auth:      Bearer token per user, validated on every request
 Deploy:    Render web service
 """
 import contextlib
+import json
 import logging
 
 import os
@@ -473,7 +474,7 @@ async def api_get_transcript(request: Request) -> JSONResponse:
         "updated_at": result["updated_at"].isoformat() if result.get("updated_at") else None,
         "entry_count": result["entry_count"],
         "is_complete": result["is_complete"],
-        "parsed_content": result["parsed_content"],
+        "parsed_content": json.loads(result["parsed_content"]) if isinstance(result["parsed_content"], str) else result["parsed_content"],
         "watermark": result["watermark"],
     })
 
