@@ -122,6 +122,22 @@ CREATE INDEX IF NOT EXISTS idx_access_log_session
     ON memory_access_log(session_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_access_log_time
     ON memory_access_log(created_at DESC);
+CREATE TABLE IF NOT EXISTS session_logs (
+    id           SERIAL PRIMARY KEY,
+    session_date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    summary      TEXT        NOT NULL,
+    decisions    TEXT        NOT NULL DEFAULT '',
+    open_threads TEXT        NOT NULL DEFAULT '',
+    commit_refs  TEXT        NOT NULL DEFAULT '',
+    tags         TEXT        NOT NULL DEFAULT '',
+    level        TEXT        NOT NULL DEFAULT 'minor',
+    created_by   TEXT        NOT NULL DEFAULT 'claude_code',
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_session_logs_date
+    ON session_logs(session_date DESC);
+CREATE INDEX IF NOT EXISTS idx_session_logs_level
+    ON session_logs(level, session_date DESC);
 """
 
 # Runs after CREATE_TABLE_SQL — backfills existing slugs as scott/private, idempotent
@@ -1058,6 +1074,70 @@ async def get_passage_enrichments(passage_id: str) -> list[dict]:
         return [dict(r) for r in rows]
     except Exception as e:
         logger.error("Failed to get passage enrichments for %s: %s", passage_id, e)
+        return []
+
+
+async def create_session_log(
+    summary: str,
+    decisions: str = "",
+    open_threads: str = "",
+    commit_refs: str = "",
+    tags: str = "",
+    level: str = "minor",
+    created_by: str = "claude_code",
+    session_date: Optional[str] = None,
+) -> Optional[dict]:
+    """Write a session log entry. Returns the created row or None on failure."""
+    if not _pool:
+        return None
+    try:
+        from datetime import datetime as _dt
+        date_val = _dt.fromisoformat(session_date) if session_date else datetime.now(timezone.utc)
+        async with _pool.acquire() as conn:
+            row = await conn.fetchrow(
+                """
+                INSERT INTO session_logs
+                    (session_date, summary, decisions, open_threads, commit_refs, tags, level, created_by)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                RETURNING id, session_date, summary, decisions, open_threads, commit_refs, tags, level, created_by, created_at
+                """,
+                date_val, summary, decisions, open_threads, commit_refs, tags, level, created_by,
+            )
+        return dict(row) if row else None
+    except Exception as e:
+        logger.error("Failed to create session log: %s", e)
+        return None
+
+
+async def list_session_logs(level: Optional[str] = None, tag: Optional[str] = None, limit: int = 100) -> list[dict]:
+    """Return session logs, newest first. Optionally filter by level or tag substring."""
+    if not _pool:
+        return []
+    try:
+        async with _pool.acquire() as conn:
+            if level and tag:
+                rows = await conn.fetch(
+                    "SELECT * FROM session_logs WHERE level = $1 AND tags ILIKE $2 ORDER BY session_date DESC LIMIT $3",
+                    level, f"%{tag}%", limit,
+                )
+            elif level:
+                rows = await conn.fetch(
+                    "SELECT * FROM session_logs WHERE level = $1 ORDER BY session_date DESC LIMIT $2",
+                    level, limit,
+                )
+            elif tag:
+                rows = await conn.fetch(
+                    "SELECT * FROM session_logs WHERE tags ILIKE $1 ORDER BY session_date DESC LIMIT $2",
+                    f"%{tag}%", limit,
+                )
+            else:
+                rows = await conn.fetch(
+                    "SELECT * FROM session_logs ORDER BY session_date DESC LIMIT $1",
+                    limit,
+                )
+        return [dict(r) for r in rows]
+    except Exception as e:
+        logger.error("Failed to list session logs: %s", e)
         return []
 
 

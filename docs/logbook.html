@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logbook — Han Solo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_shared.css">
+  <style>
+    .logbook-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 220px;
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      font-size: .9rem;
+      padding: 10px 16px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--white);
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s;
+    }
+    .search-input:focus { border-color: var(--purple); }
+    .search-input::placeholder { color: var(--text-muted); }
+
+    .filter-btn {
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--white);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .filter-btn:hover { border-color: var(--purple); color: var(--text); }
+    .filter-btn.active {
+      background: var(--purple-light);
+      border-color: var(--purple-border);
+      color: var(--purple);
+    }
+
+    .tag-filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+
+    .tag-chip {
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      font-size: .68rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--white);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .tag-chip:hover { border-color: var(--purple); color: var(--text); }
+    .tag-chip.active {
+      background: var(--purple-light);
+      border-color: var(--purple-border);
+      color: var(--purple);
+    }
+
+    .log-count {
+      font-size: .82rem;
+      color: var(--text-muted);
+      margin-bottom: 1.6rem;
+    }
+
+    .log-entry {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--border);
+      border-radius: 0 8px 8px 0;
+      padding: 24px 28px;
+      margin-bottom: 16px;
+      transition: box-shadow .15s;
+    }
+    .log-entry.major { border-left-color: var(--purple); }
+    .log-entry:hover { box-shadow: 0 4px 16px rgba(26,26,26,0.07); }
+
+    .log-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .log-date {
+      font-size: .78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: .04em;
+      white-space: nowrap;
+      padding-top: 2px;
+    }
+
+    .level-badge {
+      font-size: .62rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .level-badge.major {
+      background: var(--purple-light);
+      color: var(--purple);
+      border: 1px solid var(--purple-border);
+    }
+    .level-badge.minor {
+      background: rgba(150,150,150,.07);
+      color: #6b7280;
+      border: 1px solid rgba(150,150,150,.18);
+    }
+
+    .log-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .log-tag {
+      font-size: .62rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 4px;
+      background: rgba(189,140,125,.07);
+      color: #bd8c7d;
+      border: 1px solid rgba(189,140,125,.18);
+    }
+
+    .log-summary {
+      font-size: .93rem;
+      line-height: 1.7;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .log-details {
+      margin-top: 14px;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 14px;
+      display: none;
+    }
+    .log-entry.expanded .log-details { display: block; }
+
+    .log-section-label {
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--purple);
+      margin-bottom: 6px;
+      margin-top: 14px;
+    }
+    .log-section-label:first-child { margin-top: 0; }
+
+    .log-section-content {
+      font-size: .88rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+      white-space: pre-wrap;
+    }
+
+    .log-toggle {
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--purple);
+      cursor: pointer;
+      border: none;
+      background: none;
+      padding: 0;
+      letter-spacing: .04em;
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      transition: opacity .15s;
+    }
+    .log-toggle:hover { opacity: .7; }
+
+    .log-by {
+      font-size: .72rem;
+      color: var(--text-muted);
+      margin-left: auto;
+      white-space: nowrap;
+      padding-top: 2px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 0;
+      color: var(--text-muted);
+      font-size: .93rem;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px 0;
+      color: var(--text-muted);
+      font-size: .9rem;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="brand" href="index.html">Han Solo</a>
+  <a class="nav-link" href="index.html">Home</a>
+  <a class="nav-link" href="how-it-works.html">How it works</a>
+  <a class="nav-link" href="working-with-ren.html">Working with Ren</a>
+  <a class="nav-link" href="memory.html">Memory</a>
+  <a class="nav-link" href="the-workspace.html">Workspace</a>
+  <a class="nav-link" href="roadmap.html">Roadmap</a>
+  <a class="nav-link active" href="logbook.html">Logbook</a>
+</nav>
+
+<div class="page">
+  <div class="hero">
+    <div class="hero-label">History</div>
+    <h1>Logbook</h1>
+    <p class="hero-sub">Every session that touched Han Solo — what changed, why it changed, and what was decided. The operational record of how this system was built.</p>
+  </div>
+
+  <div class="logbook-controls">
+    <input type="text" class="search-input" id="searchInput" placeholder="Search entries…">
+    <button class="filter-btn active" id="filterAll" onclick="setLevelFilter('')">All</button>
+    <button class="filter-btn" id="filterMajor" onclick="setLevelFilter('major')">Major only</button>
+  </div>
+
+  <div class="tag-filters" id="tagFilters"></div>
+
+  <div class="log-count" id="logCount"></div>
+
+  <div id="logEntries"><div class="loading">Loading…</div></div>
+</div>
+
+<script>
+  const API = '/api/session-logs';
+  let allLogs = [];
+  let activeLevel = '';
+  let activeTag = '';
+  let searchQuery = '';
+
+  async function loadLogs() {
+    try {
+      const res = await fetch(API);
+      allLogs = await res.json();
+      buildTagFilters();
+      render();
+    } catch (e) {
+      document.getElementById('logEntries').innerHTML = '<div class="empty-state">Could not load entries.</div>';
+    }
+  }
+
+  function buildTagFilters() {
+    const tagSet = new Set();
+    allLogs.forEach(log => {
+      if (log.tags) log.tags.split(',').map(t => t.trim()).filter(Boolean).forEach(t => tagSet.add(t));
+    });
+    const container = document.getElementById('tagFilters');
+    container.innerHTML = '';
+    [...tagSet].sort().forEach(tag => {
+      const chip = document.createElement('button');
+      chip.className = 'tag-chip';
+      chip.textContent = tag;
+      chip.onclick = () => setTagFilter(tag);
+      chip.id = 'tag-' + tag;
+      container.appendChild(chip);
+    });
+  }
+
+  function setLevelFilter(level) {
+    activeLevel = level;
+    document.getElementById('filterAll').classList.toggle('active', level === '');
+    document.getElementById('filterMajor').classList.toggle('active', level === 'major');
+    render();
+  }
+
+  function setTagFilter(tag) {
+    activeTag = activeTag === tag ? '' : tag;
+    document.querySelectorAll('.tag-chip').forEach(c => c.classList.remove('active'));
+    if (activeTag) {
+      const el = document.getElementById('tag-' + tag);
+      if (el) el.classList.add('active');
+    }
+    render();
+  }
+
+  document.getElementById('searchInput').addEventListener('input', e => {
+    searchQuery = e.target.value.toLowerCase();
+    render();
+  });
+
+  function formatDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
+      ' · ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+  }
+
+  function render() {
+    let logs = allLogs;
+    if (activeLevel) logs = logs.filter(l => l.level === activeLevel);
+    if (activeTag) logs = logs.filter(l => l.tags && l.tags.split(',').map(t => t.trim()).includes(activeTag));
+    if (searchQuery) logs = logs.filter(l =>
+      (l.summary || '').toLowerCase().includes(searchQuery) ||
+      (l.decisions || '').toLowerCase().includes(searchQuery) ||
+      (l.open_threads || '').toLowerCase().includes(searchQuery) ||
+      (l.tags || '').toLowerCase().includes(searchQuery)
+    );
+
+    document.getElementById('logCount').textContent = logs.length === 1 ? '1 entry' : `${logs.length} entries`;
+
+    if (!logs.length) {
+      document.getElementById('logEntries').innerHTML = '<div class="empty-state">No entries match.</div>';
+      return;
+    }
+
+    document.getElementById('logEntries').innerHTML = logs.map(log => {
+      const tags = log.tags ? log.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
+      const hasDetails = log.decisions || log.open_threads || log.commit_refs;
+      return `
+        <div class="log-entry ${log.level}" id="entry-${log.id}">
+          <div class="log-header">
+            <span class="log-date">${formatDate(log.session_date)}</span>
+            <span class="level-badge ${log.level}">${log.level}</span>
+            <div class="log-tags">${tags.map(t => `<span class="log-tag">${t}</span>`).join('')}</div>
+            <span class="log-by">${log.created_by}</span>
+          </div>
+          <div class="log-summary">${escHtml(log.summary)}</div>
+          ${hasDetails ? `<button class="log-toggle" onclick="toggleEntry(${log.id})">Show details ↓</button>` : ''}
+          <div class="log-details">
+            ${log.decisions ? `<div class="log-section-label">Decisions</div><div class="log-section-content">${escHtml(log.decisions)}</div>` : ''}
+            ${log.open_threads ? `<div class="log-section-label">Open threads</div><div class="log-section-content">${escHtml(log.open_threads)}</div>` : ''}
+            ${log.commit_refs ? `<div class="log-section-label">Commits</div><div class="log-section-content">${escHtml(log.commit_refs)}</div>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function toggleEntry(id) {
+    const el = document.getElementById('entry-' + id);
+    const btn = el.querySelector('.log-toggle');
+    el.classList.toggle('expanded');
+    btn.textContent = el.classList.contains('expanded') ? 'Hide details ↑' : 'Show details ↓';
+  }
+
+  function escHtml(str) {
+    return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  loadLogs();
+</script>
+
+</body>
+</html>

@@ -25,7 +25,7 @@ from .auth import BearerAuthMiddleware, get_current_user
 from .config import REN_AGENT_NAME, REN_AGENT_ID
 from . import letta_client as letta
 from . import db
-from .tools import memory, signals, phase, brief, portraits, notecards, t4, skills
+from .tools import memory, signals, phase, brief, portraits, notecards, t4, skills, logbook
 from . import chat_api
 
 logging.basicConfig(level=logging.INFO)
@@ -49,6 +49,7 @@ portraits.register(server)
 notecards.register(server)
 t4.register(server)
 skills.register(server)
+logbook.register(server)
 
 
 # ---------------------------------------------------------------------------
@@ -379,6 +380,53 @@ async def api_write_passage_enrichment(request: Request) -> JSONResponse:
     return JSONResponse({"written": True}, status_code=201)
 
 
+async def api_list_session_logs(request: Request) -> JSONResponse:
+    """GET /api/session-logs — public, no auth required. Supports ?level=major&tag=letta"""
+    level = request.query_params.get("level", "").strip() or None
+    tag = request.query_params.get("tag", "").strip() or None
+    logs = await db.list_session_logs(level=level, tag=tag)
+    return JSONResponse([
+        {
+            "id": r["id"],
+            "session_date": r["session_date"].isoformat() if r.get("session_date") else None,
+            "summary": r["summary"],
+            "decisions": r["decisions"],
+            "open_threads": r["open_threads"],
+            "commit_refs": r["commit_refs"],
+            "tags": r["tags"],
+            "level": r["level"],
+            "created_by": r["created_by"],
+            "created_at": r["created_at"].isoformat() if r.get("created_at") else None,
+        }
+        for r in logs
+    ])
+
+
+async def api_create_session_log(request: Request) -> JSONResponse:
+    """POST /api/session-logs — auth required. Body: {summary, decisions?, open_threads?, commit_refs?, tags?, level?, session_date?}"""
+    get_current_user()
+    body = await request.json()
+    summary = body.get("summary", "").strip()
+    if not summary:
+        return JSONResponse({"error": "summary required"}, status_code=400)
+    level = body.get("level", "minor").strip()
+    if level not in ("major", "minor"):
+        return JSONResponse({"error": "level must be 'major' or 'minor'"}, status_code=400)
+    result = await db.create_session_log(
+        summary=summary,
+        decisions=body.get("decisions", ""),
+        open_threads=body.get("open_threads", ""),
+        commit_refs=body.get("commit_refs", ""),
+        tags=body.get("tags", ""),
+        level=level,
+        created_by=body.get("created_by", "claude_code"),
+        session_date=body.get("session_date"),
+    )
+    if not result:
+        return JSONResponse({"error": "DB write failed"}, status_code=500)
+    return JSONResponse({"id": result["id"], "level": result["level"]}, status_code=201)
+
+
 async def api_memory_health(request: Request) -> JSONResponse:
     """Return memory system health: failed transitions + capture stats."""
     failed = await db.get_failed_transitions(hours=24)
@@ -444,6 +492,8 @@ _chat_routes = [
     Route("/api/admin/agent-info", admin_agent_info),
     Route("/api/admin/patch-model", admin_patch_model, methods=["POST"]),
     Route("/api/tts", chat_api.api_tts, methods=["POST"]),
+    Route("/api/session-logs", api_list_session_logs),
+    Route("/api/session-logs", api_create_session_log, methods=["POST"]),
 ]
 for i, route in enumerate(_chat_routes):
     _mcp_app.router.routes.insert(i, route)
