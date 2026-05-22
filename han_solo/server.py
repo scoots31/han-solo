@@ -478,9 +478,14 @@ async def api_get_transcript(request: Request) -> JSONResponse:
 
 
 async def api_upsert_transcript(request: Request) -> JSONResponse:
-    """POST /api/transcripts — auth required. Upserts a parsed session transcript."""
+    """POST /api/transcripts — auth required. Upserts a parsed session transcript.
+    Accepts gzip Content-Encoding so WAF doesn't block session content."""
+    import gzip as _gzip, json as _json
     get_current_user()
-    body = await request.json()
+    raw = await request.body()
+    if request.headers.get("content-encoding", "").lower() == "gzip":
+        raw = _gzip.decompress(raw)
+    body = _json.loads(raw)
     session_id = body.get("session_id", "").strip()
     if not session_id:
         return JSONResponse({"error": "session_id required"}, status_code=400)
