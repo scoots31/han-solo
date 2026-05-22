@@ -46,6 +46,37 @@ def register(server: FastMCP) -> None:
         }
 
     @server.tool()
+    async def write_skill(phase_slug: str, content: str, layer: str = "phase-active") -> dict:
+        """
+        Write (create or update) a framework phase skill in Han Solo.
+
+        Use this to update skill content after editing the canonical file in
+        ~/Developer/Framework Vers1/skills/<phase_slug>/SKILL.md.
+
+        Args:
+            phase_slug: The skill identifier (e.g. "solo-build", "discover")
+            content:    Full markdown content of the SKILL.md file
+            layer:      Storage layer — defaults to "phase-active"
+
+        Returns: {phase_slug, layer, chars, updated_at} on success, or error dict.
+        """
+        get_current_user()
+
+        if not phase_slug or not content:
+            return {"error": "phase_slug and content are required"}
+
+        ok = await db.upsert_skill(phase_slug, content, layer)
+        if not ok:
+            return {"error": f"DB write failed for slug '{phase_slug}'"}
+
+        return {
+            "phase_slug": phase_slug,
+            "layer": layer,
+            "chars": len(content),
+            "updated_at": "now",
+        }
+
+    @server.tool()
     async def list_skills() -> list[dict]:
         """
         List all framework phase skills currently stored in Han Solo.

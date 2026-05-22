@@ -337,6 +337,21 @@ async def api_get_skill(request: Request) -> JSONResponse:
     })
 
 
+async def api_put_skill(request: Request) -> JSONResponse:
+    """PUT /api/skills/{phase_slug} — auth required. Upserts skill content."""
+    get_current_user()
+    phase_slug = request.path_params["phase_slug"]
+    body = await request.json()
+    content = body.get("content", "").strip()
+    if not content:
+        return JSONResponse({"error": "content required"}, status_code=400)
+    layer = body.get("layer", "phase-active")
+    ok = await db.upsert_skill(phase_slug, content, layer)
+    if not ok:
+        return JSONResponse({"error": "DB write failed"}, status_code=500)
+    return JSONResponse({"phase_slug": phase_slug, "layer": layer, "chars": len(content)})
+
+
 
 
 async def api_memory_access_patterns(request: Request) -> JSONResponse:
@@ -606,6 +621,7 @@ _chat_routes = [
     Route("/api/write-core-block", api_write_core_block, methods=["POST"]),
     Route("/api/create-core-block", api_create_core_block, methods=["POST"]),
     Route("/api/skills/{phase_slug}", api_get_skill),
+    Route("/api/skills/{phase_slug}", api_put_skill, methods=["PUT"]),
     Route("/api/t4/projects", api_t4_projects),
     Route("/api/t4/projects/{project_slug}", api_t4_project_patch, methods=["PATCH"]),
     Route("/api/t4/{project_slug}/entries", api_t4_entries),

@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """
-seed_skills.py — Populate the skills table from engineering-playbook SKILL.md files.
+seed_skills.py — Populate the skills table from Framework Vers1 SKILL.md files.
 
-Run manually whenever skill content changes:
+Run manually for bulk seeding. For individual skill updates, prefer the
+write_skill MCP tool or PUT /api/skills/{phase_slug}.
+
     DATABASE_URL=... python3 scripts/seed_skills.py
 
 Phase skills are seeded as layer=phase-active.
@@ -18,7 +20,7 @@ import asyncpg
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
 
-PLAYBOOK = Path.home() / "Developer" / "engineering-playbook" / "skills"
+PLAYBOOK = Path.home() / "Developer" / "Framework Vers1" / "skills"
 
 # Map skill folder name -> phase slug used by the hook
 PHASE_SKILLS = [
