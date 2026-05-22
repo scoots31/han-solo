@@ -1184,13 +1184,21 @@ async def upsert_session_transcript(
         return None
     try:
         import json as _json
+        from datetime import datetime as _dt
+        if isinstance(started_at, str):
+            try:
+                started_at_dt = _dt.fromisoformat(started_at.replace("Z", "+00:00"))
+            except ValueError:
+                started_at_dt = datetime.now(timezone.utc)
+        else:
+            started_at_dt = started_at
         async with _pool.acquire() as conn:
             row = await conn.fetchrow(
                 """
                 INSERT INTO session_transcripts
                     (session_id, project, started_at, updated_at, entry_count,
                      is_complete, parsed_content, parsed_text, watermark)
-                VALUES ($1, $2, $3::timestamptz, NOW(), $4, $5, $6::jsonb, $7, $8)
+                VALUES ($1, $2, $3, NOW(), $4, $5, $6::jsonb, $7, $8)
                 ON CONFLICT (session_id) DO UPDATE SET
                     updated_at     = NOW(),
                     entry_count    = EXCLUDED.entry_count,
@@ -1200,7 +1208,7 @@ async def upsert_session_transcript(
                     watermark      = EXCLUDED.watermark
                 RETURNING session_id, project, started_at, updated_at, entry_count, is_complete, watermark
                 """,
-                session_id, project, started_at, entry_count, is_complete,
+                session_id, project, started_at_dt, entry_count, is_complete,
                 _json.dumps(parsed_content), parsed_text, watermark,
             )
         return dict(row) if row else None
