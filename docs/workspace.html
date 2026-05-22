@@ -3289,7 +3289,7 @@
         const d = s.started_at ? new Date(s.started_at) : null;
         const dateStr = d ? d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
         const timeStr = d ? d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}) : '';
-        return `<div class="list-row" onclick="loadTxEntries('${escHtml(s.session_id)}',this)">
+        return `<div class="list-row" onclick="loadTxEntries('${escHtml(s.session_id)}',this)" style="position:relative">
           <div style="flex:1;min-width:0">
             <div style="font-size:12.5px;font-weight:500;color:var(--text-primary);font-family:monospace">${escHtml(s.session_id.slice(0,16))}</div>
             <div style="font-size:11px;color:var(--text-meta);margin-top:2px">${dateStr} ${timeStr} · ${s.entry_count} entries</div>
@@ -3298,6 +3298,10 @@
             ${s.is_complete ? 'background:var(--accent-light);color:var(--accent)' : 'background:rgba(150,150,150,.08);color:var(--text-meta)'}">
             ${s.is_complete ? 'Done' : 'Active'}
           </span>
+          <span onclick="event.stopPropagation();openTxWindow('${escHtml(s.session_id)}','${escHtml(dateStr+' '+timeStr)}')"
+            title="Open in new window"
+            style="margin-left:8px;flex-shrink:0;cursor:pointer;opacity:.45;font-size:13px;transition:opacity .15s;padding:2px 4px;border-radius:3px"
+            onmouseover="this.style.opacity='.9'" onmouseout="this.style.opacity='.45'">↗</span>
         </div>`;
       }).join('');
     }
@@ -3340,6 +3344,58 @@
         }).join('');
       } catch(err) {
         detail.innerHTML = '<div style="font-size:12px;color:var(--text-meta)">Could not load entries.</div>';
+      }
+    }
+
+    async function openTxWindow(sessionId, dateLabel) {
+      const win = window.open('', '_blank');
+      win.document.write('<html><head><title>Loading…</title></head><body style="font-family:system-ui,sans-serif;padding:32px;color:#1a1a1a;background:#fafaf8;max-width:860px;margin:0 auto"><p style="color:#999">Loading session…</p></body></html>');
+      try {
+        const data = await fetch(`/api/transcripts/${sessionId}`).then(r=>r.json());
+        const entries = data.parsed_content || [];
+        const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+        const rows = entries.map(e => {
+          const isUser = e.type === 'user';
+          const roleStyle = isUser
+            ? 'background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe'
+            : 'background:#fdf2ef;color:#9b5e4f;border:1px solid #f0cfc8';
+          const tools = (e.tool_calls||[]).map(tc => `
+            <div style="display:flex;gap:8px;align-items:baseline;padding:3px 0">
+              <span style="font-family:monospace;font-size:11px;font-weight:600;padding:1px 7px;border-radius:3px;background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb;flex-shrink:0">${esc(tc.tool)}</span>
+              ${tc.summary ? `<span style="font-size:12px;color:#6b7280;word-break:break-all">${esc(tc.summary)}</span>` : ''}
+            </div>`).join('');
+          return `<div style="display:flex;gap:12px;padding:14px 0;border-bottom:1px solid #eae6e1;align-items:flex-start">
+            <span style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:4px;flex-shrink:0;margin-top:2px;${roleStyle}">
+              ${isUser ? 'You' : 'Ren'}
+            </span>
+            <div style="flex:1;min-width:0">
+              ${e.text ? `<div style="font-size:14px;line-height:1.7;white-space:pre-wrap;word-break:break-word">${esc(e.text)}</div>` : ''}
+              ${tools ? `<div style="margin-top:6px">${tools}</div>` : ''}
+            </div>
+          </div>`;
+        }).join('');
+
+        const html = `<!DOCTYPE html><html><head>
+          <meta charset="UTF-8">
+          <title>Session ${sessionId.slice(0,16)} — Han Solo</title>
+          <style>
+            body { font-family: system-ui, -apple-system, sans-serif; background:#fafaf8; color:#1a1a1a; padding:40px 32px; max-width:860px; margin:0 auto; }
+            h1 { font-size:16px; font-weight:600; margin-bottom:4px; }
+            .meta { font-size:12px; color:#999; margin-bottom:28px; }
+          </style>
+        </head><body>
+          <h1>Claude Session</h1>
+          <div class="meta">${esc(dateLabel)} · ${sessionId} · ${entries.length} entries</div>
+          ${rows || '<p style="color:#999;font-size:13px">No entries captured.</p>'}
+        </body></html>`;
+
+        win.document.open();
+        win.document.write(html);
+        win.document.close();
+        win.document.title = `Session ${sessionId.slice(0,16)}`;
+      } catch(err) {
+        win.document.body.innerHTML = '<p style="color:#c04040;padding:32px">Could not load session.</p>';
       }
     }
 
