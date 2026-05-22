@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Session Transcripts — Han Solo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_shared.css">
+  <style>
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 240px;
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      font-size: .9rem;
+      padding: 10px 16px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--white);
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s;
+    }
+    .search-input:focus { border-color: var(--purple); }
+    .search-input::placeholder { color: var(--text-muted); }
+
+    .filter-btn {
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--white);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .filter-btn:hover { border-color: var(--purple); color: var(--text); }
+    .filter-btn.active {
+      background: var(--purple-light);
+      border-color: var(--purple-border);
+      color: var(--purple);
+    }
+
+    .session-count {
+      font-size: .82rem;
+      color: var(--text-muted);
+      margin-bottom: 1.4rem;
+    }
+
+    .session-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--border);
+      border-radius: 0 8px 8px 0;
+      padding: 20px 24px;
+      margin-bottom: 12px;
+      transition: box-shadow .15s;
+    }
+    .session-card.complete { border-left-color: var(--purple); }
+    .session-card:hover { box-shadow: 0 4px 16px rgba(26,26,26,0.07); }
+
+    .session-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .session-id {
+      font-family: monospace;
+      font-size: .82rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .session-date {
+      font-size: .78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: .04em;
+    }
+
+    .status-badge {
+      font-size: .62rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .status-badge.complete {
+      background: var(--purple-light);
+      color: var(--purple);
+      border: 1px solid var(--purple-border);
+    }
+    .status-badge.in-progress {
+      background: rgba(189,140,125,.07);
+      color: #bd8c7d;
+      border: 1px solid rgba(189,140,125,.18);
+    }
+
+    .entry-count {
+      font-size: .75rem;
+      color: var(--text-muted);
+      margin-left: auto;
+    }
+
+    .session-toggle {
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--purple);
+      cursor: pointer;
+      border: none;
+      background: none;
+      padding: 0;
+      letter-spacing: .04em;
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      transition: opacity .15s;
+      margin-top: 10px;
+      display: block;
+    }
+    .session-toggle:hover { opacity: .7; }
+
+    .session-body {
+      margin-top: 16px;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 16px;
+      display: none;
+    }
+    .session-card.expanded .session-body { display: block; }
+
+    .entry {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .entry:last-child { border-bottom: none; }
+
+    .entry-role {
+      font-size: .62rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .entry-role.user {
+      background: rgba(59,130,246,.08);
+      color: #3b82f6;
+      border: 1px solid rgba(59,130,246,.2);
+    }
+    .entry-role.assistant {
+      background: var(--purple-light);
+      color: var(--purple);
+      border: 1px solid var(--purple-border);
+    }
+
+    .entry-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .entry-text {
+      font-size: .88rem;
+      line-height: 1.7;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .tool-calls {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tool-chip {
+      font-size: .68rem;
+      font-weight: 500;
+      padding: 3px 9px;
+      border-radius: 4px;
+      background: rgba(150,150,150,.06);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      font-family: monospace;
+      max-width: 280px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .entry-time {
+      font-size: .68rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+
+    .loading-entries {
+      text-align: center;
+      padding: 24px 0;
+      color: var(--text-muted);
+      font-size: .88rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 0;
+      color: var(--text-muted);
+      font-size: .93rem;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px 0;
+      color: var(--text-muted);
+      font-size: .9rem;
+    }
+
+    .search-hint {
+      font-size: .78rem;
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 6px 0 0;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="brand" href="index.html">Han Solo</a>
+  <a class="nav-link" href="index.html">Home</a>
+  <a class="nav-link" href="how-it-works.html">How it works</a>
+  <a class="nav-link" href="working-with-ren.html">Working with Ren</a>
+  <a class="nav-link" href="memory.html">Memory</a>
+  <a class="nav-link" href="the-workspace.html">Workspace</a>
+  <a class="nav-link" href="logbook.html">Logbook</a>
+  <a class="nav-link" href="transcripts.html">Transcripts</a>
+  <a class="nav-link" href="dashboard.html">Dashboard</a>
+</nav>
+
+<div class="page">
+  <div class="hero">
+    <div class="hero-label">Audit Trail</div>
+    <h1>Session Transcripts</h1>
+    <p class="hero-sub">Every Claude Code session — parsed and searchable. What was asked, what was built, what tools were called. The complete action record.</p>
+  </div>
+
+  <div class="controls">
+    <input type="text" class="search-input" id="searchInput" placeholder="Search sessions by keyword…">
+    <button class="filter-btn active" id="filterAll" onclick="setFilter('')">All</button>
+    <button class="filter-btn" id="filterComplete" onclick="setFilter('complete')">Complete</button>
+    <button class="filter-btn" id="filterActive" onclick="setFilter('active')">In progress</button>
+  </div>
+
+  <div class="session-count" id="sessionCount"></div>
+  <div id="sessionList"><div class="loading">Loading…</div></div>
+</div>
+
+<script>
+  const MCP = 'https://han-solo-mcp.onrender.com';
+  let allSessions = [];
+  let activeFilter = '';
+  let searchTimer = null;
+  let expandedSessions = {};
+
+  async function loadSessions(query) {
+    const url = query
+      ? `${MCP}/api/transcripts?q=${encodeURIComponent(query)}&limit=100`
+      : `${MCP}/api/transcripts?limit=100`;
+    try {
+      const res = await fetch(url);
+      allSessions = await res.json();
+      render();
+    } catch (e) {
+      document.getElementById('sessionList').innerHTML =
+        '<div class="empty-state">Could not load sessions.</div>';
+    }
+  }
+
+  function setFilter(f) {
+    activeFilter = f;
+    document.getElementById('filterAll').classList.toggle('active', f === '');
+    document.getElementById('filterComplete').classList.toggle('active', f === 'complete');
+    document.getElementById('filterActive').classList.toggle('active', f === 'active');
+    render();
+  }
+
+  document.getElementById('searchInput').addEventListener('input', e => {
+    clearTimeout(searchTimer);
+    const q = e.target.value.trim();
+    searchTimer = setTimeout(() => loadSessions(q), 400);
+  });
+
+  function formatDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
+      ' · ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+  }
+
+  function formatTime(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
+  }
+
+  function render() {
+    let sessions = allSessions;
+    if (activeFilter === 'complete') sessions = sessions.filter(s => s.is_complete);
+    if (activeFilter === 'active') sessions = sessions.filter(s => !s.is_complete);
+
+    const count = sessions.length;
+    document.getElementById('sessionCount').textContent =
+      count === 1 ? '1 session' : `${count} sessions`;
+
+    if (!count) {
+      document.getElementById('sessionList').innerHTML =
+        '<div class="empty-state">No sessions match.</div>';
+      return;
+    }
+
+    document.getElementById('sessionList').innerHTML = sessions.map(s => {
+      const isComplete = s.is_complete;
+      const wasExpanded = expandedSessions[s.session_id];
+      return `
+        <div class="session-card ${isComplete ? 'complete' : ''} ${wasExpanded ? 'expanded' : ''}"
+             id="sc-${s.session_id}">
+          <div class="session-header" onclick="toggleSession('${s.session_id}')">
+            <span class="session-id">${s.session_id.slice(0, 16)}</span>
+            <span class="session-date">${formatDate(s.started_at)}</span>
+            <span class="status-badge ${isComplete ? 'complete' : 'in-progress'}">
+              ${isComplete ? 'Complete' : 'In progress'}
+            </span>
+            <span class="entry-count">${s.entry_count} entries</span>
+          </div>
+          <button class="session-toggle" onclick="toggleSession('${s.session_id}')">
+            ${wasExpanded ? 'Hide entries ↑' : 'Show entries ↓'}
+          </button>
+          <div class="session-body" id="sb-${s.session_id}">
+            <div class="loading-entries">Loading entries…</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Re-render any previously-expanded sessions
+    sessions.forEach(s => {
+      if (expandedSessions[s.session_id]) loadEntries(s.session_id);
+    });
+  }
+
+  async function toggleSession(id) {
+    const card = document.getElementById('sc-' + id);
+    const body = document.getElementById('sb-' + id);
+    const btn = card.querySelector('.session-toggle');
+    const isExpanded = card.classList.contains('expanded');
+
+    if (isExpanded) {
+      card.classList.remove('expanded');
+      btn.textContent = 'Show entries ↓';
+      delete expandedSessions[id];
+    } else {
+      card.classList.add('expanded');
+      btn.textContent = 'Hide entries ↑';
+      expandedSessions[id] = true;
+      if (!body.dataset.loaded) {
+        await loadEntries(id);
+      }
+    }
+  }
+
+  async function loadEntries(id) {
+    const body = document.getElementById('sb-' + id);
+    try {
+      const res = await fetch(`${MCP}/api/transcripts/${id}`);
+      const data = await res.json();
+      const entries = data.parsed_content || [];
+      body.dataset.loaded = '1';
+
+      if (!entries.length) {
+        body.innerHTML = '<div class="loading-entries">No entries captured.</div>';
+        return;
+      }
+
+      body.innerHTML = entries.map(e => {
+        const isUser = e.type === 'user';
+        const toolChips = (e.tool_calls || []).map(tc =>
+          `<span class="tool-chip" title="${escHtml(tc.summary)}">${escHtml(tc.tool)}: ${escHtml(tc.summary)}</span>`
+        ).join('');
+        const timeStr = e.timestamp ? formatTime(e.timestamp) : '';
+        return `
+          <div class="entry">
+            <span class="entry-role ${isUser ? 'user' : 'assistant'}">${isUser ? 'User' : 'Ren'}</span>
+            <div class="entry-content">
+              ${e.text ? `<div class="entry-text">${escHtml(e.text)}</div>` : ''}
+              ${toolChips ? `<div class="tool-calls">${toolChips}</div>` : ''}
+            </div>
+            ${timeStr ? `<span class="entry-time">${timeStr}</span>` : ''}
+          </div>
+        `;
+      }).join('');
+    } catch (err) {
+      body.innerHTML = '<div class="loading-entries">Could not load entries.</div>';
+    }
+  }
+
+  function escHtml(str) {
+    return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  loadSessions('');
+</script>
+
+</body>
+</html>
