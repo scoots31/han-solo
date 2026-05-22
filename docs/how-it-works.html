@@ -146,6 +146,9 @@
     <li>Checks the Letta GitHub releases page for updates newer than the current version</li>
   </ol>
   <p>Runs via launchd (<code>com.scotth.rendream.plist</code>). No external dependencies — stdlib Python only.</p>
+  <div class="callout">
+    <strong>How Mac-to-cloud works:</strong> The script makes a single HTTP POST to <code>han-solo-letta.onrender.com</code> with the dream prompt. Scott's Mac just fires that request — everything after that (Letta processing, Ren calling her own tools, memory writes) happens entirely on Render's servers. The Mac doesn't need to stay connected or wait. If the Mac is asleep at 2am and wakes up later, launchd runs the job when it can. If it misses a night entirely, Ren skips that reflection — no retry.
+  </div>
 
   <h3>parse_transcripts.py — Claude Code session capture (every 30 min, Mac launchd)</h3>
   <p>Every 30 minutes, a script on Scott's Mac reads Claude Code session JSONL files from <code>~/.claude/projects/</code>, parses them into structured entries, and pushes them to the Han Solo database. Only sessions from the last 45 days are kept. Ren can search these via the <code>search_transcripts</code> MCP tool — raw session history without any Anthropic API calls.</p>
