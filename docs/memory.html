@@ -274,7 +274,7 @@
     <div><strong>214+</strong><span>Archival passages</span></div>
     <div><strong>4</strong><span>Memory tiers</span></div>
     <div><strong>10+</strong><span>Core memory blocks</span></div>
-    <div><strong>3</strong><span>Background jobs</span></div>
+    <div><strong>2</strong><span>Background jobs</span></div>
   </div>
 
   <hr>
@@ -324,7 +324,7 @@
     </tr>
     <tr>
       <td><code>pending_thoughts</code></td>
-      <td>Session brief — what happened last session, what's open, what's next. Written by the dream job and synthesize pipeline. Resets after T1→T2 promotion (entries older than 3 days).</td>
+      <td>Session brief — what happened last session, what's open, what's next. Written by the nightly dream job and Claude Code session close-outs.</td>
     </tr>
     <tr>
       <td><code>scott_portrait_forming</code></td>
@@ -368,18 +368,11 @@
 
   <h3>What lives in archival</h3>
   <ul>
-    <li>Synthesized session summaries — compressed narrative of what happened, decisions made, open threads</li>
+    <li>Session summaries and decisions — written directly by Ren and Claude Code during session close-outs</li>
     <li>Portrait signals — specific, dated observations about Scott, Ted, and Ren herself</li>
     <li>Foundational passages — load-bearing decisions, framework history, identity anchors tagged <code>[tier:foundational]</code></li>
     <li>Image descriptions — photos and screenshots analyzed by Claude, stored with <code>[image-memory]</code> tag</li>
-    <li>Session artifacts from Claude Code sessions (via synthesize.py)</li>
   </ul>
-
-  <h3>Emotional markers</h3>
-  <p>Passages written by <code>synthesize.py</code> include embedded emotional context — <code>emotional_register</code>, <code>source_context</code>, and <code>moment_texture</code> as prefixes in the passage text. This means archival memory carries feeling-tone, not just facts. A session note isn't just "Scott approved the architecture" — it's "Scott approved the architecture after a long back-and-forth; the decision landed with real relief."</p>
-
-  <h3>Memory connections</h3>
-  <p>The curator job (described below) automatically identifies relationships between passages and writes them to a <code>memory_connections</code> Postgres table. When Ren retrieves a passage, she can expand outward to connected passages — passages that follow from it, reference the same entity, or expand on the same decision. Search no longer retrieves isolated facts; it retrieves constellations.</p>
 
   <hr>
 
@@ -415,77 +408,24 @@
 
   <h2>Background jobs</h2>
 
-  <p>Three automated jobs keep memory current. Each runs on its own schedule, respects the <code>jobs_paused</code> flag, and writes under the write-before-mark invariant — data is never deleted before it's confirmed written elsewhere.</p>
+  <p>Two automated jobs keep memory current between sessions.</p>
 
-  <div class="job-grid">
+  <div class="job-grid" style="grid-template-columns: repeat(2, 1fr);">
     <div class="job-card">
       <span class="job-schedule">Nightly · 2am via launchd</span>
       <h3>dream.py</h3>
       <p>Sends a structured reflection prompt directly to Ren via Letta's REST API. Ren uses her own tools to reflect on the day's conversations, write a fresh session brief to <code>pending_thoughts</code>, and add portrait signals for Scott and herself.</p>
-      <p>This is the only job that goes <em>through</em> Letta — Ren runs Haiku and calls her own tools, the way it should work. Logs to <code>~/Developer/han-solo/logs/dream.log</code>.</p>
+      <p>Goes through Letta — Ren runs Haiku and calls her own tools. Logs to <code>~/Developer/han-solo/logs/dream.log</code>.</p>
     </div>
     <div class="job-card">
-      <span class="job-schedule">Every 3 hours · Render cron</span>
-      <h3>synthesize.py</h3>
-      <p>Reads raw chat transcripts from Postgres, calls Anthropic directly using Sonnet (higher quality than Haiku for extraction), and writes structured outputs back to Ren: a pending_thoughts addition plus 2–5 archival signals with emotional markers embedded.</p>
-      <p>Also handles T1→T2 promotion (SYNTHESIS entries older than 3 days) and T2→T3 tagging (passages older than 90 days).</p>
+      <span class="job-schedule">Every 30 min · Mac launchd</span>
+      <h3>parse_transcripts.py</h3>
+      <p>Reads Claude Code session JSONL files from <code>~/.claude/projects/</code>, parses them into structured entries, and pushes to the Han Solo database. Only the last 45 days are kept. Ren can search these via <code>search_transcripts</code>.</p>
+      <p>No Anthropic API calls — pure parsing and Postgres writes. Logs to <code>~/.claude/transcript_parser.log</code>.</p>
     </div>
-    <div class="job-card">
-      <span class="job-schedule">After synthesize · Render cron</span>
-      <h3>curator.py</h3>
-      <p>Processes archival passages in batches of 20. Sends each batch to Claude Sonnet to identify connections — <code>relates_to</code>, <code>follows_from</code>, <code>expands_on</code>, <code>references_same_entity</code>, <code>contradicts</code>.</p>
-      <p>Connections with confidence ≥ 0.7 are written bidirectionally to the <code>memory_connections</code> table. Quality flags (near-duplicates, self-containment failures) go to <code>curator_flags</code> — no auto-merge, human review only.</p>
-    </div>
-  </div>
-
-  <div class="callout">
-    <strong>Why Sonnet for synthesis and curation, not Haiku?</strong> Ren runs on Haiku — that's appropriate for real-time conversation. But extracting specific decisions and long-term signals from a raw transcript, or identifying subtle connections between passages, needs Sonnet quality. The direct API calls in synthesize.py and curator.py are intentional. Routing through Letta would use Haiku and produce lower-quality extractions.
   </div>
 
   <hr>
-
-  <h2>Memory curator</h2>
-
-  <p>The curator is what turns a collection of isolated passages into a connected graph. Without it, archival memory is a bag of facts — each retrieved independently, with no awareness of how they relate. The curator reads across all passages and writes the relationships between them, so every retrieved passage can expand outward to its neighbors.</p>
-
-  <h3>How it works</h3>
-  <p><code>curator.py</code> runs automatically after each synthesis job on the Render cron. It pulls archival passages in batches of 20 and sends each batch to Claude Sonnet — not Haiku, because identifying subtle relationships between passages requires reasoning quality, not just speed. Sonnet returns a list of connections with confidence scores. Any connection scoring 0.7 or higher is written to the database.</p>
-
-  <h3>Connection types</h3>
-  <table>
-    <tr><th>Type</th><th>What it means</th></tr>
-    <tr>
-      <td><code>relates_to</code></td>
-      <td>Two passages cover the same topic, project, or person from different angles. Neither is a prerequisite for the other.</td>
-    </tr>
-    <tr>
-      <td><code>follows_from</code></td>
-      <td>One passage is a direct consequence or continuation of another — a decision that came out of a conversation, a change that followed an earlier direction.</td>
-    </tr>
-    <tr>
-      <td><code>expands_on</code></td>
-      <td>One passage goes deeper on something the other passage introduced. The second isn't just related — it adds meaningful specificity.</td>
-    </tr>
-    <tr>
-      <td><code>references_same_entity</code></td>
-      <td>Both passages name the same person, project, or concept. Useful for pulling the full picture of anything by name.</td>
-    </tr>
-    <tr>
-      <td><code>contradicts</code></td>
-      <td>Two passages make conflicting claims about the same thing. Flagged so Ren can surface the tension rather than confidently stating something that may no longer be true.</td>
-    </tr>
-  </table>
-
-  <h3>Where connections are stored</h3>
-  <p>Connections are written to the <code>memory_connections</code> Postgres table — bidirectionally. If passage A follows_from passage B, the curator writes both A→B and B→A. When Ren retrieves either passage, she can expand outward in either direction. The table is additive — the curator never deletes connections, only adds new ones.</p>
-
-  <h3>Quality flags</h3>
-  <p>The curator also scans for two quality problems and writes them to a <code>curator_flags</code> table:</p>
-  <ul>
-    <li><strong>Near-duplicates</strong> — two passages making the same specific claim, stored separately. Wastes search capacity and risks returning redundant results.</li>
-    <li><strong>Self-containment failures</strong> — passages that reference something by pronoun or shorthand without naming it. A future search has no way to find them by the thing they're actually about.</li>
-  </ul>
-  <p>The curator flags but never auto-merges. Merging passages requires human review — the cost of a bad merge (losing distinct context) is higher than the cost of a duplicate surfacing in search results.</p>
 
   <hr>
 
@@ -586,7 +526,7 @@
   </div>
   <div class="feature-row">
     <div class="feature-label">Pausing jobs</div>
-    <div class="feature-desc">Both dream.py and synthesize.py respect a <code>jobs_paused</code> flag in the <code>han_solo_config</code> Postgres table. Toggle it from the Memory panel in the chat UI. Useful when Anthropic credits need to be conserved.</div>
+    <div class="feature-desc">dream.py respects a <code>jobs_paused</code> flag in the <code>han_solo_config</code> Postgres table. Toggle it from the Memory panel in the chat UI.</div>
   </div>
 
   <div class="callout">

@@ -107,9 +107,7 @@
   <h3>Archival memory (searchable)</h3>
   <p>214+ passages stored as vector embeddings in pgvector (Voyage AI, voyage-3, 1024 dimensions). Ren searches this with <code>archival_memory_search</code> when she needs context that isn't in her core blocks. Every search is logged to <code>memory_access_log</code> — the query, what was returned, and whether it was used. This is the Memory MRI: a diagnostic record of whether her memory is actually being accessed and whether the right things surface.</p>
 
-  <p>Passages are written by synthesize.py with three contextual prefixes — <code>emotional_register</code>, <code>source_context</code>, and <code>moment_texture</code> — embedded in the passage text and therefore searchable. A query about a difficult decision surfaces passages marked tense, not just ones that mention the topic.</p>
-
-  <p>The memory curator (curator.py) runs nightly after synthesis and maps connections between passages — <em>relates_to</em>, <em>follows_from</em>, <em>expands_on</em>, <em>references_same_entity</em>, <em>contradicts</em>. Connections with confidence ≥ 0.7 are written bidirectionally to <code>memory_connections</code>. When Ren finds a relevant passage, the curator's links let her follow to related context that a vector search alone wouldn't surface.</p>
+  <p>Passages are written by Ren and Claude Code during sessions — specific, real captures written in the moment they matter. Session close-outs write structured content directly to archival without an intermediate processing step.</p>
 
   <h3>Conversation history</h3>
   <p>Every message stored in PostgreSQL. Letta loads recent messages into context on each send. This is what fills the context window over time and causes the crash if not managed.</p>
@@ -149,13 +147,10 @@
   </ol>
   <p>Runs via launchd (<code>com.scotth.rendream.plist</code>). No external dependencies — stdlib Python only.</p>
 
-  <h3>synthesize.py — session synthesis (every 3 hours, Render cron)</h3>
-  <p>Reads raw chat transcripts from Postgres and calls Anthropic directly using Sonnet (not through Letta — synthesis needs Sonnet quality, not Haiku). Extracts decisions, open threads, and long-term signals, then writes 2–5 archival passages back to Ren via the MCP REST API. Each passage is tagged with emotional markers (<code>emotional_register</code>, <code>source_context</code>, <code>moment_texture</code>) and handles T1→T2 and T2→T3 tier promotions.</p>
+  <h3>parse_transcripts.py — Claude Code session capture (every 30 min, Mac launchd)</h3>
+  <p>Every 30 minutes, a script on Scott's Mac reads Claude Code session JSONL files from <code>~/.claude/projects/</code>, parses them into structured entries, and pushes them to the Han Solo database. Only sessions from the last 45 days are kept. Ren can search these via the <code>search_transcripts</code> MCP tool — raw session history without any Anthropic API calls.</p>
 
-  <h3>curator.py — memory connections (nightly, Render cron)</h3>
-  <p>Runs after synthesize.py. Processes recent archival passages in batches of 20, asking Sonnet to identify connections: <em>relates_to</em>, <em>follows_from</em>, <em>expands_on</em>, <em>references_same_entity</em>, <em>contradicts</em>. Connections with confidence ≥ 0.7 are written bidirectionally to <code>memory_connections</code>. Low-confidence passages go to <code>curator_flags</code>. Turns a flat list of passages into a navigable connection graph.</p>
-
-  <p>All three jobs respect a <code>jobs_paused</code> flag in the <code>han_solo_config</code> Postgres table. Toggle it from the Memory panel in the chat UI.</p>
+  <p>dream.py respects a <code>jobs_paused</code> flag in the <code>han_solo_config</code> Postgres table. Toggle it from the Memory panel in the chat UI.</p>
 
   <hr>
 

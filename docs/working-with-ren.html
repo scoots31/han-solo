@@ -280,28 +280,20 @@
 
   <h2>How the memory pipeline works</h2>
 
-  <p>Two automated jobs run in the background to keep Ren's memory current. Understanding what each does — and why it's built the way it is — matters for debugging, cost awareness, and deciding what to build next.</p>
+  <p>Two automated jobs run in the background to keep Ren's memory current.</p>
 
   <h3>dream.py — nightly reflection (2am via launchd)</h3>
-  <p>Sends a structured prompt directly to the Ren agent via Letta's REST API. Ren then uses her own built-in tools — <code>conversation_search</code>, archival memory search, core block writes — to reflect, consolidate, and write a fresh session brief to <code>pending_thoughts</code>. This is the correct architecture: the Anthropic call goes through Letta, not around it. Letta runs Haiku for this step.</p>
+  <p>Sends a structured prompt directly to the Ren agent via Letta's REST API. Ren then uses her own built-in tools — <code>conversation_search</code>, archival memory search, core block writes — to reflect, consolidate, and write a fresh session brief to <code>pending_thoughts</code>. The Anthropic call goes through Letta (Haiku), not around it.</p>
 
-  <h3>synthesize.py — session synthesis (every 3 hours via Render cron)</h3>
-  <p>Reads raw chat transcripts from the <code>chat_transcripts</code> Postgres table and calls Anthropic directly using Sonnet to extract structured meaning. It then writes the results (a pending_thoughts addition + 2–5 archival signals) to Ren via the MCP REST API.</p>
-  <p><strong>Why direct Anthropic, not through Letta?</strong> Ren runs on Haiku. The synthesis step — extracting specific decisions, open threads, and long-term signals from a raw transcript — needs Sonnet quality. Routing through Letta would use Haiku and produce lower-quality extractions. The direct call is intentional, not an oversight. It also handles T1→T2 and T2→T3 tier promotions on each run.</p>
-
-  <h3>curator.py — memory connections (nightly via Render cron)</h3>
-  <p>Runs after synthesize.py each night. Takes the most recent archival passages in batches of 20 and asks Sonnet to identify meaningful connections between them: <em>relates_to</em>, <em>follows_from</em>, <em>expands_on</em>, <em>references_same_entity</em>, <em>contradicts</em>. Connections with confidence ≥ 0.7 are written bidirectionally to the <code>memory_connections</code> table. Low-confidence or flagged passages go to <code>curator_flags</code> for review.</p>
-  <p>The connection graph is what turns a flat list of passages into a navigable memory. When Ren searches and finds a relevant passage, the curator's links let her follow to related passages — context that a keyword or vector search alone wouldn't surface.</p>
+  <h3>parse_transcripts.py — Claude Code session capture (every 30 min via launchd)</h3>
+  <p>Reads Claude Code session JSONL files from <code>~/.claude/projects/</code>, parses them into structured entries, and pushes to the Han Solo database. Keeps only the last 45 days. Ren can search these via the <code>search_transcripts</code> MCP tool. No Anthropic API calls — pure parsing and Postgres writes.</p>
 
   <h3>Archival search and the Memory MRI</h3>
   <p>Archival memory uses <strong>Voyage AI embeddings</strong> (voyage-3, 1024 dimensions) stored in pgvector. Every search Ren runs — whether triggered by the conversation or explicitly requested — is logged to the <code>memory_access_log</code> table: the query, the passage IDs returned, and whether each was actually used in the response. This is the Memory MRI: a record of what she looked for, what she found, and what she chose to use.</p>
   <p>The MRI makes it possible to see whether her memory is actually being accessed and whether the right things are surfacing. A passage that keeps getting found but never used is a signal about relevance. A topic that keeps generating searches with no results is a gap worth filling.</p>
 
-  <h3>Emotional markers in archival passages</h3>
-  <p>When synthesize.py writes an archival passage, it embeds three contextual prefixes: <code>emotional_register</code> (the tone of the moment — reflective, tense, energized), <code>source_context</code> (what kind of session it came from), and <code>moment_texture</code> (the felt quality of what happened). These aren't visible in normal conversation, but they're in the passage text — which means they're searchable. A query about a difficult decision will surface passages that were marked tense, not just ones that mention the topic.</p>
-
   <h3>Pausing automated jobs</h3>
-  <p>Both jobs respect a <code>jobs_paused</code> flag in the <code>han_solo_config</code> Postgres table. Toggle it from the Memory panel in the chat UI (Pause / Resume button). Useful when Anthropic credits are being depleted during inactive periods. dream.py checks the public <code>/api/jobs-status</code> endpoint; synthesize.py reads the DB flag directly.</p>
+  <p>dream.py respects a <code>jobs_paused</code> flag in the <code>han_solo_config</code> Postgres table. Toggle it from the Memory panel in the chat UI (Pause / Resume button).</p>
 
 </div>
 </body>
