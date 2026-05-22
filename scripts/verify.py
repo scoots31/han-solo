@@ -44,7 +44,7 @@ REN_LOCAL_PY  = os.path.expanduser("~/Developer/ren-local/ren-local.py")
 EXPECTED_HAN_SOLO_TOOLS = {
     "search_t4", "get_t4_entry", "search_signals",
     "get_session_brief", "list_notecards",
-    "get_skill", "list_skills",
+    "get_skill", "list_skills", "search_transcripts",
 }
 EXPECTED_SKILLS = {
     "discover", "tech-context", "design-sprint", "prd-to-plan",
