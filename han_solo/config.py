@@ -6,6 +6,7 @@ from enum import Enum
 class Role(str, Enum):
     OWNER = "owner"
     COLLABORATOR = "collaborator"
+    AGENT = "agent"  # Ren and future AI agents — full read clearance, no human role
 
 
 class VisibilityTier(str, Enum):
@@ -74,6 +75,17 @@ def _build_token_registry() -> dict[str, UserIdentity]:
             visibility_clearance=[
                 VisibilityTier.SHARED,
                 VisibilityTier.CLIENT_JOINT,
+            ],
+        ),
+        "ren": UserIdentity(
+            id="ren",
+            name="Ren",
+            role=Role.AGENT,
+            visibility_clearance=[
+                VisibilityTier.PRIVATE,
+                VisibilityTier.SHARED,
+                VisibilityTier.CLIENT_JOINT,
+                VisibilityTier.CLIENT_EXCLUSIVE,
             ],
         ),
     }
