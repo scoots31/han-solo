@@ -2126,6 +2126,41 @@
       return body.length > 170 ? body.slice(0, 170) + '…' : body;
     }
 
+    function _getSeenPassages() {
+      try { return new Set(JSON.parse(localStorage.getItem('hs_seen_passages') || '[]')); }
+      catch { return new Set(); }
+    }
+    function _markPassageSeen(id) {
+      if (!id) return;
+      const seen = _getSeenPassages();
+      seen.add(String(id));
+      localStorage.setItem('hs_seen_passages', JSON.stringify([...seen]));
+    }
+
+    function openMemPassage(idx) {
+      const p = _allPassages[idx];
+      if (!p) return;
+      _markPassageSeen(p.id);
+      const typeLabel = { session:'Session', decision:'Decision', thread:'Thread', signal:'Signal', other:'Memory' };
+      const label = typeLabel[p._type] || 'Memory';
+      const badgeClass = (p._type === 'signal' || p._type === 'other') ? 'thread' : (p._type || 'thread');
+      const date = p.created_at
+        ? new Date(p.created_at).toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit'})
+        : '';
+      document.getElementById('mem-detail-breadcrumb').textContent = label;
+      const badge = document.getElementById('mem-detail-badge');
+      badge.textContent = label;
+      badge.className = 'badge mem-badge ' + badgeClass;
+      document.getElementById('mem-detail-date').textContent = date;
+      document.getElementById('mem-detail-title').textContent = passageTitle(p.text);
+      document.getElementById('mem-detail-body').innerHTML =
+        `<div style="white-space:pre-wrap;font-size:13px;line-height:1.75;color:var(--text-secondary);padding:0 4px">${escHtml(p.text)}</div>`;
+      document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+      document.getElementById('screen-memory-detail').classList.remove('hidden');
+      // Re-render list in background so the new dot clears without forcing a reload
+      renderMemory();
+    }
+
     async function loadMemory() {
       if (!token) return;
       const list = document.getElementById('mem-list');
@@ -2217,7 +2252,9 @@
 
       const typeLabel = { session:'Session', decision:'Decision', thread:'Thread', signal:'Signal', other:'Memory' };
 
+      const seen = _getSeenPassages();
       list.innerHTML = filtered.map(p => {
+        const idx    = _allPassages.indexOf(p);
         const badge  = p._type;
         const label  = typeLabel[badge] || 'Memory';
         const title  = escHtml(passageTitle(p.text));
@@ -2225,11 +2262,15 @@
         const date   = p.created_at
           ? new Date(p.created_at).toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'})
           : '';
+        const isNew  = p.id && !seen.has(String(p.id));
         return `
-          <div class="list-row">
-            <div class="mem-type-col"><span class="mem-badge ${badge === 'signal' || badge === 'other' ? 'thread' : badge}">${label}</span></div>
+          <div class="list-row" onclick="openMemPassage(${idx})" style="cursor:pointer">
+            <div class="mem-type-col">
+              <span class="mem-badge ${badge === 'signal' || badge === 'other' ? 'thread' : badge}">${label}</span>
+              ${isNew ? '<span style="display:block;width:6px;height:6px;background:var(--accent);border-radius:50%;margin:4px auto 0"></span>' : ''}
+            </div>
             <div class="row-content">
-              <div class="row-title">${title}</div>
+              <div class="row-title" style="${isNew ? 'font-weight:600' : ''}">${title}</div>
               ${excerpt ? `<div class="row-excerpt">${excerpt}</div>` : ''}
               <div class="row-meta"><span>${date}</span></div>
             </div>
