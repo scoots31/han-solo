@@ -829,17 +829,26 @@ async def list_notecards(status: str | None = None) -> list[dict]:
 
 async def update_notecard_status(notecard_id: int, status: str) -> bool:
     """Update a notecard's status. Returns True on success."""
-    if not _pool:
+    return await update_notecard(notecard_id, status=status)
+
+
+async def update_notecard(notecard_id: int, *, status: str | None = None, text: str | None = None) -> bool:
+    """Update a notecard's status and/or text. Returns True on success."""
+    if not _pool or (status is None and text is None):
         return False
+    sets, args = [], []
+    if status is not None:
+        args.append(status)
+        sets.append(f"status = ${len(args)}")
+    if text is not None:
+        args.append(text)
+        sets.append(f"text = ${len(args)}")
+    args.append(notecard_id)
     try:
         async with _pool.acquire() as conn:
             result = await conn.execute(
-                """
-                UPDATE notecards
-                SET status = $1, updated_at = NOW()
-                WHERE id = $2
-                """,
-                status, notecard_id,
+                f"UPDATE notecards SET {', '.join(sets)}, updated_at = NOW() WHERE id = ${len(args)}",
+                *args,
             )
         return result == "UPDATE 1"
     except Exception as e:

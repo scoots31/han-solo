@@ -1513,13 +1513,23 @@
           <button class="detail-back-btn" onclick="showScreen('notecards', document.querySelector('[onclick*=\'notecards\']'))">← Notecards</button>
         </div>
         <div class="detail-hero">
-          <div class="detail-hero-meta">
-            <span class="chat-notecard-label-pill" style="font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:3px">Notecard</span>
-            <span id="nc-detail-creator-badge" class="notecard-creator scott" style="width:20px;height:20px;font-size:9px">S</span>
-            <span id="nc-detail-creator-label" style="font-size:12px;color:var(--text-meta)">Scott · May 18</span>
-            <span id="nc-detail-status" class="notecard-status active" style="margin-left:4px">Active</span>
+          <div class="detail-hero-meta" style="justify-content:space-between">
+            <div style="display:flex;gap:8px;align-items:center">
+              <span class="chat-notecard-label-pill" style="font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:3px">Notecard</span>
+              <span id="nc-detail-creator-badge" class="notecard-creator scott" style="width:20px;height:20px;font-size:9px">S</span>
+              <span id="nc-detail-creator-label" style="font-size:12px;color:var(--text-meta)">Scott · May 18</span>
+              <span id="nc-detail-status" class="notecard-status active" style="margin-left:4px">Active</span>
+            </div>
+            <div id="nc-detail-actions" style="display:flex;gap:6px;align-items:center"></div>
           </div>
           <div class="detail-hero-title" id="nc-detail-title" style="margin-top:10px"></div>
+          <div id="nc-detail-edit-area" style="display:none;margin-top:10px">
+            <textarea id="nc-detail-textarea" style="width:100%;box-sizing:border-box;font-size:14px;font-family:inherit;color:var(--text-primary);background:var(--card-bg);border:1px solid var(--accent);border-radius:6px;padding:10px;resize:vertical;min-height:80px;line-height:1.6"></textarea>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button onclick="ncDetailSaveEdit()" style="font-size:12px;font-weight:600;color:#fff;background:var(--accent);border:none;border-radius:5px;padding:5px 14px;cursor:pointer;font-family:inherit">Save</button>
+              <button onclick="ncDetailCancelEdit()" style="font-size:12px;color:var(--text-meta);background:none;border:1px solid var(--divider);border-radius:5px;padding:5px 14px;cursor:pointer;font-family:inherit">Cancel</button>
+            </div>
+          </div>
         </div>
         <div class="detail-body" id="nc-detail-body"></div>
       </div>
@@ -3746,9 +3756,12 @@
       document.getElementById('screen-signal-detail').classList.remove('hidden');
     }
 
+    let _openNotecardId = null;
+
     function openNotecard(id) {
       const c = _allNotecards.find(n => String(n.id) === String(id));
       if (!c) return;
+      _openNotecardId = String(id);
       const isRen = c.creator !== _currentUserId;
       const badge = document.getElementById('nc-detail-creator-badge');
       badge.textContent = isRen ? 'R' : 'S';
@@ -3760,13 +3773,67 @@
       statusEl.textContent = cap(c.status);
       statusEl.className = 'notecard-status ' + c.status;
       document.getElementById('nc-detail-title').textContent = c.text;
+      document.getElementById('nc-detail-edit-area').style.display = 'none';
       document.getElementById('nc-detail-body').innerHTML =
-        `<div style="white-space:pre-wrap;font-size:13px;line-height:1.75;color:var(--text-secondary);padding:0 4px">
-           <span style="font-size:11px;color:var(--text-meta);font-weight:600;text-transform:uppercase;letter-spacing:.08em">Source</span><br>
-           <span>${escHtml(c.source || '—')}</span>
-         </div>`;
+        c.source ? `<div style="font-size:12px;color:var(--text-meta);padding:0 2px">From ${escHtml(c.source)}</div>` : '';
+      _ncDetailRenderActions(c);
       document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
       document.getElementById('screen-notecard-detail').classList.remove('hidden');
+    }
+
+    function _ncDetailRenderActions(c) {
+      const s = 'font-size:11px;color:var(--text-meta);background:none;border:1px solid var(--divider);border-radius:4px;padding:3px 10px;cursor:pointer;font-family:inherit';
+      const isArchived  = c.status === 'archived';
+      const isCompleted = c.status === 'completed';
+      const isActive    = c.status === 'active';
+      let html = `<button style="${s}" onclick="ncDetailStartEdit()">Edit</button>`;
+      if (isActive)    html += `<button style="${s}" onclick="ncDetailPatchStatus('completed')">Complete</button>`;
+      if (isCompleted) html += `<button style="${s}" onclick="ncDetailPatchStatus('active')">Reopen</button>`;
+      if (!isArchived) html += `<button style="${s}" onclick="ncDetailPatchStatus('archived')">Archive</button>`;
+      document.getElementById('nc-detail-actions').innerHTML = html;
+    }
+
+    function ncDetailStartEdit() {
+      const c = _allNotecards.find(n => String(n.id) === _openNotecardId);
+      if (!c) return;
+      document.getElementById('nc-detail-textarea').value = c.text;
+      document.getElementById('nc-detail-title').style.display = 'none';
+      document.getElementById('nc-detail-edit-area').style.display = 'block';
+      document.getElementById('nc-detail-textarea').focus();
+    }
+
+    function ncDetailCancelEdit() {
+      document.getElementById('nc-detail-edit-area').style.display = 'none';
+      document.getElementById('nc-detail-title').style.display = '';
+    }
+
+    async function ncDetailSaveEdit() {
+      const text = document.getElementById('nc-detail-textarea').value.trim();
+      if (!text || !_openNotecardId) return;
+      const res = await apiFetch(`/api/notecards/${_openNotecardId}`, { method:'PATCH', body: JSON.stringify({ text }) });
+      if (res.ok) {
+        const card = _allNotecards.find(n => String(n.id) === _openNotecardId);
+        if (card) card.text = text;
+        document.getElementById('nc-detail-title').textContent = text;
+        ncDetailCancelEdit();
+        renderNotecards();
+      }
+    }
+
+    async function ncDetailPatchStatus(status) {
+      if (!_openNotecardId) return;
+      const res = await apiFetch(`/api/notecards/${_openNotecardId}`, { method:'PATCH', body: JSON.stringify({ status }) });
+      if (res.ok) {
+        const card = _allNotecards.find(n => String(n.id) === _openNotecardId);
+        if (card) {
+          card.status = status;
+          const statusEl = document.getElementById('nc-detail-status');
+          statusEl.textContent = cap(status);
+          statusEl.className = 'notecard-status ' + status;
+          _ncDetailRenderActions(card);
+          renderNotecards();
+        }
+      }
     }
 
     // ── WIRE UP LIST CLICKS ────────────────────────────────

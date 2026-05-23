@@ -251,20 +251,29 @@ async def api_create_notecard(request: Request) -> JSONResponse:
 
 
 async def api_update_notecard(request: Request) -> JSONResponse:
-    """PATCH /api/notecards/{id} — body: {status: active|completed|archived}"""
+    """PATCH /api/notecards/{id} — body: {status?, text?}"""
     get_current_user()
     try:
         notecard_id = int(request.path_params["notecard_id"])
     except (KeyError, ValueError):
         return JSONResponse({"error": "invalid id"}, status_code=400)
     body = await request.json()
-    status = body.get("status", "").strip()
-    if status not in {"active", "completed", "archived"}:
-        return JSONResponse({"error": "status must be active, completed, or archived"}, status_code=400)
-    ok = await db.update_notecard_status(notecard_id, status)
+    status = body.get("status")
+    text   = body.get("text")
+    if status is not None:
+        status = status.strip()
+        if status not in {"active", "completed", "archived"}:
+            return JSONResponse({"error": "status must be active, completed, or archived"}, status_code=400)
+    if text is not None:
+        text = text.strip()
+        if not text:
+            return JSONResponse({"error": "text cannot be empty"}, status_code=400)
+    if status is None and text is None:
+        return JSONResponse({"error": "provide status or text"}, status_code=400)
+    ok = await db.update_notecard(notecard_id, status=status, text=text)
     if not ok:
         return JSONResponse({"error": "not found or DB write failed"}, status_code=404)
-    return JSONResponse({"id": notecard_id, "status": status})
+    return JSONResponse({"id": notecard_id, "status": status, "text": text})
 
 
 async def api_t4_projects(request: Request) -> JSONResponse:
