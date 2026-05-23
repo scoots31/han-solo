@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Han Solo — System Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  background:#faf8f5;
+  color:#1a1a1a;
+  font-family:'Space Grotesk',-apple-system,sans-serif;
+  font-size:14px;
+  line-height:1.5;
+  min-height:100vh;
+}
+
+nav.site-nav{
+  display:flex;
+  align-items:center;
+  gap:24px;
+  padding:14px 32px;
+  border-bottom:1px solid #e8ddd4;
+  background:#fff;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+.brand{font-weight:600;font-size:15px;color:#1a1a1a;text-decoration:none}
+.nav-link{font-size:13px;color:rgba(26,26,26,.55);text-decoration:none}
+.nav-link:hover{color:#1a1a1a}
+
+.page{max-width:1100px;margin:0 auto;padding:48px 32px 80px}
+
+.hero{margin-bottom:48px}
+.hero-label{font-size:11px;font-weight:600;letter-spacing:.08em;color:rgba(26,26,26,.4);text-transform:uppercase;margin-bottom:10px}
+h1{font-size:36px;font-weight:600;line-height:1.1;margin-bottom:12px}
+.hero-sub{font-size:16px;color:rgba(26,26,26,.6);max-width:600px}
+
+/* ── Zones ── */
+.zone{
+  border:1.5px solid #e8ddd4;
+  border-radius:12px;
+  padding:20px 20px 24px;
+  margin-bottom:24px;
+  background:#fff;
+}
+.zone-label{
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:rgba(26,26,26,.35);
+  margin-bottom:16px;
+}
+.zone.local{border-color:#d1bfa7;background:#fffcf8}
+.zone.render{border-color:#bdbdbd;background:#fafafa}
+.zone.cloudflare{border-color:#e8a87c;background:#fffaf6}
+.zone.github{border-color:#c0c8d8;background:#f8fafc}
+
+.zone-local .zone-label{color:#b5946a}
+.zone-render .zone-label{color:#888}
+.zone-cloudflare .zone-label{color:#c0784a}
+.zone-github .zone-label{color:#6b7fa3}
+
+.components{display:flex;flex-wrap:wrap;gap:12px}
+
+/* ── Component card ── */
+.comp{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  padding:14px 16px;
+  border:1.5px solid #e8ddd4;
+  border-radius:8px;
+  background:#fff;
+  min-width:160px;
+  flex:1;
+  max-width:220px;
+  position:relative;
+}
+.comp-num{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  background:#1a1a1a;
+  color:#fff;
+  font-size:11px;
+  font-weight:700;
+  margin-bottom:6px;
+  flex-shrink:0;
+}
+.comp-name{font-size:13px;font-weight:600;color:#1a1a1a;line-height:1.2}
+.comp-sub{font-size:11px;color:rgba(26,26,26,.5);line-height:1.4;margin-top:2px}
+.comp-url{font-size:10px;color:#b5946a;font-family:monospace;margin-top:4px;word-break:break-all}
+
+/* ── Reference table ── */
+h2{font-size:20px;font-weight:600;margin:48px 0 20px}
+
+table{width:100%;border-collapse:collapse}
+th{
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:rgba(26,26,26,.4);
+  padding:8px 12px;
+  text-align:left;
+  border-bottom:1.5px solid #e8ddd4;
+}
+td{
+  padding:12px 12px;
+  border-bottom:1px solid #f0ece7;
+  vertical-align:top;
+  font-size:13px;
+}
+td:first-child{
+  width:32px;
+  text-align:center;
+}
+.num-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  background:#1a1a1a;
+  color:#fff;
+  font-size:11px;
+  font-weight:700;
+}
+td code{
+  font-family:monospace;
+  font-size:11px;
+  background:#f5f0eb;
+  padding:1px 5px;
+  border-radius:3px;
+  color:#5a4030;
+}
+.zone-tag{
+  display:inline-block;
+  font-size:10px;
+  font-weight:600;
+  letter-spacing:.05em;
+  padding:2px 7px;
+  border-radius:10px;
+  text-transform:uppercase;
+}
+.tag-local{background:#fef3e2;color:#b5946a}
+.tag-render{background:#f0f0f0;color:#666}
+.tag-cloudflare{background:#fff0e6;color:#c0784a}
+.tag-github{background:#eef2f8;color:#6b7fa3}
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="brand" href="index.html">Han Solo</a>
+  <a class="nav-link" href="index.html">Overview</a>
+  <a class="nav-link" href="how-it-works.html">How it works</a>
+  <a class="nav-link" href="working-with-ren.html">Working with Ren</a>
+  <a class="nav-link" href="memory.html">Memory</a>
+  <a class="nav-link" href="architecture.html">Architecture</a>
+  <a class="nav-link active" href="map.html">System Map</a>
+</nav>
+
+<div class="page">
+
+  <div class="hero">
+    <div class="hero-label">Reference</div>
+    <h1>System Map</h1>
+    <p class="hero-sub">Every component numbered. Use the number in conversation — "the nav in #1" or "deploy #2" — to point at exactly the right thing without ambiguity.</p>
+  </div>
+
+  <!-- CLOUDFLARE -->
+  <div class="zone zone-cloudflare">
+    <div class="zone-label">Cloudflare Pages — han-solo-docs.pages.dev</div>
+    <div class="components">
+      <div class="comp">
+        <div class="comp-num">1</div>
+        <div class="comp-name">Workspace UI</div>
+        <div class="comp-sub">Chat + sidebar nav. Ren, Session, Workspace, Frameworks, Development sections. The main interface.</div>
+        <div class="comp-url">workspace.html → docs/workspace.html</div>
+      </div>
+      <div class="comp">
+        <div class="comp-num">2</div>
+        <div class="comp-name">Han Solo Docs</div>
+        <div class="comp-sub">Overview, how-it-works, memory, transcripts, dashboard, logbook, system map.</div>
+        <div class="comp-url">index.html → docs/*.html</div>
+      </div>
+      <div class="comp">
+        <div class="comp-num">3</div>
+        <div class="comp-name">Framework Docs</div>
+        <div class="comp-sub">Phase guides, skills reference, process map, decks. Surfaced via Solo Builder in #1.</div>
+        <div class="comp-url">framework/ → docs/framework/*.html</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RENDER -->
+  <div class="zone zone-render">
+    <div class="zone-label">Render — auto-deploys on git push</div>
+    <div class="components">
+      <div class="comp">
+        <div class="comp-num">4</div>
+        <div class="comp-name">MCP Server</div>
+        <div class="comp-sub">FastMCP bridge. 15+ tools callable by Claude Code. Also hosts a secondary web UI.</div>
+        <div class="comp-url">han-solo-mcp.onrender.com/mcp</div>
+      </div>
+      <div class="comp">
+        <div class="comp-num">5</div>
+        <div class="comp-name">Letta</div>
+        <div class="comp-sub">Ren's persistent memory backend. Core blocks, archival passages, portraits. v0.16.8.</div>
+        <div class="comp-url">han-solo-letta.onrender.com</div>
+      </div>
+      <div class="comp">
+        <div class="comp-num">6</div>
+        <div class="comp-name">Database</div>
+        <div class="comp-sub">PostgreSQL 16. T4 project data, skills table, session transcripts, verify runs.</div>
+        <div class="comp-url">Internal — Render only</div>
+      </div>
+      <div class="comp">
+        <div class="comp-num">7</div>
+        <div class="comp-name">Render App UI</div>
+        <div class="comp-sub">Secondary web UI on Render. Chat, Memory, Frameworks. Different from #1.</div>
+        <div class="comp-url">han-solo-mcp.onrender.com → han_solo/app_html.py</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOCAL -->
+  <div class="zone zone-local">
+    <div class="zone-label">Local — Scott's Mac</div>
+    <div class="components">
+      <div class="comp">
+        <div class="comp-num">8</div>
+        <div class="comp-name">Claude Code</div>
+        <div class="comp-sub">Local execution environment. MCP client — connects to #4. Where Ren loads and all work happens.</div>
+        <div class="comp-url">CLI / Claude Code app</div>
+      </div>
+      <div class="comp">
+        <div class="comp-num">9</div>
+        <div class="comp-name">Framework Vers1</div>
+        <div class="comp-sub">Source of truth for framework phase skills. Updated here first, then pushed to #6 via write_skill.</div>
+        <div class="comp-url">~/Developer/Framework Vers1/skills/</div>
+      </div>
+      <div class="comp">
+        <div class="comp-num">10</div>
+        <div class="comp-name">verify.py</div>
+        <div class="comp-sub">57-check health monitor. Runs every 30 min via LaunchAgent. Posts results to #6.</div>
+        <div class="comp-url">scripts/verify.py</div>
+      </div>
+      <div class="comp">
+        <div class="comp-num">11</div>
+        <div class="comp-name">Transcript Parser</div>
+        <div class="comp-sub">Parses Claude Code JSONL sessions (~/.claude/projects/). Pushes to #6. Runs every 30 min.</div>
+        <div class="comp-url">scripts/parse_transcripts.py</div>
+      </div>
+      <div class="comp">
+        <div class="comp-num">12</div>
+        <div class="comp-name">ren-local</div>
+        <div class="comp-sub">Local session log. Sessions, decisions, open threads. Written at close of each session.</div>
+        <div class="comp-url">~/Developer/ren-local/</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GITHUB -->
+  <div class="zone zone-github">
+    <div class="zone-label">GitHub</div>
+    <div class="components">
+      <div class="comp">
+        <div class="comp-num">13</div>
+        <div class="comp-name">han-solo repo</div>
+        <div class="comp-sub">scoots31/han-solo (private). git push → auto-deploys #4 and #7. Manual deploy for #1 #2 #3 via wrangler.</div>
+        <div class="comp-url">github.com/scoots31/han-solo</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REFERENCE TABLE -->
+  <h2>Quick reference</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Zone</th>
+        <th>What you edit</th>
+        <th>Deploy</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="num-badge">1</span></td>
+        <td><strong>Workspace UI</strong> — Chat, sidebar nav, Development section</td>
+        <td><span class="zone-tag tag-cloudflare">Cloudflare</span></td>
+        <td><code>docs/workspace.html</code></td>
+        <td>wrangler → han-solo-docs</td>
+      </tr>
+      <tr>
+        <td><span class="num-badge">2</span></td>
+        <td><strong>Han Solo Docs</strong> — overview, operational pages</td>
+        <td><span class="zone-tag tag-cloudflare">Cloudflare</span></td>
+        <td><code>docs/*.html</code></td>
+        <td>wrangler → han-solo-docs</td>
+      </tr>
+      <tr>
+        <td><span class="num-badge">3</span></td>
+        <td><strong>Framework Docs</strong> — guides, skills reference, decks</td>
+        <td><span class="zone-tag tag-cloudflare">Cloudflare</span></td>
+        <td><code>docs/framework/*.html</code></td>
+        <td>wrangler → han-solo-docs</td>
+      </tr>
+      <tr>
+        <td><span class="num-badge">4</span></td>
+        <td><strong>MCP Server</strong> — tools, API, FastMCP bridge</td>
+        <td><span class="zone-tag tag-render">Render</span></td>
+        <td><code>han_solo/server.py</code> · <code>han_solo/tools/</code></td>
+        <td>git push → auto</td>
+      </tr>
+      <tr>
+        <td><span class="num-badge">5</span></td>
+        <td><strong>Letta</strong> — Ren's persistent memory (v0.16.8)</td>
+        <td><span class="zone-tag tag-render">Render</span></td>
+        <td>Via MCP tools or Letta API</td>
+        <td>Image-based, Render manages</td>
+      </tr>
+      <tr>
+        <td><span class="num-badge">6</span></td>
+        <td><strong>Database</strong> — PostgreSQL 16, T4, skills, transcripts</td>
+        <td><span class="zone-tag tag-render">Render</span></td>
+        <td>Via API endpoints or scripts</td>
+        <td>Render managed</td>
+      </tr>
+      <tr>
+        <td><span class="num-badge">7</span></td>
+        <td><strong>Render App UI</strong> — secondary web UI on Render</td>
+        <td><span class="zone-tag tag-render">Render</span></td>
+        <td><code>han_solo/app_html.py</code></td>
+        <td>git push → auto</td>
+      </tr>
+      <tr>
+        <td><span class="num-badge">8</span></td>
+        <td><strong>Claude Code</strong> — local execution, MCP client</td>
+        <td><span class="zone-tag tag-local">Local</span></td>
+        <td>Claude Code settings, hooks, skills</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><span class="num-badge">9</span></td>
+        <td><strong>Framework Vers1</strong> — phase skills source of truth</td>
+        <td><span class="zone-tag tag-local">Local</span></td>
+        <td><code>~/Developer/Framework Vers1/skills/</code></td>
+        <td>write_skill MCP tool → #6</td>
+      </tr>
+      <tr>
+        <td><span class="num-badge">10</span></td>
+        <td><strong>verify.py</strong> — 57-check health monitor</td>
+        <td><span class="zone-tag tag-local">Local</span></td>
+        <td><code>scripts/verify.py</code></td>
+        <td>LaunchAgent, 30 min interval</td>
+      </tr>
+      <tr>
+        <td><span class="num-badge">11</span></td>
+        <td><strong>Transcript Parser</strong> — JSONL → #6</td>
+        <td><span class="zone-tag tag-local">Local</span></td>
+        <td><code>scripts/parse_transcripts.py</code></td>
+        <td>LaunchAgent, 30 min interval</td>
+      </tr>
+      <tr>
+        <td><span class="num-badge">12</span></td>
+        <td><strong>ren-local</strong> — local session log</td>
+        <td><span class="zone-tag tag-local">Local</span></td>
+        <td><code>~/Developer/ren-local/</code></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><span class="num-badge">13</span></td>
+        <td><strong>GitHub repo</strong> — scoots31/han-solo (private)</td>
+        <td><span class="zone-tag tag-github">GitHub</span></td>
+        <td>git push</td>
+        <td>Auto-deploys #4 #7. Manual for #1 #2 #3.</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+</body>
+</html>

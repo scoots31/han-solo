@@ -36,7 +36,27 @@ cd ~/Developer/han-solo/docs && zsh -l -c "wrangler pages deploy . --project-nam
 - `docs/logbook.html`, `docs/transcripts.html`, `docs/dashboard.html` — Operational docs pages
 - `docs/roadmap.html` — Roadmap page (accessible via Han Solo Overview in Development nav)
 
-**When you don't know which file to edit — ask:** is this the workspace sidebar/UI (→ `docs/workspace.html`) or the Render app UI (→ `han_solo/app_html.py`) or a docs page (→ `docs/*.html`)?
+**When you don't know which file to edit — stop and check the component map below before touching anything.**
+
+## Component map (use numbers in conversation)
+
+| # | Name | Edit here | Deploy |
+|---|------|-----------|--------|
+| 1 | Workspace UI (sidebar, nav, Development section) | `docs/workspace.html` | wrangler → han-solo-docs |
+| 2 | Han Solo Docs (overview, operational pages) | `docs/*.html` | wrangler → han-solo-docs |
+| 3 | Framework Docs (guides, skills reference, decks) | `docs/framework/*.html` | wrangler → han-solo-docs |
+| 4 | MCP Server (FastMCP bridge, API, tools) | `han_solo/server.py`, `han_solo/tools/` | git push → auto |
+| 5 | Letta (Ren's memory, v0.16.8) | Via MCP tools | Render managed |
+| 6 | Database (PostgreSQL — T4, skills, transcripts) | Via API or scripts | Render managed |
+| 7 | Render App UI (secondary web UI) | `han_solo/app_html.py` | git push → auto |
+| 8 | Claude Code (local execution, MCP client) | Claude Code settings, hooks, skills | — |
+| 9 | Framework Vers1 (phase skills source of truth) | `~/Developer/Framework Vers1/skills/` | write_skill MCP → #6 |
+| 10 | verify.py (57-check health monitor) | `scripts/verify.py` | LaunchAgent, 30 min |
+| 11 | Transcript Parser (JSONL → DB) | `scripts/parse_transcripts.py` | LaunchAgent, 30 min |
+| 12 | ren-local (local session log) | `~/Developer/ren-local/` | — |
+| 13 | GitHub repo (scoots31/han-solo) | git push | Auto #4 #7, manual #1 #2 #3 |
+
+Visual version: `docs/map.html` (han-solo-docs.pages.dev/map.html)
 
 ## Docs preview server
 
