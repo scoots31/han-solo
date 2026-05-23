@@ -612,8 +612,9 @@
       font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
       padding: 2px 6px; border-radius: 3px;
     }
-    .notecard-status.active   { background: rgba(209,191,167,.28); color: var(--onyx); }
-    .notecard-status.archived { background: rgba(73,73,75,.08); color: var(--silver); }
+    .notecard-status.active    { background: rgba(209,191,167,.28); color: var(--onyx); }
+    .notecard-status.completed { background: rgba(100,180,100,.18); color: #2a6e2a; }
+    .notecard-status.archived  { background: rgba(73,73,75,.08); color: var(--silver); }
     body.modern .notecard-status { border-radius: 4px; }
 
     /* Inline notecard in chat */
@@ -1495,6 +1496,7 @@
         </div>
         <div class="filter-bar" id="nc-filter-bar">
           <button class="filter-btn active" data-ncfilter="active">Active</button>
+          <button class="filter-btn" data-ncfilter="completed">Completed</button>
           <button class="filter-btn" data-ncfilter="all">All</button>
           <button class="filter-btn" data-ncfilter="yours">Yours</button>
           <button class="filter-btn" data-ncfilter="rens">Ren's</button>
@@ -2331,25 +2333,27 @@
 
     function ncFilteredCards() {
       switch(_ncFilter) {
-        case 'active':   return _allNotecards.filter(c => c.status === 'active' || c.status === 'completed');
-        case 'yours':    return _allNotecards.filter(c => c.creator === _currentUserId);
-        case 'rens':     return _allNotecards.filter(c => c.creator !== _currentUserId);
-        case 'archived': return _allNotecards.filter(c => c.status === 'archived');
-        default:         return _allNotecards;
+        case 'active':    return _allNotecards.filter(c => c.status === 'active');
+        case 'completed': return _allNotecards.filter(c => c.status === 'completed');
+        case 'yours':     return _allNotecards.filter(c => c.creator === _currentUserId);
+        case 'rens':      return _allNotecards.filter(c => c.creator !== _currentUserId);
+        case 'archived':  return _allNotecards.filter(c => c.status === 'archived');
+        default:          return _allNotecards;
       }
     }
 
     function renderNotecards() {
-      const activeCount   = _allNotecards.filter(c => c.status === 'active' || c.status === 'completed').length;
-      const fromRen       = _allNotecards.filter(c => c.creator !== _currentUserId).length;
-      const fromYou       = _allNotecards.filter(c => c.creator === _currentUserId).length;
-      const archivedCount = _allNotecards.filter(c => c.status === 'archived').length;
+      const activeCount    = _allNotecards.filter(c => c.status === 'active').length;
+      const completedCount = _allNotecards.filter(c => c.status === 'completed').length;
+      const fromRen        = _allNotecards.filter(c => c.creator !== _currentUserId && c.status !== 'archived').length;
+      const fromYou        = _allNotecards.filter(c => c.creator === _currentUserId && c.status !== 'archived').length;
+      const archivedCount  = _allNotecards.filter(c => c.status === 'archived').length;
 
       document.getElementById('nc-stat-active').textContent   = activeCount;
       document.getElementById('nc-stat-ren').textContent      = fromRen;
       document.getElementById('nc-stat-you').textContent      = fromYou;
       document.getElementById('nc-stat-archived').textContent = archivedCount;
-      document.getElementById('nc-sub').textContent = `${activeCount} active · ${archivedCount} archived`;
+      document.getElementById('nc-sub').textContent = `${activeCount} active · ${completedCount} completed · ${archivedCount} archived`;
 
       const cards = ncFilteredCards();
       const list  = document.getElementById('nc-list');
@@ -2358,12 +2362,18 @@
         return;
       }
       list.innerHTML = cards.map(c => {
-        const isRen      = c.creator !== _currentUserId;
-        const isArchived = c.status === 'archived';
+        const isRen        = c.creator !== _currentUserId;
+        const isArchived   = c.status === 'archived';
+        const isCompleted  = c.status === 'completed';
+        const isActive     = c.status === 'active';
         const creatorLabel = isRen ? 'Ren' : 'Scott';
-        const archiveBtn = !isArchived
-          ? `<button class="nc-archive-btn" data-id="${c.id}" style="margin-left:auto;font-size:10.5px;color:var(--text-meta);background:none;border:1px solid var(--divider);border-radius:4px;padding:2px 7px;cursor:pointer;font-family:inherit;">Archive</button>`
-          : '';
+        const btnStyle     = 'font-size:10.5px;color:var(--text-meta);background:none;border:1px solid var(--divider);border-radius:4px;padding:2px 7px;cursor:pointer;font-family:inherit;';
+        const actionBtns   = isArchived ? '' : `
+          <span style="margin-left:auto;display:flex;gap:5px">
+            ${isActive ? `<button class="nc-complete-btn" data-id="${c.id}" style="${btnStyle}">Complete</button>` : ''}
+            ${isCompleted ? `<button class="nc-reopen-btn" data-id="${c.id}" style="${btnStyle}">Reopen</button>` : ''}
+            <button class="nc-archive-btn" data-id="${c.id}" style="${btnStyle}">Archive</button>
+          </span>`;
         return `
           <div class="notecard-item" style="${isArchived ? 'opacity:.55' : ''}">
             <div class="notecard-creator ${isRen ? 'ren' : 'scott'}">${isRen ? 'R' : 'S'}</div>
@@ -2373,23 +2383,28 @@
                 <span class="notecard-status ${c.status}">${cap(c.status)}</span>
                 <span>${escHtml(creatorLabel)} · ${fmtShortDate(c.created_at)} · ${fmtTime(c.created_at)}</span>
                 <span>From ${escHtml(c.source)}</span>
-                ${archiveBtn}
+                ${actionBtns}
               </div>
             </div>
           </div>`;
       }).join('');
 
+      async function patchStatus(id, status) {
+        const res = await apiFetch(`/api/notecards/${id}`, { method:'PATCH', body: JSON.stringify({ status }) });
+        if (res.ok) {
+          const card = _allNotecards.find(c => String(c.id) === String(id));
+          if (card) card.status = status;
+          renderNotecards();
+        }
+      }
+      list.querySelectorAll('.nc-complete-btn').forEach(btn => {
+        btn.addEventListener('click', e => { e.stopPropagation(); patchStatus(btn.dataset.id, 'completed'); });
+      });
+      list.querySelectorAll('.nc-reopen-btn').forEach(btn => {
+        btn.addEventListener('click', e => { e.stopPropagation(); patchStatus(btn.dataset.id, 'active'); });
+      });
       list.querySelectorAll('.nc-archive-btn').forEach(btn => {
-        btn.addEventListener('click', async e => {
-          e.stopPropagation();
-          const id = btn.dataset.id;
-          const res = await apiFetch(`/api/notecards/${id}`, { method:'PATCH', body: JSON.stringify({ status:'archived' }) });
-          if (res.ok) {
-            const card = _allNotecards.find(c => String(c.id) === String(id));
-            if (card) card.status = 'archived';
-            renderNotecards();
-          }
-        });
+        btn.addEventListener('click', e => { e.stopPropagation(); patchStatus(btn.dataset.id, 'archived'); });
       });
     }
 
