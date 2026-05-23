@@ -545,10 +545,6 @@ APP_HTML = """<!DOCTYPE html>
           <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.3"/><rect x="8.5" y="1.5" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.3"/><rect x="1.5" y="8.5" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.3"/><rect x="8.5" y="8.5" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.3"/></svg></div>
           <span class="nav-label">Solo Builder</span>
         </div>
-        <a class="nav-item" href="/docs/index.html" target="_blank">
-          <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.3"/><path d="M7 4v3l2 1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
-          <span class="nav-label">Han Solo Overview</span>
-        </a>
       </div>
     </nav>
 
