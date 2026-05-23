@@ -725,7 +725,7 @@ APP_HTML = """<!DOCTYPE html>
       <div class="screen-header">
         <div><div class="screen-title">Solo Builder</div><div class="screen-sub">The Framework · Documentation Library</div></div>
       </div>
-      <div class="screen-body" style="overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:28px;">
+      <div class="screen-body" style="flex:1;min-height:0;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:28px;">
 
         <!-- Overview -->
         <div class="sbf-section">
