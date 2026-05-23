@@ -21,17 +21,20 @@ One change at a time. Scott reviews and approves before anything moves forward.
 
 **Render (auto-deploys on git push)**
 The live MCP server and Render-hosted app. Code lives in `han_solo/`.
-- `han_solo/app_html.py` — Render-hosted web UI (Chat, Memory, Workspace, Frameworks). Served at han-solo-mcp.onrender.com.
 - `han_solo/server.py` — FastMCP server, API routes
 - `han_solo/tools/` — MCP tool implementations
+- `han_solo/app_html.py` — **LEGACY `/chat` endpoint only. DO NOT edit for any UI change.** See `docs/workspace.html` instead.
+
+**⚠️ UI source of truth: `docs/workspace.html`**
+All workspace UI changes (nav, screens, layout, links) go in `docs/workspace.html`. This file is served by BOTH Render (at `/workspace`) AND Cloudflare Pages. Git push updates Render. Wrangler deploy updates Cloudflare.
 
 **Cloudflare Pages (deploy manually)**
-The docs site and workspace UI. Code lives in `docs/`. Deploy command:
+The docs site. Code lives in `docs/`. Deploy command:
 ```
-cd ~/Developer/han-solo/docs && zsh -l -c "wrangler pages deploy . --project-name han-solo-docs"
+wrangler pages deploy docs --project-name sbf-framework-docs
 ```
-- `docs/workspace.html` — **The live workspace app** (sidebar with Ren, Session, Workspace, Frameworks, Development). Served at han-solo-docs.pages.dev/workspace.html. **Edit this for sidebar nav changes.**
-- `docs/index.html` — Han Solo docs home page (han-solo-docs.pages.dev)
+- `docs/workspace.html` — **The live workspace app.** Edit for ALL UI changes. Served at both han-solo-mcp.onrender.com/workspace AND sbf-framework-docs.pages.dev.
+- `docs/index.html` — Han Solo docs home page
 - `docs/framework/` — Framework guide docs (getting-started, phase guides, reference)
 - `docs/logbook.html`, `docs/transcripts.html`, `docs/dashboard.html` — Operational docs pages
 - `docs/roadmap.html` — Roadmap page (accessible via Han Solo Overview in Development nav)
@@ -42,13 +45,13 @@ cd ~/Developer/han-solo/docs && zsh -l -c "wrangler pages deploy . --project-nam
 
 | # | Name | Edit here | Deploy |
 |---|------|-----------|--------|
-| 1 | Workspace UI (sidebar, nav, Development section) | `docs/workspace.html` | wrangler → han-solo-docs |
+| 1 | Workspace UI — **ALL UI changes go here** | `docs/workspace.html` | git push (Render) + wrangler (Cloudflare) |
 | 2 | Han Solo Docs (overview, operational pages) | `docs/*.html` | wrangler → han-solo-docs |
 | 3 | Framework Docs (guides, skills reference, decks) | `docs/framework/*.html` | wrangler → han-solo-docs |
 | 4 | MCP Server (FastMCP bridge, API, tools) | `han_solo/server.py`, `han_solo/tools/` | git push → auto |
 | 5 | Letta (Ren's memory, v0.16.8) | Via MCP tools | Render managed |
 | 6 | Database (PostgreSQL — T4, skills, transcripts) | Via API or scripts | Render managed |
-| 7 | Render App UI (secondary web UI) | `han_solo/app_html.py` | git push → auto |
+| 7 | Legacy /chat endpoint (read-only — not the workspace) | `han_solo/app_html.py` | do not edit |
 | 8 | Claude Code (local execution, MCP client) | Claude Code settings, hooks, skills | — |
 | 9 | Framework Vers1 (phase skills source of truth) | `~/Developer/Framework Vers1/skills/` | write_skill MCP → #6 |
 | 10 | verify.py (57-check health monitor) | `scripts/verify.py` | LaunchAgent, 30 min |

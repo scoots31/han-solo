@@ -1,3 +1,7 @@
+# ⚠️  LEGACY — this file powers the /chat route ONLY.
+# The main workspace UI is docs/workspace.html — edit THAT for any UI change.
+# Editing this file will not affect what users see at /workspace.
+
 APP_HTML = """<!DOCTYPE html>
 <html lang="en">
 <head>
