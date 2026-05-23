@@ -2375,7 +2375,7 @@
             <button class="nc-archive-btn" data-id="${c.id}" style="${btnStyle}">Archive</button>
           </span>`;
         return `
-          <div class="notecard-item" style="${isArchived ? 'opacity:.55' : ''}">
+          <div class="notecard-item" style="${isArchived ? 'opacity:.55;cursor:pointer' : 'cursor:pointer'}" onclick="openNotecard('${c.id}')">
             <div class="notecard-creator ${isRen ? 'ren' : 'scott'}">${isRen ? 'R' : 'S'}</div>
             <div class="notecard-content">
               <div class="notecard-text">${escHtml(c.text)}</div>
@@ -3746,17 +3746,25 @@
       document.getElementById('screen-signal-detail').classList.remove('hidden');
     }
 
-    function showNotecardDetail(idx) {
-      const d = notecardData[idx];
+    function openNotecard(id) {
+      const c = _allNotecards.find(n => String(n.id) === String(id));
+      if (!c) return;
+      const isRen = c.creator !== _currentUserId;
       const badge = document.getElementById('nc-detail-creator-badge');
-      badge.textContent = d.creator === 'ren' ? 'R' : 'S';
-      badge.className = 'notecard-creator ' + d.creator;
-      document.getElementById('nc-detail-creator-label').textContent = d.creatorLabel;
+      badge.textContent = isRen ? 'R' : 'S';
+      badge.className = 'notecard-creator ' + (isRen ? 'ren' : 'scott');
+      const creatorName = isRen ? 'Ren' : 'Scott';
+      const dateStr = fmtShortDate(c.created_at) + ' · ' + fmtTime(c.created_at);
+      document.getElementById('nc-detail-creator-label').textContent = `${creatorName} · ${dateStr}`;
       const statusEl = document.getElementById('nc-detail-status');
-      statusEl.textContent = d.status.charAt(0).toUpperCase() + d.status.slice(1);
-      statusEl.className = 'notecard-status ' + d.status;
-      document.getElementById('nc-detail-title').textContent = d.title;
-      renderDetailBody('nc-detail-body', d.sections);
+      statusEl.textContent = cap(c.status);
+      statusEl.className = 'notecard-status ' + c.status;
+      document.getElementById('nc-detail-title').textContent = c.text;
+      document.getElementById('nc-detail-body').innerHTML =
+        `<div style="white-space:pre-wrap;font-size:13px;line-height:1.75;color:var(--text-secondary);padding:0 4px">
+           <span style="font-size:11px;color:var(--text-meta);font-weight:600;text-transform:uppercase;letter-spacing:.08em">Source</span><br>
+           <span>${escHtml(c.source || '—')}</span>
+         </div>`;
       document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
       document.getElementById('screen-notecard-detail').classList.remove('hidden');
     }
