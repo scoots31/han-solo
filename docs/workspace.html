@@ -994,7 +994,6 @@
           <div class="nav-item" onclick="showScreen('notecards',this)">
             <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="2" width="10" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 5h5M4.5 7.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
             <span class="nav-label">Notecards</span>
-            <span class="nav-badge rose">4</span>
           </div>
         </div>
 
@@ -1498,7 +1497,8 @@
           <button class="filter-btn active" data-ncfilter="active">Active</button>
           <button class="filter-btn" data-ncfilter="completed">Completed</button>
           <button class="filter-btn" data-ncfilter="all">All</button>
-          <button class="filter-btn" data-ncfilter="yours">Yours</button>
+          <button class="filter-btn" data-ncfilter="scott">Scott</button>
+          <button class="filter-btn" data-ncfilter="ted">Ted</button>
           <button class="filter-btn" data-ncfilter="rens">Ren's</button>
           <button class="filter-btn" data-ncfilter="archived">Archived</button>
         </div>
@@ -2345,8 +2345,9 @@
       switch(_ncFilter) {
         case 'active':    return _allNotecards.filter(c => c.status === 'active');
         case 'completed': return _allNotecards.filter(c => c.status === 'completed');
-        case 'yours':     return _allNotecards.filter(c => c.creator === _currentUserId);
-        case 'rens':      return _allNotecards.filter(c => c.creator !== _currentUserId);
+        case 'scott':     return _allNotecards.filter(c => c.creator === 'scott');
+        case 'ted':       return _allNotecards.filter(c => c.creator === 'ted');
+        case 'rens':      return _allNotecards.filter(c => c.creator === 'ren');
         case 'archived':  return _allNotecards.filter(c => c.status === 'archived');
         default:          return _allNotecards;
       }
