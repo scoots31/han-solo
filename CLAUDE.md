@@ -17,12 +17,26 @@ Each violation caused hours of rework, design drift, and session context loss.
 **No batching visual/design changes without approval.**
 One change at a time. Scott reviews and approves before anything moves forward.
 
-## Stack
+## Two separate deployments — know which one you're touching
 
-- Letta backend (Render) — persistent memory for Ren
-- FastMCP bridge (Render) — MCP server at han-solo-mcp.onrender.com/mcp
-- 15 MCP tools callable from Claude Code
-- Han Solo docs: /Users/scottheinemeier/Developer/han-solo/docs/
+**Render (auto-deploys on git push)**
+The live MCP server and Render-hosted app. Code lives in `han_solo/`.
+- `han_solo/app_html.py` — Render-hosted web UI (Chat, Memory, Workspace, Frameworks). Served at han-solo-mcp.onrender.com.
+- `han_solo/server.py` — FastMCP server, API routes
+- `han_solo/tools/` — MCP tool implementations
+
+**Cloudflare Pages (deploy manually)**
+The docs site and workspace UI. Code lives in `docs/`. Deploy command:
+```
+cd ~/Developer/han-solo/docs && zsh -l -c "wrangler pages deploy . --project-name han-solo-docs"
+```
+- `docs/workspace.html` — **The live workspace app** (sidebar with Ren, Session, Workspace, Frameworks, Development). Served at han-solo-docs.pages.dev/workspace.html. **Edit this for sidebar nav changes.**
+- `docs/index.html` — Han Solo docs home page (han-solo-docs.pages.dev)
+- `docs/framework/` — Framework guide docs (getting-started, phase guides, reference)
+- `docs/logbook.html`, `docs/transcripts.html`, `docs/dashboard.html` — Operational docs pages
+- `docs/roadmap.html` — Roadmap page (accessible via Han Solo Overview in Development nav)
+
+**When you don't know which file to edit — ask:** is this the workspace sidebar/UI (→ `docs/workspace.html`) or the Render app UI (→ `han_solo/app_html.py`) or a docs page (→ `docs/*.html`)?
 
 ## Docs preview server
 
@@ -35,3 +49,4 @@ python3 -m http.server 7700 --directory /Users/scottheinemeier/Developer/han-sol
 - Approved design reference: `docs/design/han-solo-design.html`
 - Shared CSS: `docs/framework/_shared.css`
 - Framework docs: `docs/framework/` (18+ pages)
+- System state reference: `docs/system-state.md` (source of truth for Letta project_state block)
