@@ -39,6 +39,33 @@ def register(server: FastMCP) -> None:
         return f"Notecard created — id={result['id']}, creator={user.name}"
 
     @server.tool()
+    async def update_notecard(notecard_id: int, status: str = "", text: str = "") -> str:
+        """
+        Update a notecard's status and/or text.
+
+        notecard_id: the id of the notecard to update
+        status: 'active' | 'completed' | 'archived' | '' (leave blank to keep current)
+        text: new text content | '' (leave blank to keep current)
+
+        Use this to mark a notecard complete when the item has been addressed,
+        archive it when it's no longer relevant, or correct its text.
+        """
+        get_current_user()
+        s = status.strip() or None
+        t = text.strip() or None
+        if s is not None and s not in VALID_STATUSES:
+            return f"Error: status must be one of {sorted(VALID_STATUSES)}"
+        if s is None and t is None:
+            return "Error: provide status or text to update"
+        ok = await db.update_notecard(notecard_id, status=s, text=t)
+        if not ok:
+            return f"Error: notecard {notecard_id} not found or update failed"
+        parts = []
+        if s: parts.append(f"status={s}")
+        if t: parts.append(f"text updated")
+        return f"Notecard {notecard_id} updated — {', '.join(parts)}"
+
+    @server.tool()
     async def list_notecards(status: str = "") -> list[dict]:
         """
         List notecards.
