@@ -329,14 +329,7 @@ try:
 except Exception as e:
     check("Skills table", False, str(e))
 
-# 9. Jobs state
-print("\n[9] Jobs")
-try:
-    jobs, _ = mcp_get("/api/jobs-status")
-    check("Automated jobs enabled", not jobs.get("paused", True),
-          "paused" if jobs.get("paused") else "running")
-except Exception as e:
-    check("Jobs status", False, str(e))
+# 9. Jobs state — removed 2026-05-22; Render cron jobs (synthesize.py) deleted, dream.py still runs
 
 # 10. Session logs — proves the logbook write path and DB round-trip are working
 print("\n[10] Session logs")
