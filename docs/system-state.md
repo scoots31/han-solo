@@ -6,7 +6,7 @@ Letta is the runtime copy. This file is git-versioned and recoverable.
 Update protocol: edit this file → commit → write to Letta via `write_core_memory` (block_label: `project_state`).
 Never write to Letta first.
 
-Last updated: 2026-05-23
+Last updated: 2026-05-23 (2)
 
 ---
 
@@ -59,7 +59,7 @@ Last updated: 2026-05-23
 
 - Python: `/opt/homebrew/bin/python3` (3.13.13)
 - App venv: `~/Apps/.venv` (Flask, SQLAlchemy, gunicorn, psycopg2, python-dotenv)
-- `LETTA_API_KEY`: set in `~/.zshenv` (wired 2026-05-22 — was missing before this date)
+- `LETTA_API_KEY`: set in `~/.zshenv` (shell access) and in `~/Library/LaunchAgents/com.scotth.rendream.plist` EnvironmentVariables section (launchd access, added 2026-05-23). If key is rotated, update both.
 - LaunchAgent: `~/Library/LaunchAgents/` — runs parse_transcripts.py + verify.py every 30 min
 
 ---
