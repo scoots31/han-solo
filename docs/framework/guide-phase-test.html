@@ -81,12 +81,16 @@
     </thead>
     <tbody>
       <tr>
+        <td><code>docs/records-spec.md</code></td>
+        <td>Canonical record formats and status definitions — confirms what each status means before any status transitions are made</td>
+      </tr>
+      <tr>
         <td><code>docs/discovery-brief.md</code></td>
         <td>Original use cases, the problem being solved, the user and their need</td>
       </tr>
       <tr>
         <td><code>docs/design/sprint-[id].html</code></td>
-        <td>Design artifact, all screens, the intended journey</td>
+        <td>Design artifact, all screens, the intended journey — <strong>mandatory full read, not a reference scan</strong></td>
       </tr>
       <tr>
         <td><code>docs/backlog.md</code></td>
@@ -102,6 +106,10 @@
       </tr>
     </tbody>
   </table>
+
+  <div class="callout">
+    <strong>The design artifact is a mandatory full read — not a reference scan.</strong> Open <code>docs/design/sprint-[id].html</code> and read every screen end to end before any stage runs. Do not skim. Do not rely on a prior read from an earlier session. The design artifact is the visual contract for this phase — every screen the tester will walk and every transition the acceptance reviewer will judge comes from this file. If the design artifact cannot be located or opened, stop. Phase Test cannot proceed.
+  </div>
 
   <h2>Skill in This Phase</h2>
 
@@ -136,13 +144,13 @@
       <h3>Stage 1 · Environment Readiness</h3>
       <div class="section-label">Pre-flight gate — nothing runs until this passes</div>
       <p>Confirms the test environment is actually ready to test against. Testing against a misconfigured environment produces false results — passes that will fail in production, failures that are config problems, not bugs.</p>
-      <p>Checklist: mock layer inactive / real APIs active · all Done slices deployed · auth configured for test environment · app loads clean with no console errors · no broken states before interaction.</p>
+      <p>Checklist: mock layer inactive / real APIs active · all Done slices deployed · auth configured for test environment · app loads clean with no console errors · no broken states before interaction · design review completed for all phase screens (no slice built against an unreviewed screen).</p>
       <p>If anything fails: stop. List exactly what's missing. Do not proceed to Stage 2 until the environment is confirmed ready.</p>
     </div>
     <div>
       <h3>Stage 2 · Use Case Creator</h3>
       <div class="section-label">Builds the test plan every other specialist works from</div>
-      <p>Reads the discovery brief and design sprint artifact, then derives a structured test plan. This is not invented — it's extracted from what was already agreed on. Every use case, screen transition, edge case from mock data, and done criteria becomes a numbered scenario.</p>
+      <p>Opens the design artifact in full first — every screen, read end to end, element labels quoted verbatim. This list becomes the standard the tester and acceptance reviewer work against. Then reads the discovery brief and derives a structured test plan. This is not invented — it's extracted from what was already agreed on. Every use case, screen transition, edge case from mock data, and done criteria becomes a numbered scenario.</p>
       <p>Output is a numbered test plan. Every specialist from Stage 3 onward works from this shared reference. Tester, Regression Specialist, and Acceptance Reviewer all anchor to it.</p>
     </div>
     <div>
@@ -155,7 +163,7 @@
     <div>
       <h3>Stages 4 + 5 · Tester and Regression Specialist (run simultaneously)</h3>
       <div class="section-label">Stage 4: walks every scenario with named evidence · Stage 5: re-walks Done slices and checks integration points</div>
-      <p><strong>Tester (Stage 4):</strong> Executes each scenario from the test plan. Active testing — not reading code, not inspecting config. Walking the product the way a user would, recording pass or fail with specific named evidence every time. Sets up precondition, executes steps, compares against expected outcome. Failures route to qa-triage and the run continues.</p>
+      <p><strong>Tester (Stage 4):</strong> Executes each scenario from the test plan. Active testing — not reading code, not inspecting config. Walking the product the way a user would, recording pass or fail with specific named evidence every time. For each scenario that has a corresponding design screen: open the design screen alongside the live app and compare the running output against the screen content verbatim — not a mental model, the actual file. Sets up precondition, executes steps, compares against expected outcome. Failures route to qa-triage and the run continues.</p>
       <p><strong>Regression Specialist (Stage 5):</strong> Specifically focuses on integration points — the places where slices connect. A slice can pass QA in isolation and fail when another slice changes shared state, shared components, or shared navigation. Checks: navigate to each Done slice in test env · verify done criteria still hold with evidence · state from prior screens reaches this slice · shared components remain consistent · navigation intact after later slices added.</p>
     </div>
     <div>
@@ -332,6 +340,11 @@
         <td><strong>Solo sign-off at the phase level without running phase test</strong></td>
         <td>Slice QA alone isn't sufficient. Each slice confirmed its own done criteria in isolation. Slice QA doesn't confirm integration, real data flow, or use case intent. You can have 10 passing slices and a broken product.</td>
         <td>Phase test is required before deploy — not optional, not replaceable by accumulated slice QA passes. The gate enforces this. Deploy confirms OPEN before running.</td>
+      </tr>
+      <tr>
+        <td><strong>Walking phase test scenarios without the design artifact open</strong></td>
+        <td>The test gets compared to a memory of the design, not the design itself. Gaps slip through because the tester is working from what they remember the screen looked like, not what it actually says. This produces false passes.</td>
+        <td>Open the design file before any scenario runs. For each scenario with a corresponding screen, quote the element verbatim — label, layout, copy, visible state — and compare the running output against that quote. Memory is not an acceptable substitute.</td>
       </tr>
     </tbody>
   </table>
