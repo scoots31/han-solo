@@ -982,7 +982,7 @@
             <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 3h10M2 7h7M2 11h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
             <span class="nav-label">Chat</span>
           </div>
-          <div class="nav-item" onclick="showScreen('memory',this)">
+          <div class="nav-item" id="nav-memory" onclick="showScreen('memory',this)">
             <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.4"/><path d="M7 4.5v2.75l2 1.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
             <span class="nav-label">Memory</span>
           </div>
@@ -1025,7 +1025,7 @@
         </div>
         <div class="nav-section" style="margin-top:8px">
           <div class="nav-section-label">Development</div>
-          <div class="nav-item" onclick="showScreen('transcripts',this)">
+          <div class="nav-item" id="nav-claude-sessions" onclick="showScreen('transcripts',this)">
             <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2.5h10M2 5.5h10M2 8.5h7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="10.5" cy="10.5" r="2" stroke="currentColor" stroke-width="1.2"/><path d="M12 12l1.2 1.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></div>
             <span class="nav-label">Claude Sessions</span>
           </div>
@@ -1649,14 +1649,22 @@
     function showLoginOverlay() { document.getElementById('login-overlay').classList.remove('hidden'); }
     function hideLoginOverlay() { document.getElementById('login-overlay').classList.add('hidden'); }
 
+    function applyRoleVisibility(role) {
+      const isOwner = role === 'owner';
+      document.getElementById('nav-memory').style.display         = isOwner ? '' : 'none';
+      document.getElementById('nav-claude-sessions').style.display = isOwner ? '' : 'none';
+    }
+
     async function doLogin() {
       const t = document.getElementById('login-token-input').value.trim();
       if (!t) return;
       document.getElementById('login-error').textContent = '';
       const res = await fetch(API_BASE + '/api/me', { headers: { 'Authorization': 'Bearer ' + t } });
       if (res.ok) {
+        const me = await res.json();
         token = t;
         localStorage.setItem('hs_token', t);
+        applyRoleVisibility(me.role);
         hideLoginOverlay();
         loadChat();
       } else {
@@ -3466,7 +3474,12 @@
     });
 
     // Kick off
-    if (token) { loadChat(); } else { showLoginOverlay(); }
+    if (token) {
+      apiFetch('/api/me').then(r => r.ok ? r.json() : null).then(me => {
+        if (me) applyRoleVisibility(me.role);
+      });
+      loadChat();
+    } else { showLoginOverlay(); }
 
     let previousScreen = 'projects';
 
