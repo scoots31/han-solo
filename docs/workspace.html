@@ -2669,7 +2669,7 @@
       document.getElementById('proj-sub').textContent = 'Loading…';
       try {
         const data = await (await apiFetch('/api/t4/projects')).json();
-        _allProjects = data;
+        _allProjects = data.filter(p => p.project_slug !== 'han-solo');
         _projLoaded = true;
         renderProjects();
       } catch(e) {
