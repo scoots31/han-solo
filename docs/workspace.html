@@ -2120,6 +2120,25 @@
       return first.length > 90 ? first.slice(0, 90) + '…' : (first || '(no title)');
     }
 
+    function passageDate(p) {
+      const text = p.text || '';
+      // Try ISO date in text: 2026-05-10
+      const isoMatch = text.match(/\b(\d{4}-\d{2}-\d{2})\b/);
+      if (isoMatch) {
+        const d = new Date(isoMatch[1] + 'T12:00:00');
+        if (!isNaN(d)) return d.toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'});
+      }
+      // Try written date: May 10, 2026
+      const writtenMatch = text.match(/\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}\b/i);
+      if (writtenMatch) return writtenMatch[0];
+      // Fallback: consolidation date labeled clearly
+      if (p.created_at) {
+        const d = new Date(p.created_at);
+        return 'Filed ' + d.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+      }
+      return '';
+    }
+
     function passageExcerpt(text) {
       const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
       const body  = lines.slice(1).join(' ');
@@ -2144,9 +2163,7 @@
       const typeLabel = { session:'Session', decision:'Decision', thread:'Thread', signal:'Signal', other:'Memory' };
       const label = typeLabel[p._type] || 'Memory';
       const badgeClass = (p._type === 'signal' || p._type === 'other') ? 'thread' : (p._type || 'thread');
-      const date = p.created_at
-        ? new Date(p.created_at).toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit'})
-        : '';
+      const date = passageDate(p);
       document.getElementById('mem-detail-breadcrumb').textContent = label;
       const badge = document.getElementById('mem-detail-badge');
       badge.textContent = label;
@@ -2259,9 +2276,7 @@
         const label  = typeLabel[badge] || 'Memory';
         const title  = escHtml(passageTitle(p.text));
         const excerpt= escHtml(passageExcerpt(p.text));
-        const date   = p.created_at
-          ? new Date(p.created_at).toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'})
-          : '';
+        const date   = passageDate(p);
         const isNew  = p.id && !seen.has(String(p.id));
         return `
           <div class="list-row" onclick="openMemPassage(${idx})" style="cursor:pointer">
