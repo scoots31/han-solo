@@ -1,5 +1,0 @@
-HTTP 500 on POST /v1/agents/agent-fe4a3d5b-bb51-458e-92f1-6a1ee5b0ce94/messages: {"detail":"An unknown error occurred"}
-Dream session failed: HTTP Error 500: Internal Server Error
-HTTP 500 on POST /v1/agents/agent-fe4a3d5b-bb51-458e-92f1-6a1ee5b0ce94/messages: {"detail":"An unknown error occurred"}
-Dream session failed: HTTP Error 500: Internal Server Error
-Dream session failed: [Errno 54] Connection reset by peer
