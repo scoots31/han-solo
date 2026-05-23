@@ -293,8 +293,8 @@
     <div class="tier-card">
       <div class="tier-badge">T2 — Recent archival</div>
       <h3>Recent memory</h3>
-      <p>Synthesized session summaries and signals written after each session. The default landing zone for new archival writes. Searchable by topic. Passages here are 3–90 days old.</p>
-      <p class="tier-detail">No tier tag — the default bucket. Promoted to T3 after 90 days if foundational.</p>
+      <p>Session memories, signals, and context written by Ren and dream.py. The default landing zone for new archival writes. Searchable by topic.</p>
+      <p class="tier-detail">No tier tag — the default bucket.</p>
     </div>
     <div class="tier-card">
       <div class="tier-badge">T3 — Foundational</div>
@@ -517,10 +517,6 @@
   <p>Ren checks memory system health at every session start via the <code>check_memory_health</code> tool. The result covers three areas:</p>
 
   <div class="feature-row">
-    <div class="feature-label">Failed transitions</div>
-    <div class="feature-desc">Count of failed T1→T2 or T2→T3 promotions in the last 24 hours, from the <code>memory_transitions</code> audit table. Any non-zero count gets flagged to Scott immediately.</div>
-  </div>
-  <div class="feature-row">
     <div class="feature-label">Capture health</div>
     <div class="feature-desc">DB connection status, timestamp of the last successful write, and consecutive failure count. Tells Ren whether the transcript capture pipeline is running cleanly.</div>
   </div>
@@ -529,9 +525,6 @@
     <div class="feature-desc">dream.py respects a <code>jobs_paused</code> flag in the <code>han_solo_config</code> Postgres table. Toggle it from the Memory panel in the chat UI.</div>
   </div>
 
-  <div class="callout">
-    <strong>Write-before-mark invariant:</strong> No data is ever deleted before it's confirmed written elsewhere. Every T1→T2 and T2→T3 promotion attempt is logged in <code>memory_transitions</code> with status and error. The pipeline fails safe — a failed write leaves the source intact.
-  </div>
 
 </div>
 </body>
