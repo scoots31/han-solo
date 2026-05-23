@@ -6,7 +6,7 @@ Letta is the runtime copy. This file is git-versioned and recoverable.
 Update protocol: edit this file → commit → write to Letta via `write_core_memory` (block_label: `project_state`).
 Never write to Letta first.
 
-Last updated: 2026-05-22
+Last updated: 2026-05-23
 
 ---
 
@@ -20,7 +20,8 @@ Last updated: 2026-05-22
 | han-solo-mcp | han-solo-mcp.onrender.com/mcp | FastMCP bridge, MCP entrypoint for Ren |
 | han-solo-db | Internal only | PostgreSQL 16, 5 GB, Oregon region (Render ID: dpg-d81724vavr4c73b5afig-a) |
 
-- GitHub repo: scoots31/han-solo (private)
+- GitHub repo: scoots31/han-solo (public — All Rights Reserved)
+- GitHub repo: scoots31/claude-hooks (private — Claude Code hook files, git-tracked 2026-05-23)
 - Health check: han-solo-mcp.onrender.com/health
 
 **Background jobs (Render):**
@@ -38,6 +39,7 @@ Last updated: 2026-05-22
 - **Canonical update path:** write_skill MCP tool → `PUT /api/skills/{slug}` on han-solo-mcp
 - **Bulk fallback:** `~/Developer/han-solo/scripts/seed_skills.py` (reads from Framework Vers1)
 - **Common mistake:** engineering-playbook is NOT the skills source. Corrected 2026-05-22.
+- **Ren skill:** now exists in Han Solo DB (created 2026-05-23). Framework Vers1 + local `~/.claude/skills/ren/SKILL.md` + Han Solo DB are all in sync. Invocation: ren-local + Han Solo session brief. No ren-memory, no MemPalace, no engineering-playbook.
 
 ---
 
