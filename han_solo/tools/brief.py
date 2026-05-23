@@ -34,6 +34,11 @@ def register(server: FastMCP) -> None:
             pending_thoughts = ""
 
         try:
+            project_state = (await letta.read_core_block("project_state")).get("value", "")
+        except Exception:
+            project_state = ""
+
+        try:
             recent = await letta.list_passages(limit=5)
             recent_signals = [
                 {
@@ -61,6 +66,7 @@ def register(server: FastMCP) -> None:
         return {
             "current_datetime": current_datetime,
             "always_loaded_core": always_loaded,
+            "system_state": project_state,
             "pending_thoughts": pending_thoughts,
             "recent_signals": recent_signals,
         }
