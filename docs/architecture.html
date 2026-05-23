@@ -225,6 +225,8 @@ svg#flowchart:active{cursor:grabbing}
   fill:rgba(26,26,26,0.45);
 }
 .edge-label.highlighted{fill:var(--highlight)}
+.node-group.dimmed { opacity:.18; transition:opacity .2s; }
+.edge.dimmed { opacity:.06!important; transition:opacity .2s; }
 
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -294,14 +296,6 @@ svg#flowchart:active{cursor:grabbing}
         <text x="445" y="69" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">nightly cron (launchd)</text>
       </g>
 
-      <!-- Synthesize script -->
-      <g class="node-group" data-node="synthesize" onclick="nodeClick('synthesize')">
-        <rect class="node-rect" x="550" y="30" width="130" height="52"
-              fill="#fdf8f4" stroke="#8e8e90" stroke-width="1.5"/>
-        <text x="615" y="52" text-anchor="middle" fill="#8e8e90" font-size="12" font-weight="700">synthesize.py</text>
-        <text x="615" y="69" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">cron (Render / launchd)</text>
-      </g>
-
       <!-- Render health check -->
       <g class="node-group" data-node="render-health" onclick="nodeClick('render-health')">
         <rect class="node-rect" x="720" y="30" width="130" height="52"
@@ -310,13 +304,6 @@ svg#flowchart:active{cursor:grabbing}
         <text x="785" y="69" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">health check / deploy</text>
       </g>
 
-      <!-- Curator script -->
-      <g class="node-group" data-node="curator" onclick="nodeClick('curator')">
-        <rect class="node-rect" x="890" y="30" width="130" height="52"
-              fill="#fdf8f4" stroke="#49494b" stroke-width="1.5"/>
-        <text x="955" y="52" text-anchor="middle" fill="#49494b" font-size="12" font-weight="700">curator.py</text>
-        <text x="955" y="69" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">nightly cron (Render)</text>
-      </g>
 
       <!-- ════════════════════════════════════════════════
            MCP SERVER — middle band
@@ -507,13 +494,6 @@ svg#flowchart:active{cursor:grabbing}
         <text x="987" y="629" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">based on han-solo image</text>
       </g>
 
-      <g class="node-group" data-node="docker-synth" onclick="nodeClick('docker-synth')">
-        <rect class="node-rect" x="900" y="662" width="175" height="52"
-              fill="#fdf8f4" stroke="#8e8e90" stroke-width="1.5"/>
-        <text x="987" y="684" text-anchor="middle" fill="#8e8e90" font-size="12" font-weight="700">Dockerfile.synth</text>
-        <text x="987" y="701" text-anchor="middle" fill="rgba(26,26,26,0.45)" font-size="10">python:3.11-slim · asyncpg</text>
-      </g>
-
       <g class="node-group" data-node="letta-docker" onclick="nodeClick('letta-docker')">
         <rect class="node-rect" x="1100" y="590" width="160" height="52"
               fill="#fdf8f4" stroke="#d1bfa7" stroke-width="1.5"/>
@@ -554,8 +534,6 @@ svg#flowchart:active{cursor:grabbing}
       <path class="edge" id="e-claude-auth" d="M105,82 L105,150" stroke="#d1bfa7" marker-end="url(#arr)" data-edges='["claude","auth-middleware"]'/>
       <path class="edge" id="e-browser-chatapi" d="M275,82 L275,220 L780,220 L780,176" stroke="#8e8e90" marker-end="url(#arr)" data-edges='["browser","chat-api"]'/>
       <path class="edge" id="e-dream-letta" d="M445,82 L445,420" stroke="#49494b" marker-end="url(#arr)" data-edges='["dream","letta-client"]'/>
-      <path class="edge" id="e-synth-db" d="M615,82 L615,590" stroke="#8e8e90" marker-end="url(#arr)" data-edges='["synthesize","db"]'/>
-      <path class="edge" id="e-synth-mcp" d="M615,82 L700,82 L700,176 L930,176" stroke="#8e8e90" stroke-dasharray="4,3" marker-end="url(#arr)" data-edges='["synthesize","chat-html"]'/>
       <path class="edge" id="e-render-health" d="M785,82 L785,150 L710,150 L710,176" stroke="#8e8e90" marker-end="url(#arr)" data-edges='["render-health","validation"]'/>
 
       <!-- Auth → FastMCP -->
@@ -611,19 +589,10 @@ svg#flowchart:active{cursor:grabbing}
 
       <!-- docker edges -->
       <path class="edge" id="e-doc-mcp" d="M987,642 L987,700 L600,700 L560,650" stroke="#8e8e90" stroke-dasharray="4,3" marker-end="url(#arr)" data-edges='["docker-mcp","db"]'/>
-      <path class="edge" id="e-doc-synth" d="M987,714 L615,714 L615,82" stroke="#8e8e90" stroke-dasharray="4,3" marker-end="url(#arr)" data-edges='["docker-synth","synthesize"]'/>
       <path class="edge" id="e-letta-doc" d="M1180,590 L1180,560 L1070,490" stroke="#d1bfa7" stroke-dasharray="4,3" marker-end="url(#arr)" data-edges='["letta-docker","voyage-ai"]'/>
-
-      <!-- synthesize → anthropic -->
-      <path class="edge" id="e-synth-ant" d="M680,56 L1100,420" stroke="#d1bfa7" stroke-dasharray="4,3" marker-end="url(#arr)" data-edges='["synthesize","anthropic-api"]'/>
 
       <!-- dream → letta-api directly -->
       <path class="edge" id="e-dream-lapi" d="M510,56 L860,56 L860,350 L900,360" stroke="#49494b" stroke-dasharray="4,3" marker-end="url(#arr)" data-edges='["dream","letta-api"]'/>
-
-      <!-- curator → db (reads/writes memory_connections, curator_flags) -->
-      <path class="edge" id="e-curator-db" d="M955,82 L955,620 L560,620" stroke="#49494b" stroke-dasharray="4,3" marker-end="url(#arr)" data-edges='["curator","db"]'/>
-      <!-- curator → anthropic (Sonnet for connection analysis) -->
-      <path class="edge" id="e-curator-ant" d="M1020,56 L1150,400" stroke="#d1bfa7" stroke-dasharray="4,3" marker-end="url(#arr)" data-edges='["curator","anthropic-api"]'/>
 
       <!-- fastmcp → tool-t4 -->
       <path class="edge" id="e-mcp-tt4" d="M380,202 L910,280" stroke="#8e8e90" marker-end="url(#arr)" data-edges='["fastmcp","tool-t4"]'/>
@@ -662,7 +631,6 @@ svg#flowchart:active{cursor:grabbing}
   <div class="leg-item"><div class="leg-swatch" style="background:#8e8e90"></div>MCP Server / Tools</div>
   <div class="leg-item"><div class="leg-swatch" style="background:#49494b"></div>Config / Background</div>
   <div class="leg-item"><div class="leg-swatch" style="background:#bd8c7d"></div>Auth / Validation</div>
-  <div class="leg-item"><div class="leg-swatch" style="background:#8e8e90"></div>Synthesis / Embeddings</div>
   <div class="leg-item"><div class="leg-swatch" style="background:#d1bfa7"></div>Anthropic API</div>
   <div class="leg-item" style="gap:6px">
     <svg width="30" height="10"><line x1="0" y1="5" x2="30" y2="5" stroke="#4a4038" stroke-width="1.5" marker-end="url(#arr)"/></svg>
@@ -738,36 +706,6 @@ const FLOWS = [
     ]
   },
   {
-    id: 'synthesize-flow',
-    label: 'Synthesis pipeline (T1→T2→T3)',
-    color: '#8e8e90',
-    nodes: ['synthesize','db','postgres','anthropic-api','chat-api','letta-api'],
-    steps: [
-      {title:'Cron fires synthesize.py',desc:'Render cron job (or launchd) runs synthesize.py. Creates asyncpg pool, checks jobs_paused in han_solo_config.',ref:'synthesize.py:run'},
-      {title:'Fetch unprocessed sessions',desc:'SELECT from chat_transcripts WHERE processed=FALSE, grouped by session_id. Ordered oldest-first.',ref:'synthesize.py:get_unprocessed_sessions'},
-      {title:'Call Anthropic for synthesis',desc:'format_transcript → SYNTHESIS_PROMPT → claude-sonnet-4-6 → returns JSON {pending_thoughts_addition, signals:[]}.',ref:'synthesize.py:synthesize_transcript · _anthropic_request'},
-      {title:'Write to Ren via MCP REST',desc:'POST /api/write-core-block to append SYNTHESIS[date session X]: block to pending_thoughts. POST /api/write-signal for each archival signal.',ref:'synthesize.py:write_to_letta · server.py:api_write_core_block · api_write_signal_rest'},
-      {title:'Mark processed',desc:'Only after all writes confirmed: UPDATE chat_transcripts SET processed=TRUE. Write-before-mark invariant — never loses data.',ref:'synthesize.py:mark_processed'},
-      {title:'T1→T2 promotion',desc:'promote_old_entries: SYNTHESIS entries >3 days old beyond the 2 most recent are written to archival memory as texture/ren signals, then trimmed from pending_thoughts.',ref:'synthesize.py:promote_old_entries'},
-      {title:'T2→T3 tagging',desc:'_tag_foundational: archival passages >90 days old get [tier:foundational] prepended. New tagged passage written, then old passage deleted (write-before-delete invariant).',ref:'synthesize.py:_tag_foundational'},
-      {title:'Purge & cleanup',desc:'DELETE processed transcripts older than 5 days. memory_transitions table audits every T1→T2 and T2→T3 attempt with status/error.',ref:'synthesize.py:purge_old · db.py:memory_transitions'},
-    ]
-  },
-  {
-    id: 'curator-flow',
-    label: 'Memory curator (connection graph)',
-    color: '#49494b',
-    nodes: ['curator','db','postgres','anthropic-api'],
-    steps: [
-      {title:'Cron fires curator.py',desc:'Render cron runs curator.py nightly after synthesize.py completes. Creates asyncpg pool, checks jobs_paused flag.',ref:'curator.py:run'},
-      {title:'Fetch recent passages',desc:'Queries archival passages written in the last 48 hours, in batches of 20. Only passages not yet processed by the curator.',ref:'curator.py:get_recent_passages'},
-      {title:'Call Anthropic for connection analysis',desc:'Sends batch of passage pairs to claude-sonnet-4-6 with a structured prompt. Returns JSON array of connections: {passage_id_a, passage_id_b, relationship, confidence, grounding}.',ref:'curator.py:analyze_connections · _anthropic_request'},
-      {title:'Filter by confidence',desc:'Only connections with confidence ≥ 0.7 are written. Lower-confidence items go to curator_flags with reason for review.',ref:'curator.py:filter_connections'},
-      {title:'Write bidirectional connections',desc:'db.upsert_connection writes each connection twice — A→B and B→A — to memory_connections. UNIQUE constraint on (passage_id_a, passage_id_b, relationship) prevents duplicates.',ref:'db.py:upsert_connection · memory_connections table'},
-      {title:'Flag low-confidence passages',desc:'Passages flagged for ambiguity, contradiction, or low confidence written to curator_flags with curator_run_id for tracing.',ref:'db.py:write_curator_flag'},
-    ]
-  },
-  {
     id: 'auth-flow',
     label: 'Auth & identity resolution',
     color: '#bd8c7d',
@@ -829,10 +767,12 @@ FLOWS.forEach(f => {
 
 function clearHighlights() {
   document.querySelectorAll('.node-group.highlighted').forEach(el => el.classList.remove('highlighted'));
+  document.querySelectorAll('.node-group.dimmed').forEach(el => el.classList.remove('dimmed'));
   document.querySelectorAll('.edge.highlighted').forEach(el => {
     el.classList.remove('highlighted');
     el.setAttribute('marker-end','url(#arr)');
   });
+  document.querySelectorAll('.edge.dimmed').forEach(el => el.classList.remove('dimmed'));
   document.querySelectorAll('.edge-label.highlighted').forEach(el => el.classList.remove('highlighted'));
   document.querySelectorAll('.flow-item.active').forEach(el => el.classList.remove('active'));
 }
@@ -853,24 +793,27 @@ function activateFlow(id) {
   // Highlight flow item
   document.querySelector(`.flow-item[data-id="${id}"]`).classList.add('active');
 
-  // Highlight nodes
-  flow.nodes.forEach(nid => {
-    const g = document.querySelector(`[data-node="${nid}"]`);
-    if (g) g.classList.add('highlighted');
+  // Highlight nodes in flow, dim everything else
+  const nodeSet = new Set(flow.nodes);
+  document.querySelectorAll('.node-group').forEach(g => {
+    const nid = g.dataset.node;
+    if (nodeSet.has(nid)) g.classList.add('highlighted');
+    else g.classList.add('dimmed');
   });
 
-  // Highlight edges that connect flow nodes
-  const nodeSet = new Set(flow.nodes);
+  // Highlight edges that connect flow nodes, dim everything else
   document.querySelectorAll('.edge').forEach(e => {
     const raw = e.dataset.edges;
-    if (!raw) return;
+    if (!raw) { e.classList.add('dimmed'); return; }
     try {
       const [a, b] = JSON.parse(raw);
       if (nodeSet.has(a) && nodeSet.has(b)) {
         e.classList.add('highlighted');
         e.setAttribute('marker-end','url(#arr-hi)');
+      } else {
+        e.classList.add('dimmed');
       }
-    } catch {}
+    } catch { e.classList.add('dimmed'); }
   });
 
   renderSteps(flow);
