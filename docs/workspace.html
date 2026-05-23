@@ -745,7 +745,7 @@
 
     .solo-fw-docs { display:flex; flex-direction:column; gap:20px; }
     .solo-fw-doc-group-label { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--text-meta); padding-bottom:6px; border-bottom:1px solid var(--divider); margin-bottom:4px; }
-    .solo-fw-doc-item { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--divider); cursor:pointer; }
+    .solo-fw-doc-item { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--divider); cursor:pointer; text-decoration:none; color:inherit; }
     .solo-fw-doc-item:last-child { border-bottom:none; }
     .solo-fw-doc-item:hover .solo-fw-doc-title { color:var(--accent); }
     .solo-fw-doc-icon { width:28px; height:28px; border-radius:6px; background:var(--card-bg); border:1px solid var(--card-border); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
@@ -1277,73 +1277,73 @@
 
               <div>
                 <div class="solo-fw-doc-group-label">Core</div>
-                <div class="solo-fw-doc-item">
+                <a class="solo-fw-doc-item" href="/docs/framework/getting-started.html" target="_blank">
                   <div class="solo-fw-doc-icon"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 14 14"><rect x="2" y="1.5" width="10" height="11" rx="1.2"/><path d="M4.5 4.5h5M4.5 7h5M4.5 9.5h3" stroke-linecap="round"/></svg></div>
                   <div><div class="solo-fw-doc-title">CLAUDE.md — Global Instructions</div><div class="solo-fw-doc-desc">Scott's working preferences, output contract, session modes, and standing rules</div></div>
                   <div class="solo-fw-doc-arrow">›</div>
-                </div>
-                <div class="solo-fw-doc-item">
+                </a>
+                <a class="solo-fw-doc-item" href="/docs/framework/framework-architecture.html" target="_blank">
                   <div class="solo-fw-doc-icon"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 14 14"><path d="M7 1.5L2 4.5v5l5 3 5-3v-5L7 1.5z" stroke-linejoin="round"/></svg></div>
                   <div><div class="solo-fw-doc-title">Architecture Overview</div><div class="solo-fw-doc-desc">Phase chain, always-on skills, session modes, and framework principles</div></div>
                   <div class="solo-fw-doc-arrow">›</div>
-                </div>
-                <div class="solo-fw-doc-item">
+                </a>
+                <a class="solo-fw-doc-item" href="/docs/framework/process-map.html" target="_blank">
                   <div class="solo-fw-doc-icon"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5"/><path d="M7 4.5v2.75l1.5 1" stroke-linecap="round"/></svg></div>
                   <div><div class="solo-fw-doc-title">Output Contract</div><div class="solo-fw-doc-desc">Voice, formatting rules, response sizing, transition patterns</div></div>
                   <div class="solo-fw-doc-arrow">›</div>
-                </div>
+                </a>
               </div>
 
               <div>
                 <div class="solo-fw-doc-group-label">Phase Skills</div>
-                <div class="solo-fw-doc-item">
+                <a class="solo-fw-doc-item" href="/docs/framework/guide-discover.html" target="_blank">
                   <div class="solo-fw-doc-icon"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 14 14"><path d="M2 7h10M7 2l5 5-5 5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
                   <div><div class="solo-fw-doc-title">Start → Discover → Tech Context</div><div class="solo-fw-doc-desc">Entry phases: project intake, discovery loop, and technical grounding</div></div>
                   <div class="solo-fw-doc-arrow">›</div>
-                </div>
-                <div class="solo-fw-doc-item">
+                </a>
+                <a class="solo-fw-doc-item" href="/docs/framework/guide-design-sprint.html" target="_blank">
                   <div class="solo-fw-doc-icon"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 14 14"><rect x="2" y="3" width="4" height="8" rx=".8"/><rect x="8" y="5" width="4" height="6" rx=".8"/></svg></div>
                   <div><div class="solo-fw-doc-title">Design Sprint → Design Review</div><div class="solo-fw-doc-desc">UI/UX exploration, design critique gates, and client context loader</div></div>
                   <div class="solo-fw-doc-arrow">›</div>
-                </div>
-                <div class="solo-fw-doc-item">
+                </a>
+                <a class="solo-fw-doc-item" href="/docs/framework/guide-plan.html" target="_blank">
                   <div class="solo-fw-doc-icon"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 14 14"><path d="M2 10l3-3 2.5 2.5L11 5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
                   <div><div class="solo-fw-doc-title">PRD to Plan → Solo Build → QA</div><div class="solo-fw-doc-desc">Build sequencing, backlog slicing, autopilot, and quality assurance gates</div></div>
                   <div class="solo-fw-doc-arrow">›</div>
-                </div>
-                <div class="solo-fw-doc-item">
+                </a>
+                <a class="solo-fw-doc-item" href="/docs/framework/guide-deploy.html" target="_blank">
                   <div class="solo-fw-doc-icon"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 14 14"><path d="M12 7a5 5 0 11-10 0 5 5 0 0110 0z"/><path d="M9 7a2 2 0 11-4 0 2 2 0 014 0z" fill="currentColor" stroke="none"/></svg></div>
                   <div><div class="solo-fw-doc-title">Deploy → Product Continuity</div><div class="solo-fw-doc-desc">Launch gates, handoff templates, and session continuity protocol</div></div>
                   <div class="solo-fw-doc-arrow">›</div>
-                </div>
+                </a>
               </div>
 
               <div>
                 <div class="solo-fw-doc-group-label">Supporting Skills</div>
-                <div class="solo-fw-doc-item">
+                <a class="solo-fw-doc-item" href="/docs/framework/skills-reference.html" target="_blank">
                   <div class="solo-fw-doc-icon"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 14 14"><circle cx="5" cy="5" r="3"/><path d="M11.5 11.5l-3-3" stroke-linecap="round"/></svg></div>
                   <div><div class="solo-fw-doc-title">Research Spike · Grill Me · Principal Engineer</div><div class="solo-fw-doc-desc">On-demand deep dives, challenge sessions, and architectural review</div></div>
                   <div class="solo-fw-doc-arrow">›</div>
-                </div>
-                <div class="solo-fw-doc-item">
+                </a>
+                <a class="solo-fw-doc-item" href="/docs/framework/skills-reference.html" target="_blank">
                   <div class="solo-fw-doc-icon"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 14 14"><path d="M7 2v10M2 7h10" stroke-linecap="round"/></svg></div>
                   <div><div class="solo-fw-doc-title">Ren · Nivya · Solo Simulator</div><div class="solo-fw-doc-desc">Framework partner, recall companion, and autonomous test runner</div></div>
                   <div class="solo-fw-doc-arrow">›</div>
-                </div>
+                </a>
               </div>
 
               <div>
                 <div class="solo-fw-doc-group-label">Templates</div>
-                <div class="solo-fw-doc-item">
+                <a class="solo-fw-doc-item" href="/docs/framework/getting-started.html" target="_blank">
                   <div class="solo-fw-doc-icon"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 14 14"><rect x="2" y="2" width="10" height="10" rx="1.5"/><path d="M5 2v10M2 5h3" stroke-linecap="round"/></svg></div>
                   <div><div class="solo-fw-doc-title">HANDOFF.template.md</div><div class="solo-fw-doc-desc">Session continuity handoff — copy to project root as HANDOFF.md</div></div>
                   <div class="solo-fw-doc-arrow">›</div>
-                </div>
-                <div class="solo-fw-doc-item">
+                </a>
+                <a class="solo-fw-doc-item" href="/docs/framework/backlog-status-reference.html" target="_blank">
                   <div class="solo-fw-doc-icon"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 14 14"><path d="M2 3h10M4 3V2M10 3V2M2 6h10M2 11h10M2 8.5h6" stroke-linecap="round"/></svg></div>
                   <div><div class="solo-fw-doc-title">Backlog · PRD · Slice templates</div><div class="solo-fw-doc-desc">Standard formats for product backlog, requirements docs, and build slices</div></div>
                   <div class="solo-fw-doc-arrow">›</div>
-                </div>
+                </a>
               </div>
 
             </div>
