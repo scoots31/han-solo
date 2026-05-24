@@ -6,7 +6,7 @@ Letta is the runtime copy. This file is git-versioned and recoverable.
 Update protocol: edit this file → commit → write to Letta via `write_core_memory` (block_label: `project_state`).
 Never write to Letta first.
 
-Last updated: 2026-05-23 (2)
+Last updated: 2026-05-24
 
 ---
 
@@ -30,6 +30,30 @@ Last updated: 2026-05-23 (2)
 |---|---|---|
 | dream.py | ACTIVE | Memory consolidation |
 | synthesize.py | REMOVED 2026-05-22 | Render cron deleted. Was never functional — signals table always empty. Cost was real; output was not. |
+
+---
+
+## MCP Tools (Claude Code ↔ Han Solo)
+
+Tools live in `han_solo/tools/` and register with the FastMCP server at `han-solo-mcp.onrender.com/mcp`.
+
+| Tool group | File | Key tools |
+|---|---|---|
+| Memory | memory.py | write_core_memory, read_core_memory, list_core_memory_blocks |
+| Signals | signals.py | write_signal, search_signals, add_portrait_signal |
+| Brief | brief.py | get_session_brief, write_pending_thoughts, check_memory_health |
+| T4 | t4.py | write_t4_entry, get_t4_entry, search_t4, delete_t4_entry |
+| Skills | skills.py | get_skill, list_skills, write_skill |
+| Notecards | notecards.py | list_notecards, create_notecard, update_notecard |
+| Portraits | portraits.py | read_portrait, write_portrait, read_all_portraits |
+| Phase | phase.py | advance_phase, check_phase_gate, get_project_state |
+| Logbook | logbook.py | write_session_log, write_session_summary |
+| Transcripts | transcripts.py | search_transcripts, enrich_passage |
+| **Bridge** | **bridge.py** | **send_to_ren** — synchronous Claude Code → Ren bridge. Added 2026-05-24. |
+
+**`send_to_ren`**: Claude Code calls this to reach Ren mid-session. Message lands in Ren's Letta context; response returned synchronously. Does not appear in workspace UI. Used for architecture decisions, assumption audits, and team handoff notes at session close.
+
+Ren's tool set (read-only on her Letta agent): search_t4, get_t4_entry, search_signals, get_session_brief, list_notecards, get_skill, list_skills, write_skill, search_transcripts. No write tools on Ren's agent (intentional). `send_to_ren` is for Claude Code only.
 
 ---
 
