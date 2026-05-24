@@ -17,6 +17,16 @@ Each violation caused hours of rework, design drift, and session context loss.
 **No batching visual/design changes without approval.**
 One change at a time. Scott reviews and approves before anything moves forward.
 
+## Engineering standards
+
+Before writing any code in a han-solo session:
+1. State your interpretation of the task in one sentence
+2. Verify what you're about to change exists in the codebase — grep and read, never assume
+3. Read `docs/system-state.md` if touching infrastructure
+4. If context contradicts files — stop and align with Scott before proceeding
+
+Full standards and team context: T4 → `han-solo / decisions_log / engineering-standards-ren-claude-team-handoff`
+
 ## Two separate deployments — know which one you're touching
 
 **Render (auto-deploys on git push)**
