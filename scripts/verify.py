@@ -45,7 +45,11 @@ EXPECTED_HAN_SOLO_TOOLS = {
     "search_t4", "get_t4_entry", "search_signals",
     "get_session_brief", "list_notecards",
     "get_skill", "list_skills", "write_skill", "search_transcripts",
+    "write_t4_entry",
 }
+# write_t4_entry is intentionally allowed on Ren — she uses it for handoff entries
+# and decisions_log as Architecture Owner of the WHY. Scoped by trust, not by tool.
+ALLOWED_WRITE_TOOLS_ON_REN = {"write_t4_entry", "write_skill"}
 EXPECTED_SKILLS = {
     "discover", "tech-context", "design-sprint", "prd-to-plan",
     "solo-build", "solo-qa", "deploy", "brainstorming", "data-scaffold",
@@ -250,12 +254,13 @@ try:
     tools = agent.get("tools", [])
     han_tools = {t["name"] for t in tools if "mcp:han-solo" in t.get("tags", [])}
     write_tools = {t for t in han_tools if t.startswith("write_") or t in ("delete_t4_entry", "advance_phase")}
+    unexpected_write_tools = write_tools - ALLOWED_WRITE_TOOLS_ON_REN
 
     check("Total tools on Ren", len(tools) > 10, f"{len(tools)} tools")
     check("Han-solo tools count", len(han_tools) == len(EXPECTED_HAN_SOLO_TOOLS),
           f"{len(han_tools)} attached, expected {len(EXPECTED_HAN_SOLO_TOOLS)}")
-    check("No write tools on Ren", len(write_tools) == 0,
-          f"write tools present: {write_tools}" if write_tools else "clean")
+    check("No unexpected write tools on Ren", len(unexpected_write_tools) == 0,
+          f"unexpected write tools: {unexpected_write_tools}" if unexpected_write_tools else "clean")
     for name in sorted(EXPECTED_HAN_SOLO_TOOLS):
         check(f"  Ren has: {name}", name in han_tools)
 except Exception as e:
