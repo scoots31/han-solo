@@ -95,6 +95,7 @@ async def admin_agent_info(request: Request) -> JSONResponse:
         "agent_id": agent_id,
         "name": data.get("name"),
         "llm_config": data.get("llm_config"),
+        "system": data.get("system"),
     })
 
 
