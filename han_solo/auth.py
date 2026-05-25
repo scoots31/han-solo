@@ -21,7 +21,7 @@ def lookup_token(token: str) -> Optional[UserIdentity]:
     return TOKEN_REGISTRY.get(token)
 
 
-EXEMPT_PATHS = {"/health", "/", "/chat", "/workspace", "/api/jobs-status"}
+EXEMPT_PATHS = {"/health", "/", "/chat", "/workspace", "/api/jobs-status", "/api/code/webhook"}
 
 # (path, method) pairs exempt from auth — GET-only public endpoints
 EXEMPT_PATH_METHODS = {("/api/session-logs", "GET"), ("/api/transcripts", "GET"),

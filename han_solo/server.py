@@ -642,6 +642,51 @@ async def api_code_index_log(request: Request) -> JSONResponse:
     return JSONResponse({"ok": True})
 
 
+async def api_code_webhook(request: Request) -> JSONResponse:
+    """POST /api/code/webhook — GitHub push webhook. Re-indexes the codebase on push to main."""
+    import hashlib
+    import hmac
+    import asyncio
+    import os as _os
+    from pathlib import Path as _Path
+
+    secret = _os.environ.get("GITHUB_WEBHOOK_SECRET", "")
+    body = await request.body()
+
+    if secret:
+        sig_header = request.headers.get("x-hub-signature-256", "")
+        expected = "sha256=" + hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
+        if not hmac.compare_digest(sig_header, expected):
+            return JSONResponse({"error": "invalid signature"}, status_code=401)
+
+    try:
+        payload = json.loads(body)
+    except Exception:
+        return JSONResponse({"error": "invalid JSON"}, status_code=400)
+
+    # Only re-index on pushes to the default branch
+    ref = payload.get("ref", "")
+    if not ref.endswith("/main") and ref != "refs/heads/main":
+        return JSONResponse({"ok": True, "skipped": f"ref {ref} is not main"})
+
+    commit_hash = payload.get("after", "unknown")[:7]
+
+    async def _reindex():
+        try:
+            import sys
+            repo_root = _Path(__file__).parent.parent
+            if str(repo_root) not in sys.path:
+                sys.path.insert(0, str(repo_root))
+            from scripts.index_codebase import run_server_side
+            result = await run_server_side(repo_root, trigger="webhook", commit_hash=commit_hash)
+            logger.info("Webhook re-index complete: %s", result)
+        except Exception as exc:
+            logger.error("Webhook re-index failed: %s", exc)
+
+    asyncio.create_task(_reindex())
+    return JSONResponse({"ok": True, "commit": commit_hash, "indexing": "started"})
+
+
 async def api_code_search(request: Request) -> JSONResponse:
     """GET /api/code/search?q=... — semantic search for the workspace UI."""
     import json as _json
@@ -759,6 +804,7 @@ _chat_routes = [
     Route("/api/usage/stats", api_usage_stats),
     Route("/api/code/chunks", api_code_chunks, methods=["POST"]),
     Route("/api/code/index-log", api_code_index_log, methods=["POST"]),
+    Route("/api/code/webhook", api_code_webhook, methods=["POST"]),
     Route("/api/code/search", api_code_search),
 ]
 for i, route in enumerate(_chat_routes):

@@ -391,6 +391,64 @@ def run(repo_root: Path, dry_run: bool) -> None:
     logger.info("Done — %d files, %d chunks%s", files_indexed, total_chunks, " (dry run)" if dry_run else "")
 
 
+async def run_server_side(repo_root: Path, trigger: str = "webhook", commit_hash: str = "unknown") -> dict:
+    """
+    Run the indexer from within the server process — calls DB directly, no HTTP round-trip.
+    Used by the GitHub webhook handler on Render.
+    Returns {files_indexed, chunks_created, errors}.
+    """
+    import sys
+    import os as _os
+    # Add repo root to path so han_solo.db is importable
+    repo_str = str(repo_root)
+    if repo_str not in sys.path:
+        sys.path.insert(0, repo_str)
+
+    from han_solo import db as _db
+
+    openai_key = _os.environ.get("OPENAI_API_KEY", "")
+    if not openai_key:
+        return {"error": "OPENAI_API_KEY not set"}
+
+    files = collect_files(repo_root)
+    total_chunks = 0
+    files_indexed = 0
+    errors = []
+
+    for path in files:
+        rel = str(path.relative_to(repo_root))
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except Exception as e:
+            errors.append(f"{rel}: {e}")
+            continue
+
+        raw_chunks = chunk_file(path, text)
+        if not raw_chunks:
+            continue
+
+        try:
+            vectors = embed_chunks(raw_chunks)
+        except Exception as e:
+            errors.append(f"{rel}: embedding failed — {e}")
+            continue
+
+        chunk_records = [
+            {"chunk_index": i, "chunk_text": ct, "embedding": vec}
+            for i, (ct, vec) in enumerate(zip(raw_chunks, vectors))
+        ]
+
+        count = await _db.upsert_code_chunks(REPO_NAME, rel, path.suffix.lstrip("."), chunk_records)
+        if count:
+            total_chunks += count
+            files_indexed += 1
+        else:
+            errors.append(f"{rel}: failed to store")
+
+    await _db.log_code_index(REPO_NAME, commit_hash, files_indexed, total_chunks, trigger)
+    return {"files_indexed": files_indexed, "chunks_created": total_chunks, "errors": errors}
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Index han-solo codebase for semantic search")
     parser.add_argument("--repo-path", type=Path, default=REPO_PATH)
