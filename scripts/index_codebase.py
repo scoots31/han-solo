@@ -50,6 +50,7 @@ INDEX_EXTENSIONS = {".py", ".md", ".sh", ".yaml", ".yml", ".json", ".html"}
 SKIP_PATHS = {
     "node_modules", ".git", "__pycache__", ".venv", "venv",
     ".env", "dist", "build", ".mypy_cache", ".pytest_cache",
+    "docs",  # UI artifacts — not implementation code
 }
 SKIP_FILES = {".env", ".env.local", ".env.example"}
 

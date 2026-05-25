@@ -126,6 +126,16 @@ async def admin_patch_system(request: Request) -> JSONResponse:
     return JSONResponse({"patched": True, "system_length": len(system), "tools": tools})
 
 
+async def admin_delete_chunks_by_type(request: Request) -> JSONResponse:
+    """POST /api/admin/delete-chunks-by-type — remove all indexed chunks for a file_type."""
+    body = await request.json()
+    file_type = body.get("file_type", "").strip()
+    if not file_type:
+        return JSONResponse({"error": "file_type required"}, status_code=400)
+    deleted = await db.delete_code_chunks_by_type("han-solo", file_type)
+    return JSONResponse({"deleted": deleted, "file_type": file_type})
+
+
 async def api_write_core_block(request: Request) -> JSONResponse:
     """REST endpoint for synthesis script to update a core memory block."""
     body = await request.json()
@@ -740,6 +750,9 @@ async def api_code_search(request: Request) -> JSONResponse:
     if not chunks:
         return JSONResponse({"results": [], "message": "No chunks indexed yet"})
 
+    # Exclude HTML — docs/ UI artifacts, not implementation code
+    chunks = [c for c in chunks if c.get("file_type") != "html"]
+
     def cosine(a, b):
         dot = sum(x * y for x, y in zip(a, b))
         ma = math.sqrt(sum(x * x for x in a))
@@ -813,6 +826,7 @@ _chat_routes = [
     Route("/api/admin/patch-model", admin_patch_model, methods=["POST"]),
     Route("/api/admin/patch-system", admin_patch_system, methods=["POST"]),
     Route("/api/admin/prune-transcripts", api_prune_transcripts, methods=["POST"]),
+    Route("/api/admin/delete-chunks-by-type", admin_delete_chunks_by_type, methods=["POST"]),
     Route("/api/tts", chat_api.api_tts, methods=["POST"]),
     Route("/api/session-logs", api_list_session_logs),
     Route("/api/session-logs", api_create_session_log, methods=["POST"]),

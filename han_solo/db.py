@@ -1591,6 +1591,22 @@ async def get_all_code_chunks(repo: str) -> list[dict]:
         return []
 
 
+async def delete_code_chunks_by_type(repo: str, file_type: str) -> int:
+    """Delete all chunks for a repo where file_type matches. Returns rows deleted."""
+    if not _pool:
+        return 0
+    try:
+        async with _pool.acquire() as conn:
+            result = await conn.execute(
+                "DELETE FROM code_chunks WHERE repo = $1 AND file_type = $2",
+                repo, file_type,
+            )
+        return int(result.split()[-1])
+    except Exception as e:
+        logger.error("Failed to delete code chunks by type %s: %s", file_type, e)
+        return 0
+
+
 async def log_code_index(repo: str, commit_hash: Optional[str], files_indexed: int, chunks_created: int, trigger: str = "manual") -> None:
     """Log a completed re-index run."""
     if not _pool:
