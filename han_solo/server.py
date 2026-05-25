@@ -103,8 +103,10 @@ async def admin_patch_model(request: Request) -> JSONResponse:
     model = body.get("model", "").strip()
     if not model:
         return JSONResponse({"error": "model required"}, status_code=400)
-    result = await letta.patch_agent_model(model)
-    return JSONResponse({"patched": True, "llm_config": result.get("llm_config")})
+    enable_reasoner = bool(body.get("enable_reasoner", False))
+    result = await letta.patch_agent_model(model, enable_reasoner=enable_reasoner)
+    tools = [t["name"] for t in result.get("tools", [])]
+    return JSONResponse({"patched": True, "llm_config": result.get("llm_config"), "tools": tools})
 
 
 async def api_write_core_block(request: Request) -> JSONResponse:
@@ -825,6 +827,7 @@ async def _lifespan(app):
                 agent_id = await letta.get_or_create_ren_agent(REN_AGENT_NAME)
                 letta.set_ren_agent_id(agent_id)
                 logger.info("Ren agent ready: %s", agent_id)
+            await letta.ensure_ren_tools()
         except Exception as e:
             logger.error("Failed to initialise Ren agent (will retry on next request): %s", e)
         await db.init_pool()

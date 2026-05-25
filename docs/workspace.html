@@ -1025,6 +1025,10 @@
         </div>
         <div class="nav-section" style="margin-top:8px">
           <div class="nav-section-label">Development</div>
+          <div class="nav-item" onclick="showScreen('code-search',this)">
+            <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 4.5h5M3 7h3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><rect x="1.5" y="2" width="8" height="10" rx="1" stroke="currentColor" stroke-width="1.3"/><circle cx="11" cy="10" r="2" stroke="currentColor" stroke-width="1.2"/><path d="M12.4 11.4l1.1 1.1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+            <span class="nav-label">Code Search</span>
+          </div>
           <div class="nav-item" id="nav-claude-sessions" onclick="showScreen('transcripts',this)">
             <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2.5h10M2 5.5h10M2 8.5h7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="10.5" cy="10.5" r="2" stroke="currentColor" stroke-width="1.2"/><path d="M12 12l1.2 1.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></div>
             <span class="nav-label">Claude Sessions</span>
@@ -1568,6 +1572,22 @@
 
 
       <!-- TRANSCRIPTS -->
+      <div class="screen hidden" id="screen-code-search">
+        <div class="screen-header">
+          <div>
+            <div class="screen-title">Code Search</div>
+            <div class="screen-sub" id="cs-sub">Search the han-solo codebase by intent</div>
+          </div>
+          <div class="screen-actions">
+            <input type="text" id="cs-input" placeholder="e.g. how does the bridge send messages to Ren…"
+              style="font-family:inherit;font-size:12px;padding:6px 12px;border:1px solid var(--divider);border-radius:6px;background:var(--card-bg);color:var(--text-primary);outline:none;width:320px"
+              onkeydown="if(event.key==='Enter')runCodeSearch()">
+            <button onclick="runCodeSearch()" style="font-family:inherit;font-size:12px;padding:6px 14px;border:none;border-radius:6px;background:var(--accent);color:white;cursor:pointer;">Search</button>
+          </div>
+        </div>
+        <div class="scrollable" id="cs-results" style="padding:16px 20px"></div>
+      </div>
+
       <div class="screen hidden" id="screen-transcripts">
         <div class="screen-header">
           <div>
@@ -3325,6 +3345,38 @@
     // ── TRANSCRIPTS ───────────────────────────────────────────────────
     let _txLoaded = false, _txSessions = [], _txSearchTimer = null;
 
+    async function runCodeSearch() {
+      const query = document.getElementById('cs-input').value.trim();
+      if (!query) return;
+      const el = document.getElementById('cs-results');
+      const sub = document.getElementById('cs-sub');
+      el.innerHTML = '<div style="color:var(--text-meta);font-size:12.5px">Searching…</div>';
+      try {
+        const res = await fetch(`/api/code/search?q=${encodeURIComponent(query)}&limit=8`);
+        const data = await res.json();
+        const results = data.results || [];
+        sub.textContent = results.length ? `${results.length} results for "${query}"` : `No results for "${query}"`;
+        if (!results.length) {
+          el.innerHTML = '<div style="color:var(--text-meta);font-size:12.5px">No matches found.</div>';
+          return;
+        }
+        el.innerHTML = results.map(r => `
+          <div style="margin-bottom:16px;border:1px solid var(--divider);border-radius:8px;overflow:hidden">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--card-bg);border-bottom:1px solid var(--divider)">
+              <span style="font-size:11.5px;font-weight:600;color:var(--text-primary);font-family:monospace">${r.file_path}</span>
+              <span style="font-size:10px;color:var(--text-meta);background:var(--accent-light);color:var(--accent);padding:2px 7px;border-radius:20px">score ${r.score}</span>
+            </div>
+            <pre style="margin:0;padding:12px 14px;font-size:11.5px;line-height:1.6;color:var(--text-secondary);white-space:pre-wrap;word-break:break-word;font-family:monospace;background:var(--bg)">${escHtml(r.content.slice(0,800))}${r.content.length > 800 ? '\n…' : ''}</pre>
+          </div>`).join('');
+      } catch(e) {
+        el.innerHTML = '<div style="color:var(--text-meta);font-size:12.5px">Search failed. Is the server running?</div>';
+      }
+    }
+
+    function escHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
     async function loadTranscripts(query) {
       const url = query
         ? `/api/transcripts?q=${encodeURIComponent(query)}&limit=100`
@@ -3505,6 +3557,11 @@
       if (id === 'dashboard'   && token && !_dashLoaded)       loadDashboard();
       if (id === 'board'       && token && !_boardLoaded)      loadBoard();
       if (id === 'transcripts' && !_txLoaded)                  loadTranscripts();
+      if (id === 'code-search') {
+        document.getElementById('cs-input').focus();
+        if (!document.getElementById('cs-results').innerHTML)
+          document.getElementById('cs-results').innerHTML = '<div style="color:var(--text-meta);font-size:12.5px">Type a question and press Enter or Search.</div>';
+      }
     }
 
     function showProjectDetail(projectName) {

@@ -11,6 +11,15 @@ from . import db as _db
 
 logger = logging.getLogger(__name__)
 
+# Canonical tool set for the Ren agent — restored on every server startup.
+# If a tool is missing (e.g. after a Letta PATCH that omitted tool_ids),
+# ensure_ren_tools() re-attaches it from the Letta tool registry.
+CANONICAL_REN_TOOL_NAMES = {
+    "search_t4", "get_t4_entry", "search_signals", "get_session_brief",
+    "list_notecards", "get_skill", "list_skills", "write_skill",
+    "write_t4_entry", "search_transcripts", "search_code",
+}
+
 # Shared async client — initialised in server lifespan, closed on shutdown
 _client: Optional[httpx.AsyncClient] = None
 
@@ -185,15 +194,65 @@ async def reset_conversation(handoff_summary: str | None = None) -> str:
     return agent_id
 
 
-async def patch_agent_model(model: str) -> dict[str, Any]:
-    """Patch the active Ren agent's LLM model. One-time admin use."""
+async def patch_agent_model(model: str, enable_reasoner: bool = False) -> dict[str, Any]:
+    """Patch the active Ren agent's LLM model.
+
+    Always includes the current tool_ids in the PATCH payload — Letta resets
+    tool_ids to empty when the field is omitted, which wipes all custom tools.
+    """
     agent_id = await ensure_ren_agent_id()
     config_resp = await _letta("GET", f"{LETTA_URL}/v1/agents/{agent_id}")
     current = config_resp.json()
     llm_config = current["llm_config"]
     llm_config["model"] = model
-    resp = await _letta("PATCH", f"{LETTA_URL}/v1/agents/{agent_id}", json={"llm_config": llm_config})
+    llm_config["enable_reasoner"] = enable_reasoner
+    current_tool_ids = [t["id"] for t in current.get("tools", [])]
+    resp = await _letta("PATCH", f"{LETTA_URL}/v1/agents/{agent_id}", json={
+        "llm_config": llm_config,
+        "tool_ids": current_tool_ids,
+    })
     return resp.json()
+
+
+async def ensure_ren_tools() -> None:
+    """Ensure Ren's canonical tools are all attached. Called at server startup.
+
+    Letta's PATCH /v1/agents/{id} resets tool_ids to empty when the field is
+    omitted — any model switch that doesn't include tool_ids will wipe tools.
+    This function runs at startup to catch and repair that silently.
+    """
+    try:
+        agent_id = await ensure_ren_agent_id()
+        agent_resp = await _letta("GET", f"{LETTA_URL}/v1/agents/{agent_id}")
+        agent = agent_resp.json()
+        current_tools = {t["name"]: t["id"] for t in agent.get("tools", [])}
+
+        if CANONICAL_REN_TOOL_NAMES.issubset(current_tools.keys()):
+            logger.info("Ren tools OK — %d attached", len(current_tools))
+            return
+
+        missing = CANONICAL_REN_TOOL_NAMES - current_tools.keys()
+        logger.warning("Ren is missing %d tools: %s — restoring...", len(missing), missing)
+
+        tools_resp = await _letta("GET", f"{LETTA_URL}/v1/tools?limit=200")
+        all_tools = tools_resp.json()
+        available = {t["name"]: t["id"] for t in all_tools}
+
+        target_ids = list(current_tools.values())
+        restored = []
+        for name in CANONICAL_REN_TOOL_NAMES:
+            if name not in current_tools and name in available:
+                target_ids.append(available[name])
+                restored.append(name)
+
+        if restored:
+            await _letta("PATCH", f"{LETTA_URL}/v1/agents/{agent_id}", json={"tool_ids": target_ids})
+            logger.info("Restored %d tools to Ren: %s", len(restored), restored)
+        else:
+            still_missing = CANONICAL_REN_TOOL_NAMES - set(available.keys())
+            logger.error("Cannot restore tools — not found in Letta registry: %s", still_missing)
+    except Exception as e:
+        logger.error("ensure_ren_tools failed (non-fatal): %s", e)
 
 
 # ---------------------------------------------------------------------------
