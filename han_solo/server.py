@@ -17,6 +17,7 @@ import os
 import httpx
 from mcp.server.fastmcp import FastMCP
 from mcp.server.transport_security import TransportSecuritySettings
+from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, HTMLResponse
 from starlette.routing import Route, Mount
@@ -692,5 +693,12 @@ async def _lifespan(app):
 
 _mcp_app.router.lifespan_context = _lifespan
 
-# Step 4 — raw ASGI auth middleware (preserves SSE streaming)
-app = BearerAuthMiddleware(_mcp_app)
+# Step 4 — auth middleware (preserves SSE streaming), then CORS outermost
+# CORS must wrap auth so cross-origin requests from han-solo-docs.pages.dev work
+# and preflight OPTIONS requests are handled before auth sees them.
+app = CORSMiddleware(
+    BearerAuthMiddleware(_mcp_app),
+    allow_origins=["https://han-solo-docs.pages.dev", "https://han-solo-mcp.onrender.com"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
+)
