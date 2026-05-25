@@ -43,6 +43,7 @@ EMBED_MODEL  = "text-embedding-3-small"
 EMBED_BATCH  = 20          # chunks per embedding API call
 WINDOW_LINES = 100         # fallback chunking window
 WINDOW_STEP  = 80          # lines to advance per window (20-line overlap)
+MAX_CHARS    = 6000        # ~1500 tokens — well under OpenAI's 8191 token limit
 
 INDEX_EXTENSIONS = {".py", ".md", ".sh", ".yaml", ".yml", ".json", ".html"}
 
@@ -203,18 +204,39 @@ def chunk_by_window(text: str, window: int = WINDOW_LINES, step: int = WINDOW_ST
     return chunks
 
 
+def _split_oversized(chunks: list[str], max_chars: int = MAX_CHARS) -> list[str]:
+    """Split any chunk that exceeds max_chars into smaller pieces."""
+    result = []
+    for chunk in chunks:
+        if len(chunk) <= max_chars:
+            result.append(chunk)
+        else:
+            lines = chunk.splitlines()
+            buf = ""
+            for line in lines:
+                if buf and len(buf) + len(line) + 1 > max_chars:
+                    result.append(buf.strip())
+                    buf = line
+                else:
+                    buf = (buf + "\n" + line) if buf else line
+            if buf.strip():
+                result.append(buf.strip())
+    return result
+
+
 def chunk_file(path: Path, text: str) -> list[str]:
     ext = path.suffix.lower()
     if ext == ".py":
-        return chunk_python(text)
+        chunks = chunk_python(text)
     elif ext == ".md":
-        return chunk_markdown(text)
+        chunks = chunk_markdown(text)
     elif ext in {".json", ".yaml", ".yml"}:
-        return chunk_json_yaml(text)
+        chunks = chunk_json_yaml(text)
     elif ext == ".html":
-        return chunk_html(text)
+        chunks = chunk_html(text)
     else:
-        return chunk_by_window(text)
+        chunks = chunk_by_window(text)
+    return _split_oversized(chunks)
 
 
 # ---------------------------------------------------------------------------
