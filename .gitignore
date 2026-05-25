@@ -3,3 +3,4 @@
 __pycache__/
 logs/
 dream.error.log
+.wrangler/
