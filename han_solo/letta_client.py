@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 CANONICAL_REN_TOOL_NAMES = {
     "search_t4", "get_t4_entry", "search_signals", "get_session_brief",
     "list_notecards", "get_skill", "list_skills", "write_skill",
-    "write_t4_entry", "search_transcripts", "search_code",
+    "write_t4_entry", "search_transcripts",
 }
 
 # Shared async client — initialised in server lifespan, closed on shutdown
@@ -244,42 +244,36 @@ async def patch_agent_system(system: str) -> dict[str, Any]:
 
 
 async def ensure_ren_tools() -> None:
-    """Ensure Ren's canonical tools are all attached. Called at server startup.
+    """Sync Ren's tools to exactly the canonical set. Called at server startup.
 
+    Adds missing tools AND removes extras — canonical set is authoritative.
     Letta's PATCH /v1/agents/{id} resets tool_ids to empty when the field is
-    omitted — any model switch that doesn't include tool_ids will wipe tools.
-    This function runs at startup to catch and repair that silently.
+    omitted, so every model switch must include tool_ids to avoid wiping tools.
     """
     try:
         agent_id = await ensure_ren_agent_id()
         agent_resp = await _letta("GET", f"{LETTA_URL}/v1/agents/{agent_id}")
         agent = agent_resp.json()
-        current_tools = {t["name"]: t["id"] for t in agent.get("tools", [])}
+        current_names = {t["name"] for t in agent.get("tools", [])}
 
-        if CANONICAL_REN_TOOL_NAMES.issubset(current_tools.keys()):
-            logger.info("Ren tools OK — %d attached", len(current_tools))
+        if current_names == CANONICAL_REN_TOOL_NAMES:
+            logger.info("Ren tools OK — %d attached", len(current_names))
             return
 
-        missing = CANONICAL_REN_TOOL_NAMES - current_tools.keys()
-        logger.warning("Ren is missing %d tools: %s — restoring...", len(missing), missing)
+        missing = CANONICAL_REN_TOOL_NAMES - current_names
+        extra = current_names - CANONICAL_REN_TOOL_NAMES
+        logger.info("Ren tools out of sync — missing: %s, extra: %s — syncing", missing, extra)
 
         tools_resp = await _letta("GET", f"{LETTA_URL}/v1/tools?limit=200")
-        all_tools = tools_resp.json()
-        available = {t["name"]: t["id"] for t in all_tools}
+        all_tools = {t["name"]: t["id"] for t in tools_resp.json()}
+        canonical_tool_ids = [all_tools[name] for name in CANONICAL_REN_TOOL_NAMES if name in all_tools]
 
-        target_ids = list(current_tools.values())
-        restored = []
-        for name in CANONICAL_REN_TOOL_NAMES:
-            if name not in current_tools and name in available:
-                target_ids.append(available[name])
-                restored.append(name)
+        await _letta("PATCH", f"{LETTA_URL}/v1/agents/{agent_id}", json={"tool_ids": canonical_tool_ids})
+        logger.info("Ren tools synced to canonical set (%d tools)", len(canonical_tool_ids))
 
-        if restored:
-            await _letta("PATCH", f"{LETTA_URL}/v1/agents/{agent_id}", json={"tool_ids": target_ids})
-            logger.info("Restored %d tools to Ren: %s", len(restored), restored)
-        else:
-            still_missing = CANONICAL_REN_TOOL_NAMES - set(available.keys())
-            logger.error("Cannot restore tools — not found in Letta registry: %s", still_missing)
+        still_missing = CANONICAL_REN_TOOL_NAMES - set(all_tools.keys())
+        if still_missing:
+            logger.error("Tools not found in Letta registry: %s", still_missing)
     except Exception as e:
         logger.error("ensure_ren_tools failed (non-fatal): %s", e)
 
