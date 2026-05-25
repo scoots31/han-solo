@@ -197,8 +197,9 @@ async def reset_conversation(handoff_summary: str | None = None) -> str:
 async def patch_agent_model(model: str, enable_reasoner: bool = False) -> dict[str, Any]:
     """Patch the active Ren agent's LLM model.
 
-    Always includes the current tool_ids in the PATCH payload — Letta resets
-    tool_ids to empty when the field is omitted, which wipes all custom tools.
+    Resolves canonical tool IDs from the Letta registry — never trusts the
+    agent's current tool state, which may be empty if a prior PATCH wiped tools.
+    Every model switch atomically restores the full canonical tool set.
     """
     agent_id = await ensure_ren_agent_id()
     config_resp = await _letta("GET", f"{LETTA_URL}/v1/agents/{agent_id}")
@@ -206,10 +207,15 @@ async def patch_agent_model(model: str, enable_reasoner: bool = False) -> dict[s
     llm_config = current["llm_config"]
     llm_config["model"] = model
     llm_config["enable_reasoner"] = enable_reasoner
-    current_tool_ids = [t["id"] for t in current.get("tools", [])]
+
+    # Resolve canonical tool IDs from the registry — authoritative source.
+    tools_resp = await _letta("GET", f"{LETTA_URL}/v1/tools?limit=200")
+    all_tools = {t["name"]: t["id"] for t in tools_resp.json()}
+    canonical_tool_ids = [all_tools[name] for name in CANONICAL_REN_TOOL_NAMES if name in all_tools]
+
     resp = await _letta("PATCH", f"{LETTA_URL}/v1/agents/{agent_id}", json={
         "llm_config": llm_config,
-        "tool_ids": current_tool_ids,
+        "tool_ids": canonical_tool_ids,
     })
     return resp.json()
 
@@ -386,7 +392,6 @@ async def send_chat_message(content: str, user_name: str) -> tuple[list[str], bo
     payload = {
         "messages": [{"role": "user", "content": content, "name": user_name}],
         "stream_tokens": False,
-        "max_steps": 15,
     }
     resp = await _letta("POST", f"{LETTA_URL}/v1/agents/{agent_id}/messages", json=payload, timeout=180.0)
     data = resp.json()
