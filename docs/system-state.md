@@ -6,7 +6,7 @@ Letta is the runtime copy. This file is git-versioned and recoverable.
 Update protocol: edit this file → commit → write to Letta via `write_core_memory` (block_label: `project_state`).
 Never write to Letta first.
 
-Last updated: 2026-05-24
+Last updated: 2026-05-25
 
 ---
 
@@ -16,7 +16,7 @@ Last updated: 2026-05-24
 
 | Service | URL | Notes |
 |---|---|---|
-| han-solo-letta | han-solo-letta.onrender.com | Letta v0.16.8 (upgraded 2026-05-22 from v0.16.7, security fix: pickle→JSON sandbox transport) |
+| han-solo-letta | han-solo-letta.onrender.com | Letta v0.16.8 (upgraded 2026-05-22 from v0.16.7, security fix: pickle→JSON sandbox transport). Ren agent: ren-v2 (`agent-fe4a3d5b-bb51-458e-92f1-6a1ee5b0ce94`), model: `claude-sonnet-4-6`, context_window_limit: 32,000 tokens (upgraded from Haiku 4.5 on 2026-05-25). |
 | han-solo-mcp | han-solo-mcp.onrender.com/mcp | FastMCP bridge, MCP entrypoint for Ren |
 | han-solo-db | Internal only | PostgreSQL 16, 5 GB, Oregon region (Render ID: dpg-d81724vavr4c73b5afig-a) |
 
@@ -53,7 +53,7 @@ Tools live in `han_solo/tools/` and register with the FastMCP server at `han-sol
 
 **`send_to_ren`**: Claude Code calls this to reach Ren mid-session. Message lands in Ren's Letta context; response returned synchronously. Does not appear in workspace UI. Used for architecture decisions, assumption audits, and team handoff notes at session close.
 
-Ren's tool set (read-only on her Letta agent): search_t4, get_t4_entry, search_signals, get_session_brief, list_notecards, get_skill, list_skills, write_skill, search_transcripts. No write tools on Ren's agent (intentional). `send_to_ren` is for Claude Code only.
+Ren's tool set (10 tools on her Letta agent): search_t4, get_t4_entry, search_signals, get_session_brief, list_notecards, get_skill, list_skills, write_skill, write_t4_entry, search_transcripts. Write tools intentionally allowed: write_skill (Ren can update framework skills) and write_t4_entry (Ren can write decisions log as Architecture Owner). `send_to_ren` is for Claude Code only.
 
 ---
 
@@ -71,7 +71,7 @@ Ren's tool set (read-only on her Letta agent): search_t4, get_t4_entry, search_s
 
 | Script | Purpose | Notes |
 |---|---|---|
-| verify.py | 57 checks, 12 sections, cold-start detection. Posts results to Han Solo DB. | Runs every 30 min via LaunchAgent |
+| verify.py | 62 checks, 12 sections, cold-start detection. Posts results to Han Solo DB. | Runs every 30 min via LaunchAgent |
 | parse_transcripts.py | Parses Claude Code JSONL sessions (~/.claude/projects/). Pushes to Han Solo DB. | 45-day rolling window enforced at API level |
 | dream.py | Memory consolidation | Also deployed on Render |
 | seed_skills.py | Bulk skill seed from Framework Vers1 | Fallback only; write_skill MCP tool is preferred |
