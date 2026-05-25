@@ -25,7 +25,7 @@ Before writing any code in a han-solo session:
 3. Read `docs/system-state.md` if touching infrastructure
 4. If context contradicts files — stop and align with Scott before proceeding
 
-Full standards and team context: T4 → `han-solo / decisions_log / engineering-standards-ren-claude-team-handoff`
+Full standards and team context: T4 → `han-solo / decisions_log / engineering-standards-v2`
 
 ## Two separate deployments — know which one you're touching
 
@@ -64,7 +64,7 @@ wrangler pages deploy docs --project-name sbf-framework-docs
 | 7 | Legacy /chat endpoint (read-only — not the workspace) | `han_solo/app_html.py` | do not edit |
 | 8 | Claude Code (local execution, MCP client) | Claude Code settings, hooks, skills | — |
 | 9 | Framework Vers1 (phase skills source of truth) | `~/Developer/Framework Vers1/skills/` | write_skill MCP → #6 |
-| 10 | verify.py (57-check health monitor) | `scripts/verify.py` | LaunchAgent, 30 min |
+| 10 | verify.py (62-check health monitor) | `scripts/verify.py` | LaunchAgent, 30 min |
 | 11 | Transcript Parser (JSONL → DB) | `scripts/parse_transcripts.py` | LaunchAgent, 30 min |
 | 12 | ren-local (local session log) | `~/Developer/ren-local/` | — |
 | 13 | GitHub repo (scoots31/han-solo) | git push | Auto #4 #7, manual #1 #2 #3 |
