@@ -220,6 +220,29 @@ async def patch_agent_model(model: str, enable_reasoner: bool = False) -> dict[s
     return resp.json()
 
 
+async def patch_agent_system(system: str) -> dict[str, Any]:
+    """Patch the active Ren agent's system prompt.
+
+    Atomically updates system + restores canonical tool set from registry.
+    Never trusts the agent's current tool state.
+    """
+    agent_id = await ensure_ren_agent_id()
+    config_resp = await _letta("GET", f"{LETTA_URL}/v1/agents/{agent_id}")
+    current = config_resp.json()
+    llm_config = current["llm_config"]
+
+    tools_resp = await _letta("GET", f"{LETTA_URL}/v1/tools?limit=200")
+    all_tools = {t["name"]: t["id"] for t in tools_resp.json()}
+    canonical_tool_ids = [all_tools[name] for name in CANONICAL_REN_TOOL_NAMES if name in all_tools]
+
+    resp = await _letta("PATCH", f"{LETTA_URL}/v1/agents/{agent_id}", json={
+        "system": system,
+        "llm_config": llm_config,
+        "tool_ids": canonical_tool_ids,
+    })
+    return resp.json()
+
+
 async def ensure_ren_tools() -> None:
     """Ensure Ren's canonical tools are all attached. Called at server startup.
 

@@ -110,6 +110,16 @@ async def admin_patch_model(request: Request) -> JSONResponse:
     return JSONResponse({"patched": True, "llm_config": result.get("llm_config"), "tools": tools})
 
 
+async def admin_patch_system(request: Request) -> JSONResponse:
+    body = await request.json()
+    system = body.get("system", "").strip()
+    if not system:
+        return JSONResponse({"error": "system required"}, status_code=400)
+    result = await letta.patch_agent_system(system)
+    tools = [t["name"] for t in result.get("tools", [])]
+    return JSONResponse({"patched": True, "system_length": len(system), "tools": tools})
+
+
 async def api_write_core_block(request: Request) -> JSONResponse:
     """REST endpoint for synthesis script to update a core memory block."""
     body = await request.json()
@@ -795,6 +805,7 @@ _chat_routes = [
     Route("/api/memory/access-patterns", api_memory_access_patterns),
     Route("/api/admin/agent-info", admin_agent_info),
     Route("/api/admin/patch-model", admin_patch_model, methods=["POST"]),
+    Route("/api/admin/patch-system", admin_patch_system, methods=["POST"]),
     Route("/api/admin/prune-transcripts", api_prune_transcripts, methods=["POST"]),
     Route("/api/tts", chat_api.api_tts, methods=["POST"]),
     Route("/api/session-logs", api_list_session_logs),
