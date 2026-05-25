@@ -18,6 +18,7 @@ CANONICAL_REN_TOOL_NAMES = {
     "search_t4", "get_t4_entry", "search_signals", "get_session_brief",
     "list_notecards", "get_skill", "list_skills", "write_skill",
     "write_t4_entry", "search_transcripts",
+    "send_message",  # built-in exit-loop tool — explicitly attached so PATCHes never drop it
 }
 
 # Shared async client — initialised in server lifespan, closed on shutdown
