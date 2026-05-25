@@ -91,11 +91,17 @@ async def admin_agent_info(request: Request) -> JSONResponse:
     agent_id = await letta.ensure_ren_agent_id()
     resp = await letta._letta("GET", f"{letta.LETTA_URL}/v1/agents/{agent_id}/")
     data = resp.json()
+    agent_tools = [t["name"] for t in data.get("tools", [])]
+    # Also check what's in the Letta tool registry — includes built-ins if stored
+    registry_resp = await letta._letta("GET", f"{letta.LETTA_URL}/v1/tools?limit=200")
+    registry_tools = [t["name"] for t in registry_resp.json()]
     return JSONResponse({
         "agent_id": agent_id,
         "name": data.get("name"),
         "llm_config": data.get("llm_config"),
         "system": data.get("system"),
+        "agent_tools": agent_tools,
+        "registry_tools": registry_tools,
     })
 
 
