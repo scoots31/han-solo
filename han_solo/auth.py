@@ -25,7 +25,8 @@ EXEMPT_PATHS = {"/health", "/", "/chat", "/workspace", "/api/jobs-status"}
 
 # (path, method) pairs exempt from auth — GET-only public endpoints
 EXEMPT_PATH_METHODS = {("/api/session-logs", "GET"), ("/api/transcripts", "GET"),
-                       ("/api/verify-runs/latest", "GET"), ("/api/usage/stats", "GET")}
+                       ("/api/verify-runs/latest", "GET"), ("/api/usage/stats", "GET"),
+                       ("/api/code/search", "GET")}
 
 # Path prefixes exempt for GET — covers dynamic routes like /api/transcripts/{id}
 EXEMPT_GET_PREFIXES = {"/api/transcripts/"}

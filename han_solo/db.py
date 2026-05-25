@@ -181,6 +181,30 @@ CREATE INDEX IF NOT EXISTS idx_usage_log_logged_at
     ON usage_log(logged_at DESC);
 CREATE INDEX IF NOT EXISTS idx_usage_log_source
     ON usage_log(source, logged_at DESC);
+CREATE TABLE IF NOT EXISTS code_chunks (
+    id          SERIAL PRIMARY KEY,
+    repo        TEXT        NOT NULL DEFAULT 'han-solo',
+    file_path   TEXT        NOT NULL,
+    file_type   TEXT        NOT NULL,
+    chunk_index INT         NOT NULL,
+    chunk_text  TEXT        NOT NULL,
+    embedding   JSONB       NOT NULL DEFAULT '[]',
+    indexed_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (repo, file_path, chunk_index)
+);
+CREATE INDEX IF NOT EXISTS idx_code_chunks_repo_file
+    ON code_chunks(repo, file_path);
+CREATE TABLE IF NOT EXISTS code_index_log (
+    id             SERIAL PRIMARY KEY,
+    indexed_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    repo           TEXT        NOT NULL,
+    commit_hash    TEXT,
+    files_indexed  INT         NOT NULL DEFAULT 0,
+    chunks_created INT         NOT NULL DEFAULT 0,
+    trigger        TEXT        NOT NULL DEFAULT 'manual'
+);
+CREATE INDEX IF NOT EXISTS idx_code_index_log_indexed_at
+    ON code_index_log(indexed_at DESC);
 """
 
 # Runs after CREATE_TABLE_SQL — backfills existing slugs as scott/private, idempotent
@@ -1504,3 +1528,81 @@ async def upsert_skill(phase_slug: str, content: str, layer: str = "phase-active
     except Exception as e:
         logger.error("Failed to upsert skill %s: %s", phase_slug, e)
         return False
+
+
+async def upsert_code_chunks(repo: str, file_path: str, file_type: str, chunks: list[dict]) -> int:
+    """Replace all chunks for a file. Each chunk: {chunk_index, chunk_text, embedding}. Returns count inserted."""
+    if not _pool:
+        return 0
+    try:
+        import json as _json
+        async with _pool.acquire() as conn:
+            await conn.execute(
+                "DELETE FROM code_chunks WHERE repo = $1 AND file_path = $2",
+                repo, file_path,
+            )
+            if not chunks:
+                return 0
+            await conn.executemany(
+                """
+                INSERT INTO code_chunks (repo, file_path, file_type, chunk_index, chunk_text, embedding)
+                VALUES ($1, $2, $3, $4, $5, $6::jsonb)
+                """,
+                [
+                    (repo, file_path, file_type, c["chunk_index"], c["chunk_text"], _json.dumps(c["embedding"]))
+                    for c in chunks
+                ],
+            )
+        return len(chunks)
+    except Exception as e:
+        logger.error("Failed to upsert code chunks for %s: %s", file_path, e)
+        return 0
+
+
+async def get_all_code_chunks(repo: str) -> list[dict]:
+    """Fetch all chunks with embeddings for a repo — used for cosine similarity search."""
+    if not _pool:
+        return []
+    try:
+        import json as _json
+        async with _pool.acquire() as conn:
+            rows = await conn.fetch(
+                """
+                SELECT id, file_path, file_type, chunk_index, chunk_text, embedding
+                FROM code_chunks
+                WHERE repo = $1
+                ORDER BY file_path, chunk_index
+                """,
+                repo,
+            )
+        return [
+            {
+                "id": r["id"],
+                "file_path": r["file_path"],
+                "file_type": r["file_type"],
+                "chunk_index": r["chunk_index"],
+                "chunk_text": r["chunk_text"],
+                "embedding": _json.loads(r["embedding"]) if isinstance(r["embedding"], str) else r["embedding"],
+            }
+            for r in rows
+        ]
+    except Exception as e:
+        logger.error("Failed to fetch code chunks for repo %s: %s", repo, e)
+        return []
+
+
+async def log_code_index(repo: str, commit_hash: Optional[str], files_indexed: int, chunks_created: int, trigger: str = "manual") -> None:
+    """Log a completed re-index run."""
+    if not _pool:
+        return
+    try:
+        async with _pool.acquire() as conn:
+            await conn.execute(
+                """
+                INSERT INTO code_index_log (repo, commit_hash, files_indexed, chunks_created, trigger)
+                VALUES ($1, $2, $3, $4, $5)
+                """,
+                repo, commit_hash, files_indexed, chunks_created, trigger,
+            )
+    except Exception as e:
+        logger.error("Failed to log code index run: %s", e)

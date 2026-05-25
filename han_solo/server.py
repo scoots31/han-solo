@@ -27,7 +27,7 @@ from .auth import BearerAuthMiddleware, get_current_user
 from .config import REN_AGENT_NAME, REN_AGENT_ID
 from . import letta_client as letta
 from . import db
-from .tools import memory, signals, phase, brief, portraits, notecards, t4, skills, logbook, transcripts, bridge
+from .tools import memory, signals, phase, brief, portraits, notecards, t4, skills, logbook, transcripts, bridge, codebase
 from . import chat_api
 
 logging.basicConfig(level=logging.INFO)
@@ -54,6 +54,7 @@ skills.register(server)
 logbook.register(server)
 transcripts.register(server)
 bridge.register(server)
+codebase.register(server)
 
 
 # ---------------------------------------------------------------------------
@@ -607,6 +608,100 @@ async def api_memory_health(request: Request) -> JSONResponse:
     })
 
 
+async def api_code_chunks(request: Request) -> JSONResponse:
+    """POST /api/code/chunks — receive indexed chunks from index_codebase.py."""
+    get_current_user()
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse({"error": "invalid JSON"}, status_code=400)
+    repo      = body.get("repo", "han-solo")
+    file_path = body.get("file_path", "")
+    file_type = body.get("file_type", "")
+    chunks    = body.get("chunks", [])
+    if not file_path or not isinstance(chunks, list):
+        return JSONResponse({"error": "file_path and chunks required"}, status_code=400)
+    count = await db.upsert_code_chunks(repo, file_path, file_type, chunks)
+    return JSONResponse({"stored": count, "file_path": file_path})
+
+
+async def api_code_index_log(request: Request) -> JSONResponse:
+    """POST /api/code/index-log — log a completed index run."""
+    get_current_user()
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse({"error": "invalid JSON"}, status_code=400)
+    await db.log_code_index(
+        repo=body.get("repo", "han-solo"),
+        commit_hash=body.get("commit_hash"),
+        files_indexed=body.get("files_indexed", 0),
+        chunks_created=body.get("chunks_created", 0),
+        trigger=body.get("trigger", "manual"),
+    )
+    return JSONResponse({"ok": True})
+
+
+async def api_code_search(request: Request) -> JSONResponse:
+    """GET /api/code/search?q=... — semantic search for the workspace UI."""
+    import json as _json
+    import math
+    import os as _os
+    import urllib.request as _req
+
+    query = request.query_params.get("q", "").strip()
+    limit = min(int(request.query_params.get("limit", 5)), 10)
+    if not query:
+        return JSONResponse({"error": "q is required"}, status_code=400)
+
+    openai_key = _os.environ.get("OPENAI_API_KEY", "")
+    if not openai_key:
+        return JSONResponse({"error": "OPENAI_API_KEY not configured"}, status_code=500)
+
+    # Embed the query
+    try:
+        payload = _json.dumps({"model": "text-embedding-3-small", "input": query}).encode()
+        req = _req.Request(
+            "https://api.openai.com/v1/embeddings",
+            data=payload,
+            headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
+        )
+        with _req.urlopen(req, timeout=15) as resp:
+            data = _json.loads(resp.read())
+        query_vec = data["data"][0]["embedding"]
+    except Exception as e:
+        return JSONResponse({"error": f"Embedding failed: {e}"}, status_code=500)
+
+    chunks = await db.get_all_code_chunks("han-solo")
+    if not chunks:
+        return JSONResponse({"results": [], "message": "No chunks indexed yet"})
+
+    def cosine(a, b):
+        dot = sum(x * y for x, y in zip(a, b))
+        ma = math.sqrt(sum(x * x for x in a))
+        mb = math.sqrt(sum(x * x for x in b))
+        return dot / (ma * mb) if ma and mb else 0.0
+
+    scored = sorted(
+        [(cosine(query_vec, c["embedding"]), c) for c in chunks if c.get("embedding")],
+        key=lambda x: x[0], reverse=True,
+    )[:limit]
+
+    return JSONResponse({
+        "query": query,
+        "results": [
+            {
+                "file_path": c["file_path"],
+                "file_type": c["file_type"],
+                "chunk_index": c["chunk_index"],
+                "score": round(score, 4),
+                "content": c["chunk_text"],
+            }
+            for score, c in scored
+        ],
+    })
+
+
 _docs_dir = os.path.join(os.path.dirname(__file__), "..", "docs")
 
 
@@ -662,6 +757,9 @@ _chat_routes = [
     Route("/api/verify-runs/latest", api_get_latest_verify_run),
     Route("/api/verify-runs", api_write_verify_run, methods=["POST"]),
     Route("/api/usage/stats", api_usage_stats),
+    Route("/api/code/chunks", api_code_chunks, methods=["POST"]),
+    Route("/api/code/index-log", api_code_index_log, methods=["POST"]),
+    Route("/api/code/search", api_code_search),
 ]
 for i, route in enumerate(_chat_routes):
     _mcp_app.router.routes.insert(i, route)
