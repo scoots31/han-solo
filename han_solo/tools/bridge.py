@@ -4,10 +4,13 @@ Claude calls send_to_ren mid-session; Ren responds via her Letta context.
 The exchange is recorded in Ren's conversation history but does not appear
 in the workspace UI.
 """
+import asyncio
+
 from mcp.server.fastmcp import FastMCP
 
 from ..auth import get_current_user
 from .. import letta_client as letta
+from .. import db
 
 
 def register(server: FastMCP) -> None:
@@ -34,8 +37,9 @@ def register(server: FastMCP) -> None:
 
         prefixed = f"[FROM CLAUDE CODE]\n\n{message}"
         try:
-            messages, _ = await letta.send_chat_message(prefixed, "Claude Code")
+            messages, _, usage = await letta.send_chat_message(prefixed, "Claude Code")
         except Exception as exc:
             return f"Bridge unavailable — Ren did not respond: {exc}"
 
+        asyncio.create_task(db.write_usage_log("bridge", **usage))
         return "\n\n".join(messages) if messages else "No response from Ren."

@@ -568,6 +568,14 @@ async def api_write_verify_run(request: Request) -> JSONResponse:
     return JSONResponse({"id": result["id"], "ran_at": result["ran_at"].isoformat()}, status_code=201)
 
 
+async def api_usage_stats(request: Request) -> JSONResponse:
+    """GET /api/usage/stats — auth required. Returns token usage aggregates."""
+    get_current_user()
+    days = int(request.query_params.get("days", 7))
+    stats = await db.get_usage_stats(days=days)
+    return JSONResponse(stats)
+
+
 async def api_prune_transcripts(request: Request) -> JSONResponse:
     """POST /api/admin/prune-transcripts — auth required. Deletes sessions older than ?days=45."""
     get_current_user()
@@ -653,6 +661,7 @@ _chat_routes = [
     Route("/api/transcripts/{session_id}", api_get_transcript),
     Route("/api/verify-runs/latest", api_get_latest_verify_run),
     Route("/api/verify-runs", api_write_verify_run, methods=["POST"]),
+    Route("/api/usage/stats", api_usage_stats),
 ]
 for i, route in enumerate(_chat_routes):
     _mcp_app.router.routes.insert(i, route)

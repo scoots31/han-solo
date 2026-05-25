@@ -256,11 +256,12 @@ async def api_send(request: Request) -> JSONResponse:
 
         session_id = await letta.ensure_ren_agent_id()
         try:
-            response_messages, wants_to_continue = await letta.send_chat_message(
+            response_messages, wants_to_continue, usage = await letta.send_chat_message(
                 "__system_continue__", "system"
             )
         except Exception as exc:
             return JSONResponse({"error": str(exc)}, status_code=502)
+        asyncio.create_task(db.write_usage_log("chat_ui", **usage))
         for text in response_messages:
             _push("Ren", text, "assistant")
             asyncio.create_task(_capture_message(session_id, "assistant", "Ren", text))
@@ -334,10 +335,11 @@ async def api_send(request: Request) -> JSONResponse:
     asyncio.create_task(_capture_message(session_id, "user", user.name, display_text))
 
     try:
-        response_messages, wants_to_continue = await letta.send_chat_message(letta_message, user.name)
+        response_messages, wants_to_continue, usage = await letta.send_chat_message(letta_message, user.name)
     except Exception as exc:
         return JSONResponse({"error": str(exc)}, status_code=502)
 
+    asyncio.create_task(db.write_usage_log("chat_ui", **usage))
     for text in response_messages:
         _push("Ren", text, "assistant")
         asyncio.create_task(_capture_message(session_id, "assistant", "Ren", text))

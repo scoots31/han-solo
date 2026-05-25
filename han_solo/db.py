@@ -166,6 +166,21 @@ CREATE TABLE IF NOT EXISTS verify_runs (
 );
 CREATE INDEX IF NOT EXISTS idx_verify_runs_ran_at
     ON verify_runs(ran_at DESC);
+CREATE TABLE IF NOT EXISTS usage_log (
+    id                  SERIAL PRIMARY KEY,
+    logged_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    source              TEXT        NOT NULL,
+    prompt_tokens       INT         NOT NULL DEFAULT 0,
+    completion_tokens   INT         NOT NULL DEFAULT 0,
+    total_tokens        INT         NOT NULL DEFAULT 0,
+    context_tokens      INT,
+    cached_input_tokens INT,
+    step_count          INT         NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_usage_log_logged_at
+    ON usage_log(logged_at DESC);
+CREATE INDEX IF NOT EXISTS idx_usage_log_source
+    ON usage_log(source, logged_at DESC);
 """
 
 # Runs after CREATE_TABLE_SQL — backfills existing slugs as scott/private, idempotent
@@ -1372,6 +1387,100 @@ async def get_latest_verify_run() -> Optional[dict]:
     except Exception as e:
         logger.error("Failed to get latest verify run: %s", e)
         return None
+
+
+async def write_usage_log(
+    source: str,
+    prompt_tokens: int,
+    completion_tokens: int,
+    total_tokens: int,
+    context_tokens: int | None = None,
+    cached_input_tokens: int | None = None,
+    step_count: int = 0,
+) -> bool:
+    """Log token usage for one Letta message exchange. Silent on failure."""
+    if not _pool:
+        return False
+    try:
+        async with _pool.acquire() as conn:
+            await conn.execute(
+                """
+                INSERT INTO usage_log
+                    (source, prompt_tokens, completion_tokens, total_tokens,
+                     context_tokens, cached_input_tokens, step_count)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
+                """,
+                source, prompt_tokens, completion_tokens, total_tokens,
+                context_tokens, cached_input_tokens, step_count,
+            )
+        return True
+    except Exception as e:
+        logger.error("Failed to write usage log: %s", e)
+        return False
+
+
+async def get_usage_stats(days: int = 7) -> dict:
+    """Return aggregated token usage for the last N days."""
+    if not _pool:
+        return {}
+    try:
+        async with _pool.acquire() as conn:
+            summary = await conn.fetchrow(
+                """
+                SELECT
+                    COUNT(*)                            AS total_messages,
+                    COALESCE(SUM(total_tokens), 0)      AS total_tokens,
+                    COALESCE(AVG(prompt_tokens), 0)     AS avg_prompt_tokens,
+                    COALESCE(AVG(completion_tokens), 0) AS avg_completion_tokens,
+                    COALESCE(AVG(context_tokens) FILTER (WHERE context_tokens IS NOT NULL), 0)
+                                                        AS avg_context_tokens,
+                    COALESCE(SUM(cached_input_tokens) FILTER (WHERE cached_input_tokens IS NOT NULL), 0)
+                                                        AS total_cached_tokens,
+                    COALESCE(SUM(prompt_tokens), 1)     AS denom_prompt
+                FROM usage_log
+                WHERE logged_at >= NOW() - INTERVAL '1 day' * $1
+                """,
+                days,
+            )
+            by_source = await conn.fetch(
+                """
+                SELECT source, COUNT(*) AS messages,
+                       COALESCE(SUM(total_tokens), 0) AS tokens
+                FROM usage_log
+                WHERE logged_at >= NOW() - INTERVAL '1 day' * $1
+                GROUP BY source ORDER BY tokens DESC
+                """,
+                days,
+            )
+            daily = await conn.fetch(
+                """
+                SELECT DATE(logged_at) AS day,
+                       COUNT(*) AS messages,
+                       COALESCE(SUM(total_tokens), 0) AS tokens,
+                       COALESCE(AVG(context_tokens) FILTER (WHERE context_tokens IS NOT NULL), 0) AS avg_context
+                FROM usage_log
+                WHERE logged_at >= NOW() - INTERVAL '1 day' * $1
+                GROUP BY day ORDER BY day DESC
+                """,
+                days,
+            )
+        denom = summary["denom_prompt"] or 1
+        cache_rate = round(summary["total_cached_tokens"] / denom, 3)
+        return {
+            "period_days": days,
+            "total_messages": summary["total_messages"],
+            "total_tokens": summary["total_tokens"],
+            "avg_prompt_tokens": round(summary["avg_prompt_tokens"]),
+            "avg_completion_tokens": round(summary["avg_completion_tokens"]),
+            "avg_context_tokens": round(summary["avg_context_tokens"]),
+            "cache_hit_rate": cache_rate,
+            "context_window_limit": 32000,
+            "by_source": [dict(r) for r in by_source],
+            "daily": [dict(r) for r in daily],
+        }
+    except Exception as e:
+        logger.error("Failed to get usage stats: %s", e)
+        return {}
 
 
 async def upsert_skill(phase_slug: str, content: str, layer: str = "phase-active") -> bool:

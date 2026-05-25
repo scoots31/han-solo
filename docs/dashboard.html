@@ -282,6 +282,15 @@
     <div class="loading-panel">Loading…</div>
   </div>
 
+  <!-- Usage panel -->
+  <div class="section-title">Token Usage — Last 7 Days</div>
+  <div class="dashboard-grid" id="usageStats">
+    <div class="loading-panel">Loading…</div>
+  </div>
+  <div class="verify-panel" id="usagePanel">
+    <div class="loading-panel">Loading…</div>
+  </div>
+
   <!-- Transcript panel -->
   <div class="section-title">Session Transcripts</div>
   <div class="transcript-panel" id="transcriptPanel">
@@ -322,13 +331,15 @@
   }
 
   async function loadDashboard() {
-    const [verifyRes, transcriptRes] = await Promise.allSettled([
+    const [verifyRes, transcriptRes, usageRes] = await Promise.allSettled([
       fetch(`${MCP}/api/verify-runs/latest`),
       fetch(`${MCP}/api/transcripts?limit=50`),
+      fetch(`${MCP}/api/usage/stats?days=7`),
     ]);
 
     renderVerify(verifyRes.status === 'fulfilled' ? await verifyRes.value.json() : null);
     renderTranscripts(transcriptRes.status === 'fulfilled' ? await transcriptRes.value.json() : []);
+    renderUsage(usageRes.status === 'fulfilled' ? await usageRes.value.json() : null);
   }
 
   function renderVerify(data) {
@@ -475,6 +486,72 @@
       </div>
       <a class="view-all" href="transcripts.html">View all ${total} sessions →</a>
       <div class="stale-note">Updated every 30 min via LaunchAgent · search_transcripts available to Ren</div>
+    `;
+  }
+
+  function renderUsage(data) {
+    const statsEl = document.getElementById('usageStats');
+    const panelEl = document.getElementById('usagePanel');
+
+    if (!data || data.error || !data.total_messages) {
+      statsEl.innerHTML = '<div class="loading-panel">No usage data yet — will populate after the first message to Ren.</div>';
+      panelEl.innerHTML = '';
+      return;
+    }
+
+    const ctxPct = data.avg_context_tokens
+      ? Math.round(data.avg_context_tokens / data.context_window_limit * 100)
+      : 0;
+    const cacheRatePct = Math.round((data.cache_hit_rate || 0) * 100);
+
+    statsEl.innerHTML = `
+      <div class="stat-card">
+        <div class="stat-label">Messages (7d)</div>
+        <div class="stat-value">${data.total_messages}</div>
+        <div class="stat-sub">${data.total_tokens.toLocaleString()} total tokens</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Prompt Tokens</div>
+        <div class="stat-value">${data.avg_prompt_tokens.toLocaleString()}</div>
+        <div class="stat-sub">per message in</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Context Used</div>
+        <div class="stat-value ${ctxPct > 85 ? 'fail' : ctxPct > 60 ? '' : 'pass'}">${ctxPct}%</div>
+        <div class="stat-sub">of 32k limit (avg ${data.avg_context_tokens.toLocaleString()} tokens)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Cache Hit Rate</div>
+        <div class="stat-value">${cacheRatePct}%</div>
+        <div class="stat-sub">tokens served from cache</div>
+      </div>
+    `;
+
+    const bySource = (data.by_source || []).map(s =>
+      `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+        <span style="font-weight:500;">${escHtml(s.source)}</span>
+        <span style="color:var(--text-muted);">${s.messages} messages · ${Number(s.tokens).toLocaleString()} tokens</span>
+      </div>`
+    ).join('');
+
+    const daily = (data.daily || []).slice(0, 7).map(d => {
+      const ctx = d.avg_context ? Math.round(d.avg_context / data.context_window_limit * 100) : 0;
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+        <span style="color:var(--text-muted);font-size:.85rem;">${d.day}</span>
+        <span style="font-weight:500;">${d.messages} msg</span>
+        <span style="color:var(--text-muted);">${Number(d.tokens).toLocaleString()} tokens</span>
+        <span style="font-size:.8rem;color:${ctx > 85 ? '#e05252' : 'var(--text-muted)'};">${ctx}% ctx</span>
+      </div>`;
+    }).join('');
+
+    panelEl.innerHTML = `
+      <div style="padding:20px 24px;">
+        <div style="font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px;">By Source</div>
+        ${bySource || '<div style="color:var(--text-muted);">—</div>'}
+        <div style="font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin:20px 0 12px;">Daily Breakdown</div>
+        ${daily || '<div style="color:var(--text-muted);">—</div>'}
+        <div style="margin-top:16px;font-size:.78rem;color:var(--text-muted);">Context window limit: 32,000 tokens · Model: claude-sonnet-4-6</div>
+      </div>
     `;
   }
 

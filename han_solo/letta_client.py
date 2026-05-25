@@ -311,13 +311,15 @@ async def list_chat_messages(limit: int = 200) -> list[dict[str, Any]]:
 # Chat — send a message and get Ren's response
 # ---------------------------------------------------------------------------
 
-async def send_chat_message(content: str, user_name: str) -> tuple[list[str], bool]:
+async def send_chat_message(content: str, user_name: str) -> tuple[list[str], bool, dict]:
     """
     Send a message to the Ren agent.
 
-    Returns (messages, wants_to_continue) where messages is a list of all
-    send_message calls Ren made in this step (rendered as separate bubbles)
-    and wants_to_continue signals that Ren has more to say next turn.
+    Returns (messages, wants_to_continue, usage) where:
+    - messages: list of send_message calls Ren made (rendered as separate bubbles)
+    - wants_to_continue: True if Ren has more to say next turn
+    - usage: dict with prompt_tokens, completion_tokens, total_tokens, context_tokens,
+             cached_input_tokens, step_count
 
     Ren signals continuation by appending [[CONTINUES]] to her last message.
     """
@@ -346,4 +348,15 @@ async def send_chat_message(content: str, user_name: str) -> tuple[list[str], bo
     # Split on [[MSG]] to produce separate bubbles
     messages = [m.strip() for m in raw.split("[[MSG]]") if m.strip()]
 
-    return messages, wants_to_continue
+    # Extract usage statistics — present in every Letta response
+    u = data.get("usage", {})
+    usage = {
+        "prompt_tokens": u.get("prompt_tokens", 0),
+        "completion_tokens": u.get("completion_tokens", 0),
+        "total_tokens": u.get("total_tokens", 0),
+        "context_tokens": u.get("context_tokens"),
+        "cached_input_tokens": u.get("cached_input_tokens"),
+        "step_count": u.get("step_count", 0),
+    }
+
+    return messages, wants_to_continue, usage
