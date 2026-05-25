@@ -386,6 +386,7 @@ async def send_chat_message(content: str, user_name: str) -> tuple[list[str], bo
     payload = {
         "messages": [{"role": "user", "content": content, "name": user_name}],
         "stream_tokens": False,
+        "max_steps": 15,
     }
     resp = await _letta("POST", f"{LETTA_URL}/v1/agents/{agent_id}/messages", json=payload, timeout=180.0)
     data = resp.json()
