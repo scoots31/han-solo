@@ -569,8 +569,7 @@ async def api_write_verify_run(request: Request) -> JSONResponse:
 
 
 async def api_usage_stats(request: Request) -> JSONResponse:
-    """GET /api/usage/stats — auth required. Returns token usage aggregates."""
-    get_current_user()
+    """GET /api/usage/stats — public. Returns token usage aggregates."""
     days = int(request.query_params.get("days", 7))
     stats = await db.get_usage_stats(days=days)
     return JSONResponse(stats)
