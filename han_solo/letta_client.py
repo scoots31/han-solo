@@ -18,6 +18,7 @@ CANONICAL_REN_TOOL_NAMES = {
     "search_t4", "get_t4_entry", "search_signals", "get_session_brief",
     "list_notecards", "get_skill", "list_skills", "write_skill",
     "write_t4_entry", "search_transcripts",
+    "search_code",   # semantic search over han-solo Python source — use intentionally, not speculatively
     "send_message",  # built-in exit-loop tool — explicitly attached so PATCHes never drop it
 }
 
@@ -430,6 +431,30 @@ async def send_chat_message(content: str, user_name: str) -> tuple[list[str], bo
 
     # Split on [[MSG]] to produce separate bubbles
     messages = [m.strip() for m in raw.split("[[MSG]]") if m.strip()]
+
+    # If Ren hit her step limit without calling send_message, nudge her to surface findings
+    if not messages:
+        nudge_payload = {
+            "messages": [{"role": "user", "content": "You reached your step limit without responding. Please summarize what you found and send your response now.", "name": "system"}],
+            "stream_tokens": False,
+        }
+        nudge_resp = await _letta("POST", f"{LETTA_URL}/v1/agents/{agent_id}/messages", json=nudge_payload, timeout=60.0)
+        nudge_data = nudge_resp.json()
+        nudge_raw = ""
+        for msg in nudge_data.get("messages", []):
+            if msg.get("message_type") == "assistant_message":
+                nudge_raw = msg.get("content", "") or msg.get("assistant_message", "")
+                break
+        if nudge_raw:
+            if "[[CONTINUES]]" in nudge_raw:
+                wants_to_continue = True
+                nudge_raw = nudge_raw.replace("[[CONTINUES]]", "").strip()
+            messages = [m.strip() for m in nudge_raw.split("[[MSG]]") if m.strip()]
+            nu = nudge_data.get("usage", {})
+            data.setdefault("usage", {})
+            data["usage"]["prompt_tokens"] = data["usage"].get("prompt_tokens", 0) + nu.get("prompt_tokens", 0)
+            data["usage"]["completion_tokens"] = data["usage"].get("completion_tokens", 0) + nu.get("completion_tokens", 0)
+            data["usage"]["total_tokens"] = data["usage"].get("total_tokens", 0) + nu.get("total_tokens", 0)
 
     # Extract usage statistics — present in every Letta response
     u = data.get("usage", {})
