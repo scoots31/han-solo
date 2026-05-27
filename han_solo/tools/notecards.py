@@ -103,7 +103,7 @@ def register(server: FastMCP) -> None:
         Returns id, text, creator, status, source, session_id, created_at for each.
         """
         get_current_user()
-        valid = {"active", "completed", "archived", ""}
+        valid = {"active", "completed", "archived", "pending_deletion", ""}
         if status not in valid:
             return [{"error": f"status must be one of {sorted(valid)}"}]
         cards = await db.list_notecards(status=status or None)
