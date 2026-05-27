@@ -6,7 +6,7 @@ Letta is the runtime copy. This file is git-versioned and recoverable.
 Update protocol: edit this file → commit → write to Letta via `write_core_memory` (block_label: `project_state`).
 Never write to Letta first.
 
-Last updated: 2026-05-25
+Last updated: 2026-05-26
 
 ---
 
@@ -16,7 +16,7 @@ Last updated: 2026-05-25
 
 | Service | URL | Notes |
 |---|---|---|
-| han-solo-letta | han-solo-letta.onrender.com | Letta v0.16.8 (upgraded 2026-05-22 from v0.16.7, security fix: pickle→JSON sandbox transport). Ren agent: ren-v2 (`agent-fe4a3d5b-bb51-458e-92f1-6a1ee5b0ce94`), model: `claude-haiku-4-5-20251001`, context_window: 32,000 tokens. Reverted from Sonnet 4.6 on 2026-05-25 — Sonnet exceeded Render's proxy timeout causing "could not reach Ren" errors in the workspace chat. Streaming required before Sonnet can be used here. |
+| han-solo-letta | han-solo-letta.onrender.com | Letta v0.16.8 (upgraded 2026-05-22 from v0.16.7, security fix: pickle→JSON sandbox transport). Ren agent: ren-v2 (`agent-fe4a3d5b-bb51-458e-92f1-6a1ee5b0ce94`), model: `claude-haiku-4-5-20251001`, context_window: 100,000 tokens (expanded from 32k on 2026-05-26). Model switching removed — Haiku is fixed. See T4 decisions_log/cascade-fix-2026-05-26 for full context. |
 | han-solo-mcp | han-solo-mcp.onrender.com/mcp | FastMCP bridge, MCP entrypoint for Ren |
 | han-solo-db | Internal only | PostgreSQL 16, 5 GB, Oregon region (Render ID: dpg-d81724vavr4c73b5afig-a) |
 
@@ -53,7 +53,7 @@ Tools live in `han_solo/tools/` and register with the FastMCP server at `han-sol
 
 **`send_to_ren`**: Claude Code calls this to reach Ren mid-session. Message lands in Ren's Letta context; response returned synchronously. Does not appear in workspace UI. Used for architecture decisions, assumption audits, and team handoff notes at session close.
 
-Ren's tool set (10 tools on her Letta agent): search_t4, get_t4_entry, search_signals, get_session_brief, list_notecards, get_skill, list_skills, write_skill, write_t4_entry, search_transcripts. Write tools intentionally allowed: write_skill (Ren can update framework skills) and write_t4_entry (Ren can write decisions log as Architecture Owner). `send_to_ren` is for Claude Code only.
+Ren's tool set (12 tools on her Letta agent, updated 2026-05-26): search_t4, get_t4_entry, list_notecards, get_skill, list_skills, write_skill, write_t4_entry, search_transcripts, search_code, send_message, read_core_memory, write_core_memory. `archival_memory_search` is a Letta built-in always available, not in explicit tool list. Removed: `search_signals` and `get_session_brief` (circular dependency — caused cascade failures). Added: `read_core_memory` and `write_core_memory` (external_mcp, persist reliably). Model-switch endpoint removed. `send_to_ren` is for Claude Code only. Rule: Claude Code uses bridge before writing to Ren's core blocks mid-session.
 
 ---
 
