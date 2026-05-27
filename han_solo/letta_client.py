@@ -456,10 +456,11 @@ async def send_failsafe_message(command: str, command_args: str | None = None) -
     content = f"[FAILSAFE COMMAND: {command}]"
     if command_args:
         content += f"\n{command_args}"
+    _max_steps = 1 if command == "PING" else 5
     payload = {
         "messages": [{"role": "user", "content": content, "name": "failsafe"}],
         "stream_tokens": False,
-        "max_steps": 2,
+        "max_steps": _max_steps,
     }
     try:
         resp = await _letta(
