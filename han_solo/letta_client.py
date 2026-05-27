@@ -450,8 +450,14 @@ async def send_chat_message(content: str, user_name: str) -> tuple[list[str], bo
 
 
 async def send_failsafe_message(command: str, command_args: str | None = None) -> str:
-    """Send a failsafe diagnostic command to Ren with max_steps=2.
-    No nudge loop, no usage tracking — returns raw response text or error string."""
+    """Send a failsafe diagnostic command to Ren.
+    No nudge loop, no usage tracking — returns raw response text or error string.
+
+    Letta agents use request_heartbeat to signal whether they want another reasoning
+    step after a tool call. When request_heartbeat=False, the loop terminates without
+    calling send_message, so no assistant_message appears in the response. The fallback
+    below catches this case and surfaces the tool_return content directly.
+    """
     agent_id = await ensure_ren_agent_id()
     content = f"[FAILSAFE COMMAND: {command}]"
     if command_args:
@@ -465,13 +471,31 @@ async def send_failsafe_message(command: str, command_args: str | None = None) -
     try:
         resp = await _letta(
             "POST", f"{LETTA_URL}/v1/agents/{agent_id}/messages",
-            json=payload, timeout=30.0,
+            json=payload, timeout=60.0,
         )
         data = resp.json()
-        for msg in data.get("messages", []):
+        messages = data.get("messages", [])
+
+        # Primary: Ren called send_message and produced a proper response.
+        for msg in messages:
             if msg.get("message_type") == "assistant_message":
                 raw = msg.get("content", "") or msg.get("assistant_message", "")
                 return raw.replace("[[CONTINUES]]", "").replace("[[MSG]]", "\n\n").strip()
+
+        # Fallback: Ren called a tool with request_heartbeat=False — loop terminated
+        # before send_message. Surface the last tool_return content directly.
+        last_tool_return = None
+        for msg in messages:
+            if msg.get("message_type") == "tool_return_message":
+                last_tool_return = msg.get("tool_return", "")
+        if last_tool_return:
+            import json as _json
+            try:
+                parsed = _json.loads(last_tool_return)
+                return _json.dumps(parsed, indent=2, ensure_ascii=False)
+            except Exception:
+                return last_tool_return
+
         return "No response from Ren."
     except Exception as e:
         return f"Failsafe error: {e}"
