@@ -15,11 +15,14 @@ logger = logging.getLogger(__name__)
 # If a tool is missing (e.g. after a Letta PATCH that omitted tool_ids),
 # ensure_ren_tools() re-attaches it from the Letta tool registry.
 CANONICAL_REN_TOOL_NAMES = {
-    "search_t4", "get_t4_entry", "search_signals", "get_session_brief",
+    "search_t4", "get_t4_entry",
     "list_notecards", "get_skill", "list_skills", "write_skill",
     "write_t4_entry", "search_transcripts",
-    "search_code",   # semantic search over han-solo Python source — use intentionally, not speculatively
-    "send_message",  # built-in exit-loop tool — explicitly attached so PATCHes never drop it
+    "search_code",            # semantic search over han-solo Python source — use intentionally, not speculatively
+    "send_message",           # built-in exit-loop tool — explicitly attached so PATCHes never drop it
+    "archival_memory_search", # Letta built-in — T2/T3 archival search, no circular dependency
+    # Removed: get_session_brief (circular: calls Letta back 4x while Letta waits for MCP response)
+    # Removed: search_signals (circular: calls letta.search_passages mid-execution; also dormant)
 }
 
 # Shared async client — initialised in server lifespan, closed on shutdown
