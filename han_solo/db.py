@@ -205,6 +205,16 @@ CREATE TABLE IF NOT EXISTS code_index_log (
 );
 CREATE INDEX IF NOT EXISTS idx_code_index_log_indexed_at
     ON code_index_log(indexed_at DESC);
+CREATE TABLE IF NOT EXISTS failsafe_log (
+    id           SERIAL PRIMARY KEY,
+    logged_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    command      TEXT        NOT NULL,
+    command_args TEXT,
+    response     TEXT        NOT NULL DEFAULT '',
+    status       TEXT        NOT NULL DEFAULT 'success'
+);
+CREATE INDEX IF NOT EXISTS idx_failsafe_log_logged_at
+    ON failsafe_log(logged_at DESC);
 """
 
 # Runs after CREATE_TABLE_SQL — backfills existing slugs as scott/private, idempotent
@@ -1605,6 +1615,27 @@ async def delete_code_chunks_by_type(repo: str, file_type: str) -> int:
     except Exception as e:
         logger.error("Failed to delete code chunks by type %s: %s", file_type, e)
         return 0
+
+
+async def write_failsafe_log(
+    command: str, response: str, status: str, command_args: str | None = None
+) -> bool:
+    """Log a failsafe channel interaction. Silent on failure — never blocks the response."""
+    if not _pool:
+        return False
+    try:
+        async with _pool.acquire() as conn:
+            await conn.execute(
+                """
+                INSERT INTO failsafe_log (command, command_args, response, status)
+                VALUES ($1, $2, $3, $4)
+                """,
+                command, command_args, response, status,
+            )
+        return True
+    except Exception as e:
+        logger.error("Failed to write failsafe log: %s", e)
+        return False
 
 
 async def log_code_index(repo: str, commit_hash: Optional[str], files_indexed: int, chunks_created: int, trigger: str = "manual") -> None:

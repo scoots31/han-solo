@@ -627,6 +627,30 @@ async def api_memory_health(request: Request) -> JSONResponse:
     })
 
 
+async def api_failsafe_message(request: Request) -> JSONResponse:
+    """POST /api/admin/failsafe-message — direct diagnostic command to Ren. Auth required.
+    Accepts: {command: PING|STATUS|DUMP_MEMORY|RELOAD_BRIEF, command_args?: string}
+    Always writes to failsafe_log, even on Letta failure."""
+    get_current_user()
+    body = await request.json()
+    command = body.get("command", "").strip().upper()
+    command_args = body.get("command_args", "").strip() or None
+
+    valid_commands = {"PING", "STATUS", "DUMP_MEMORY", "RELOAD_BRIEF"}
+    if command not in valid_commands:
+        return JSONResponse(
+            {"error": f"Unknown command. Valid: {', '.join(sorted(valid_commands))}"},
+            status_code=400,
+        )
+
+    response_text = await letta.send_failsafe_message(command, command_args)
+    status = "failure" if response_text.startswith("Failsafe error") else "success"
+    await db.write_failsafe_log(
+        command=command, response=response_text, status=status, command_args=command_args
+    )
+    return JSONResponse({"command": command, "response": response_text, "status": status})
+
+
 async def api_code_chunks(request: Request) -> JSONResponse:
     """POST /api/code/chunks — receive indexed chunks from index_codebase.py."""
     get_current_user()
@@ -816,6 +840,7 @@ _chat_routes = [
     Route("/api/admin/patch-system", admin_patch_system, methods=["POST"]),
     Route("/api/admin/prune-transcripts", api_prune_transcripts, methods=["POST"]),
     Route("/api/admin/delete-chunks-by-type", admin_delete_chunks_by_type, methods=["POST"]),
+    Route("/api/admin/failsafe-message", api_failsafe_message, methods=["POST"]),
     Route("/api/tts", chat_api.api_tts, methods=["POST"]),
     Route("/api/session-logs", api_list_session_logs),
     Route("/api/session-logs", api_create_session_log, methods=["POST"]),
@@ -866,7 +891,7 @@ _mcp_app.router.lifespan_context = _lifespan
 # and preflight OPTIONS requests are handled before auth sees them.
 app = CORSMiddleware(
     BearerAuthMiddleware(_mcp_app),
-    allow_origins=["https://han-solo-docs.pages.dev", "https://han-solo-mcp.onrender.com"],
+    allow_origins=["https://han-solo-docs.pages.dev", "https://han-solo-mcp.onrender.com", "null"],
     allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],
 )

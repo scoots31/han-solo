@@ -447,3 +447,30 @@ async def send_chat_message(content: str, user_name: str) -> tuple[list[str], bo
     }
 
     return messages, wants_to_continue, usage
+
+
+async def send_failsafe_message(command: str, command_args: str | None = None) -> str:
+    """Send a failsafe diagnostic command to Ren with max_steps=2.
+    No nudge loop, no usage tracking — returns raw response text or error string."""
+    agent_id = await ensure_ren_agent_id()
+    content = f"[FAILSAFE COMMAND: {command}]"
+    if command_args:
+        content += f"\n{command_args}"
+    payload = {
+        "messages": [{"role": "user", "content": content, "name": "failsafe"}],
+        "stream_tokens": False,
+        "max_steps": 2,
+    }
+    try:
+        resp = await _letta(
+            "POST", f"{LETTA_URL}/v1/agents/{agent_id}/messages",
+            json=payload, timeout=30.0,
+        )
+        data = resp.json()
+        for msg in data.get("messages", []):
+            if msg.get("message_type") == "assistant_message":
+                raw = msg.get("content", "") or msg.get("assistant_message", "")
+                return raw.replace("[[CONTINUES]]", "").replace("[[MSG]]", "\n\n").strip()
+        return "No response from Ren."
+    except Exception as e:
+        return f"Failsafe error: {e}"
