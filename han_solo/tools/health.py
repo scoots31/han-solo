@@ -107,10 +107,12 @@ def register(server: FastMCP) -> None:
                 return {"status": "unhealthy", "details": str(e)[:200]}
 
         async def _check_mcp_bridge():
+            # External URL — localhost self-ping fails on Render due to network isolation.
+            # External check validates the full route, which is what actually matters.
             try:
                 async with httpx.AsyncClient() as client:
                     resp = await client.get(
-                        f"http://localhost:{PORT}/health",
+                        "https://han-solo-mcp.onrender.com/health",
                         timeout=TIMEOUT,
                     )
                     if resp.status_code == 200:
