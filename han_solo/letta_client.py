@@ -18,11 +18,12 @@ CANONICAL_REN_TOOL_NAMES = {
     "search_t4", "get_t4_entry",
     "list_notecards", "get_skill", "list_skills", "write_skill",
     "write_t4_entry", "search_transcripts",
-    "search_code",         # semantic search over han-solo Python source — use intentionally, not speculatively
-    "send_message",        # built-in exit-loop tool — explicitly attached so PATCHes never drop it
-    "read_core_memory",    # external_mcp — reads core blocks via management API (no circular dependency)
-    "write_core_memory",   # external_mcp — full-replace write to core blocks via management API
-    # archival_memory_search: letta_core built-in, always available to memgpt_agent, does not need attachment
+    "search_code",              # semantic search over han-solo Python source — use intentionally, not speculatively
+    "send_message",             # letta_core — explicitly attached so PATCHes never drop it
+    "read_core_memory",         # external_mcp — reads core blocks via management API (no circular dependency)
+    "write_core_memory",        # external_mcp — full-replace write to core blocks via management API
+    "archival_memory_search",   # letta_core — NOT auto-available; must be explicitly attached like send_message
+    # archival_memory_insert: NOT added — governance question open; search first, insert later
     # core_memory_append / core_memory_replace: letta_memory_core, cannot be persisted via PATCH tool_ids
     # Removed: get_session_brief (circular: calls Letta back 4x while Letta waits for MCP response)
     # Removed: search_signals (circular: calls letta.search_passages mid-execution; also dormant)
