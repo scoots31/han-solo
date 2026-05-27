@@ -105,17 +105,6 @@ async def admin_agent_info(request: Request) -> JSONResponse:
     })
 
 
-async def admin_patch_model(request: Request) -> JSONResponse:
-    body = await request.json()
-    model = body.get("model", "").strip()
-    if not model:
-        return JSONResponse({"error": "model required"}, status_code=400)
-    enable_reasoner = bool(body.get("enable_reasoner", False))
-    result = await letta.patch_agent_model(model, enable_reasoner=enable_reasoner)
-    tools = [t["name"] for t in result.get("tools", [])]
-    return JSONResponse({"patched": True, "llm_config": result.get("llm_config"), "tools": tools})
-
-
 async def admin_patch_system(request: Request) -> JSONResponse:
     body = await request.json()
     system = body.get("system", "").strip()
@@ -823,7 +812,6 @@ _chat_routes = [
     Route("/api/memory/enrichments", api_write_passage_enrichment, methods=["POST"]),
     Route("/api/memory/access-patterns", api_memory_access_patterns),
     Route("/api/admin/agent-info", admin_agent_info),
-    Route("/api/admin/patch-model", admin_patch_model, methods=["POST"]),
     Route("/api/admin/patch-system", admin_patch_system, methods=["POST"]),
     Route("/api/admin/prune-transcripts", api_prune_transcripts, methods=["POST"]),
     Route("/api/admin/delete-chunks-by-type", admin_delete_chunks_by_type, methods=["POST"]),

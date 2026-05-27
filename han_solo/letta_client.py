@@ -21,6 +21,8 @@ CANONICAL_REN_TOOL_NAMES = {
     "search_code",            # semantic search over han-solo Python source — use intentionally, not speculatively
     "send_message",           # built-in exit-loop tool — explicitly attached so PATCHes never drop it
     "archival_memory_search", # Letta built-in — T2/T3 archival search, no circular dependency
+    "core_memory_append",     # Letta built-in — append to core memory blocks (pending_thoughts, open_threads, etc.)
+    "core_memory_replace",    # Letta built-in — replace core memory block content
     # Removed: get_session_brief (circular: calls Letta back 4x while Letta waits for MCP response)
     # Removed: search_signals (circular: calls letta.search_passages mid-execution; also dormant)
 }
@@ -199,50 +201,21 @@ async def reset_conversation(handoff_summary: str | None = None) -> str:
     return agent_id
 
 
-async def patch_agent_model(model: str, enable_reasoner: bool = False) -> dict[str, Any]:
-    """Patch the active Ren agent's LLM model.
-
-    Resolves canonical tool IDs from the Letta registry — never trusts the
-    agent's current tool state, which may be empty if a prior PATCH wiped tools.
-    Every model switch atomically restores the full canonical tool set.
-    """
-    agent_id = await ensure_ren_agent_id()
-    config_resp = await _letta("GET", f"{LETTA_URL}/v1/agents/{agent_id}")
-    current = config_resp.json()
-    llm_config = current["llm_config"]
-    llm_config["model"] = model
-    llm_config["enable_reasoner"] = enable_reasoner
-
-    # Resolve canonical tool IDs from the registry — authoritative source.
-    tools_resp = await _letta("GET", f"{LETTA_URL}/v1/tools?limit=200")
-    all_tools = {t["name"]: t["id"] for t in tools_resp.json()}
-    canonical_tool_ids = [all_tools[name] for name in CANONICAL_REN_TOOL_NAMES if name in all_tools]
-
-    resp = await _letta("PATCH", f"{LETTA_URL}/v1/agents/{agent_id}", json={
-        "llm_config": llm_config,
-        "tool_ids": canonical_tool_ids,
-    })
-    return resp.json()
-
-
 async def patch_agent_system(system: str) -> dict[str, Any]:
     """Patch the active Ren agent's system prompt.
 
-    Atomically updates system + restores canonical tool set from registry.
-    Never trusts the agent's current tool state.
+    Sends only system + tool_ids — omitting llm_config intentionally.
+    Letta PATCH is additive; omitting llm_config leaves the model unchanged.
+    Including llm_config in the same PATCH silently drops letta_memory_core
+    tools (core_memory_append, core_memory_replace) from the agent's tool set.
     """
     agent_id = await ensure_ren_agent_id()
-    config_resp = await _letta("GET", f"{LETTA_URL}/v1/agents/{agent_id}")
-    current = config_resp.json()
-    llm_config = current["llm_config"]
-
     tools_resp = await _letta("GET", f"{LETTA_URL}/v1/tools?limit=200")
     all_tools = {t["name"]: t["id"] for t in tools_resp.json()}
     canonical_tool_ids = [all_tools[name] for name in CANONICAL_REN_TOOL_NAMES if name in all_tools]
 
     resp = await _letta("PATCH", f"{LETTA_URL}/v1/agents/{agent_id}", json={
         "system": system,
-        "llm_config": llm_config,
         "tool_ids": canonical_tool_ids,
     })
     return resp.json()
