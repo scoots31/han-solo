@@ -634,7 +634,8 @@ async def api_failsafe_message(request: Request) -> JSONResponse:
     get_current_user()
     body = await request.json()
     command = body.get("command", "").strip().upper()
-    command_args = body.get("command_args", "").strip() or None
+    raw_args = body.get("command_args")
+    command_args = raw_args.strip() if raw_args else None
 
     valid_commands = {"PING", "STATUS", "DUMP_MEMORY", "RELOAD_BRIEF"}
     if command not in valid_commands:
