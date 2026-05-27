@@ -23,6 +23,7 @@ CANONICAL_REN_TOOL_NAMES = {
     "read_core_memory",         # external_mcp — reads core blocks via management API (no circular dependency)
     "write_core_memory",        # external_mcp — full-replace write to core blocks via management API
     "archival_memory_search",   # letta_core — NOT auto-available; must be explicitly attached like send_message
+    "check_system_health",      # external_mcp — Ren's self-diagnostic tool; registered via han-solo MCP server
     # archival_memory_insert: NOT added — governance question open; search first, insert later
     # core_memory_append / core_memory_replace: letta_memory_core, cannot be persisted via PATCH tool_ids
     # Removed: get_session_brief (circular: calls Letta back 4x while Letta waits for MCP response)
