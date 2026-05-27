@@ -44,17 +44,6 @@ def register(server: FastMCP) -> None:
             await letta.write_core_block(block_label, value)
         except Exception:
             await letta.create_core_block(block_label, value, limit=20000)
-
-        # Notify Ren mid-session so the update is visible in her current context
-        try:
-            notice = (
-                f"[system] Your '{block_label}' memory block was just updated by Claude. "
-                f"New content: {value[:500]}{'...' if len(value) > 500 else ''}"
-            )
-            await letta.send_chat_message(notice, "system")
-        except Exception:
-            pass  # notification is best-effort — don't fail the write
-
         return f"Block '{block_label}' updated."
 
     @server.tool()
