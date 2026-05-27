@@ -94,6 +94,31 @@ def register(server: FastMCP) -> None:
         return "Log write failed — continuing."
 
     @server.tool()
+    async def delete_archival_passage(passage_id: str, confirmed: bool = False) -> str:
+        """
+        Delete an archival memory passage with a two-step approval flow.
+
+        confirmed=False (default): returns the passage ID and a confirmation prompt.
+        Only call with confirmed=True after Scott explicitly approves the deletion.
+
+        passage_id: the Letta passage ID (UUID from archival_memory_search results)
+
+        Use this to remove duplicate, stale, or incorrect passages from archival memory.
+        Deletions are permanent — there is no undo.
+        """
+        get_current_user()
+        # No content preview on confirmed=False: Letta has no single-passage GET endpoint,
+        # and Ren already has the content from the archival_memory_search that surfaced the ID.
+        # The two-step guard here is purely against accidental calls, not a content review.
+        if not confirmed:
+            return (
+                f"Passage {passage_id} flagged for deletion — awaiting Scott's approval.\n"
+                f"Call delete_archival_passage('{passage_id}', confirmed=True) to permanently delete."
+            )
+        await letta.delete_passage(passage_id)
+        return f"Passage {passage_id} permanently deleted from archival memory."
+
+    @server.tool()
     async def enrich_passage(passage_id: str, context_note: str, session_date: str = "") -> str:
         """
         Record context about how a passage was used during retrieval (memory reconsolidation).

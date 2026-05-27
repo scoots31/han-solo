@@ -329,9 +329,10 @@ APP_HTML = """<!DOCTYPE html>
       font-size: 10px; font-weight: 700; letter-spacing: .06em;
       text-transform: uppercase; padding: 2px 7px; border-radius: 3px;
     }
-    .nc-status.active    { background: rgba(189,140,125,.15); color: var(--accent); }
-    .nc-status.completed { background: rgba(73,73,75,.1);     color: var(--onyx); }
-    .nc-status.archived  { background: rgba(142,142,144,.12); color: var(--silver); }
+    .nc-status.active           { background: rgba(189,140,125,.15); color: var(--accent); }
+    .nc-status.completed        { background: rgba(73,73,75,.1);     color: var(--onyx); }
+    .nc-status.archived         { background: rgba(142,142,144,.12); color: var(--silver); }
+    .nc-status.pending_deletion { background: rgba(220,50,50,.12);   color: #c0392b; }
 
     .nc-card-footer { display: flex; align-items: center; justify-content: space-between; }
     .nc-date { font-size: 11px; color: var(--text-meta); }
@@ -342,7 +343,11 @@ APP_HTML = """<!DOCTYPE html>
       border: 1px solid var(--card-border); background: var(--bg);
       color: var(--text-secondary); cursor: pointer; transition: all .12s;
     }
-    .nc-action-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .nc-action-btn:hover         { border-color: var(--accent); color: var(--accent); }
+    .nc-delete-btn               { color: #c0392b; border-color: rgba(192,57,43,.3); }
+    .nc-delete-btn:hover         { border-color: #c0392b; color: #c0392b; background: rgba(192,57,43,.07); }
+    .nc-confirm-delete-btn       { color: #c0392b; border-color: #c0392b; background: rgba(192,57,43,.07); }
+    .nc-confirm-delete-btn:hover { background: rgba(192,57,43,.15); }
 
     /* ── NOTECARD PICKER (mid-chat) ── */
     .nc-picker-wrap { position: relative; flex-shrink: 0; }
@@ -1375,16 +1380,26 @@ function renderNotecards(cards) {
         '<div class="nc-actions">' + actions + '</div>' +
       '</div>';
     list.appendChild(card);
+    // data-delete and data-confirm-delete route to delete functions;
+    // all other buttons carry data-status and route to updateNcStatus.
     card.querySelectorAll('.nc-action-btn').forEach(btn => {
-      btn.addEventListener('click', () => updateNcStatus(c.id, btn.dataset.status, card));
+      if (btn.dataset.delete) {
+        btn.addEventListener('click', () => deleteNotecard(c.id, card));
+      } else if (btn.dataset.confirmDelete) {
+        btn.addEventListener('click', () => confirmDeleteNotecard(c.id, card));
+      } else {
+        btn.addEventListener('click', () => updateNcStatus(c.id, btn.dataset.status, card));
+      }
     });
   });
 }
 
 function ncActions(c) {
-  if (c.status === 'active')    return '<button class="nc-action-btn" data-status="completed">Complete</button><button class="nc-action-btn" data-status="archived">Archive</button>';
-  if (c.status === 'completed') return '<button class="nc-action-btn" data-status="active">Reopen</button><button class="nc-action-btn" data-status="archived">Archive</button>';
-  if (c.status === 'archived')  return '<button class="nc-action-btn" data-status="active">Restore</button>';
+  const del = '<button class="nc-action-btn nc-delete-btn" data-delete="true">Delete</button>';
+  if (c.status === 'active')           return '<button class="nc-action-btn" data-status="completed">Complete</button><button class="nc-action-btn" data-status="archived">Archive</button>' + del;
+  if (c.status === 'completed')        return '<button class="nc-action-btn" data-status="active">Reopen</button><button class="nc-action-btn" data-status="archived">Archive</button>' + del;
+  if (c.status === 'archived')         return '<button class="nc-action-btn" data-status="active">Restore</button>' + del;
+  if (c.status === 'pending_deletion') return '<button class="nc-action-btn nc-confirm-delete-btn" data-confirm-delete="true">Confirm Delete</button><button class="nc-action-btn" data-status="active">Cancel</button>';
   return '';
 }
 
@@ -1395,6 +1410,24 @@ function escNc(s) {
 async function updateNcStatus(id, status, cardEl) {
   try {
     const resp = await apiFetch('/api/notecards/' + id, { method: 'PATCH', body: JSON.stringify({ status }) });
+    if (resp.ok) { _ncLoaded = false; loadNotecards(); }
+  } catch {}
+}
+
+// Two-step delete: clicking Delete marks pending_deletion so Ren can also flag cards
+// from chat and have Scott confirm visually. Confirm Delete does the hard DELETE.
+async function deleteNotecard(id, cardEl) {
+  if (!confirm('Mark this notecard for deletion? You can confirm or cancel on the next screen.')) return;
+  try {
+    const resp = await apiFetch('/api/notecards/' + id, { method: 'PATCH', body: JSON.stringify({ status: 'pending_deletion' }) });
+    if (resp.ok) { _ncLoaded = false; loadNotecards(); }
+  } catch {}
+}
+
+async function confirmDeleteNotecard(id, cardEl) {
+  if (!confirm('Permanently delete this notecard? This cannot be undone.')) return;
+  try {
+    const resp = await apiFetch('/api/notecards/' + id, { method: 'DELETE' });
     if (resp.ok) { _ncLoaded = false; loadNotecards(); }
   } catch {}
 }

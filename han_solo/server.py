@@ -284,8 +284,10 @@ async def api_update_notecard(request: Request) -> JSONResponse:
     text   = body.get("text")
     if status is not None:
         status = status.strip()
-        if status not in {"active", "completed", "archived"}:
-            return JSONResponse({"error": "status must be active, completed, or archived"}, status_code=400)
+        # pending_deletion is the first step of the two-step delete flow — Ren sets it,
+        # Scott confirms via the UI's "Confirm Delete" button (or DELETE endpoint directly).
+        if status not in {"active", "completed", "archived", "pending_deletion"}:
+            return JSONResponse({"error": "status must be active, completed, archived, or pending_deletion"}, status_code=400)
     if text is not None:
         text = text.strip()
         if not text:
@@ -296,6 +298,19 @@ async def api_update_notecard(request: Request) -> JSONResponse:
     if not ok:
         return JSONResponse({"error": "not found or DB write failed"}, status_code=404)
     return JSONResponse({"id": notecard_id, "status": status, "text": text})
+
+
+async def api_delete_notecard(request: Request) -> JSONResponse:
+    """DELETE /api/notecards/{id} — permanently deletes the notecard."""
+    get_current_user()
+    try:
+        notecard_id = int(request.path_params["notecard_id"])
+    except (KeyError, ValueError):
+        return JSONResponse({"error": "invalid id"}, status_code=400)
+    ok = await db.delete_notecard(notecard_id)
+    if not ok:
+        return JSONResponse({"error": "not found or delete failed"}, status_code=404)
+    return JSONResponse({"deleted": notecard_id})
 
 
 async def api_t4_projects(request: Request) -> JSONResponse:
@@ -814,6 +829,7 @@ _chat_routes = [
     Route("/api/notecards", api_list_notecards),
     Route("/api/notecards", api_create_notecard, methods=["POST"]),
     Route("/api/notecards/{notecard_id}", api_update_notecard, methods=["PATCH"]),
+    Route("/api/notecards/{notecard_id}", api_delete_notecard, methods=["DELETE"]),
     Route("/health", health),
     Route("/api/me", chat_api.api_me),
     Route("/api/history", chat_api.api_history),
