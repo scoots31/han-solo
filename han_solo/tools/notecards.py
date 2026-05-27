@@ -12,7 +12,7 @@ from ..auth import get_current_user
 from .. import db
 from .. import letta_client as letta
 
-VALID_STATUSES = {"active", "completed", "archived"}
+VALID_STATUSES = {"active", "completed", "archived", "pending_deletion"}
 
 
 def register(server: FastMCP) -> None:
@@ -64,6 +64,34 @@ def register(server: FastMCP) -> None:
         if s: parts.append(f"status={s}")
         if t: parts.append(f"text updated")
         return f"Notecard {notecard_id} updated — {', '.join(parts)}"
+
+    @server.tool()
+    async def delete_notecard(notecard_id: int, confirmed: bool = False) -> str:
+        """
+        Delete a notecard with a two-step approval flow.
+
+        confirmed=False (default): marks the notecard as pending_deletion and returns
+        its content for Scott to review. Call again with confirmed=True to permanently delete.
+
+        confirmed=True: permanently deletes the notecard. Only call after Scott approves.
+        """
+        get_current_user()
+        card = await db.get_notecard(notecard_id)
+        if not card:
+            return f"Error: notecard {notecard_id} not found"
+        if not confirmed:
+            ok = await db.update_notecard(notecard_id, status="pending_deletion")
+            if not ok:
+                return f"Error: failed to mark notecard {notecard_id} for deletion"
+            return (
+                f"Notecard {notecard_id} marked for deletion — awaiting Scott's approval.\n"
+                f"Content: {card['text']}\n"
+                f"Call delete_notecard({notecard_id}, confirmed=True) to permanently delete."
+            )
+        ok = await db.delete_notecard(notecard_id)
+        if not ok:
+            return f"Error: failed to delete notecard {notecard_id}"
+        return f"Notecard {notecard_id} permanently deleted."
 
     @server.tool()
     async def list_notecards(status: str = "") -> list[dict]:

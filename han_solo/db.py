@@ -856,7 +856,7 @@ async def list_notecards(status: str | None = None) -> list[dict]:
                     """
                     SELECT id, text, creator, status, source, session_id, created_at
                     FROM notecards
-                    WHERE status IN ('active', 'completed')
+                    WHERE status IN ('active', 'completed', 'pending_deletion')
                     ORDER BY created_at DESC
                     """
                 )
@@ -874,6 +874,38 @@ async def list_notecards(status: str | None = None) -> list[dict]:
     except Exception as e:
         logger.error("Failed to list notecards: %s", e)
         return []
+
+
+async def get_notecard(notecard_id: int) -> dict | None:
+    """Fetch a single notecard by id. Returns the row as a dict or None if not found."""
+    if not _pool:
+        return None
+    try:
+        async with _pool.acquire() as conn:
+            row = await conn.fetchrow(
+                "SELECT id, text, creator, status, source, session_id, created_at FROM notecards WHERE id = $1",
+                notecard_id,
+            )
+        return dict(row) if row else None
+    except Exception as e:
+        logger.error("Failed to fetch notecard %d: %s", notecard_id, e)
+        return None
+
+
+async def delete_notecard(notecard_id: int) -> bool:
+    """Hard delete a notecard by id. Returns True on success."""
+    if not _pool:
+        return False
+    try:
+        async with _pool.acquire() as conn:
+            result = await conn.execute(
+                "DELETE FROM notecards WHERE id = $1",
+                notecard_id,
+            )
+        return result == "DELETE 1"
+    except Exception as e:
+        logger.error("Failed to delete notecard %d: %s", notecard_id, e)
+        return False
 
 
 async def update_notecard_status(notecard_id: int, status: str) -> bool:
