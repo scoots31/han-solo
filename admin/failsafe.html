@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ren Failsafe</title>
+<style>
+  :root {
+    --bg: #090806;
+    --surface: #141210;
+    --border: #2a2520;
+    --text: #EDE8E0;
+    --muted: #7a7268;
+    --gold: #E8971C;
+    --red: #c0392b;
+    --green: #27ae60;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 48px 16px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 640px;
+  }
+
+  header {
+    margin-bottom: 32px;
+  }
+
+  h1 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--gold);
+    letter-spacing: 0.02em;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  input[type="password"],
+  select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-size: 14px;
+    padding: 9px 12px;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  input[type="password"]:focus,
+  select:focus {
+    border-color: var(--gold);
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a7268' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+    cursor: pointer;
+  }
+
+  .token-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+
+  .token-row input {
+    flex: 1;
+  }
+
+  .btn-clear {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--muted);
+    font-size: 11px;
+    padding: 9px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .btn-clear:hover { border-color: var(--muted); color: var(--text); }
+
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+
+  .command-desc {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--muted);
+    min-height: 18px;
+  }
+
+  button[type="submit"] {
+    width: 100%;
+    background: var(--gold);
+    color: var(--bg);
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 11px;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+
+  button[type="submit"]:hover { opacity: 0.9; }
+  button[type="submit"]:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .response-area { display: none; }
+  .response-area.visible { display: block; }
+
+  .response-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .response-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+
+  .status-badge {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 2px 8px;
+    border-radius: 3px;
+  }
+
+  .status-badge.success { background: rgba(39,174,96,0.15); color: var(--green); }
+  .status-badge.failure { background: rgba(192,57,43,0.15); color: var(--red); }
+  .status-badge.error   { background: rgba(192,57,43,0.15); color: var(--red); }
+
+  pre {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px;
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--text);
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .timestamp {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 8px;
+    text-align: right;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(232,151,28,0.3);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .warning {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Ren Failsafe</h1>
+    <p class="subtitle">Direct diagnostic channel &mdash; bypasses normal pipeline</p>
+  </header>
+
+  <div class="card">
+    <div class="field">
+      <label>API Token</label>
+      <div class="token-row">
+        <input type="password" id="token" placeholder="MCP_TOKEN" autocomplete="off" spellcheck="false">
+        <button type="button" class="btn-clear" onclick="clearToken()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <form id="form">
+      <div class="field">
+        <label>Command</label>
+        <select id="command" onchange="updateDesc()">
+          <option value="PING">PING</option>
+          <option value="STATUS">STATUS</option>
+          <option value="DUMP_MEMORY">DUMP_MEMORY</option>
+          <option value="RELOAD_BRIEF">RELOAD_BRIEF</option>
+        </select>
+        <div class="command-desc" id="command-desc">Confirms Ren is online and accepting messages.</div>
+      </div>
+
+      <button type="submit" id="send-btn">Send Command</button>
+    </form>
+  </div>
+
+  <div class="card response-area" id="response-area">
+    <div class="response-meta">
+      <span class="response-label" id="response-command-label">Response</span>
+      <span class="status-badge" id="status-badge"></span>
+    </div>
+    <pre id="response-text"></pre>
+    <div class="timestamp" id="timestamp"></div>
+  </div>
+
+  <p class="warning">Local tool only &mdash; do not commit with a token hardcoded. Token is stored in localStorage.</p>
+</div>
+
+<script>
+  const ENDPOINT = 'https://han-solo-mcp.onrender.com/api/admin/failsafe-message';
+
+  const DESCRIPTIONS = {
+    PING:         'Confirms Ren is online and accepting messages.',
+    STATUS:       'Asks Ren for her current health state — tools, memory, anything she notices.',
+    DUMP_MEMORY:  'Returns the raw content of her core memory blocks for diagnostics.',
+    RELOAD_BRIEF: 'Tells Ren to re-read her core memory blocks right now.',
+  };
+
+  // Restore token from localStorage
+  const tokenInput = document.getElementById('token');
+  const saved = localStorage.getItem('ren_failsafe_token');
+  if (saved) tokenInput.value = saved;
+  tokenInput.addEventListener('input', () => {
+    localStorage.setItem('ren_failsafe_token', tokenInput.value);
+  });
+
+  function clearToken() {
+    tokenInput.value = '';
+    localStorage.removeItem('ren_failsafe_token');
+  }
+
+  function updateDesc() {
+    const cmd = document.getElementById('command').value;
+    document.getElementById('command-desc').textContent = DESCRIPTIONS[cmd] || '';
+  }
+
+  document.getElementById('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const token = tokenInput.value.trim();
+    const command = document.getElementById('command').value;
+
+    if (!token) {
+      showError('Token required.');
+      return;
+    }
+
+    const btn = document.getElementById('send-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Sending...';
+
+    try {
+      const res = await fetch(ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ command, command_args: null }),
+      });
+
+      if (!res.ok) {
+        let detail = `HTTP ${res.status}`;
+        try { const d = await res.json(); detail = d.error || detail; } catch (_) {}
+        showError(`Request failed — ${detail}`);
+        return;
+      }
+
+      const data = await res.json();
+      showResponse(data.command, data.response, data.status);
+
+    } catch (err) {
+      showError(`Request failed — Render API unreachable or returned error. (${err.message})`);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Send Command';
+    }
+  });
+
+  function showResponse(command, text, status) {
+    const area = document.getElementById('response-area');
+    document.getElementById('response-command-label').textContent = command;
+    document.getElementById('response-text').textContent = text;
+    const badge = document.getElementById('status-badge');
+    badge.textContent = status;
+    badge.className = `status-badge ${status}`;
+    document.getElementById('timestamp').textContent = new Date().toLocaleTimeString();
+    area.className = 'card response-area visible';
+  }
+
+  function showError(msg) {
+    showResponse('ERROR', msg, 'error');
+  }
+</script>
+</body>
+</html>
