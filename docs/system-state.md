@@ -6,7 +6,7 @@ Letta is the runtime copy. This file is git-versioned and recoverable.
 Update protocol: edit this file → commit → write to Letta via `write_core_memory` (block_label: `project_state`).
 Never write to Letta first.
 
-Last updated: 2026-05-27
+Last updated: 2026-05-28
 
 ---
 
@@ -42,9 +42,9 @@ Tools live in `han_solo/tools/` and register with the FastMCP server at `han-sol
 | Memory | memory.py | write_core_memory, read_core_memory, list_core_memory_blocks |
 | Signals | signals.py | write_signal, search_signals, add_portrait_signal |
 | Brief | brief.py | get_session_brief, write_pending_thoughts, check_memory_health |
-| T4 | t4.py | write_t4_entry, get_t4_entry, search_t4, delete_t4_entry |
+| T4 | t4.py | write_t4_entry, get_t4_entry, search_t4, delete_t4_entry, append_t4_entry |
 | Skills | skills.py | get_skill, list_skills, write_skill |
-| Notecards | notecards.py | list_notecards, create_notecard, update_notecard |
+| Notecards | notecards.py | list_notecards, create_notecard, update_notecard, delete_notecard |
 | Portraits | portraits.py | read_portrait, write_portrait, read_all_portraits |
 | Phase | phase.py | advance_phase, check_phase_gate, get_project_state |
 | Logbook | logbook.py | write_session_log, write_session_summary |
@@ -56,7 +56,7 @@ Tools live in `han_solo/tools/` and register with the FastMCP server at `han-sol
 
 **`send_to_ren`**: Claude Code calls this to reach Ren mid-session. Message lands in Ren's Letta context; response returned synchronously. Does not appear in workspace UI. Used for architecture decisions, assumption audits, and team handoff notes at session close.
 
-Ren's tool set (14 tools on her Letta agent, updated 2026-05-27): search_t4, get_t4_entry, list_notecards, get_skill, list_skills, write_skill, write_t4_entry, search_transcripts, search_code, send_message, read_core_memory, write_core_memory, archival_memory_search, check_system_health. Removed: `search_signals` and `get_session_brief` (circular dependency — caused cascade failures). Added 2026-05-27: `archival_memory_search` (explicitly attached — not auto-available in Letta), `check_system_health` (SL-001). Model-switch endpoint removed. `send_to_ren` is for Claude Code only. Rule: Claude Code uses bridge before writing to Ren's core blocks mid-session.
+Ren's tool set (20 tools on her Letta agent, updated 2026-05-28): search_t4, get_t4_entry, list_notecards, create_notecard, update_notecard, delete_notecard, get_skill, list_skills, write_skill, write_t4_entry, search_transcripts, search_code, send_message, read_core_memory, write_core_memory, archival_memory_search, check_system_health, append_t4_entry, update_open_threads, delete_archival_passage. Removed: `search_signals` and `get_session_brief` (circular dependency). Added 2026-05-28 (SL-005): create_notecard, update_notecard, delete_notecard, append_t4_entry, update_open_threads, delete_archival_passage. Post-deploy sync process: `POST /api/admin/sync-mcp-tools` registers new tools individually via Letta API, then `ensure_ren_tools()` attaches them. Documented in `docs/add-tool-checklist.md` Step 8. `send_to_ren` is for Claude Code only. Rule: Claude Code uses bridge before writing to Ren's core blocks mid-session.
 
 ---
 
