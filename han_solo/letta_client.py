@@ -261,6 +261,25 @@ async def ensure_ren_tools() -> None:
         logger.error("ensure_ren_tools failed (non-fatal): %s", e)
 
 
+async def sync_mcp_tools(mcp_server_token: str) -> dict[str, Any]:
+    """Re-register the han-solo MCP server with Letta to trigger fresh tool discovery.
+
+    Letta only discovers external_mcp tools when it first connects to a server.
+    Calling PUT /v1/tools/mcp/servers with the same config forces Letta to
+    re-fetch tools/list and create registry entries for any new tools added
+    since the initial connection.
+
+    Call ensure_ren_tools() immediately after to attach newly discovered tools.
+    """
+    resp = await _letta("PUT", f"{LETTA_URL}/v1/tools/mcp/servers", json={
+        "server_name": "han-solo",
+        "server_url": "https://han-solo-mcp.onrender.com/mcp",
+        "auth_type": "bearer",
+        "auth_token": mcp_server_token,
+    })
+    return resp.json()
+
+
 # ---------------------------------------------------------------------------
 # Core memory (Store 4 always-loaded blocks)
 # ---------------------------------------------------------------------------

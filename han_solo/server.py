@@ -24,7 +24,7 @@ from starlette.routing import Route, Mount
 from starlette.staticfiles import StaticFiles
 
 from .auth import BearerAuthMiddleware, get_current_user
-from .config import REN_AGENT_NAME, REN_AGENT_ID
+from .config import REN_AGENT_NAME, REN_AGENT_ID, MCP_SERVER_TOKEN
 from . import letta_client as letta
 from . import db
 from .tools import memory, signals, phase, brief, portraits, notecards, t4, skills, logbook, transcripts, bridge, codebase, health
@@ -114,6 +114,35 @@ async def admin_patch_system(request: Request) -> JSONResponse:
     result = await letta.patch_agent_system(system)
     tools = [t["name"] for t in result.get("tools", [])]
     return JSONResponse({"patched": True, "system_length": len(system), "tools": tools})
+
+
+async def api_sync_mcp_tools(request: Request) -> JSONResponse:
+    """POST /api/admin/sync-mcp-tools — force Letta to re-discover tools from this MCP server.
+
+    Letta only discovers external_mcp tools at initial connection. Call this after
+    deploying new tools so they appear in Letta's registry and get attached to Ren.
+    Requires MCP_SERVER_TOKEN env var set in Render (same value as USER_TOKEN_SCOTT).
+    """
+    get_current_user()
+    if not MCP_SERVER_TOKEN:
+        return JSONResponse({"error": "MCP_SERVER_TOKEN not configured in Render env"}, status_code=500)
+
+    before_resp = await letta._letta("GET", f"{letta.LETTA_URL}/v1/tools?limit=200")
+    before_names = {t["name"] for t in before_resp.json()}
+
+    await letta.sync_mcp_tools(MCP_SERVER_TOKEN)
+    await letta.ensure_ren_tools()
+
+    after_resp = await letta._letta("GET", f"{letta.LETTA_URL}/v1/tools?limit=200")
+    after_names = {t["name"] for t in after_resp.json()}
+
+    added = sorted(after_names - before_names)
+    return JSONResponse({
+        "synced": True,
+        "added_to_registry": added,
+        "registry_before": len(before_names),
+        "registry_after": len(after_names),
+    })
 
 
 async def admin_delete_chunks_by_type(request: Request) -> JSONResponse:
@@ -855,6 +884,7 @@ _chat_routes = [
     Route("/api/memory/access-patterns", api_memory_access_patterns),
     Route("/api/admin/agent-info", admin_agent_info),
     Route("/api/admin/patch-system", admin_patch_system, methods=["POST"]),
+    Route("/api/admin/sync-mcp-tools", api_sync_mcp_tools, methods=["POST"]),
     Route("/api/admin/prune-transcripts", api_prune_transcripts, methods=["POST"]),
     Route("/api/admin/delete-chunks-by-type", admin_delete_chunks_by_type, methods=["POST"]),
     Route("/api/admin/failsafe-message", api_failsafe_message, methods=["POST"]),

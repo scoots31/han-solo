@@ -52,6 +52,11 @@ ELEVENLABS_VOICE_ID = os.environ.get("ELEVENLABS_VOICE_ID", "")
 # MCP server port
 PORT = int(os.environ.get("PORT", "8000"))
 
+# Bearer token Letta uses to authenticate when calling this MCP server's tools/list.
+# Required for /api/admin/sync-mcp-tools to re-register the server with Letta.
+# Set to the same value as USER_TOKEN_SCOTT in Render env vars.
+MCP_SERVER_TOKEN = os.environ.get("MCP_SERVER_TOKEN", "")
+
 # Token → UserIdentity registry
 # Tokens are stored as env vars: USER_TOKEN_SCOTT, USER_TOKEN_TED, etc.
 # Each maps to a user definition. Add new users by adding env vars + entries here.
