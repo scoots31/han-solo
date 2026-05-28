@@ -272,12 +272,15 @@ async def sync_mcp_tools() -> dict[str, Any]:
     """
     servers_resp = await _letta("GET", f"{LETTA_URL}/v1/tools/mcp/servers")
     servers = servers_resp.json()
-    if not isinstance(servers, list):
-        return {"error": f"unexpected response: {servers}"}
 
-    han_solo = next((s for s in servers if s.get("server_name") == "han-solo"), None)
+    # Letta returns a dict keyed by server_name, not a list
+    if isinstance(servers, dict):
+        han_solo = servers.get("han-solo")
+    else:
+        han_solo = next((s for s in servers if s.get("server_name") == "han-solo"), None)
+
     if not han_solo:
-        return {"error": "han-solo not found in Letta MCP server list"}
+        return {"error": f"han-solo not found in Letta MCP servers: {servers}"}
 
     put_resp = await _letta("PUT", f"{LETTA_URL}/v1/tools/mcp/servers", json=han_solo)
     return put_resp.json()
