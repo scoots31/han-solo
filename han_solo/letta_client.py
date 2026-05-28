@@ -261,23 +261,26 @@ async def ensure_ren_tools() -> None:
         logger.error("ensure_ren_tools failed (non-fatal): %s", e)
 
 
-async def sync_mcp_tools(mcp_server_token: str) -> dict[str, Any]:
+async def sync_mcp_tools() -> dict[str, Any]:
     """Re-register the han-solo MCP server with Letta to trigger fresh tool discovery.
 
     Letta only discovers external_mcp tools when it first connects to a server.
-    Calling PUT /v1/tools/mcp/servers with the same config forces Letta to
-    re-fetch tools/list and create registry entries for any new tools added
-    since the initial connection.
+    Reads the existing server config from Letta and re-PUTs it to force a fresh
+    tools/list fetch — no separate env var or token needed.
 
     Call ensure_ren_tools() immediately after to attach newly discovered tools.
     """
-    resp = await _letta("PUT", f"{LETTA_URL}/v1/tools/mcp/servers", json={
-        "server_name": "han-solo",
-        "server_url": "https://han-solo-mcp.onrender.com/mcp",
-        "auth_type": "bearer",
-        "auth_token": mcp_server_token,
-    })
-    return resp.json()
+    servers_resp = await _letta("GET", f"{LETTA_URL}/v1/tools/mcp/servers")
+    servers = servers_resp.json()
+    if not isinstance(servers, list):
+        return {"error": f"unexpected response: {servers}"}
+
+    han_solo = next((s for s in servers if s.get("server_name") == "han-solo"), None)
+    if not han_solo:
+        return {"error": "han-solo not found in Letta MCP server list"}
+
+    put_resp = await _letta("PUT", f"{LETTA_URL}/v1/tools/mcp/servers", json=han_solo)
+    return put_resp.json()
 
 
 # ---------------------------------------------------------------------------

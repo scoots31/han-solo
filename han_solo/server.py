@@ -24,7 +24,7 @@ from starlette.routing import Route, Mount
 from starlette.staticfiles import StaticFiles
 
 from .auth import BearerAuthMiddleware, get_current_user
-from .config import REN_AGENT_NAME, REN_AGENT_ID, MCP_SERVER_TOKEN
+from .config import REN_AGENT_NAME, REN_AGENT_ID
 from . import letta_client as letta
 from . import db
 from .tools import memory, signals, phase, brief, portraits, notecards, t4, skills, logbook, transcripts, bridge, codebase, health
@@ -124,13 +124,14 @@ async def api_sync_mcp_tools(request: Request) -> JSONResponse:
     Requires MCP_SERVER_TOKEN env var set in Render (same value as USER_TOKEN_SCOTT).
     """
     get_current_user()
-    if not MCP_SERVER_TOKEN:
-        return JSONResponse({"error": "MCP_SERVER_TOKEN not configured in Render env"}, status_code=500)
 
     before_resp = await letta._letta("GET", f"{letta.LETTA_URL}/v1/tools?limit=200")
     before_names = {t["name"] for t in before_resp.json()}
 
-    await letta.sync_mcp_tools(MCP_SERVER_TOKEN)
+    result = await letta.sync_mcp_tools()
+    if "error" in result:
+        return JSONResponse(result, status_code=502)
+
     await letta.ensure_ren_tools()
 
     after_resp = await letta._letta("GET", f"{letta.LETTA_URL}/v1/tools?limit=200")
