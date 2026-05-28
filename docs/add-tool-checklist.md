@@ -61,18 +61,38 @@ Commit all changed files together. The commit triggers a Render deploy.
 
 On Render deploy:
 - The new tool appears in the MCP server's `tools/list` endpoint immediately
-- Letta reconnects to the MCP server and discovers new tools (may take a few minutes)
-- `ensure_ren_tools()` fires at startup and attaches everything in the canonical set
+- `ensure_ren_tools()` fires at startup and attaches everything in the canonical set **that is already in Letta's registry**
 
-## Step 8 — Test in a new Claude Code session
+**Important:** Letta does NOT automatically discover new MCP tools after initial server connection.
+New tools must be explicitly registered into Letta's registry before `ensure_ren_tools()` can attach them.
+Proceed to Step 8 to do this.
+
+## Step 8 — Register new tools in Letta's registry
+
+After deploy lands, call the sync endpoint:
+
+```
+POST /api/admin/sync-mcp-tools
+Authorization: Bearer <han_solo_token>
+```
+
+This calls `GET /v1/tools/mcp/servers/han-solo/tools` (live MCP call) to find all tools
+the server now exposes, then registers any missing ones via
+`POST /v1/tools/mcp/servers/han-solo/{tool_name}`, then runs `ensure_ren_tools()` to
+attach them to Ren's agent.
+
+The response will show `missing_found` (tools not yet in registry) and `registered` (successfully added).
+A clean response looks like: `{"missing_found": [], "registered": [], "errors": []}` — meaning the tools
+were already registered from a previous sync.
+
+## Step 9 — Test in a new Claude Code session
 
 **MCP tools are registered at session start.** New tools added in the current session
 will NOT appear as callable tools until the next Claude Code session. Open a fresh session
 to test any new MCP tool.
 
-For Ren's Letta tools: test by sending her a message that should trigger the new tool.
-If the tool doesn't appear, check the Render deploy logs and call `ensure_ren_tools`
-manually via the admin endpoint or a server restart.
+For Ren's Letta tools: verify via `GET /api/admin/agent-info` that the new tools appear
+in `agent_tools`. Then test by sending Ren a message that exercises the new tool.
 
 ---
 

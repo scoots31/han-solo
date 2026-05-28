@@ -46,10 +46,13 @@ EXPECTED_HAN_SOLO_TOOLS = {
     "get_session_brief", "list_notecards",
     "get_skill", "list_skills", "write_skill", "search_transcripts",
     "write_t4_entry",
+    "create_notecard", "update_notecard", "delete_notecard",
+    "append_t4_entry", "update_open_threads", "delete_archival_passage",
 }
 # write_t4_entry is intentionally allowed on Ren — she uses it for handoff entries
 # and decisions_log as Architecture Owner of the WHY. Scoped by trust, not by tool.
-ALLOWED_WRITE_TOOLS_ON_REN = {"write_t4_entry", "write_skill"}
+# delete_notecard and delete_archival_passage are write/destructive — require confirmed=True.
+ALLOWED_WRITE_TOOLS_ON_REN = {"write_t4_entry", "write_skill", "update_notecard", "delete_notecard", "append_t4_entry", "update_open_threads", "delete_archival_passage"}
 EXPECTED_SKILLS = {
     "discover", "tech-context", "design-sprint", "prd-to-plan",
     "solo-build", "solo-qa", "deploy", "brainstorming", "data-scaffold",
