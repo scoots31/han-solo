@@ -10,6 +10,8 @@ Entry types and write behaviors:
   append     : discovery_brief, brainstorm, as_is_map, to_be_map,
                decisions_log
 """
+from datetime import datetime, timezone
+
 from mcp.server.fastmcp import FastMCP
 
 from ..auth import get_current_user
@@ -302,3 +304,50 @@ def register(server: FastMCP) -> None:
         if "error" in result:
             return {"error": result["error"]}
         return {"deleted": result["deleted"], "project_slug": project_slug, "entry_type": entry_type, "entry_id": entry_id or "(all)"}
+
+    @server.tool()
+    async def append_t4_entry(
+        project_slug: str,
+        entry_type: str,
+        entry_id: str,
+        content: str,
+    ) -> str:
+        """
+        Append to any T4 entry, regardless of its normal write behavior.
+
+        Use this when you need to add to an entry that is normally upsert or write_once —
+        for example, adding a mid-session note to a handoff, or appending a new decision
+        to a decisions_log. Each append is timestamped and separated with a divider.
+
+        project_slug: kebab-case project name
+        entry_type: any valid T4 entry type
+        entry_id: the entry to append to (required — use the type name for auto-ID types)
+        content: markdown text to append
+
+        If the entry does not exist, it is created with this content.
+        """
+        get_current_user()
+
+        if not content.strip():
+            return "Error: content is required"
+        if not entry_id.strip():
+            return "Error: entry_id is required"
+
+        await db.ensure_project_exists(project_slug)
+
+        # Prepend timestamp so each append is identifiable in the log
+        ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+        stamped_content = f"**{ts}**\n\n{content.strip()}"
+
+        result = await db.write_t4_entry(
+            project_slug=project_slug,
+            entry_type=entry_type,
+            entry_id=entry_id,
+            content=stamped_content,
+            parent_id=None,
+            behavior="append",
+        )
+
+        if "error" in result:
+            return f"Error: {result['error']}"
+        return f"Appended to {entry_type}/{entry_id} for {project_slug} — {ts}"

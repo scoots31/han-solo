@@ -119,6 +119,61 @@ def register(server: FastMCP) -> None:
         return f"Passage {passage_id} permanently deleted from archival memory."
 
     @server.tool()
+    async def update_open_threads(action: str, thread: str) -> str:
+        """
+        Add, close, or remove an item from Ren's open threads list (a Letta core block).
+
+        action: 'add' | 'close' | 'remove'
+        thread: the thread text to act on
+
+        'add'    — appends a new thread to the list
+        'close'  — marks the matching thread as [CLOSED]
+        'remove' — deletes the matching thread from the list entirely
+
+        Matching for 'close' and 'remove' is case-insensitive substring match.
+        If the open_threads block does not exist, 'add' creates it.
+        """
+        get_current_user()
+
+        if action not in ("add", "close", "remove"):
+            return "Error: action must be 'add', 'close', or 'remove'"
+        if not thread.strip():
+            return "Error: thread is required"
+
+        t = thread.strip()
+        block = await letta.read_core_block("open_threads")
+        # Block may not exist yet — start with empty list
+        raw = block.get("value", "") if block else ""
+        lines = [l for l in raw.splitlines() if l.strip()]
+
+        if action == "add":
+            lines.append(f"- {t}")
+        elif action == "close":
+            # Find matching line (case-insensitive substring) and prefix with [CLOSED]
+            matched = False
+            for i, line in enumerate(lines):
+                if t.lower() in line.lower() and "[CLOSED]" not in line:
+                    lines[i] = line.replace("- ", "- [CLOSED] ", 1) if line.startswith("- ") else f"- [CLOSED] {line.lstrip('- ')}"
+                    matched = True
+                    break
+            if not matched:
+                return f"No open thread matching '{t}' found"
+        elif action == "remove":
+            before = len(lines)
+            lines = [l for l in lines if t.lower() not in l.lower()]
+            if len(lines) == before:
+                return f"No thread matching '{t}' found"
+
+        updated = "\n".join(lines)
+        try:
+            await letta.write_core_block("open_threads", updated)
+        except Exception:
+            await letta.create_core_block("open_threads", updated, limit=10000)
+
+        count = len([l for l in lines if l.strip() and "[CLOSED]" not in l])
+        return f"Open threads updated — action={action}, {count} open thread(s) remaining."
+
+    @server.tool()
     async def enrich_passage(passage_id: str, context_note: str, session_date: str = "") -> str:
         """
         Record context about how a passage was used during retrieval (memory reconsolidation).

@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 CANONICAL_REN_TOOL_NAMES = {
     "search_t4", "get_t4_entry",
     "list_notecards", "create_notecard", "update_notecard", "delete_notecard",
+    "update_open_threads", "append_t4_entry",
     "get_skill", "list_skills", "write_skill",
     "write_t4_entry", "search_transcripts",
     "search_code",              # semantic search over han-solo Python source — use intentionally, not speculatively
