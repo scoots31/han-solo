@@ -262,32 +262,40 @@ async def ensure_ren_tools() -> None:
 
 
 async def sync_mcp_tools() -> dict[str, Any]:
-    """Re-register the han-solo MCP server with Letta to trigger fresh tool discovery.
+    """Register any new MCP tools from the han-solo server into Letta's tool registry.
 
-    Letta only discovers external_mcp tools when it first connects to a server.
-    Reads the existing server config from Letta and re-PUTs it to force a fresh
-    tools/list fetch — no separate env var or token needed.
+    Calls GET /v1/tools/mcp/servers/han-solo/tools (live call to the MCP server)
+    to get all currently exposed tools, then registers any that are missing from
+    Letta's registry via POST /v1/tools/mcp/servers/han-solo/{tool_name}.
 
-    Call ensure_ren_tools() immediately after to attach newly discovered tools.
+    Call ensure_ren_tools() immediately after to attach newly registered tools to Ren.
     """
-    servers_resp = await _letta("GET", f"{LETTA_URL}/v1/tools/mcp/servers")
-    servers = servers_resp.json()
+    # Get what the MCP server currently exposes (live call)
+    live_resp = await _letta("GET", f"{LETTA_URL}/v1/tools/mcp/servers/han-solo/tools")
+    live_tools = {t["name"] for t in live_resp.json()} if isinstance(live_resp.json(), list) else set()
 
-    # Letta returns a dict keyed by server_name, not a list
-    if isinstance(servers, dict):
-        han_solo = servers.get("han-solo")
-    else:
-        han_solo = next((s for s in servers if s.get("server_name") == "han-solo"), None)
+    # Get what's already in Letta's registry
+    registry_resp = await _letta("GET", f"{LETTA_URL}/v1/tools?limit=200")
+    registry_names = {t["name"] for t in registry_resp.json()}
 
-    if not han_solo:
-        return {"error": f"han-solo not found in Letta MCP servers: {servers}"}
+    # Register tools that are live but not yet in registry
+    missing = live_tools - registry_names
+    registered = []
+    errors = []
+    for tool_name in sorted(missing):
+        try:
+            await _letta("POST", f"{LETTA_URL}/v1/tools/mcp/servers/han-solo/{tool_name}")
+            registered.append(tool_name)
+        except Exception as e:
+            errors.append({"tool": tool_name, "error": str(e)})
 
-    try:
-        put_resp = await _letta("PUT", f"{LETTA_URL}/v1/tools/mcp/servers", json=han_solo)
-        return {"put_status": put_resp.status_code, "put_response": put_resp.json()}
-    except Exception as e:
-        # Return the actual Letta error so we can see what format it expects
-        return {"error": str(e), "server_config_sent": han_solo}
+    return {
+        "live_tool_count": len(live_tools),
+        "registry_before": len(registry_names),
+        "missing_found": sorted(missing),
+        "registered": registered,
+        "errors": errors,
+    }
 
 
 # ---------------------------------------------------------------------------

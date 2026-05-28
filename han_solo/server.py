@@ -124,25 +124,9 @@ async def api_sync_mcp_tools(request: Request) -> JSONResponse:
     """
     get_current_user()
 
-    before_resp = await letta._letta("GET", f"{letta.LETTA_URL}/v1/tools?limit=200")
-    before_names = {t["name"] for t in before_resp.json()}
-
     result = await letta.sync_mcp_tools()
-    if "error" in result:
-        return JSONResponse(result, status_code=502)
-
     await letta.ensure_ren_tools()
-
-    after_resp = await letta._letta("GET", f"{letta.LETTA_URL}/v1/tools?limit=200")
-    after_names = {t["name"] for t in after_resp.json()}
-
-    added = sorted(after_names - before_names)
-    return JSONResponse({
-        "synced": True,
-        "added_to_registry": added,
-        "registry_before": len(before_names),
-        "registry_after": len(after_names),
-    })
+    return JSONResponse(result)
 
 
 async def admin_delete_chunks_by_type(request: Request) -> JSONResponse:
