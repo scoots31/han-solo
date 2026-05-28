@@ -121,7 +121,6 @@ async def api_sync_mcp_tools(request: Request) -> JSONResponse:
 
     Letta only discovers external_mcp tools at initial connection. Call this after
     deploying new tools so they appear in Letta's registry and get attached to Ren.
-    Requires MCP_SERVER_TOKEN env var set in Render (same value as USER_TOKEN_SCOTT).
     """
     get_current_user()
 

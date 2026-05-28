@@ -282,8 +282,12 @@ async def sync_mcp_tools() -> dict[str, Any]:
     if not han_solo:
         return {"error": f"han-solo not found in Letta MCP servers: {servers}"}
 
-    put_resp = await _letta("PUT", f"{LETTA_URL}/v1/tools/mcp/servers", json=han_solo)
-    return put_resp.json()
+    try:
+        put_resp = await _letta("PUT", f"{LETTA_URL}/v1/tools/mcp/servers", json=han_solo)
+        return {"put_status": put_resp.status_code, "put_response": put_resp.json()}
+    except Exception as e:
+        # Return the actual Letta error so we can see what format it expects
+        return {"error": str(e), "server_config_sent": han_solo}
 
 
 # ---------------------------------------------------------------------------
