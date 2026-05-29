@@ -684,11 +684,20 @@ async def api_pre_build_gate(request: Request) -> JSONResponse:
     """GET /api/hub/pre-build-gate — Returns full hub state for pre-build gate review.
 
     Auth required. Returns all components with vitals, top-3 incidents, danger zones,
-    and assumptions. Claude calls this before opening a slice; Scott reads hub-gate.html.
+    and assumptions. Also returns the pre_build_gate_active T4 entry if present so the
+    gate page can render the slice brief Claude wrote before opening the slice.
     """
     get_current_user()
     components = await db.get_pre_build_gate()
-    return JSONResponse({"components": components, "total": len(components)})
+    brief_entry = await db.get_t4_entry("han-solo", "gate", "pre_build_gate_active")
+    brief = None
+    if brief_entry:
+        import json as _json
+        try:
+            brief = _json.loads(brief_entry["content"])
+        except Exception:
+            brief = {"raw": brief_entry["content"]}
+    return JSONResponse({"components": components, "total": len(components), "brief": brief})
 
 
 async def api_seed_hub(request: Request) -> JSONResponse:
