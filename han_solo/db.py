@@ -329,6 +329,112 @@ CREATE TABLE IF NOT EXISTS assumptions (
 );
 CREATE INDEX IF NOT EXISTS idx_assumptions_component_id
     ON assumptions(component_id);
+CREATE TABLE IF NOT EXISTS claude_plus_sessions (
+    session_id  UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    started_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    closed_at   TIMESTAMPTZ,
+    mode        TEXT        NOT NULL DEFAULT 'sprint'
+);
+CREATE TABLE IF NOT EXISTS claude_plus_identity_and_role (
+    id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    content     TEXT        NOT NULL DEFAULT '',
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_by  TEXT        NOT NULL DEFAULT 'ren'
+);
+CREATE TABLE IF NOT EXISTS claude_plus_operating_contract (
+    id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    content     TEXT        NOT NULL DEFAULT '',
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_by  TEXT        NOT NULL DEFAULT 'ren'
+);
+CREATE TABLE IF NOT EXISTS hub_snapshot_current (
+    id                  UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    hub_data            JSONB       NOT NULL DEFAULT '{}',
+    hub_schema_version  TEXT        NOT NULL DEFAULT '1.0',
+    snapshot_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_by          TEXT        NOT NULL DEFAULT 'claude_plus'
+);
+CREATE TABLE IF NOT EXISTS session_shape_and_boundaries (
+    id                          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    session_id                  UUID        REFERENCES claude_plus_sessions(session_id),
+    slices_completed            INT         NOT NULL DEFAULT 0,
+    slices_in_progress          INT         NOT NULL DEFAULT 0,
+    context_consumption_estimate TEXT       NOT NULL DEFAULT 'light',
+    session_mode                TEXT        NOT NULL DEFAULT 'sprint',
+    notes                       TEXT        NOT NULL DEFAULT '',
+    updated_at                  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_by                  TEXT        NOT NULL DEFAULT 'ren'
+);
+CREATE TABLE IF NOT EXISTS slice_sizing_decision_log (
+    id                  UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    session_id          UUID        REFERENCES claude_plus_sessions(session_id),
+    recent_decisions    JSONB       NOT NULL DEFAULT '[]',
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_by          TEXT        NOT NULL DEFAULT 'claude_plus'
+);
+CREATE TABLE IF NOT EXISTS claude_plus_state_machine (
+    id                      UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    session_id              UUID        REFERENCES claude_plus_sessions(session_id),
+    hub_read                BOOLEAN     NOT NULL DEFAULT FALSE,
+    code_read_current_slice TEXT        NOT NULL DEFAULT 'n/a',
+    gate_entry_written      BOOLEAN     NOT NULL DEFAULT FALSE,
+    scott_approved          BOOLEAN     NOT NULL DEFAULT FALSE,
+    session_mode            TEXT        NOT NULL DEFAULT 'sprint',
+    pending_decisions_count INT         NOT NULL DEFAULT 0,
+    close_signal_fired      BOOLEAN     NOT NULL DEFAULT FALSE,
+    session_close_confirmed BOOLEAN     NOT NULL DEFAULT FALSE,
+    updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_by              TEXT        NOT NULL DEFAULT 'claude_plus'
+);
+CREATE TABLE IF NOT EXISTS session_close (
+    id                      UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    session_id              UUID        REFERENCES claude_plus_sessions(session_id),
+    triggers_fired          JSONB       NOT NULL DEFAULT '[]',
+    close_procedure_status  JSONB       NOT NULL DEFAULT '{}',
+    updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_by              TEXT        NOT NULL DEFAULT 'claude_plus'
+);
+CREATE TABLE IF NOT EXISTS pending_actions_and_decisions (
+    id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    session_id  UUID        REFERENCES claude_plus_sessions(session_id),
+    description TEXT        NOT NULL,
+    flagged_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    owner       TEXT,
+    status      TEXT        NOT NULL DEFAULT 'open',
+    resolved_at TIMESTAMPTZ,
+    created_by  TEXT        NOT NULL DEFAULT 'claude_plus',
+    written_by  TEXT        NOT NULL DEFAULT 'ren'
+);
+CREATE INDEX IF NOT EXISTS idx_pending_actions_status
+    ON pending_actions_and_decisions(status, flagged_at DESC);
+CREATE TABLE IF NOT EXISTS failure_recovery_procedures (
+    id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    content     TEXT        NOT NULL DEFAULT '',
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_by  TEXT        NOT NULL DEFAULT 'ren'
+);
+CREATE TABLE IF NOT EXISTS framework_state (
+    id                  UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    version             TEXT        NOT NULL DEFAULT '',
+    status              TEXT        NOT NULL DEFAULT '',
+    active_skills       JSONB       NOT NULL DEFAULT '[]',
+    north_stars         TEXT        NOT NULL DEFAULT '',
+    recent_decisions    JSONB       NOT NULL DEFAULT '[]',
+    open_curator_work   TEXT        NOT NULL DEFAULT '',
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_by          TEXT        NOT NULL DEFAULT 'ren'
+);
+CREATE TABLE IF NOT EXISTS block_audit_log (
+    id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    session_id  UUID,
+    block_name  TEXT        NOT NULL,
+    operation   TEXT        NOT NULL,
+    old_value   JSONB,
+    new_value   JSONB,
+    timestamp   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_by  TEXT        NOT NULL
+);
 """
 
 # Runs after CREATE_TABLE_SQL — backfills existing slugs as scott/private, idempotent
