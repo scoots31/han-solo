@@ -680,6 +680,17 @@ async def api_failsafe_message(request: Request) -> JSONResponse:
     return JSONResponse({"command": command, "response": response_text, "status": status})
 
 
+async def api_pre_build_gate(request: Request) -> JSONResponse:
+    """GET /api/hub/pre-build-gate — Returns full hub state for pre-build gate review.
+
+    Auth required. Returns all components with vitals, top-3 incidents, danger zones,
+    and assumptions. Claude calls this before opening a slice; Scott reads hub-gate.html.
+    """
+    get_current_user()
+    components = await db.get_pre_build_gate()
+    return JSONResponse({"components": components, "total": len(components)})
+
+
 async def api_seed_hub(request: Request) -> JSONResponse:
     """POST /api/admin/seed-hub — parse all 9 component KBs from T4 and seed hub tables.
 
@@ -1078,6 +1089,7 @@ _chat_routes = [
     Route("/api/admin/delete-chunks-by-type", admin_delete_chunks_by_type, methods=["POST"]),
     Route("/api/admin/failsafe-message", api_failsafe_message, methods=["POST"]),
     Route("/api/admin/seed-hub", api_seed_hub, methods=["POST"]),
+    Route("/api/hub/pre-build-gate", api_pre_build_gate),
     Route("/api/tts", chat_api.api_tts, methods=["POST"]),
     Route("/api/session-logs", api_list_session_logs),
     Route("/api/session-logs", api_create_session_log, methods=["POST"]),

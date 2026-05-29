@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pre-Build Gate — Han Solo Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #090806;
+      --surface: #111009;
+      --card: #161410;
+      --border: rgba(232,151,28,0.12);
+      --border-soft: rgba(237,232,224,0.08);
+      --text: #EDE8E0;
+      --text-dim: rgba(237,232,224,0.55);
+      --text-muted: rgba(237,232,224,0.32);
+      --gold: #E8971C;
+      --gold-dim: rgba(232,151,28,0.18);
+      --red: #e05c4b;
+      --red-dim: rgba(224,92,75,0.12);
+      --green: #5cad7a;
+      --green-dim: rgba(92,173,122,0.12);
+      --font-display: 'Cormorant Garamond', serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-body); }
+
+    body { padding: 0; }
+
+    /* ── HEADER ── */
+    .header {
+      position: sticky; top: 0; z-index: 10;
+      background: var(--bg); border-bottom: 1px solid var(--border);
+      padding: 18px 32px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .header-title {
+      font-family: var(--font-display); font-size: 22px; font-weight: 400; letter-spacing: 0.02em;
+      color: var(--gold);
+    }
+    .header-meta { font-size: 12px; color: var(--text-muted); }
+    .header-status { display: flex; align-items: center; gap: 10px; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+    .status-dot.loading { background: var(--gold); animation: pulse 1.2s ease-in-out infinite; }
+    .status-dot.error { background: var(--red); }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
+    /* ── LAYOUT ── */
+    .page { max-width: 1100px; margin: 0 auto; padding: 32px 32px 80px; }
+
+    .summary-bar {
+      display: flex; gap: 16px; margin-bottom: 32px; flex-wrap: wrap;
+    }
+    .summary-chip {
+      background: var(--card); border: 1px solid var(--border-soft);
+      border-radius: 8px; padding: 12px 20px;
+      display: flex; flex-direction: column; gap: 4px; min-width: 120px;
+    }
+    .summary-chip .chip-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    .summary-chip .chip-value { font-size: 22px; font-weight: 600; color: var(--text); }
+    .summary-chip .chip-value.warn { color: var(--gold); }
+    .summary-chip .chip-value.danger { color: var(--red); }
+
+    /* ── COMPONENT CARDS ── */
+    .section-label {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-muted); margin-bottom: 16px; padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .components-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(480px, 1fr)); gap: 20px;
+    }
+    .component-card {
+      background: var(--card); border: 1px solid var(--border-soft); border-radius: 10px;
+      overflow: hidden;
+    }
+    .component-card.has-danger { border-color: rgba(224,92,75,0.25); }
+
+    .card-header {
+      padding: 16px 20px 14px; border-bottom: 1px solid var(--border-soft);
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+    }
+    .card-name { font-family: var(--font-display); font-size: 18px; font-weight: 500; color: var(--text); }
+    .card-owner { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .card-badges { display: flex; gap: 6px; flex-shrink: 0; align-items: flex-start; }
+    .badge {
+      font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 3px 8px; border-radius: 4px;
+    }
+    .badge-active { background: var(--green-dim); color: var(--green); }
+    .badge-degraded { background: var(--red-dim); color: var(--red); }
+    .badge-unknown { background: rgba(237,232,224,0.06); color: var(--text-muted); }
+    .badge-count { background: var(--gold-dim); color: var(--gold); }
+
+    .card-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 16px; }
+
+    /* ── VITALS ── */
+    .section-title {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-muted); margin-bottom: 8px;
+    }
+    .vitals-list { display: flex; flex-direction: column; gap: 6px; }
+    .vital-item {
+      display: flex; gap: 10px; align-items: flex-start;
+      font-size: 12.5px; color: var(--text-dim); line-height: 1.5;
+    }
+    .vital-num {
+      flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%;
+      background: var(--gold-dim); color: var(--gold);
+      font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+      margin-top: 1px;
+    }
+    .vital-title { font-weight: 500; color: var(--text); }
+
+    /* ── INCIDENTS ── */
+    .incidents-list { display: flex; flex-direction: column; gap: 8px; }
+    .incident-item {
+      background: rgba(237,232,224,0.03); border-radius: 6px; padding: 10px 12px;
+      border-left: 2px solid rgba(237,232,224,0.12);
+    }
+    .incident-code { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+    .incident-cause { font-size: 12.5px; color: var(--text-dim); line-height: 1.5; }
+    .incident-recovery { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    /* ── DANGER ZONES ── */
+    .danger-section { background: var(--red-dim); border-radius: 8px; padding: 12px 14px; }
+    .danger-header { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--red); font-weight: 700; margin-bottom: 8px; }
+    .danger-list { display: flex; flex-direction: column; gap: 6px; }
+    .danger-item { font-size: 12.5px; color: rgba(237,232,224,0.7); line-height: 1.5; }
+    .danger-item strong { color: var(--red); }
+
+    /* ── ASSUMPTIONS ── */
+    .assumptions-list { display: flex; flex-direction: column; gap: 6px; }
+    .assumption-item {
+      display: flex; gap: 10px; align-items: flex-start;
+      font-size: 12.5px; color: var(--text-dim); line-height: 1.5;
+    }
+    .assumption-conf {
+      flex-shrink: 0; font-size: 10px; font-weight: 600; text-transform: uppercase;
+      padding: 2px 6px; border-radius: 3px;
+    }
+    .conf-high { background: var(--green-dim); color: var(--green); }
+    .conf-medium { background: var(--gold-dim); color: var(--gold); }
+    .conf-low { background: var(--red-dim); color: var(--red); }
+    .assumption-tested { font-size: 10px; color: var(--green); }
+
+    /* ── EMPTY STATE ── */
+    .empty { color: var(--text-muted); font-size: 12px; font-style: italic; }
+
+    /* ── LOADING / ERROR ── */
+    .state-screen {
+      display: flex; align-items: center; justify-content: center; height: 60vh;
+      flex-direction: column; gap: 16px; color: var(--text-muted);
+    }
+    .state-screen .state-label { font-size: 14px; }
+    .spinner {
+      width: 24px; height: 24px; border: 2px solid var(--border-soft);
+      border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── SNAPSHOT NOTICE ── */
+    .snapshot-bar {
+      background: var(--gold-dim); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 20px; margin-bottom: 24px;
+      font-size: 13px; color: var(--text-dim); display: flex; align-items: center; gap: 10px;
+    }
+    .snapshot-bar .snap-icon { color: var(--gold); font-size: 16px; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">Pre-Build Gate</div>
+    <div class="header-meta" id="gate-meta">Loading system state…</div>
+  </div>
+  <div class="header-status">
+    <div class="status-dot loading" id="status-dot"></div>
+    <span id="status-label" style="font-size:12px;color:var(--text-muted)">Fetching</span>
+  </div>
+</div>
+
+<div class="page" id="page">
+  <div class="state-screen" id="loading-screen">
+    <div class="spinner"></div>
+    <div class="state-label">Loading gate data…</div>
+  </div>
+</div>
+
+<script>
+const TOKEN_KEY = 'han_solo_token';
+
+function getToken() {
+  return localStorage.getItem(TOKEN_KEY) || '';
+}
+
+function apiFetch(path, opts = {}) {
+  const token = getToken();
+  return fetch(path, {
+    ...opts,
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', ...(opts.headers || {}) }
+  });
+}
+
+async function loadGate() {
+  const dot = document.getElementById('status-dot');
+  const label = document.getElementById('status-label');
+  const meta = document.getElementById('gate-meta');
+  const page = document.getElementById('page');
+
+  try {
+    const res = await apiFetch('/api/hub/pre-build-gate');
+    if (res.status === 401) {
+      const token = prompt('Enter your Han Solo token:');
+      if (token) { localStorage.setItem(TOKEN_KEY, token); loadGate(); return; }
+      return;
+    }
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    dot.className = 'status-dot';
+    label.textContent = `${data.total} components`;
+    meta.textContent = `Fetched ${new Date().toLocaleString()} — review all components before approving the build`;
+
+    renderGate(page, data);
+  } catch (err) {
+    dot.className = 'status-dot error';
+    label.textContent = 'Error';
+    page.innerHTML = `<div class="state-screen"><div class="state-label" style="color:var(--red)">Failed to load gate: ${err.message}</div></div>`;
+  }
+}
+
+function statusBadge(status) {
+  const cls = status === 'active' ? 'badge-active' : status === 'degraded' ? 'badge-degraded' : 'badge-unknown';
+  return `<span class="badge ${cls}">${status}</span>`;
+}
+
+function renderGate(container, data) {
+  const { components } = data;
+  const totalVitals = components.reduce((n, c) => n + c.vitals.length, 0);
+  const totalIncidents = components.reduce((n, c) => n + c.incidents.length, 0);
+  const totalDanger = components.reduce((n, c) => n + c.danger_zones.length, 0);
+  const degraded = components.filter(c => c.status === 'degraded').length;
+
+  const summaryHtml = `
+    <div class="summary-bar">
+      <div class="summary-chip">
+        <span class="chip-label">Components</span>
+        <span class="chip-value">${components.length}</span>
+      </div>
+      <div class="summary-chip">
+        <span class="chip-label">Vitals</span>
+        <span class="chip-value">${totalVitals}</span>
+      </div>
+      <div class="summary-chip">
+        <span class="chip-label">Incidents</span>
+        <span class="chip-value">${totalIncidents}</span>
+      </div>
+      <div class="summary-chip">
+        <span class="chip-label">Danger Zones</span>
+        <span class="chip-value ${totalDanger > 0 ? 'warn' : ''}">${totalDanger}</span>
+      </div>
+      <div class="summary-chip">
+        <span class="chip-label">Degraded</span>
+        <span class="chip-value ${degraded > 0 ? 'danger' : ''}">${degraded}</span>
+      </div>
+    </div>`;
+
+  const snapshotHtml = `
+    <div class="snapshot-bar">
+      <span class="snap-icon">⊙</span>
+      This gate snapshot is written to T4 at fetch time. To confer with Ren about any risk, reference the entry <strong>pre_build_gate_active</strong> in T4.
+    </div>`;
+
+  const cardsHtml = components.map(c => {
+    const hasDanger = c.danger_zones.length > 0;
+
+    const vitalsHtml = c.vitals.length ? c.vitals.map(v => `
+      <div class="vital-item">
+        <div class="vital-num">${v.vital_number}</div>
+        <div><span class="vital-title">${esc(v.title)}</span></div>
+      </div>`).join('') : `<div class="empty">No vitals recorded</div>`;
+
+    const incidentsHtml = c.incidents.length ? c.incidents.map(i => `
+      <div class="incident-item">
+        <div class="incident-code">${esc(i.incident_code)}</div>
+        <div class="incident-cause">${esc(i.cause)}</div>
+        ${i.recovery_minutes ? `<div class="incident-recovery">Recovery: ~${i.recovery_minutes} min</div>` : ''}
+      </div>`).join('') : `<div class="empty">No incidents recorded</div>`;
+
+    const dangerHtml = hasDanger ? `
+      <div class="danger-section">
+        <div class="danger-header">⚠ Danger Zones</div>
+        <div class="danger-list">
+          ${c.danger_zones.map(d => `<div class="danger-item"><strong>${esc(d.description.split('.')[0])}</strong>${d.consequence ? ` — ${esc(d.consequence)}` : ''}</div>`).join('')}
+        </div>
+      </div>` : '';
+
+    const assumptionsHtml = c.assumptions.length ? `
+      <div>
+        <div class="section-title">Assumptions</div>
+        <div class="assumptions-list">
+          ${c.assumptions.map(a => `
+            <div class="assumption-item">
+              <span class="assumption-conf conf-${a.confidence}">${a.confidence}</span>
+              <span>${esc(a.statement)}${a.tested ? ' <span class="assumption-tested">✓ tested</span>' : ''}</span>
+            </div>`).join('')}
+        </div>
+      </div>` : '';
+
+    return `
+      <div class="component-card ${hasDanger ? 'has-danger' : ''}">
+        <div class="card-header">
+          <div>
+            <div class="card-name">${esc(c.name)}</div>
+            <div class="card-owner">Owner: ${esc(c.owner)}</div>
+          </div>
+          <div class="card-badges">
+            ${statusBadge(c.status)}
+            <span class="badge badge-count">${c.vitals.length}v / ${c.incidents.length}i</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="section-title">Vitals</div>
+            <div class="vitals-list">${vitalsHtml}</div>
+          </div>
+          <div>
+            <div class="section-title">Recent Incidents</div>
+            <div class="incidents-list">${incidentsHtml}</div>
+          </div>
+          ${dangerHtml}
+          ${assumptionsHtml}
+        </div>
+      </div>`;
+  }).join('');
+
+  container.innerHTML = `
+    ${summaryHtml}
+    ${snapshotHtml}
+    <div class="section-label">System Components</div>
+    <div class="components-grid">${cardsHtml}</div>`;
+}
+
+function esc(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+loadGate();
+</script>
+</body>
+</html>

@@ -1763,6 +1763,51 @@ async def delete_code_chunks_by_type(repo: str, file_type: str) -> int:
         return 0
 
 
+async def get_pre_build_gate() -> list[dict]:
+    """Fetch all hub data for the pre-build gate: components + vitals + incidents + danger_zones + assumptions."""
+    if not _pool:
+        return []
+    try:
+        async with _pool.acquire() as conn:
+            components = await conn.fetch(
+                "SELECT id, name, description, owner, status FROM components ORDER BY id"
+            )
+            result = []
+            for c in components:
+                cid = c["id"]
+                vitals = await conn.fetch(
+                    "SELECT vital_number, title, failure_mode FROM vitals WHERE component_id=$1 ORDER BY vital_number",
+                    cid,
+                )
+                incidents = await conn.fetch(
+                    "SELECT incident_code, cause, symptom, recovery_minutes FROM incidents WHERE component_id=$1 ORDER BY id LIMIT 3",
+                    cid,
+                )
+                danger_zones = await conn.fetch(
+                    "SELECT description, consequence FROM danger_zones WHERE component_id=$1 ORDER BY id",
+                    cid,
+                )
+                assumptions = await conn.fetch(
+                    "SELECT statement, confidence, tested FROM assumptions WHERE component_id=$1 ORDER BY id",
+                    cid,
+                )
+                result.append({
+                    "id": cid,
+                    "name": c["name"],
+                    "description": c["description"],
+                    "owner": c["owner"],
+                    "status": c["status"],
+                    "vitals": [dict(v) for v in vitals],
+                    "incidents": [dict(i) for i in incidents],
+                    "danger_zones": [dict(d) for d in danger_zones],
+                    "assumptions": [dict(a) for a in assumptions],
+                })
+        return result
+    except Exception as e:
+        logger.error("get_pre_build_gate failed: %s", e)
+        return []
+
+
 async def clear_hub_tables() -> bool:
     """Delete all rows from hub tables in dependency order. Safe to call before re-seeding."""
     if not _pool:
