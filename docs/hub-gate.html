@@ -3,221 +3,298 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pre-Build Gate — Han Solo Hub</title>
+  <title>Pre-Build Gate — Han Solo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Lato:ital,wght@0,300;0,400;0,700;1,300&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
 
-    :root {
-      --bg: #090806;
-      --surface: #111009;
-      --card: #161410;
-      --border: rgba(232,151,28,0.12);
-      --border-soft: rgba(237,232,224,0.08);
-      --text: #EDE8E0;
-      --text-dim: rgba(237,232,224,0.55);
-      --text-muted: rgba(237,232,224,0.32);
-      --gold: #E8971C;
-      --gold-dim: rgba(232,151,28,0.18);
-      --red: #e05c4b;
-      --red-dim: rgba(224,92,75,0.12);
-      --green: #5cad7a;
-      --green-dim: rgba(92,173,122,0.12);
-      --font-display: 'Cormorant Garamond', serif;
-      --font-body: 'DM Sans', sans-serif;
+    body.editorial {
+      --bg:#fafaf8; --sidebar-bg:#ffffff; --sidebar-border:#eae6e1; --divider:#eae6e1;
+      --accent:#bd8c7d; --accent-light:#f6eeeb; --gold:#d1bfa7; --onyx:#49494b; --silver:#8e8e90;
+      --text-primary:#1a1a1a; --text-secondary:#5a5a5a; --text-meta:#9a9a9a;
+      --card-bg:#ffffff; --card-border:#eae6e1;
+      --font-display:'Cormorant Garamond',serif; --font-body:'Inter',sans-serif;
+      font-family:'Inter',sans-serif; background:var(--bg); color:var(--text-primary);
+    }
+    body.atelier {
+      --bg:#f7f4ef; --sidebar-bg:#ede9e2; --sidebar-border:#ddd6cc; --divider:#ddd6cc;
+      --accent:#bd8c7d; --accent-light:#edddd7; --gold:#d1bfa7; --onyx:#49494b; --silver:#8e8e90;
+      --text-primary:#26211c; --text-secondary:#5c5550; --text-meta:#9a9490;
+      --card-bg:#f0ece5; --card-border:#ddd6cc;
+      --font-display:'Playfair Display',serif; --font-body:'Lato',sans-serif;
+      font-family:'Lato',sans-serif; background:var(--bg); color:var(--text-primary);
+    }
+    body.modern {
+      --bg:#ffffff; --sidebar-bg:#e8e8e8; --sidebar-border:#dedede; --divider:#ebebeb;
+      --accent:#bd8c7d; --accent-light:#f7efed; --gold:#d1bfa7; --onyx:#49494b; --silver:#8e8e90;
+      --text-primary:#111111; --text-secondary:#555555; --text-meta:#aaaaaa;
+      --card-bg:#f9f9f9; --card-border:#e8e8e8;
+      --font-display:'Space Grotesk',sans-serif; --font-body:'Space Grotesk',sans-serif;
+      font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(--text-primary);
     }
 
-    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-body); }
+    .app { display:flex; height:100vh; overflow:hidden; }
 
-    body { padding: 0; }
-
-    /* ── HEADER ── */
-    .header {
-      position: sticky; top: 0; z-index: 10;
-      background: var(--bg); border-bottom: 1px solid var(--border);
-      padding: 18px 32px; display: flex; align-items: center; justify-content: space-between;
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width:200px; min-width:200px; background:var(--sidebar-bg);
+      border-right:1px solid var(--sidebar-border); display:flex; flex-direction:column;
+      padding:20px 0 16px;
     }
-    .header-title {
-      font-family: var(--font-display); font-size: 22px; font-weight: 400; letter-spacing: 0.02em;
-      color: var(--gold);
-    }
-    .header-meta { font-size: 12px; color: var(--text-muted); }
-    .header-status { display: flex; align-items: center; gap: 10px; }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
-    .status-dot.loading { background: var(--gold); animation: pulse 1.2s ease-in-out infinite; }
-    .status-dot.error { background: var(--red); }
-    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+    .sidebar-logo { padding:0 20px 20px; border-bottom:1px solid var(--sidebar-border); margin-bottom:16px; }
+    body.editorial .sidebar-logo { font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:400; letter-spacing:.03em; color:var(--text-primary); }
+    body.atelier   .sidebar-logo { font-family:'Playfair Display',serif; font-size:20px; font-weight:400; color:var(--text-primary); }
+    body.modern    .sidebar-logo { font-family:'Space Grotesk',sans-serif; font-size:17px; font-weight:600; color:var(--text-primary); }
+    .sidebar-sub { font-size:10px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--text-meta); margin-top:3px; }
 
-    /* ── LAYOUT ── */
-    .page { max-width: 1100px; margin: 0 auto; padding: 32px 32px 80px; }
+    .sidebar-section { padding:0 12px; margin-bottom:6px; }
+    .sidebar-section-label { font-size:9.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--text-meta); padding:0 8px 6px; }
+    .sidebar-item { display:flex; align-items:center; gap:8px; padding:7px 8px; border-radius:6px; font-size:12.5px; color:var(--text-secondary); cursor:pointer; transition:all .13s; }
+    .sidebar-item:hover { background:var(--accent-light); color:var(--text-primary); }
+    .sidebar-item.active { background:var(--accent-light); color:var(--text-primary); font-weight:500; }
+    body.editorial .sidebar-item { border-radius:0; }
+    body.editorial .sidebar-item.active { background:none; color:var(--accent); }
 
-    .summary-bar {
-      display: flex; gap: 16px; margin-bottom: 32px; flex-wrap: wrap;
-    }
-    .summary-chip {
-      background: var(--card); border: 1px solid var(--border-soft);
-      border-radius: 8px; padding: 12px 20px;
-      display: flex; flex-direction: column; gap: 4px; min-width: 120px;
-    }
-    .summary-chip .chip-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
-    .summary-chip .chip-value { font-size: 22px; font-weight: 600; color: var(--text); }
-    .summary-chip .chip-value.warn { color: var(--gold); }
-    .summary-chip .chip-value.danger { color: var(--red); }
+    .sidebar-footer { margin-top:auto; padding:0 12px; }
+    .theme-switcher { display:flex; gap:4px; padding:0 8px; }
+    .sw-btn { width:16px; height:16px; border-radius:50%; border:2px solid transparent; cursor:pointer; transition:all .13s; }
+    .sw-btn.editorial-swatch { background:#fafaf8; border-color:#eae6e1; }
+    .sw-btn.atelier-swatch   { background:#f7f4ef; border-color:#ddd6cc; }
+    .sw-btn.modern-swatch    { background:#f0f0f0; border-color:#dedede; }
+    .sw-btn.active { border-color:var(--accent) !important; }
 
-    /* ── COMPONENT CARDS ── */
+    /* ── MAIN ── */
+    .main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+
+    .top-bar {
+      border-bottom:1px solid var(--divider); padding:14px 28px;
+      display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+    }
+    .top-bar-title { font-family:var(--font-display); font-size:18px; font-weight:400; color:var(--text-primary); }
+    body.modern .top-bar-title { font-size:16px; font-weight:600; }
+    .top-bar-meta { font-size:11.5px; color:var(--text-meta); }
+    .top-bar-right { display:flex; align-items:center; gap:12px; }
+    .gate-status { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-meta); }
+    .status-dot { width:7px; height:7px; border-radius:50%; background:#86c99a; flex-shrink:0; }
+    .status-dot.loading { background:var(--gold); animation:pulse 1.2s ease-in-out infinite; }
+    .status-dot.error { background:#d97070; }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
+
+    /* ── SUMMARY CHIPS ── */
+    .summary-row { display:flex; gap:1px; border-bottom:1px solid var(--divider); background:var(--divider); flex-shrink:0; }
+    .summary-chip { flex:1; padding:12px 20px; background:var(--bg); display:flex; flex-direction:column; gap:2px; }
+    .chip-label { font-size:9.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--text-meta); }
+    .chip-value { font-size:20px; font-weight:300; color:var(--text-primary); font-family:var(--font-display); }
+    body.modern .chip-value { font-weight:500; font-size:18px; }
+    .chip-value.warn { color:var(--accent); }
+    .chip-value.danger { color:#d97070; }
+
+    /* ── CONTENT ── */
+    .content { flex:1; overflow-y:auto; padding:24px 28px 60px; }
+    .content::-webkit-scrollbar { width:3px; }
+    .content::-webkit-scrollbar-thumb { background:var(--divider); border-radius:4px; }
+
+    /* ── SECTION LABELS ── */
     .section-label {
-      font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;
-      color: var(--text-muted); margin-bottom: 16px; padding-bottom: 8px;
-      border-bottom: 1px solid var(--border-soft);
+      font-size:9.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+      color:var(--text-meta); margin-bottom:14px; padding-bottom:9px;
+      border-bottom:1px solid var(--divider);
     }
-    .components-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(480px, 1fr)); gap: 20px;
-    }
-    .component-card {
-      background: var(--card); border: 1px solid var(--border-soft); border-radius: 10px;
-      overflow: hidden;
-    }
-    .component-card.has-danger { border-color: rgba(224,92,75,0.25); }
-
-    .card-header {
-      padding: 16px 20px 14px; border-bottom: 1px solid var(--border-soft);
-      display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
-    }
-    .card-name { font-family: var(--font-display); font-size: 18px; font-weight: 500; color: var(--text); }
-    .card-owner { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-    .card-badges { display: flex; gap: 6px; flex-shrink: 0; align-items: flex-start; }
-    .badge {
-      font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
-      padding: 3px 8px; border-radius: 4px;
-    }
-    .badge-active { background: var(--green-dim); color: var(--green); }
-    .badge-degraded { background: var(--red-dim); color: var(--red); }
-    .badge-unknown { background: rgba(237,232,224,0.06); color: var(--text-muted); }
-    .badge-count { background: var(--gold-dim); color: var(--gold); }
-
-    .card-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 16px; }
-
-    /* ── VITALS ── */
-    .section-title {
-      font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;
-      color: var(--text-muted); margin-bottom: 8px;
-    }
-    .vitals-list { display: flex; flex-direction: column; gap: 6px; }
-    .vital-item {
-      display: flex; gap: 10px; align-items: flex-start;
-      font-size: 12.5px; color: var(--text-dim); line-height: 1.5;
-    }
-    .vital-num {
-      flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%;
-      background: var(--gold-dim); color: var(--gold);
-      font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center;
-      margin-top: 1px;
-    }
-    .vital-title { font-weight: 500; color: var(--text); }
-
-    /* ── INCIDENTS ── */
-    .incidents-list { display: flex; flex-direction: column; gap: 8px; }
-    .incident-item {
-      background: rgba(237,232,224,0.03); border-radius: 6px; padding: 10px 12px;
-      border-left: 2px solid rgba(237,232,224,0.12);
-    }
-    .incident-code { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
-    .incident-cause { font-size: 12.5px; color: var(--text-dim); line-height: 1.5; }
-    .incident-recovery { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
-
-    /* ── DANGER ZONES ── */
-    .danger-section { background: var(--red-dim); border-radius: 8px; padding: 12px 14px; }
-    .danger-header { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--red); font-weight: 700; margin-bottom: 8px; }
-    .danger-list { display: flex; flex-direction: column; gap: 6px; }
-    .danger-item { font-size: 12.5px; color: rgba(237,232,224,0.7); line-height: 1.5; }
-    .danger-item strong { color: var(--red); }
-
-    /* ── ASSUMPTIONS ── */
-    .assumptions-list { display: flex; flex-direction: column; gap: 6px; }
-    .assumption-item {
-      display: flex; gap: 10px; align-items: flex-start;
-      font-size: 12.5px; color: var(--text-dim); line-height: 1.5;
-    }
-    .assumption-conf {
-      flex-shrink: 0; font-size: 10px; font-weight: 600; text-transform: uppercase;
-      padding: 2px 6px; border-radius: 3px;
-    }
-    .conf-high { background: var(--green-dim); color: var(--green); }
-    .conf-medium { background: var(--gold-dim); color: var(--gold); }
-    .conf-low { background: var(--red-dim); color: var(--red); }
-    .assumption-tested { font-size: 10px; color: var(--green); }
-
-    /* ── EMPTY STATE ── */
-    .empty { color: var(--text-muted); font-size: 12px; font-style: italic; }
-
-    /* ── LOADING / ERROR ── */
-    .state-screen {
-      display: flex; align-items: center; justify-content: center; height: 60vh;
-      flex-direction: column; gap: 16px; color: var(--text-muted);
-    }
-    .state-screen .state-label { font-size: 14px; }
-    .spinner {
-      width: 24px; height: 24px; border: 2px solid var(--border-soft);
-      border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ── SNAPSHOT NOTICE ── */
-    .snapshot-bar {
-      background: var(--gold-dim); border: 1px solid var(--border);
-      border-radius: 8px; padding: 12px 20px; margin-bottom: 24px;
-      font-size: 13px; color: var(--text-dim); display: flex; align-items: center; gap: 10px;
+    .snapshot-notice {
+      padding:10px 14px; border:1px solid var(--card-border); border-radius:7px;
+      background:var(--card-bg); margin-bottom:20px; font-size:12px; color:var(--text-secondary);
+      display:flex; align-items:flex-start; gap:8px; line-height:1.55;
     }
-    .snapshot-bar .snap-icon { color: var(--gold); font-size: 16px; }
+    .snapshot-notice-icon { color:var(--accent); flex-shrink:0; margin-top:1px; }
+    body.editorial .snapshot-notice { border-radius:0; background:transparent; border:none; border-left:2px solid var(--accent); padding-left:12px; }
+
+    /* ── COMPONENT GRID ── */
+    .components-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(460px,1fr)); gap:16px; }
+
+    .component-card {
+      background:var(--card-bg); border:1px solid var(--card-border);
+      border-radius:8px; overflow:hidden;
+    }
+    body.editorial .component-card { border-radius:0; background:transparent; border:none; border-top:1.5px solid var(--divider); }
+    body.atelier   .component-card { border-radius:12px; }
+    .component-card.has-danger { border-color:rgba(217,112,112,.3); }
+    body.editorial .component-card.has-danger { border-top-color:rgba(217,112,112,.6); }
+
+    .card-head {
+      padding:14px 18px 12px; border-bottom:1px solid var(--divider);
+      display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+    }
+    body.editorial .card-head { padding:14px 0 12px; }
+    .card-name { font-family:var(--font-display); font-size:17px; font-weight:500; color:var(--text-primary); }
+    body.modern .card-name { font-size:15px; font-weight:600; font-family:var(--font-body); }
+    .card-owner { font-size:11px; color:var(--text-meta); margin-top:2px; }
+    .card-badges { display:flex; gap:5px; align-items:flex-start; flex-shrink:0; flex-wrap:wrap; justify-content:flex-end; }
+
+    .badge {
+      font-size:9px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+      padding:2px 7px; border-radius:3px;
+    }
+    .badge-active  { background:rgba(134,201,154,.14); color:#3d8a55; }
+    .badge-degraded{ background:rgba(217,112,112,.12); color:#b84a4a; }
+    .badge-unknown { background:rgba(73,73,75,.08); color:var(--silver); }
+    .badge-count   { background:rgba(189,140,125,.12); color:#9b5e4f; }
+
+    .card-body { padding:14px 18px; display:flex; flex-direction:column; gap:14px; }
+    body.editorial .card-body { padding:14px 0; }
+
+    /* ── VITALS ── */
+    .sub-label { font-size:9.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--text-meta); margin-bottom:7px; }
+    .vitals-list { display:flex; flex-direction:column; gap:5px; }
+    .vital-item { display:flex; gap:9px; align-items:flex-start; font-size:12.5px; color:var(--text-secondary); line-height:1.5; }
+    .vital-num {
+      flex-shrink:0; width:17px; height:17px; border-radius:50%;
+      background:rgba(189,140,125,.12); color:var(--accent);
+      font-size:9px; font-weight:700; display:flex; align-items:center; justify-content:center;
+      margin-top:1px;
+    }
+    body.editorial .vital-num { border-radius:0; background:none; color:var(--text-meta); font-size:11px; width:auto; height:auto; font-weight:400; }
+    .vital-title { font-weight:500; color:var(--text-primary); }
+    body.editorial .vital-title { font-weight:400; }
+
+    /* ── INCIDENTS ── */
+    .incidents-list { display:flex; flex-direction:column; gap:7px; }
+    .incident-item { padding:9px 11px; border-radius:6px; background:var(--bg); border:1px solid var(--divider); }
+    body.editorial .incident-item { border-radius:0; background:transparent; border:none; border-left:2px solid var(--divider); padding-left:10px; }
+    body.atelier   .incident-item { border-radius:8px; }
+    .incident-code { font-size:9.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--text-meta); margin-bottom:3px; }
+    .incident-cause { font-size:12.5px; color:var(--text-secondary); line-height:1.5; }
+    .incident-recovery { font-size:11px; color:var(--text-meta); margin-top:3px; }
+
+    /* ── DANGER ── */
+    .danger-section { padding:10px 12px; border-radius:6px; background:rgba(217,112,112,.06); border:1px solid rgba(217,112,112,.18); }
+    body.editorial .danger-section { border-radius:0; border:none; border-left:3px solid rgba(217,112,112,.5); padding-left:10px; }
+    .danger-label { font-size:9.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#b84a4a; margin-bottom:7px; }
+    .danger-list { display:flex; flex-direction:column; gap:5px; }
+    .danger-item { font-size:12.5px; color:var(--text-secondary); line-height:1.5; }
+    .danger-item strong { color:#b84a4a; }
+
+    /* ── EMPTY / LOADING ── */
+    .empty { font-size:12px; color:var(--text-meta); font-style:italic; }
+    .loading-screen { display:flex; align-items:center; justify-content:center; height:60vh; flex-direction:column; gap:12px; }
+    .spinner { width:20px; height:20px; border:2px solid var(--divider); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .loading-label { font-size:13px; color:var(--text-meta); }
   </style>
 </head>
-<body>
+<body class="editorial">
 
-<div class="header">
-  <div>
-    <div class="header-title">Pre-Build Gate</div>
-    <div class="header-meta" id="gate-meta">Loading system state…</div>
-  </div>
-  <div class="header-status">
-    <div class="status-dot loading" id="status-dot"></div>
-    <span id="status-label" style="font-size:12px;color:var(--text-muted)">Fetching</span>
-  </div>
-</div>
+<div class="app">
 
-<div class="page" id="page">
-  <div class="state-screen" id="loading-screen">
-    <div class="spinner"></div>
-    <div class="state-label">Loading gate data…</div>
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      Han Solo
+      <div class="sidebar-sub">Pre-Build Gate</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">View</div>
+      <div class="sidebar-item active">System Components</div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="sidebar-section-label" style="padding:0 8px 8px">Theme</div>
+      <div class="theme-switcher">
+        <div class="sw-btn editorial-swatch active" title="Editorial" onclick="setTheme('editorial',this)"></div>
+        <div class="sw-btn atelier-swatch"   title="Atelier"   onclick="setTheme('atelier',this)"></div>
+        <div class="sw-btn modern-swatch"    title="Modern"    onclick="setTheme('modern',this)"></div>
+      </div>
+    </div>
   </div>
+
+  <div class="main">
+    <div class="top-bar">
+      <div>
+        <div class="top-bar-title">Pre-Build Gate</div>
+        <div class="top-bar-meta" id="gate-meta">Loading system state…</div>
+      </div>
+      <div class="top-bar-right">
+        <div class="gate-status">
+          <div class="status-dot loading" id="status-dot"></div>
+          <span id="status-label">Fetching</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-row" id="summary-row" style="display:none">
+      <div class="summary-chip">
+        <div class="chip-label">Components</div>
+        <div class="chip-value" id="sum-components">—</div>
+      </div>
+      <div class="summary-chip">
+        <div class="chip-label">Vitals</div>
+        <div class="chip-value" id="sum-vitals">—</div>
+      </div>
+      <div class="summary-chip">
+        <div class="chip-label">Incidents</div>
+        <div class="chip-value" id="sum-incidents">—</div>
+      </div>
+      <div class="summary-chip">
+        <div class="chip-label">Danger Zones</div>
+        <div class="chip-value" id="sum-danger">—</div>
+      </div>
+      <div class="summary-chip">
+        <div class="chip-label">Degraded</div>
+        <div class="chip-value" id="sum-degraded">—</div>
+      </div>
+    </div>
+
+    <div class="content" id="content">
+      <div class="loading-screen" id="loading-screen">
+        <div class="spinner"></div>
+        <div class="loading-label">Loading gate data…</div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script>
 const TOKEN_KEY = 'han_solo_token';
 
-function getToken() {
-  return localStorage.getItem(TOKEN_KEY) || '';
-}
+function getToken() { return localStorage.getItem(TOKEN_KEY) || ''; }
 
 function apiFetch(path, opts = {}) {
-  const token = getToken();
   return fetch(path, {
     ...opts,
-    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', ...(opts.headers || {}) }
+    headers: { 'Authorization': `Bearer ${getToken()}`, 'Content-Type': 'application/json', ...(opts.headers||{}) }
   });
+}
+
+function setTheme(t, btn) {
+  document.body.className = t;
+  document.querySelectorAll('.sw-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function statusBadge(status) {
+  const cls = status === 'active' ? 'badge-active' : status === 'degraded' ? 'badge-degraded' : 'badge-unknown';
+  return `<span class="badge ${cls}">${esc(status)}</span>`;
 }
 
 async function loadGate() {
   const dot = document.getElementById('status-dot');
   const label = document.getElementById('status-label');
   const meta = document.getElementById('gate-meta');
-  const page = document.getElementById('page');
+  const content = document.getElementById('content');
 
   try {
     const res = await apiFetch('/api/hub/pre-build-gate');
     if (res.status === 401) {
       const token = prompt('Enter your Han Solo token:');
       if (token) { localStorage.setItem(TOKEN_KEY, token); loadGate(); return; }
+      content.innerHTML = '<div class="loading-screen"><div class="loading-label">Token required — reload the page to try again.</div></div>';
       return;
     }
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -227,129 +304,93 @@ async function loadGate() {
     label.textContent = `${data.total} components`;
     meta.textContent = `Fetched ${new Date().toLocaleString()} — review all components before approving the build`;
 
-    renderGate(page, data);
+    const totalVitals    = data.components.reduce((n,c) => n + c.vitals.length, 0);
+    const totalIncidents = data.components.reduce((n,c) => n + c.incidents.length, 0);
+    const totalDanger    = data.components.reduce((n,c) => n + c.danger_zones.length, 0);
+    const degraded       = data.components.filter(c => c.status === 'degraded').length;
+
+    document.getElementById('sum-components').textContent = data.total;
+    document.getElementById('sum-vitals').textContent = totalVitals;
+    document.getElementById('sum-incidents').textContent = totalIncidents;
+    document.getElementById('sum-danger').className = 'chip-value' + (totalDanger > 0 ? ' warn' : '');
+    document.getElementById('sum-danger').textContent = totalDanger;
+    document.getElementById('sum-degraded').className = 'chip-value' + (degraded > 0 ? ' danger' : '');
+    document.getElementById('sum-degraded').textContent = degraded;
+    document.getElementById('summary-row').style.display = 'flex';
+
+    renderComponents(content, data.components);
   } catch (err) {
     dot.className = 'status-dot error';
     label.textContent = 'Error';
-    page.innerHTML = `<div class="state-screen"><div class="state-label" style="color:var(--red)">Failed to load gate: ${err.message}</div></div>`;
+    content.innerHTML = `<div class="loading-screen"><div class="loading-label" style="color:#b84a4a">Failed to load: ${esc(err.message)}</div></div>`;
   }
 }
 
-function statusBadge(status) {
-  const cls = status === 'active' ? 'badge-active' : status === 'degraded' ? 'badge-degraded' : 'badge-unknown';
-  return `<span class="badge ${cls}">${status}</span>`;
-}
-
-function renderGate(container, data) {
-  const { components } = data;
-  const totalVitals = components.reduce((n, c) => n + c.vitals.length, 0);
-  const totalIncidents = components.reduce((n, c) => n + c.incidents.length, 0);
-  const totalDanger = components.reduce((n, c) => n + c.danger_zones.length, 0);
-  const degraded = components.filter(c => c.status === 'degraded').length;
-
-  const summaryHtml = `
-    <div class="summary-bar">
-      <div class="summary-chip">
-        <span class="chip-label">Components</span>
-        <span class="chip-value">${components.length}</span>
-      </div>
-      <div class="summary-chip">
-        <span class="chip-label">Vitals</span>
-        <span class="chip-value">${totalVitals}</span>
-      </div>
-      <div class="summary-chip">
-        <span class="chip-label">Incidents</span>
-        <span class="chip-value">${totalIncidents}</span>
-      </div>
-      <div class="summary-chip">
-        <span class="chip-label">Danger Zones</span>
-        <span class="chip-value ${totalDanger > 0 ? 'warn' : ''}">${totalDanger}</span>
-      </div>
-      <div class="summary-chip">
-        <span class="chip-label">Degraded</span>
-        <span class="chip-value ${degraded > 0 ? 'danger' : ''}">${degraded}</span>
-      </div>
-    </div>`;
-
+function renderComponents(container, components) {
   const snapshotHtml = `
-    <div class="snapshot-bar">
-      <span class="snap-icon">⊙</span>
-      This gate snapshot is written to T4 at fetch time. To confer with Ren about any risk, reference the entry <strong>pre_build_gate_active</strong> in T4.
+    <div class="snapshot-notice">
+      <span class="snapshot-notice-icon">⊙</span>
+      <span>This snapshot is written to T4 at fetch time. To confer with Ren about any risk, reference <strong>pre_build_gate_active</strong> in T4.</span>
     </div>`;
 
   const cardsHtml = components.map(c => {
     const hasDanger = c.danger_zones.length > 0;
 
-    const vitalsHtml = c.vitals.length ? c.vitals.map(v => `
-      <div class="vital-item">
-        <div class="vital-num">${v.vital_number}</div>
-        <div><span class="vital-title">${esc(v.title)}</span></div>
-      </div>`).join('') : `<div class="empty">No vitals recorded</div>`;
+    const vitalsHtml = c.vitals.length
+      ? c.vitals.map(v => `
+        <div class="vital-item">
+          <div class="vital-num">${v.vital_number}</div>
+          <div><span class="vital-title">${esc(v.title)}</span></div>
+        </div>`).join('')
+      : `<div class="empty">No vitals recorded</div>`;
 
-    const incidentsHtml = c.incidents.length ? c.incidents.map(i => `
-      <div class="incident-item">
-        <div class="incident-code">${esc(i.incident_code)}</div>
-        <div class="incident-cause">${esc(i.cause)}</div>
-        ${i.recovery_minutes ? `<div class="incident-recovery">Recovery: ~${i.recovery_minutes} min</div>` : ''}
-      </div>`).join('') : `<div class="empty">No incidents recorded</div>`;
+    const incidentsHtml = c.incidents.length
+      ? c.incidents.map(i => `
+        <div class="incident-item">
+          <div class="incident-code">${esc(i.incident_code)}</div>
+          <div class="incident-cause">${esc(i.cause)}</div>
+          ${i.recovery_minutes ? `<div class="incident-recovery">Recovery: ~${i.recovery_minutes} min</div>` : ''}
+        </div>`).join('')
+      : `<div class="empty">No incidents recorded</div>`;
 
     const dangerHtml = hasDanger ? `
       <div class="danger-section">
-        <div class="danger-header">⚠ Danger Zones</div>
+        <div class="danger-label">⚠ Danger Zones</div>
         <div class="danger-list">
           ${c.danger_zones.map(d => `<div class="danger-item"><strong>${esc(d.description.split('.')[0])}</strong>${d.consequence ? ` — ${esc(d.consequence)}` : ''}</div>`).join('')}
         </div>
       </div>` : '';
 
-    const assumptionsHtml = c.assumptions.length ? `
-      <div>
-        <div class="section-title">Assumptions</div>
-        <div class="assumptions-list">
-          ${c.assumptions.map(a => `
-            <div class="assumption-item">
-              <span class="assumption-conf conf-${a.confidence}">${a.confidence}</span>
-              <span>${esc(a.statement)}${a.tested ? ' <span class="assumption-tested">✓ tested</span>' : ''}</span>
-            </div>`).join('')}
-        </div>
-      </div>` : '';
-
     return `
       <div class="component-card ${hasDanger ? 'has-danger' : ''}">
-        <div class="card-header">
+        <div class="card-head">
           <div>
             <div class="card-name">${esc(c.name)}</div>
             <div class="card-owner">Owner: ${esc(c.owner)}</div>
           </div>
           <div class="card-badges">
             ${statusBadge(c.status)}
-            <span class="badge badge-count">${c.vitals.length}v / ${c.incidents.length}i</span>
+            <span class="badge badge-count">${c.vitals.length}v · ${c.incidents.length}i</span>
           </div>
         </div>
         <div class="card-body">
           <div>
-            <div class="section-title">Vitals</div>
+            <div class="sub-label">Vitals</div>
             <div class="vitals-list">${vitalsHtml}</div>
           </div>
           <div>
-            <div class="section-title">Recent Incidents</div>
+            <div class="sub-label">Recent Incidents</div>
             <div class="incidents-list">${incidentsHtml}</div>
           </div>
           ${dangerHtml}
-          ${assumptionsHtml}
         </div>
       </div>`;
   }).join('');
 
   container.innerHTML = `
-    ${summaryHtml}
     ${snapshotHtml}
     <div class="section-label">System Components</div>
     <div class="components-grid">${cardsHtml}</div>`;
-}
-
-function esc(str) {
-  if (!str) return '';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 loadGate();
