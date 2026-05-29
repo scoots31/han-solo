@@ -89,6 +89,20 @@ async def health(request: Request) -> JSONResponse:
 _mcp_app = server.streamable_http_app()
 
 # Step 2 — inject custom routes before the /mcp route
+async def admin_list_mcp_tools(request: Request) -> JSONResponse:
+    """GET /api/admin/list-mcp-tools — list tools registered on this FastMCP server instance."""
+    get_current_user()
+    tool_names = sorted(server._tool_manager._tools.keys()) if hasattr(server, '_tool_manager') else []
+    # fallback: try get_tools() if available
+    if not tool_names:
+        try:
+            tools = server.list_tools() if hasattr(server, 'list_tools') else []
+            tool_names = sorted(t.name for t in tools) if tools else []
+        except Exception:
+            tool_names = []
+    return JSONResponse({"tool_count": len(tool_names), "tools": tool_names})
+
+
 async def admin_agent_info(request: Request) -> JSONResponse:
     agent_id = await letta.ensure_ren_agent_id()
     resp = await letta._letta("GET", f"{letta.LETTA_URL}/v1/agents/{agent_id}/")
@@ -1296,6 +1310,7 @@ _chat_routes = [
     Route("/api/memory/enrichments/{passage_id}", api_get_passage_enrichments),
     Route("/api/memory/enrichments", api_write_passage_enrichment, methods=["POST"]),
     Route("/api/memory/access-patterns", api_memory_access_patterns),
+    Route("/api/admin/list-mcp-tools", admin_list_mcp_tools),
     Route("/api/admin/agent-info", admin_agent_info),
     Route("/api/admin/patch-system", admin_patch_system, methods=["POST"]),
     Route("/api/admin/sync-mcp-tools", api_sync_mcp_tools, methods=["POST"]),
