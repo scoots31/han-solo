@@ -1763,6 +1763,23 @@ async def delete_code_chunks_by_type(repo: str, file_type: str) -> int:
         return 0
 
 
+async def clear_hub_tables() -> bool:
+    """Delete all rows from hub tables in dependency order. Safe to call before re-seeding."""
+    if not _pool:
+        return False
+    try:
+        async with _pool.acquire() as conn:
+            await conn.execute(
+                "DELETE FROM assumptions; DELETE FROM danger_zones; DELETE FROM procedures; "
+                "DELETE FROM incidents; DELETE FROM vitals; DELETE FROM operational_status; "
+                "DELETE FROM components;"
+            )
+        return True
+    except Exception as e:
+        logger.error("clear_hub_tables failed: %s", e)
+        return False
+
+
 async def seed_hub_component(
     name: str, description: str, owner: str
 ) -> int | None:

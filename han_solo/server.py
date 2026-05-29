@@ -687,6 +687,15 @@ async def api_seed_hub(request: Request) -> JSONResponse:
     Returns a per-component summary of rows inserted.
     """
     get_current_user()
+    body = {}
+    try:
+        body = await request.json()
+    except Exception:
+        pass
+    force = body.get("force", False)
+
+    if force:
+        await db.clear_hub_tables()
 
     KB_ENTRIES = [
         ("Letta", "letta", "letta", "Ren"),
@@ -770,6 +779,8 @@ def _parse_vitals(text: str) -> list[dict]:
             continue
         if in_vitals and re.match(r"^## ", stripped):
             flush()
+            current_num = 0
+            current_lines = []
             break
         if not in_vitals:
             continue
@@ -814,6 +825,8 @@ def _parse_incidents(text: str) -> list[dict]:
             continue
         if in_incidents and re.match(r"^## ", stripped):
             flush()
+            current_code = None
+            current_lines = []
             break
         if not in_incidents:
             continue
