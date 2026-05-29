@@ -680,6 +680,198 @@ async def api_failsafe_message(request: Request) -> JSONResponse:
     return JSONResponse({"command": command, "response": response_text, "status": status})
 
 
+async def api_seed_hub(request: Request) -> JSONResponse:
+    """POST /api/admin/seed-hub — parse all 9 component KBs from T4 and seed hub tables.
+
+    Idempotent: safe to re-run. Skips rows that already exist.
+    Returns a per-component summary of rows inserted.
+    """
+    get_current_user()
+
+    KB_ENTRIES = [
+        ("Letta", "letta", "letta", "Ren"),
+        ("MCP Bridge", "mcp-bridge", "mcp-bridge", "Claude"),
+        ("han-solo DB", "han-solo-db", "han-solo", "Claude"),
+        ("Claude Code", "claude-code", "claude-code", "Claude"),
+        ("Solo Hook", "solo-hook", "solo-hook", "Claude"),
+        ("Framework Skills", "framework-skills", "framework-skills", "Ren"),
+        ("dream.py", "dream", "dream", "Claude"),
+        ("Workspace UI", "workspace-ui", "workspace-ui", "Claude"),
+        ("Code Wiki", "code-wiki", "code-wiki", "Ren"),
+    ]
+
+    results = []
+
+    for component_name, kb_slug, _slug, owner in KB_ENTRIES:
+        entry_id = f"component-kb-{kb_slug}-2026-05-28"
+        kb = await db.get_t4_entry("han-solo", "decisions_log", entry_id)
+        if not kb:
+            results.append({"component": component_name, "error": "KB not found in T4"})
+            continue
+
+        content = kb.get("content", "")
+        vitals = _parse_vitals(content)
+        incidents = _parse_incidents(content)
+        procedures = _parse_procedures(content)
+
+        component_id = await db.seed_hub_component(
+            name=component_name,
+            description=_first_paragraph(content),
+            owner=owner,
+        )
+        if not component_id:
+            results.append({"component": component_name, "error": "Failed to insert component"})
+            continue
+
+        v_count = await db.seed_hub_vitals(component_id, vitals)
+        i_count = await db.seed_hub_incidents(component_id, incidents)
+        p_count = await db.seed_hub_procedures(component_id, procedures)
+
+        results.append({
+            "component": component_name,
+            "component_id": component_id,
+            "vitals": v_count,
+            "incidents": i_count,
+            "procedures": p_count,
+        })
+
+    return JSONResponse({"seeded": results})
+
+
+def _first_paragraph(text: str) -> str:
+    """Extract first non-header, non-empty paragraph as description."""
+    for line in text.splitlines():
+        line = line.strip()
+        if line and not line.startswith("#") and not line.startswith("Type:") and len(line) > 20:
+            return line[:500]
+    return ""
+
+
+def _parse_vitals(text: str) -> list[dict]:
+    """Parse numbered VITALS items from KB markdown. Stores full text as failure_mode."""
+    import re
+    vitals = []
+    in_vitals = False
+    current_lines: list[str] = []
+    current_num = 0
+
+    def flush():
+        if current_num and current_lines:
+            full = " ".join(current_lines).strip()
+            # First sentence is the title (ends at first period or newline ~80 chars)
+            dot = full.find(". ")
+            title = full[:dot].strip() if 0 < dot < 120 else full[:100].strip()
+            vitals.append({"vital_number": current_num, "title": title, "failure_mode": full})
+
+    for line in text.splitlines():
+        stripped = line.strip()
+        if re.match(r"^## VITALS", stripped):
+            in_vitals = True
+            continue
+        if in_vitals and re.match(r"^## ", stripped):
+            flush()
+            break
+        if not in_vitals:
+            continue
+        m = re.match(r"^(\d+)\.\s+(.*)", stripped)
+        if m:
+            flush()
+            current_num = int(m.group(1))
+            current_lines = [m.group(2)]
+        elif stripped and current_num:
+            current_lines.append(stripped)
+
+    flush()
+    return vitals
+
+
+def _parse_incidents(text: str) -> list[dict]:
+    """Parse INCIDENT A/B/C blocks from KB markdown."""
+    import re
+    incidents = []
+    in_incidents = False
+    current_code = None
+    current_title = ""
+    current_lines: list[str] = []
+
+    def flush():
+        if current_code:
+            narrative = " ".join(current_lines).strip()
+            # Split cause (first sentence) from symptom (rest)
+            dot = narrative.find(". ")
+            cause = narrative[:dot].strip() if 0 < dot < 300 else narrative[:300].strip()
+            symptom = narrative[dot + 2:].strip() if dot > 0 else ""
+            incidents.append({
+                "incident_code": f"{current_code} — {current_title}",
+                "cause": cause,
+                "symptom": symptom,
+            })
+
+    for line in text.splitlines():
+        stripped = line.strip()
+        if re.match(r"^## REAL INCIDENTS", stripped):
+            in_incidents = True
+            continue
+        if in_incidents and re.match(r"^## ", stripped):
+            flush()
+            break
+        if not in_incidents:
+            continue
+        m = re.match(r"^INCIDENT ([A-Z])\s*[—–-]+\s*(.*?)(?:\([^)]*\))?:?\s*(.*)$", stripped)
+        if m:
+            flush()
+            current_code = f"INCIDENT {m.group(1)}"
+            current_title = m.group(2).strip().rstrip(":")
+            current_lines = [m.group(3).strip()] if m.group(3).strip() else []
+        elif stripped and current_code:
+            current_lines.append(stripped)
+
+    flush()
+    return incidents
+
+
+def _parse_procedures(text: str) -> list[dict]:
+    """Parse procedure blocks from KB markdown. Each paragraph becomes one procedure row."""
+    import re
+    procedures = []
+    in_procedures = False
+    current_title = ""
+    current_lines: list[str] = []
+
+    def flush():
+        if current_title and current_lines:
+            procedures.append({
+                "title": current_title,
+                "steps": "\n".join(current_lines).strip(),
+            })
+
+    for line in text.splitlines():
+        stripped = line.strip()
+        if re.match(r"^## PROCEDURES", stripped):
+            in_procedures = True
+            continue
+        if in_procedures and re.match(r"^## ", stripped):
+            flush()
+            break
+        if not in_procedures:
+            continue
+        # A new procedure starts with a sentence ending in colon, or "To/Before/After/If/For"
+        if re.match(r"^(To |Before |After |If |For )", stripped) and stripped.endswith(":"):
+            flush()
+            current_title = stripped.rstrip(":")
+            current_lines = []
+        elif stripped and current_title:
+            current_lines.append(stripped)
+        elif re.match(r"^(To |Before |After |If |For )", stripped) and not current_title:
+            # Title without colon — treat whole thing as a procedure block
+            flush()
+            current_title = stripped[:120]
+            current_lines = []
+
+    flush()
+    return procedures
+
+
 async def api_code_chunks(request: Request) -> JSONResponse:
     """POST /api/code/chunks — receive indexed chunks from index_codebase.py."""
     get_current_user()
@@ -872,6 +1064,7 @@ _chat_routes = [
     Route("/api/admin/prune-transcripts", api_prune_transcripts, methods=["POST"]),
     Route("/api/admin/delete-chunks-by-type", admin_delete_chunks_by_type, methods=["POST"]),
     Route("/api/admin/failsafe-message", api_failsafe_message, methods=["POST"]),
+    Route("/api/admin/seed-hub", api_seed_hub, methods=["POST"]),
     Route("/api/tts", chat_api.api_tts, methods=["POST"]),
     Route("/api/session-logs", api_list_session_logs),
     Route("/api/session-logs", api_create_session_log, methods=["POST"]),

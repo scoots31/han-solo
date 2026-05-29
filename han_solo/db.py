@@ -1763,6 +1763,98 @@ async def delete_code_chunks_by_type(repo: str, file_type: str) -> int:
         return 0
 
 
+async def seed_hub_component(
+    name: str, description: str, owner: str
+) -> int | None:
+    """Insert a component row, returning its id. Skips if name already exists."""
+    if not _pool:
+        return None
+    try:
+        async with _pool.acquire() as conn:
+            row = await conn.fetchrow(
+                """
+                INSERT INTO components (name, description, owner)
+                VALUES ($1, $2, $3)
+                ON CONFLICT (name) DO UPDATE SET description = EXCLUDED.description, updated_at = NOW()
+                RETURNING id
+                """,
+                name, description, owner,
+            )
+        return row["id"] if row else None
+    except Exception as e:
+        logger.error("seed_hub_component failed for %s: %s", name, e)
+        return None
+
+
+async def seed_hub_vitals(component_id: int, vitals: list[dict]) -> int:
+    """Insert vitals rows for a component. Each dict: vital_number, title, failure_mode.
+    Returns count inserted."""
+    if not _pool or not vitals:
+        return 0
+    count = 0
+    try:
+        async with _pool.acquire() as conn:
+            for v in vitals:
+                await conn.execute(
+                    """
+                    INSERT INTO vitals (component_id, vital_number, title, failure_mode)
+                    VALUES ($1, $2, $3, $4)
+                    ON CONFLICT DO NOTHING
+                    """,
+                    component_id, v["vital_number"], v["title"], v["failure_mode"],
+                )
+                count += 1
+    except Exception as e:
+        logger.error("seed_hub_vitals failed for component %d: %s", component_id, e)
+    return count
+
+
+async def seed_hub_incidents(component_id: int, incidents: list[dict]) -> int:
+    """Insert incident rows for a component. Each dict: incident_code, cause, symptom.
+    Returns count inserted."""
+    if not _pool or not incidents:
+        return 0
+    count = 0
+    try:
+        async with _pool.acquire() as conn:
+            for inc in incidents:
+                await conn.execute(
+                    """
+                    INSERT INTO incidents (component_id, incident_code, cause, symptom)
+                    VALUES ($1, $2, $3, $4)
+                    ON CONFLICT DO NOTHING
+                    """,
+                    component_id, inc["incident_code"], inc["cause"], inc["symptom"],
+                )
+                count += 1
+    except Exception as e:
+        logger.error("seed_hub_incidents failed for component %d: %s", component_id, e)
+    return count
+
+
+async def seed_hub_procedures(component_id: int, procedures: list[dict]) -> int:
+    """Insert procedure rows for a component. Each dict: title, steps.
+    Returns count inserted."""
+    if not _pool or not procedures:
+        return 0
+    count = 0
+    try:
+        async with _pool.acquire() as conn:
+            for proc in procedures:
+                await conn.execute(
+                    """
+                    INSERT INTO procedures (component_id, title, steps)
+                    VALUES ($1, $2, $3)
+                    ON CONFLICT DO NOTHING
+                    """,
+                    component_id, proc["title"], proc["steps"],
+                )
+                count += 1
+    except Exception as e:
+        logger.error("seed_hub_procedures failed for component %d: %s", component_id, e)
+    return count
+
+
 async def write_failsafe_log(
     command: str, response: str, status: str, command_args: str | None = None
 ) -> bool:
