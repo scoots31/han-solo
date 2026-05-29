@@ -215,6 +215,120 @@ CREATE TABLE IF NOT EXISTS failsafe_log (
 );
 CREATE INDEX IF NOT EXISTS idx_failsafe_log_logged_at
     ON failsafe_log(logged_at DESC);
+
+-- Hub: information hub tables (SL-001)
+CREATE TABLE IF NOT EXISTS components (
+    id          SERIAL PRIMARY KEY,
+    name        TEXT        NOT NULL UNIQUE,
+    description TEXT        NOT NULL DEFAULT '',
+    owner       TEXT        NOT NULL DEFAULT '',
+    status      TEXT        NOT NULL DEFAULT 'active',
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_components_name
+    ON components(name);
+CREATE TABLE IF NOT EXISTS vitals (
+    id                      SERIAL PRIMARY KEY,
+    component_id            INT         NOT NULL REFERENCES components(id) ON DELETE CASCADE,
+    vital_number            INT         NOT NULL,
+    title                   TEXT        NOT NULL,
+    failure_mode            TEXT        NOT NULL DEFAULT '',
+    verification_procedure  TEXT        NOT NULL DEFAULT '',
+    created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_vitals_component_id
+    ON vitals(component_id);
+CREATE TABLE IF NOT EXISTS incidents (
+    id                  SERIAL PRIMARY KEY,
+    component_id        INT         NOT NULL REFERENCES components(id) ON DELETE CASCADE,
+    incident_code       TEXT        NOT NULL,
+    cause               TEXT        NOT NULL DEFAULT '',
+    symptom             TEXT        NOT NULL DEFAULT '',
+    recovery_minutes    INT,
+    occurred_date       DATE,
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_incidents_component_id
+    ON incidents(component_id);
+CREATE INDEX IF NOT EXISTS idx_incidents_occurred_date
+    ON incidents(occurred_date DESC);
+CREATE TABLE IF NOT EXISTS procedures (
+    id              SERIAL PRIMARY KEY,
+    component_id    INT         NOT NULL REFERENCES components(id) ON DELETE CASCADE,
+    title           TEXT        NOT NULL,
+    steps           TEXT        NOT NULL DEFAULT '',
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_procedures_component_id
+    ON procedures(component_id);
+CREATE TABLE IF NOT EXISTS operational_status (
+    id              SERIAL PRIMARY KEY,
+    component_id    INT         NOT NULL REFERENCES components(id) ON DELETE CASCADE UNIQUE,
+    last_check      TIMESTAMPTZ,
+    status          TEXT        NOT NULL DEFAULT 'unknown',
+    metrics_json    JSONB       NOT NULL DEFAULT '{}',
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_operational_status_component_id
+    ON operational_status(component_id);
+CREATE TABLE IF NOT EXISTS deployment_log (
+    id                  SERIAL PRIMARY KEY,
+    deployed_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    component_id        INT         REFERENCES components(id) ON DELETE SET NULL,
+    changed_what        TEXT        NOT NULL DEFAULT '',
+    who                 TEXT        NOT NULL DEFAULT '',
+    why                 TEXT        NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS idx_deployment_log_component_id
+    ON deployment_log(component_id, deployed_at DESC);
+CREATE INDEX IF NOT EXISTS idx_deployment_log_deployed_at
+    ON deployment_log(deployed_at DESC);
+CREATE TABLE IF NOT EXISTS incident_log (
+    id                  SERIAL PRIMARY KEY,
+    discovered_date     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    component_id        INT         REFERENCES components(id) ON DELETE SET NULL,
+    description         TEXT        NOT NULL DEFAULT '',
+    recovery_time       INT,
+    resolved_date       TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS idx_incident_log_component_id
+    ON incident_log(component_id, discovered_date DESC);
+CREATE INDEX IF NOT EXISTS idx_incident_log_discovered_date
+    ON incident_log(discovered_date DESC);
+CREATE TABLE IF NOT EXISTS page_content (
+    id              SERIAL PRIMARY KEY,
+    page_key        TEXT        NOT NULL UNIQUE,
+    content_md      TEXT        NOT NULL DEFAULT '',
+    updated_by      TEXT        NOT NULL DEFAULT '',
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_page_content_page_key
+    ON page_content(page_key);
+CREATE TABLE IF NOT EXISTS danger_zones (
+    id              SERIAL PRIMARY KEY,
+    component_id    INT         NOT NULL REFERENCES components(id) ON DELETE CASCADE,
+    description     TEXT        NOT NULL DEFAULT '',
+    consequence     TEXT        NOT NULL DEFAULT '',
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_danger_zones_component_id
+    ON danger_zones(component_id);
+CREATE TABLE IF NOT EXISTS assumptions (
+    id              SERIAL PRIMARY KEY,
+    component_id    INT         NOT NULL REFERENCES components(id) ON DELETE CASCADE,
+    statement       TEXT        NOT NULL DEFAULT '',
+    confidence      TEXT        NOT NULL DEFAULT 'medium',
+    tested          BOOLEAN     NOT NULL DEFAULT FALSE,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_assumptions_component_id
+    ON assumptions(component_id);
 """
 
 # Runs after CREATE_TABLE_SQL — backfills existing slugs as scott/private, idempotent
