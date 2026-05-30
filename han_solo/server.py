@@ -950,7 +950,7 @@ async def api_seed_hub(request: Request) -> JSONResponse:
 
     results = []
 
-    for component_name, kb_slug, _slug, owner in KB_ENTRIES:
+    for component_name, kb_slug, slug, owner in KB_ENTRIES:
         entry_id = f"component-kb-{kb_slug}-2026-05-28"
         kb = await db.get_t4_entry("han-solo", "decisions_log", entry_id)
         if not kb:
@@ -961,11 +961,14 @@ async def api_seed_hub(request: Request) -> JSONResponse:
         vitals = _parse_vitals(content)
         incidents = _parse_incidents(content)
         procedures = _parse_procedures(content)
+        component_type = _parse_type(content)
 
         component_id = await db.seed_hub_component(
             name=component_name,
             description=_first_paragraph(content),
             owner=owner,
+            slug=slug,
+            type=component_type,
         )
         if not component_id:
             results.append({"component": component_name, "error": "Failed to insert component"})
@@ -992,6 +995,17 @@ def _first_paragraph(text: str) -> str:
         line = line.strip()
         if line and not line.startswith("#") and not line.startswith("Type:") and len(line) > 20:
             return line[:500]
+    return ""
+
+
+def _parse_type(text: str) -> str:
+    """Extract component type from the KB header line 'Type: <value> | ...'."""
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("Type:"):
+            value = stripped[len("Type:"):].strip()
+            # Take only the part before the first pipe separator
+            return value.split("|")[0].strip()
     return ""
 
 
@@ -1122,6 +1136,56 @@ def _parse_procedures(text: str) -> list[dict]:
 
     flush()
     return procedures
+
+
+async def api_schema_check(request: Request) -> JSONResponse:
+    """GET /api/admin/schema-check — verify hub schema and row counts.
+
+    Returns column presence for the components table and row counts for all
+    hub tables. Use this to confirm migrations and seeding landed correctly
+    without needing direct DB access.
+    """
+    get_current_user()
+    pool = db._pool
+    if not pool:
+        return JSONResponse({"error": "DB pool not available"}, status_code=503)
+
+    try:
+        async with pool.acquire() as conn:
+            # Verify columns present on components table
+            col_rows = await conn.fetch(
+                """
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_name = 'components'
+                ORDER BY ordinal_position
+                """
+            )
+            columns = [r["column_name"] for r in col_rows]
+
+            # Row counts for all hub tables
+            counts = {}
+            for table in [
+                "components", "vitals", "incidents", "procedures",
+                "operational_status", "danger_zones", "assumptions",
+                "component_dependencies",
+            ]:
+                row = await conn.fetchrow(f"SELECT COUNT(*) AS n FROM {table}")
+                counts[table] = row["n"] if row else 0
+
+            # Sample components so we can confirm slug/type are populated
+            sample_rows = await conn.fetch(
+                "SELECT id, name, slug, type, owner FROM components ORDER BY id LIMIT 10"
+            )
+            sample = [dict(r) for r in sample_rows]
+
+        return JSONResponse({
+            "components_columns": columns,
+            "row_counts": counts,
+            "sample_components": sample,
+        })
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 
 async def api_code_chunks(request: Request) -> JSONResponse:
@@ -1318,6 +1382,7 @@ _chat_routes = [
     Route("/api/admin/delete-chunks-by-type", admin_delete_chunks_by_type, methods=["POST"]),
     Route("/api/admin/failsafe-message", api_failsafe_message, methods=["POST"]),
     Route("/api/admin/seed-hub", api_seed_hub, methods=["POST"]),
+    Route("/api/admin/schema-check", api_schema_check),
     Route("/api/admin/seed-claude-plus", api_seed_claude_plus, methods=["POST"]),
     Route("/api/hub/pre-build-gate", api_pre_build_gate),
     Route("/api/tts", chat_api.api_tts, methods=["POST"]),

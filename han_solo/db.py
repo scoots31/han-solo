@@ -1977,21 +1977,28 @@ async def clear_hub_tables() -> bool:
 
 
 async def seed_hub_component(
-    name: str, description: str, owner: str
+    name: str, description: str, owner: str, slug: str = "", type: str = ""
 ) -> int | None:
-    """Insert a component row, returning its id. Skips if name already exists."""
+    """Insert a component row, returning its id.
+    Conflict resolution is on name (not slug) — component names are stable KB identifiers.
+    Slug is a derived field populated at seed time; changing a component's canonical name
+    would require a deliberate re-seed with force=True."""
     if not _pool:
         return None
     try:
         async with _pool.acquire() as conn:
             row = await conn.fetchrow(
                 """
-                INSERT INTO components (name, description, owner)
-                VALUES ($1, $2, $3)
-                ON CONFLICT (name) DO UPDATE SET description = EXCLUDED.description, updated_at = NOW()
+                INSERT INTO components (name, description, owner, slug, type)
+                VALUES ($1, $2, $3, $4, $5)
+                ON CONFLICT (name) DO UPDATE
+                    SET description = EXCLUDED.description,
+                        slug = EXCLUDED.slug,
+                        type = EXCLUDED.type,
+                        updated_at = NOW()
                 RETURNING id
                 """,
-                name, description, owner,
+                name, description, owner, slug, type,
             )
         return row["id"] if row else None
     except Exception as e:
