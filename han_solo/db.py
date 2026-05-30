@@ -219,8 +219,10 @@ CREATE INDEX IF NOT EXISTS idx_failsafe_log_logged_at
 -- Hub: information hub tables (SL-001)
 CREATE TABLE IF NOT EXISTS components (
     id          SERIAL PRIMARY KEY,
+    slug        TEXT        NOT NULL UNIQUE DEFAULT '',
     name        TEXT        NOT NULL UNIQUE,
     description TEXT        NOT NULL DEFAULT '',
+    type        TEXT        NOT NULL DEFAULT '',
     owner       TEXT        NOT NULL DEFAULT '',
     status      TEXT        NOT NULL DEFAULT 'active',
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -228,6 +230,8 @@ CREATE TABLE IF NOT EXISTS components (
 );
 CREATE INDEX IF NOT EXISTS idx_components_name
     ON components(name);
+CREATE INDEX IF NOT EXISTS idx_components_slug
+    ON components(slug);
 CREATE TABLE IF NOT EXISTS vitals (
     id                      SERIAL PRIMARY KEY,
     component_id            INT         NOT NULL REFERENCES components(id) ON DELETE CASCADE,
@@ -281,7 +285,9 @@ CREATE TABLE IF NOT EXISTS deployment_log (
     component_id        INT         REFERENCES components(id) ON DELETE SET NULL,
     changed_what        TEXT        NOT NULL DEFAULT '',
     who                 TEXT        NOT NULL DEFAULT '',
-    why                 TEXT        NOT NULL DEFAULT ''
+    why                 TEXT        NOT NULL DEFAULT '',
+    deploy_type         TEXT        NOT NULL DEFAULT '',
+    commit_sha          TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_deployment_log_component_id
     ON deployment_log(component_id, deployed_at DESC);
@@ -292,6 +298,8 @@ CREATE TABLE IF NOT EXISTS incident_log (
     discovered_date     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     component_id        INT         REFERENCES components(id) ON DELETE SET NULL,
     description         TEXT        NOT NULL DEFAULT '',
+    severity            TEXT        NOT NULL DEFAULT '',
+    root_cause          TEXT        NOT NULL DEFAULT '',
     recovery_time       INT,
     resolved_date       TIMESTAMPTZ
 );
@@ -303,11 +311,14 @@ CREATE TABLE IF NOT EXISTS page_content (
     id              SERIAL PRIMARY KEY,
     page_key        TEXT        NOT NULL UNIQUE,
     content_md      TEXT        NOT NULL DEFAULT '',
+    is_stale        BOOLEAN     NOT NULL DEFAULT FALSE,
     updated_by      TEXT        NOT NULL DEFAULT '',
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_page_content_page_key
     ON page_content(page_key);
+CREATE INDEX IF NOT EXISTS idx_page_content_is_stale
+    ON page_content(is_stale) WHERE is_stale = TRUE;
 CREATE TABLE IF NOT EXISTS danger_zones (
     id              SERIAL PRIMARY KEY,
     component_id    INT         NOT NULL REFERENCES components(id) ON DELETE CASCADE,
@@ -329,6 +340,27 @@ CREATE TABLE IF NOT EXISTS assumptions (
 );
 CREATE INDEX IF NOT EXISTS idx_assumptions_component_id
     ON assumptions(component_id);
+CREATE TABLE IF NOT EXISTS component_dependencies (
+    id              SERIAL PRIMARY KEY,
+    component_id    INT         NOT NULL REFERENCES components(id) ON DELETE CASCADE,
+    depends_on_id   INT         NOT NULL REFERENCES components(id) ON DELETE CASCADE,
+    criticality     TEXT        NOT NULL DEFAULT 'soft',
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(component_id, depends_on_id)
+);
+CREATE INDEX IF NOT EXISTS idx_component_dependencies_component_id
+    ON component_dependencies(component_id);
+CREATE INDEX IF NOT EXISTS idx_component_dependencies_depends_on_id
+    ON component_dependencies(depends_on_id);
+CREATE TABLE IF NOT EXISTS component_context (
+    id                  SERIAL PRIMARY KEY,
+    component_id        INT         NOT NULL REFERENCES components(id) ON DELETE CASCADE UNIQUE,
+    build_impact_area   TEXT        NOT NULL DEFAULT '',
+    last_gate_review    TIMESTAMPTZ,
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_component_context_component_id
+    ON component_context(component_id);
 CREATE TABLE IF NOT EXISTS claude_plus_sessions (
     session_id  UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
     started_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -445,6 +477,22 @@ FROM t4_entries
 ON CONFLICT (project_slug) DO NOTHING;
 """
 
+# SL-001: Add missing hub schema columns to existing tables (idempotent)
+MIGRATE_HUB_SCHEMA_SQL = """
+ALTER TABLE components ADD COLUMN IF NOT EXISTS slug TEXT NOT NULL DEFAULT '';
+ALTER TABLE components ADD COLUMN IF NOT EXISTS type TEXT NOT NULL DEFAULT '';
+CREATE UNIQUE INDEX IF NOT EXISTS idx_components_slug ON components(slug);
+
+ALTER TABLE page_content ADD COLUMN IF NOT EXISTS is_stale BOOLEAN NOT NULL DEFAULT FALSE;
+CREATE INDEX IF NOT EXISTS idx_page_content_is_stale ON page_content(is_stale) WHERE is_stale = TRUE;
+
+ALTER TABLE deployment_log ADD COLUMN IF NOT EXISTS deploy_type TEXT NOT NULL DEFAULT '';
+ALTER TABLE deployment_log ADD COLUMN IF NOT EXISTS commit_sha TEXT;
+
+ALTER TABLE incident_log ADD COLUMN IF NOT EXISTS severity TEXT NOT NULL DEFAULT '';
+ALTER TABLE incident_log ADD COLUMN IF NOT EXISTS root_cause TEXT NOT NULL DEFAULT '';
+"""
+
 # Health tracking — last successful write timestamp
 _last_write_at: Optional[datetime] = None
 _write_failure_count: int = 0
@@ -460,6 +508,7 @@ async def init_pool() -> None:
         async with _pool.acquire() as conn:
             await conn.execute(CREATE_TABLE_SQL)
             await conn.execute(MIGRATE_T4_PROJECTS_SQL)
+            await conn.execute(MIGRATE_HUB_SCHEMA_SQL)
         logger.info("Transcript DB pool ready")
     except Exception as e:
         logger.error("Failed to init transcript DB pool: %s", e)
