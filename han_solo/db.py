@@ -474,6 +474,7 @@ ON CONFLICT (project_slug) DO NOTHING;
 """
 
 # SL-001: Add missing hub schema columns to existing tables (idempotent)
+# SL-002: Add slug unique constraint after components are seeded with real slugs
 MIGRATE_HUB_SCHEMA_SQL = """
 ALTER TABLE components ADD COLUMN IF NOT EXISTS slug TEXT NOT NULL DEFAULT '';
 ALTER TABLE components ADD COLUMN IF NOT EXISTS type TEXT NOT NULL DEFAULT '';
@@ -487,6 +488,14 @@ ALTER TABLE deployment_log ADD COLUMN IF NOT EXISTS commit_sha TEXT;
 
 ALTER TABLE incident_log ADD COLUMN IF NOT EXISTS severity TEXT NOT NULL DEFAULT '';
 ALTER TABLE incident_log ADD COLUMN IF NOT EXISTS root_cause TEXT NOT NULL DEFAULT '';
+
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'components_slug_key'
+  ) THEN
+    ALTER TABLE components ADD CONSTRAINT components_slug_key UNIQUE (slug);
+  END IF;
+END $$;
 """
 
 # Health tracking — last successful write timestamp
