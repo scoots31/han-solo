@@ -230,8 +230,6 @@ CREATE TABLE IF NOT EXISTS components (
 );
 CREATE INDEX IF NOT EXISTS idx_components_name
     ON components(name);
-CREATE INDEX IF NOT EXISTS idx_components_slug
-    ON components(slug);
 CREATE TABLE IF NOT EXISTS vitals (
     id                      SERIAL PRIMARY KEY,
     component_id            INT         NOT NULL REFERENCES components(id) ON DELETE CASCADE,
@@ -317,8 +315,6 @@ CREATE TABLE IF NOT EXISTS page_content (
 );
 CREATE INDEX IF NOT EXISTS idx_page_content_page_key
     ON page_content(page_key);
-CREATE INDEX IF NOT EXISTS idx_page_content_is_stale
-    ON page_content(is_stale) WHERE is_stale = TRUE;
 CREATE TABLE IF NOT EXISTS danger_zones (
     id              SERIAL PRIMARY KEY,
     component_id    INT         NOT NULL REFERENCES components(id) ON DELETE CASCADE,
@@ -491,6 +487,9 @@ ALTER TABLE deployment_log ADD COLUMN IF NOT EXISTS commit_sha TEXT;
 
 ALTER TABLE incident_log ADD COLUMN IF NOT EXISTS severity TEXT NOT NULL DEFAULT '';
 ALTER TABLE incident_log ADD COLUMN IF NOT EXISTS root_cause TEXT NOT NULL DEFAULT '';
+
+CREATE INDEX IF NOT EXISTS idx_components_slug ON components(slug);
+CREATE INDEX IF NOT EXISTS idx_page_content_is_stale ON page_content(is_stale) WHERE is_stale = TRUE;
 """
 
 # Health tracking — last successful write timestamp
