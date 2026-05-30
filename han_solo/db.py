@@ -219,7 +219,7 @@ CREATE INDEX IF NOT EXISTS idx_failsafe_log_logged_at
 -- Hub: information hub tables (SL-001)
 CREATE TABLE IF NOT EXISTS components (
     id          SERIAL PRIMARY KEY,
-    slug        TEXT        NOT NULL UNIQUE DEFAULT '',
+    slug        TEXT        NOT NULL DEFAULT '',
     name        TEXT        NOT NULL UNIQUE,
     description TEXT        NOT NULL DEFAULT '',
     type        TEXT        NOT NULL DEFAULT '',
@@ -477,7 +477,7 @@ ON CONFLICT (project_slug) DO NOTHING;
 MIGRATE_HUB_SCHEMA_SQL = """
 ALTER TABLE components ADD COLUMN IF NOT EXISTS slug TEXT NOT NULL DEFAULT '';
 ALTER TABLE components ADD COLUMN IF NOT EXISTS type TEXT NOT NULL DEFAULT '';
-CREATE UNIQUE INDEX IF NOT EXISTS idx_components_slug ON components(slug);
+CREATE INDEX IF NOT EXISTS idx_components_slug ON components(slug);
 
 ALTER TABLE page_content ADD COLUMN IF NOT EXISTS is_stale BOOLEAN NOT NULL DEFAULT FALSE;
 CREATE INDEX IF NOT EXISTS idx_page_content_is_stale ON page_content(is_stale) WHERE is_stale = TRUE;
@@ -487,9 +487,6 @@ ALTER TABLE deployment_log ADD COLUMN IF NOT EXISTS commit_sha TEXT;
 
 ALTER TABLE incident_log ADD COLUMN IF NOT EXISTS severity TEXT NOT NULL DEFAULT '';
 ALTER TABLE incident_log ADD COLUMN IF NOT EXISTS root_cause TEXT NOT NULL DEFAULT '';
-
-CREATE INDEX IF NOT EXISTS idx_components_slug ON components(slug);
-CREATE INDEX IF NOT EXISTS idx_page_content_is_stale ON page_content(is_stale) WHERE is_stale = TRUE;
 """
 
 # Health tracking — last successful write timestamp
