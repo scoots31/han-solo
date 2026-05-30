@@ -618,10 +618,23 @@
         <thead><tr><th>Capability</th><th>Detail</th></tr></thead>
         <tbody>
           <tr><td><strong>Full curator capability</strong></td><td>Can propose, review, and execute framework changes — all curator rules apply</td></tr>
-          <tr><td><strong>Cross-device memory</strong></td><td>Fetches current framework state from ren-memory repo at every session start</td></tr>
+          <tr><td><strong>Persistent memory</strong></td><td>Loads context from Han Solo DB at every session start — accurate across all devices and sessions</td></tr>
           <tr><td><strong>Daily health check</strong></td><td>8am macOS notification with GREEN/YELLOW/RED staleness scores for pending retro items, stale handoffs, unprocessed ideas</td></tr>
           <tr><td><strong>Comms cascade</strong></td><td>When a version ships, spawns comms-cascade sub-agent with structured brief — automated doc update, commit, push, and deploy in one pass</td></tr>
           <tr><td><strong>Relationship context</strong></td><td>Knows Scott's preferences, working style, and history of framework decisions</td></tr>
+        </tbody>
+      </table>
+
+      <h3 id="claude-plus">claude-plus</h3>
+      <p>The framework's implementation partner. Not a tool that executes requests — a team member with persistent context, explicit gates, and clear accountability. Loads 10 blocks from Han Solo DB at activation. Bridges to Ren at every session close.</p>
+      <table>
+        <thead><tr><th>Capability</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>10 persistent blocks</strong></td><td>Identity, operating contract, hub snapshot, session shape, slice sizing log, state machine, session close tracker, pending decisions, failure recovery, framework state — all loaded at activation</td></tr>
+          <tr><td><strong>Gate enforcement</strong></td><td>Hub read → code read → gate entry → Scott approval. Build does not open until all four are confirmed. State machine tracks gate status throughout the session.</td></tr>
+          <tr><td><strong>Session close</strong></td><td>Flags close proactively on 5 triggers. Runs close procedure: gates confirmed, summary written, pending surfaced, Ren bridged, local cache synced.</td></tr>
+          <tr><td><strong>Dual-write</strong></td><td>Han Solo DB is primary record. claude_local is session failsafe. Syncs to Han Solo at close.</td></tr>
+          <tr><td><strong>Two modes</strong></td><td>Sprint (building slices) and Curator (modifying the framework). Mode is explicit — Scott names it, Claude Plus reads it from session shape at activation.</td></tr>
         </tbody>
       </table>
 
